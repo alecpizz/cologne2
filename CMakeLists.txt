@@ -31,6 +31,7 @@ add_subdirectory(vendor/stb_image)
 add_subdirectory(vendor/stb_truetype)
 add_subdirectory(vendor/glm)
 add_subdirectory(vendor/imgui-docking)
+add_subdirectory(vendor/assimp)
 
 
 # MY_SOURCES is defined to be a list of all the source files for my game 
@@ -42,8 +43,8 @@ add_executable("${CMAKE_PROJECT_NAME}")
 
 set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY CXX_STANDARD 20)
 
-
-target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC GLFW_INCLUDE_NONE=1) 
+target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC GLFW_INCLUDE_NONE=1)
+target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC BUILD_SHARED_LIBS=OFF)
 
 if(PRODUCTION_BUILD)
 	# setup the ASSETS_PATH macro to be in the root folder of your exe
@@ -72,6 +73,6 @@ target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURC
 
 
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm
-	glad stb_image stb_truetype imgui SDL3-static)
+	glad stb_image stb_truetype imgui SDL3-static assimp)
 
 
