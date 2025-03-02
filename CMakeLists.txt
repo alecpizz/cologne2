@@ -32,6 +32,7 @@ add_subdirectory(vendor/stb_truetype)
 add_subdirectory(vendor/glm)
 add_subdirectory(vendor/imgui-docking)
 add_subdirectory(vendor/assimp)
+add_subdirectory(vendor/spdlog)
 
 
 # MY_SOURCES is defined to be a list of all the source files for my game 
@@ -70,9 +71,9 @@ if(MSVC) # If using the VS compiler...
 endif()
 
 target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/")
+target_precompile_headers("${CMAKE_PROJECT_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/gpch.h")
 
-
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm spdlog::spdlog_header_only
 	glad stb_image stb_truetype imgui SDL3-static assimp)
 
 

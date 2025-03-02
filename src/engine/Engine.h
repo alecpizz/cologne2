@@ -9,7 +9,9 @@
 
 */
 #pragma once
-#include <cstdint>
+#include "engine/Renderer.h"
+#include "engine/Window.h"
+#include "engine/EventManager.h"
 
 namespace goon
 {
@@ -17,12 +19,25 @@ namespace goon
     {
     public:
         Engine();
+
         ~Engine();
+
+        Renderer *get_renderer() const;
+
+        Window *get_window() const;
+
+        EventManager *get_event_manager() const;
+
         Engine(Engine &&) = delete;
+
         Engine(const Engine &) = delete;
+
         Engine &operator=(Engine &&) = delete;
+
         Engine &operator=(const Engine &) = delete;
+
         bool init(uint32_t width, uint32_t height);
+
         void run();
 
     private:
