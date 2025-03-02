@@ -5,7 +5,6 @@ namespace goon
     class Window
     {
         friend class Engine;
-
     public:
         ~Window();
 

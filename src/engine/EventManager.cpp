@@ -22,7 +22,7 @@ namespace goon
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
-            // ImGui_ImplSDL3_ProcessEvent(&event);
+            ImGui_ImplSDL3_ProcessEvent(&event);
             if (event.type == SDL_EVENT_QUIT || event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
             {
                 _impl->should_quit = true;
