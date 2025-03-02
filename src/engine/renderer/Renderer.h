@@ -14,6 +14,7 @@ namespace goon
         Renderer &operator=(Renderer &&) = delete;
 
         Renderer &operator=(const Renderer &) = delete;
+        void render();
     private:
         Renderer();
         struct Impl;

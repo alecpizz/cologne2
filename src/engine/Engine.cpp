@@ -47,7 +47,6 @@ namespace goon
 
     bool Engine::init(uint32_t width, uint32_t height)
     {
-        //TODO: Window class
         _impl->debug_ui = std::unique_ptr<DebugUI>(new DebugUI());
         _impl->window = std::unique_ptr<Window>(new Window(width, height));
         _impl->renderer = std::unique_ptr<Renderer>(new Renderer());
@@ -72,6 +71,8 @@ namespace goon
             _impl->debug_ui->clear();
 
             _impl->window->clear();
+
+            _impl->renderer->render();
 
             _impl->debug_ui->present();
 
