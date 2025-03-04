@@ -1,16 +1,34 @@
-﻿//
-// Created by alecpizz on 3/1/2025.
-//
+﻿#pragma once
 
-#ifndef TEXTURE_H
-#define TEXTURE_H
+namespace goon
+{
+    class Texture
+    {
+    public:
+        explicit Texture(const char *texture_path);
 
+        ~Texture();
 
+        uint32_t get_width() const;
 
-class Texture {
+        uint32_t get_height() const;
 
-};
+        uint32_t get_channels() const;
 
+        uint32_t get_handle() const;
 
+        void use(uint8_t index) const;
 
-#endif //TEXTURE_H
+        Texture(const Texture &) = delete;
+
+        Texture &operator=(const Texture &) = delete;
+
+        Texture(Texture &&) = delete;
+
+        Texture &operator=(Texture &&) = delete;
+
+    private:
+        struct Impl;
+        Impl *_impl;
+    };
+}

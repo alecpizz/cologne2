@@ -1,16 +1,30 @@
-﻿//
-// Created by alecpizz on 3/1/2025.
-//
+﻿#pragma once
 
-#ifndef MODEL_H
-#define MODEL_H
+namespace goon
+{
+    class Mesh;
 
+    class Model
+    {
+    public:
+        Model(const char *path);
 
+        ~Model();
 
-class Model {
+        Model(Model &&) = delete;
 
-};
+        Model &operator=(Model &&) = delete;
 
+        Model(const Model &) = delete;
 
+        Model &operator=(const Model &) = delete;
 
-#endif //MODEL_H
+        Mesh *get_meshes() const;
+
+        uint32_t get_num_meshes() const;
+
+    private:
+        struct Impl;
+        Impl *_impl;
+    };
+}

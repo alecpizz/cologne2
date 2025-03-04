@@ -3,6 +3,8 @@
 //
 
 #include "Renderer.h"
+#include "../Scene.h"
+#include "VertexAttribute.h"
 
 namespace goon
 {
@@ -16,6 +18,10 @@ namespace goon
     Renderer::~Renderer()
     {
         delete _impl;
+    }
+
+    void Renderer::render_scene(Scene &scene)
+    {
     }
 
     Renderer::Renderer()

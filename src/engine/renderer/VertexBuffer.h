@@ -1,16 +1,33 @@
-﻿//
-// Created by alecpizz on 3/1/2025.
-//
+﻿#pragma once
+#include "gpch.h"
+#include "Vertex.h"
+namespace goon
+{
+    struct VertexBuffer
+    {
+        uint32_t handle = 0;
 
-#ifndef VERTEXBUFFER_H
-#define VERTEXBUFFER_H
+        VertexBuffer(const Vertex* vertices, const uint32_t size)
+        {
+            glGenBuffers(1, &handle);
+            glBindBuffer(GL_ARRAY_BUFFER, handle);
+            glBufferData(GL_ARRAY_BUFFER, size * sizeof(Vertex), vertices, GL_STATIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+        }
 
+        void use() const
+        {
+            glBindBuffer(GL_ARRAY_BUFFER, handle);
+        }
 
+        void release() const
+        {
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+        }
 
-class VertexBuffer {
-
-};
-
-
-
-#endif //VERTEXBUFFER_H
+        ~VertexBuffer()
+        {
+            glDeleteBuffers(1, &handle);
+        }
+    };
+}

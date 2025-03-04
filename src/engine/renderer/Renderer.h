@@ -1,12 +1,19 @@
 ﻿#pragma once
+#include "VertexAttribute.h"
+#include "engine/Scene.h"
+
+class Scene;
+
 
 namespace goon
 {
     class Renderer
     {
         friend class Engine;
+
     public:
         ~Renderer();
+
         Renderer(Renderer &&) = delete;
 
         Renderer(const Renderer &) = delete;
@@ -14,9 +21,11 @@ namespace goon
         Renderer &operator=(Renderer &&) = delete;
 
         Renderer &operator=(const Renderer &) = delete;
-        void render();
+        void render_scene(Scene &scene);
+
     private:
         Renderer();
+
         struct Impl;
         Impl *_impl;
     };
