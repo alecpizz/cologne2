@@ -2,15 +2,45 @@
 // Created by alecpizz on 3/1/2025.
 //
 
-#ifndef SHADER_H
-#define SHADER_H
+#pragma once
 
+namespace goon
+{
+    class Shader
+    {
+    public:
+        Shader(Shader &&) = delete;
 
+        Shader(const Shader &) = delete;
 
-class Shader {
+        Shader &operator=(Shader &&) = delete;
 
-};
+        Shader &operator=(const Shader &) = delete;
 
+        Shader(const char *vert_path, const char *frag_path);
 
+        Shader(const char *vert_path, const char *frag_path, const char *geom_path);
 
-#endif //SHADER_H
+        ~Shader();
+
+        uint32_t get_handle() const;
+
+        void bind() const;
+
+        void set_bool(const char *name, bool value) const;
+
+        void set_int(const char *name, int32_t value) const;
+
+        void set_vec3(const char *name, const float *value) const;
+
+        void set_vec4(const char *name, const float *value) const;
+
+        void set_mat4(const char *name, const float *value) const;
+
+        void set_float(const char *name, float value) const;
+
+    private:
+        struct Impl;
+        Impl *_impl;
+    };
+}

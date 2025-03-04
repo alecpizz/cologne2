@@ -12,9 +12,12 @@ namespace goon
         uint32_t width = 0;
         uint32_t height = 0;
         uint32_t channels = 0;
+        std::string path;
+        TextureType type = TextureType::NONE;
 
         void init(const std::string& path)
         {
+            this->path = path;
             glGenTextures(1, &handle);
             glBindTexture(GL_TEXTURE_2D, handle);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -75,6 +78,26 @@ namespace goon
     uint32_t Texture::get_handle() const
     {
         return _impl->handle;
+    }
+
+    const char * Texture::get_path() const
+    {
+        return _impl->path.c_str();
+    }
+
+    void Texture::set_path(const char *path) const
+    {
+        _impl->path = std::string(path);
+    }
+
+    TextureType Texture::get_type() const
+    {
+        return _impl->type;
+    }
+
+    void Texture::set_texture_type(const TextureType type) const
+    {
+        _impl->type = type;
     }
 
     void Texture::use(const uint8_t index) const

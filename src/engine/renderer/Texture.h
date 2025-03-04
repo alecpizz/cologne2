@@ -2,6 +2,12 @@
 
 namespace goon
 {
+    enum class TextureType
+    {
+        NONE,
+        DIFFUSE,
+        SPECULAR
+    };
     class Texture
     {
     public:
@@ -16,6 +22,14 @@ namespace goon
         uint32_t get_channels() const;
 
         uint32_t get_handle() const;
+
+        const char* get_path() const;
+
+        void set_path(const char* path) const;
+
+        TextureType get_type() const;
+
+        void set_texture_type(TextureType type) const;
 
         void use(uint8_t index) const;
 

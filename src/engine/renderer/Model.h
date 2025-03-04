@@ -7,7 +7,7 @@ namespace goon
     class Model
     {
     public:
-        Model(const char *path);
+        explicit Model(const char *path);
 
         ~Model();
 
