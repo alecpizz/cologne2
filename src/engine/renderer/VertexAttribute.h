@@ -1,4 +1,6 @@
 ﻿#pragma once
+#include "Vertex.h"
+
 namespace goon
 {
     struct VertexAttribute

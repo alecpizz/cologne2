@@ -39,13 +39,14 @@ add_subdirectory(vendor/spdlog)
 # DON'T ADD THE SOURCES BY HAND, they are already added with this macro
 file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
 add_executable("${CMAKE_PROJECT_NAME}")
 
 set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY CXX_STANDARD 20)
 
 target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC GLFW_INCLUDE_NONE=1)
-target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC BUILD_SHARED_LIBS=OFF)
 
 if(PRODUCTION_BUILD)
 	# setup the ASSETS_PATH macro to be in the root folder of your exe
@@ -74,6 +75,6 @@ target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURC
 target_precompile_headers("${CMAKE_PROJECT_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/gpch.h")
 
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm spdlog::spdlog_header_only
-	glad stb_image stb_truetype imgui SDL3-static assimp)
+	 stb_image stb_truetype imgui SDL3-static assimp)
 
 

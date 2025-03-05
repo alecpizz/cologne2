@@ -1,8 +1,10 @@
 ﻿#pragma once
+#include "Texture.h"
+
 namespace goon
 {
-    class Vertex;
-    class Texture;
+
+    struct Vertex;
     struct VertexAttribute;
     struct VertexBuffer;
     struct ElementBuffer;
@@ -28,14 +30,6 @@ namespace goon
         ElementBuffer *get_element_buffer() const;
 
         VertexAttribute *get_vertex_attribute() const;
-
-        Mesh(Mesh &&) = delete;
-
-        Mesh(const Mesh &) = delete;
-
-        Mesh &operator=(Mesh &&) = delete;
-
-        Mesh &operator=(const Mesh &) = delete;
 
     private:
         struct Impl;

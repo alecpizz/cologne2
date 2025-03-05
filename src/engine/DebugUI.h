@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "engine/Engine.h"
-#include "engine/Renderer.h"
+#include "engine/renderer/Renderer.h"
 #include "engine/Window.h"
 
 namespace goon

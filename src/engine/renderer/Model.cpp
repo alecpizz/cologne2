@@ -111,7 +111,7 @@ namespace goon
         std::vector<Texture> load_material_textures(const aiMaterial* mat, const aiTextureType type)
         {
             std::vector<Texture> textures;
-            for (size_t i = 0; i < mat->GetTextureCount(type); i++)
+            for (uint32_t i = 0; i < mat->GetTextureCount(type); i++)
             {
                 aiString str;
                 mat->GetTexture(type, i, &str);
@@ -162,7 +162,7 @@ namespace goon
         return _impl->meshes.data();
     }
 
-    uint32_t Model::get_num_meshes() const
+    uint64_t Model::get_num_meshes() const
     {
         return _impl->meshes.size();
     }

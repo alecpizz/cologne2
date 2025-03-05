@@ -21,7 +21,7 @@ namespace goon
 
         Mesh *get_meshes() const;
 
-        uint32_t get_num_meshes() const;
+        uint64_t get_num_meshes() const;
 
     private:
         struct Impl;

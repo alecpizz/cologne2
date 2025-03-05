@@ -22,6 +22,7 @@ namespace goon
 
     void Renderer::render_scene(Scene &scene)
     {
+
     }
 
     Renderer::Renderer()

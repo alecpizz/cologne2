@@ -33,14 +33,6 @@ namespace goon
 
         void use(uint8_t index) const;
 
-        Texture(const Texture &) = delete;
-
-        Texture &operator=(const Texture &) = delete;
-
-        Texture(Texture &&) = delete;
-
-        Texture &operator=(Texture &&) = delete;
-
     private:
         struct Impl;
         Impl *_impl;

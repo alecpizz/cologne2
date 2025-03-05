@@ -9,7 +9,7 @@
 
 */
 #pragma once
-#include "engine/Renderer.h"
+#include "engine/renderer/Renderer.h"
 #include "engine/Window.h"
 #include "engine/EventManager.h"
 
@@ -44,4 +44,4 @@ namespace goon
         struct Impl;
         Impl *_impl;
     };
-} // goon
+} 

@@ -1,6 +1,5 @@
 ﻿#pragma once
-
-class Model;
+#include "renderer/Model.h"
 
 namespace goon
 {

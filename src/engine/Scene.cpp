@@ -4,17 +4,18 @@
 
 #include "Scene.h"
 #include "gpch.h"
+#include "renderer/Model.h"
 
 namespace goon
 {
     struct Scene::Impl
     {
-        std::vector<Model> models;
+        std::vector<Model> models = std::vector<Model>();
     };
 
     Scene::Scene()
     {
-        _impl = new Impl;
+        _impl = new Impl();
     }
 
     Scene::~Scene()

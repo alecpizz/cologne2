@@ -2,6 +2,7 @@
 #include "ElementBuffer.h"
 #include "VertexBuffer.h"
 #include "VertexAttribute.h"
+#include "Texture.h"
 
 namespace goon
 {
@@ -10,15 +11,15 @@ namespace goon
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
         std::vector<Texture> textures;
-        std::shared_ptr<VertexAttribute> vertex_attribute = nullptr;
-        std::shared_ptr<VertexBuffer> vertex_buffer = nullptr;
-        std::shared_ptr<ElementBuffer> element_buffer = nullptr;
+        std::unique_ptr<VertexAttribute> vertex_attribute = nullptr;
+        std::unique_ptr<VertexBuffer> vertex_buffer = nullptr;
+        std::unique_ptr<ElementBuffer> element_buffer = nullptr;
 
         void init()
         {
-            vertex_attribute = std::make_shared<VertexAttribute>();
-            vertex_buffer = std::make_shared<VertexBuffer>(vertices.data(), vertices.size());
-            element_buffer = std::make_shared<ElementBuffer>(indices.data(), indices.size());
+            vertex_attribute = std::make_unique<VertexAttribute>();
+            vertex_buffer = std::make_unique<VertexBuffer>(vertices.data(), vertices.size());
+            element_buffer = std::make_unique<ElementBuffer>(indices.data(), indices.size());
         }
     };
 
