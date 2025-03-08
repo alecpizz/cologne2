@@ -32,4 +32,9 @@ namespace goon
     {
         return _impl->models.size();
     }
+
+    void Scene::add_model(const char *path) const
+    {
+        _impl->models.emplace_back(Model(path));
+    }
 }

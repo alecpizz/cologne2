@@ -11,13 +11,13 @@ namespace goon
 
         ~Model();
 
-        Model(Model &&) = delete;
+        // Model(Model &&) = delete;
 
-        Model &operator=(Model &&) = delete;
+        // Model &operator=(Model &&) = delete;
 
-        Model(const Model &) = delete;
+        // Model(const Model &) = delete;
 
-        Model &operator=(const Model &) = delete;
+        // Model &operator=(const Model &) = delete;
 
         Mesh *get_meshes() const;
 

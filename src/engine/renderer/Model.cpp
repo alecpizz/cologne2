@@ -36,10 +36,17 @@ namespace goon
 
         void process_node(aiNode *node, const aiScene *scene)
         {
-            for (size_t i = 0; i < scene->mNumMeshes; i++)
+            for(unsigned int i = 0; i < node->mNumMeshes; i++)
             {
-                aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+                // the node object only contains indices to index the actual objects in the scene.
+                // the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
+                aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
                 meshes.push_back(process_mesh(mesh, scene));
+            }
+            // after we've processed all of the meshes (if any) we then recursively process each of the children nodes
+            for(unsigned int i = 0; i < node->mNumChildren; i++)
+            {
+                process_node(node->mChildren[i], scene);
             }
         }
 

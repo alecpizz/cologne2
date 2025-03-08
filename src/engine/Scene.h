@@ -14,6 +14,8 @@ namespace goon
 
         uint64_t get_model_count() const;
 
+        void add_model(const char* path) const;
+
         Scene(Scene &&) = delete;
 
         Scene(const Scene &) = delete;
