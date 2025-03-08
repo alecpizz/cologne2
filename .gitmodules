@@ -1,0 +1,10 @@
+[submodule "vendor/assimp"]
+	path = vendor/assimp
+	url = https://github.com/assimp/assimp.git
+[submodule "vendor/imgui-docking/imgui"]
+	path = vendor/imgui-docking/imgui
+	url = https://github.com/ocornut/imgui.git
+	branch = docking
+[submodule "vendor/SDL"]
+	path = vendor/SDL
+	url = https://github.com/libsdl-org/SDL.git
