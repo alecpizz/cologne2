@@ -1,38 +1,46 @@
 ﻿#pragma once
 #include "Texture.h"
+#include "Vertex.h"
+#include "Mesh.h"
+#include "ElementBuffer.h"
+#include "VertexAttribute.h"
+#include "VertexBuffer.h"
 
 namespace goon
 {
-
-    struct Vertex;
-    struct VertexAttribute;
-    struct VertexBuffer;
-    struct ElementBuffer;
 
     class Mesh
     {
     public:
         Mesh(const Vertex *vertices, size_t num_vertices,
-            const uint32_t *indices, size_t num_indices,
-            const Texture *textures,
+             const uint32_t *indices, size_t num_indices,
+             const Texture *textures,
              size_t num_textures);
 
         ~Mesh();
 
-        Vertex *get_vertices() const;
+        Vertex *get_vertices();
 
-        uint32_t *get_indices() const;
+        uint32_t *get_indices();
 
-        Texture *get_textures() const;
+        size_t get_num_indices() const;
 
-        VertexBuffer *get_vertex_buffer() const;
+        Texture *get_textures();
 
-        ElementBuffer *get_element_buffer() const;
+        VertexBuffer get_vertex_buffer() const;
 
-        VertexAttribute *get_vertex_attribute() const;
+        ElementBuffer get_element_buffer() const;
+
+        VertexAttribute get_vertex_attribute() const;
+
+        void draw() const;
 
     private:
-        struct Impl;
-        Impl *_impl;
+        std::vector<Vertex> _vertices;
+        std::vector<uint32_t> _indices;
+        std::vector<Texture> _textures;
+        VertexBuffer _vertex_buffer = {};
+        ElementBuffer _element_buffer = {};
+        VertexAttribute _vertex_attribute = {};
     };
 }

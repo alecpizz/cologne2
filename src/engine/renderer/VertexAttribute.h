@@ -22,7 +22,6 @@ namespace goon
             glEnableVertexAttribArray(3);
             glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE,
                 sizeof(Vertex), reinterpret_cast<void *>(offsetof(Vertex, tangent)));
-            glBindVertexArray(0);
         }
 
         void use() const

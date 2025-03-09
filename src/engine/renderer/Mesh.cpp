@@ -6,76 +6,73 @@
 
 namespace goon
 {
-    struct Mesh::Impl
-    {
-        std::vector<Vertex> vertices;
-        std::vector<uint32_t> indices;
-        std::vector<Texture> textures;
-        std::unique_ptr<VertexAttribute> vertex_attribute = nullptr;
-        std::unique_ptr<VertexBuffer> vertex_buffer = nullptr;
-        std::unique_ptr<ElementBuffer> element_buffer = nullptr;
-
-        void init()
-        {
-            vertex_attribute = std::make_unique<VertexAttribute>();
-            vertex_buffer = std::make_unique<VertexBuffer>(vertices.data(), vertices.size());
-            element_buffer = std::make_unique<ElementBuffer>(indices.data(), indices.size());
-        }
-    };
-
     Mesh::Mesh(const Vertex *vertices, const size_t num_vertices, const uint32_t *indices, const size_t num_indices,
                const Texture *textures,
                const size_t num_textures)
     {
-        _impl = new Impl();
         for (size_t i = 0; i < num_vertices; i++)
         {
-            _impl->vertices.push_back(vertices[i]);
+            _vertices.emplace_back(vertices[i]);
         }
         for (size_t i = 0; i < num_indices; i++)
         {
-            _impl->indices.push_back(indices[i]);
+            _indices.emplace_back(indices[i]);
         }
 
         for (size_t i = 0; i < num_textures; i++)
         {
-            _impl->textures.push_back(textures[i]);
+            _textures.emplace_back(textures[i]);
         }
-
+        _vertex_attribute = {};
+        _vertex_buffer = VertexBuffer(vertices, num_vertices);
+        _element_buffer = ElementBuffer(indices, num_indices);
+        _vertex_attribute.release();
+        _vertex_buffer.release();
+        _element_buffer.release();
     }
 
     Mesh::~Mesh()
     {
-        delete _impl;
     }
 
-    Vertex *Mesh::get_vertices() const
+    Vertex *Mesh::get_vertices()
     {
-        return _impl->vertices.data();
+        return _vertices.data();
     }
 
-    uint32_t *Mesh::get_indices() const
+    uint32_t *Mesh::get_indices()
     {
-        return _impl->indices.data();
+        return _indices.data();
     }
 
-    Texture *Mesh::get_textures() const
+    size_t Mesh::get_num_indices() const
     {
-        return _impl->textures.data();
+        return _indices.size();
     }
 
-    VertexBuffer* Mesh::get_vertex_buffer() const
+    Texture *Mesh::get_textures()
     {
-        return _impl->vertex_buffer.get();
+        return _textures.data();
     }
 
-    ElementBuffer* Mesh::get_element_buffer() const
+    VertexBuffer Mesh::get_vertex_buffer() const
     {
-        return _impl->element_buffer.get();
+        return _vertex_buffer;
     }
 
-    VertexAttribute* Mesh::get_vertex_attribute() const
+    ElementBuffer Mesh::get_element_buffer() const
     {
-        return _impl->vertex_attribute.get();
+        return _element_buffer;
+    }
+
+    VertexAttribute Mesh::get_vertex_attribute() const
+    {
+        return _vertex_attribute;
+    }
+
+    void Mesh::draw() const
+    {
+        glBindVertexArray(_vertex_attribute.handle);
+        glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, nullptr);
     }
 }

@@ -58,7 +58,7 @@ namespace goon
             LOG_ERROR("Failed to initialize window or renderer!");
             return false;
         }
-        _impl->scene->add_model(RESOURCES_PATH "backpack/backpack.obj");
+        _impl->scene->add_model(RESOURCES_PATH "backpack/backpack.glb");
         return true;
     }
 

@@ -1,9 +1,10 @@
 ﻿#pragma once
 
+#include "Texture.h"
+#include "Mesh.h""
+
 namespace goon
 {
-    class Mesh;
-
     class Model
     {
     public:
@@ -19,12 +20,13 @@ namespace goon
 
         // Model &operator=(const Model &) = delete;
 
-        Mesh *get_meshes() const;
+        Mesh *get_meshes();
 
         uint64_t get_num_meshes() const;
 
     private:
-        struct Impl;
-        Impl *_impl;
+        std::vector<Mesh> _meshes;
+        std::string _directory;
+        std::vector<Texture> _textures;
     };
 }

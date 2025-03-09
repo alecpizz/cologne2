@@ -2,6 +2,14 @@
 #include <spdlog/spdlog.h>
 #include "spdlog/sinks/stdout_color_sinks.h"
 
+#define FORMAT_LOG_ENTRY( msg, formatted_msg ) \
+char formatted_msg[ 4096 ] ; \
+va_list ap ; \
+va_start( ap, msg ) ; \
+vsnprintf( formatted_msg, sizeof( formatted_msg ), msg, ap ) ; \
+va_end( ap ) ;
+
+
 namespace goon
 {
     struct Log::Impl
@@ -27,22 +35,26 @@ namespace goon
 
     void Log::log_info(const char *msg, ...)
     {
-        _impl->logger->log(spdlog::level::info, msg);
+        FORMAT_LOG_ENTRY(msg, formatted_msg);
+        _impl->logger->log(spdlog::level::info, formatted_msg);
     }
 
     void Log::log_error(const char *msg, ...)
     {
-        _impl->logger->log(spdlog::level::err, msg);
+        FORMAT_LOG_ENTRY(msg, formatted_msg);
+        _impl->logger->log(spdlog::level::err, formatted_msg);
     }
 
     void Log::log_debug(const char *msg, ...)
     {
-        _impl->logger->log(spdlog::level::debug, msg);
+        FORMAT_LOG_ENTRY(msg, formatted_msg);
+        _impl->logger->log(spdlog::level::debug, formatted_msg);
     }
 
     void Log::log_warning(const char *msg, ...)
     {
-        _impl->logger->log(spdlog::level::warn, msg);
+        FORMAT_LOG_ENTRY(msg, formatted_msg);
+        _impl->logger->log(spdlog::level::warn, formatted_msg);
     }
 
     Log::Log()
