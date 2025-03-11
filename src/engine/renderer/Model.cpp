@@ -111,9 +111,14 @@ namespace goon
             textures.insert(textures.end(), specular_maps.begin(), specular_maps.end());
         }
 
-        return Mesh(vertices.data(), vertices.size(),
+        if (indices.size() == 0)
+        {
+            LOG_INFO("No indicies found");
+        }
+
+        return {vertices.data(), vertices.size(),
                     indices.data(), indices.size(),
-                    textures.data(), textures.size());
+                    textures.data(), textures.size()};
     }
 
 

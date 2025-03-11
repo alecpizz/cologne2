@@ -1,7 +1,4 @@
 ﻿#include "Mesh.h"
-#include "ElementBuffer.h"
-#include "VertexBuffer.h"
-#include "VertexAttribute.h"
 #include "Texture.h"
 
 namespace goon
@@ -23,12 +20,28 @@ namespace goon
         {
             _textures.emplace_back(textures[i]);
         }
-        _vertex_attribute = {};
-        _vertex_buffer = VertexBuffer(vertices, num_vertices);
-        _element_buffer = ElementBuffer(indices, num_indices);
-        _vertex_attribute.release();
-        _vertex_buffer.release();
-        _element_buffer.release();
+        glCreateBuffers(1, &_vbo);
+        glNamedBufferStorage(_vbo, sizeof(Vertex)* num_vertices, vertices, GL_MAP_READ_BIT);
+
+        glCreateBuffers(1, &_ibo);
+        glNamedBufferStorage(_ibo, sizeof(uint32_t)*num_indices, indices, GL_MAP_READ_BIT);
+
+        glCreateVertexArrays(1, &_vao);
+
+        glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
+        glVertexArrayElementBuffer(_vao, _ibo);
+
+        glEnableVertexArrayAttrib(_vao, 0);
+        glEnableVertexArrayAttrib(_vao, 1);
+        glEnableVertexArrayAttrib(_vao, 2);
+
+        glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, position));
+        glVertexArrayAttribFormat(_vao, 1, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, normal));
+        glVertexArrayAttribFormat(_vao, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, uv));
+
+        glVertexArrayAttribBinding(_vao, 0, 0);
+        glVertexArrayAttribBinding(_vao, 1, 0);
+        glVertexArrayAttribBinding(_vao, 2, 0);
     }
 
     Mesh::~Mesh()
@@ -55,24 +68,11 @@ namespace goon
         return _textures.data();
     }
 
-    VertexBuffer Mesh::get_vertex_buffer() const
-    {
-        return _vertex_buffer;
-    }
-
-    ElementBuffer Mesh::get_element_buffer() const
-    {
-        return _element_buffer;
-    }
-
-    VertexAttribute Mesh::get_vertex_attribute() const
-    {
-        return _vertex_attribute;
-    }
 
     void Mesh::draw() const
     {
-        glBindVertexArray(_vertex_attribute.handle);
-        glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, nullptr);
+        glBindVertexArray(_vao);
+        glDrawElements(GL_TRIANGLES, static_cast<uint32_t>(_indices.size()), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
     }
 }

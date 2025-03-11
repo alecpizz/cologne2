@@ -2,9 +2,6 @@
 #include "Texture.h"
 #include "Vertex.h"
 #include "Mesh.h"
-#include "ElementBuffer.h"
-#include "VertexAttribute.h"
-#include "VertexBuffer.h"
 
 namespace goon
 {
@@ -27,20 +24,14 @@ namespace goon
 
         Texture *get_textures();
 
-        VertexBuffer get_vertex_buffer() const;
-
-        ElementBuffer get_element_buffer() const;
-
-        VertexAttribute get_vertex_attribute() const;
-
         void draw() const;
 
     private:
         std::vector<Vertex> _vertices;
         std::vector<uint32_t> _indices;
         std::vector<Texture> _textures;
-        VertexBuffer _vertex_buffer = {};
-        ElementBuffer _element_buffer = {};
-        VertexAttribute _vertex_attribute = {};
+        uint32_t _vbo = 0;
+        uint32_t _ibo = 0;
+        uint32_t _vao = 0;
     };
 }

@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "VertexAttribute.h"
 #include "engine/Scene.h"
 
 class Scene;

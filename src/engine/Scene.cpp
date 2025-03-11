@@ -35,6 +35,6 @@ namespace goon
 
     void Scene::add_model(const char *path) const
     {
-        _impl->models.emplace_back(Model(path));
+        _impl->models.emplace_back(path);
     }
 }

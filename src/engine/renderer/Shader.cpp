@@ -70,7 +70,7 @@ namespace goon
             }
             catch (const std::ifstream::failure &e)
             {
-                LOG_ERROR("Failed to read file");
+                LOG_ERROR("Failed to read file %s", shader_path);
             }
             uint32_t shader = glCreateShader(shader_type);
             const char* shader_code = code.c_str();
@@ -91,11 +91,13 @@ namespace goon
     Shader::Shader(const char *vert_path, const char *frag_path)
     {
         _impl = new Impl();
+        _impl->compile(vert_path, frag_path, nullptr);
     }
 
     Shader::Shader(const char *vert_path, const char *frag_path, const char *geom_path)
     {
         _impl = new Impl();
+        _impl->compile(vert_path, frag_path, geom_path);
     }
 
     Shader::~Shader()

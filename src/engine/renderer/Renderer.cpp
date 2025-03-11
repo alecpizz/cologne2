@@ -5,7 +5,6 @@
 #include "Renderer.h"
 #include "../Scene.h"
 #include "Shader.h"
-#include "VertexAttribute.h"
 
 namespace goon
 {
@@ -14,7 +13,7 @@ namespace goon
         std::unique_ptr<Shader> lit_shader = nullptr;
         void init()
         {
-            lit_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/lit.vert", "shaders/lit.frag");
+            lit_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/lit.vert", RESOURCES_PATH "shaders/lit.frag");
         }
     };
     Renderer::~Renderer()
@@ -34,8 +33,12 @@ namespace goon
 
         // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 10.0f)); // translate it down so it's at the center of the scene
+        model = glm::scale(model, glm::vec3(1.0f));	// it's a bit too big for our scene, so scale it down
+        static float angle = 0.0f;
+        angle += 0.05f;
+        model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         _impl->lit_shader->set_mat4("model", &model[0][0]);
         for (size_t i = 0; i < scene.get_model_count(); i++)
         {
