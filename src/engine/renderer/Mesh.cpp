@@ -3,28 +3,16 @@
 
 namespace goon
 {
-    Mesh::Mesh(const Vertex *vertices, const size_t num_vertices, const uint32_t *indices, const size_t num_indices,
-               const Texture *textures,
-               const size_t num_textures)
+    Mesh::Mesh(const Vertex *vertices, size_t num_vertices,
+               const uint32_t *indices, size_t num_indices)
     {
-        for (size_t i = 0; i < num_vertices; i++)
-        {
-            _vertices.emplace_back(vertices[i]);
-        }
-        for (size_t i = 0; i < num_indices; i++)
-        {
-            _indices.emplace_back(indices[i]);
-        }
+        _indices_count = static_cast<uint32_t>(num_indices);
 
-        for (size_t i = 0; i < num_textures; i++)
-        {
-            _textures.emplace_back(textures[i]);
-        }
         glCreateBuffers(1, &_vbo);
-        glNamedBufferStorage(_vbo, sizeof(Vertex)* num_vertices, vertices, GL_MAP_READ_BIT);
+        glNamedBufferStorage(_vbo, sizeof(Vertex) * num_vertices, vertices, GL_MAP_READ_BIT);
 
         glCreateBuffers(1, &_ibo);
-        glNamedBufferStorage(_ibo, sizeof(uint32_t)*num_indices, indices, GL_MAP_READ_BIT);
+        glNamedBufferStorage(_ibo, sizeof(uint32_t) * num_indices, indices, GL_MAP_READ_BIT);
 
         glCreateVertexArrays(1, &_vao);
 
@@ -46,33 +34,16 @@ namespace goon
 
     Mesh::~Mesh()
     {
-    }
-
-    Vertex *Mesh::get_vertices()
-    {
-        return _vertices.data();
-    }
-
-    uint32_t *Mesh::get_indices()
-    {
-        return _indices.data();
-    }
-
-    size_t Mesh::get_num_indices() const
-    {
-        return _indices.size();
-    }
-
-    Texture *Mesh::get_textures()
-    {
-        return _textures.data();
+        // glDeleteBuffers(1, &_vbo);
+        // glDeleteBuffers(1, &_ibo);
+        // glDeleteVertexArrays(1, &_vao);
     }
 
 
     void Mesh::draw() const
     {
         glBindVertexArray(_vao);
-        glDrawElements(GL_TRIANGLES, static_cast<uint32_t>(_indices.size()), GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, _indices_count, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     }
 }

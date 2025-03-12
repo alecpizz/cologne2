@@ -4,14 +4,19 @@ namespace goon
 {
     enum class TextureType
     {
-        NONE,
-        DIFFUSE,
-        SPECULAR
+        NONE = -1,
+        ALBEDO = 0,
+        NORMAL = 1,
+        AO = 2,
+        ROUGHNESS = 3,
+        METALLIC = 4
     };
     class Texture
     {
     public:
         explicit Texture(const char *texture_path);
+        explicit Texture(void *data, const char *texture_path, uint32_t width, uint32_t height, uint32_t channels);
+        Texture();
 
         ~Texture();
 
@@ -31,7 +36,7 @@ namespace goon
 
         void set_texture_type(TextureType type);
 
-        void use(uint8_t index) const;
+        void bind(uint8_t index) const;
 
     private:
         uint32_t _handle = 0;

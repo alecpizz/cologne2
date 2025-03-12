@@ -40,9 +40,11 @@ namespace goon
         model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         _impl->lit_shader->set_mat4("model", &model[0][0]);
+        _impl->lit_shader->set_int("texture_diffuse1", 0);
         for (size_t i = 0; i < scene.get_model_count(); i++)
         {
-            auto modelM = scene.get_models()[i];
+            auto& modelM = scene.get_models()[i];
+            modelM.get_albedo()->bind(0);
             for (size_t j = 0; j < modelM.get_num_meshes(); j++)
             {
                 modelM.get_meshes()[j].draw();

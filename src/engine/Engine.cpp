@@ -59,6 +59,8 @@ namespace goon
             return false;
         }
         _impl->scene->add_model(RESOURCES_PATH "backpack/backpack.glb");
+        auto& model = _impl->scene->get_models()[0];
+        model.set_texture(RESOURCES_PATH "backpack/diffuse.jpg", TextureType::ALBEDO);
         return true;
     }
 

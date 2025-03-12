@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Texture.h"
-#include "Mesh.h""
+#include "Mesh.h"
 
 namespace goon
 {
@@ -12,6 +12,13 @@ namespace goon
 
         ~Model();
 
+        Texture* get_albedo() const;
+        Texture* get_normal() const;
+        Texture* get_ao() const;
+        Texture* get_roughness() const;
+        Texture* get_metallic() const;
+
+        void set_texture(const char* path, TextureType type);
         // Model(Model &&) = delete;
 
         // Model &operator=(Model &&) = delete;
@@ -25,8 +32,7 @@ namespace goon
         uint64_t get_num_meshes() const;
 
     private:
-        std::vector<Mesh> _meshes;
-        std::string _directory;
-        std::vector<Texture> _textures;
+        struct Impl;
+        Impl * _impl;
     };
 }
