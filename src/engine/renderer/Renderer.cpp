@@ -14,6 +14,7 @@ namespace goon
         void init()
         {
             lit_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/lit.vert", RESOURCES_PATH "shaders/lit.frag");
+            glEnable(GL_DEPTH_TEST);
         }
     };
     Renderer::~Renderer()

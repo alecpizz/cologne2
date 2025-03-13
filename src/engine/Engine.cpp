@@ -52,7 +52,7 @@ namespace goon
         _impl->window = std::unique_ptr<Window>(new Window(width, height));
         _impl->renderer = std::unique_ptr<Renderer>(new Renderer());
         _impl->event_manager = std::unique_ptr<EventManager>(new EventManager());
-        _impl->scene = std::unique_ptr<Scene>(new Scene());
+        _impl->scene = std::make_unique<Scene>();
         if (_impl->window == nullptr || _impl->renderer == nullptr)
         {
             LOG_ERROR("Failed to initialize window or renderer!");
@@ -77,7 +77,7 @@ namespace goon
 
             _impl->window->clear();
 
-            _impl->renderer->render_scene(*_impl->scene.get());
+            _impl->renderer->render_scene(*_impl->scene);
 
             _impl->debug_ui->present();
 

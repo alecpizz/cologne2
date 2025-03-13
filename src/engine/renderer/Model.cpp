@@ -47,7 +47,6 @@ namespace goon
                 aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
 
                 meshes.push_back(process_mesh(mesh));
-                LOG_INFO("PUSH MESH");
             }
             // after we've processed all of the meshes (if any) we then recursively process each of the children nodes
             for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -155,9 +154,11 @@ namespace goon
         {
             case TextureType::ALBEDO:
                 _impl->albedo = std::make_unique<Texture>(path);
+                _impl->albedo.get()->set_texture_type(TextureType::ALBEDO);
                 break;
             case TextureType::NORMAL:
                 _impl->normal = std::make_unique<Texture>(path);
+                _impl->normal.get()->set_texture_type(TextureType::NORMAL);
                 break;
             case TextureType::AO:
                 _impl->ao = std::make_unique<Texture>(path);

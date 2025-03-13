@@ -10,12 +10,11 @@ namespace goon
     Texture::Texture(const char *texture_path)
     {
         set_path(texture_path);
-        glGenTextures(1, &_handle);
-        glBindTexture(GL_TEXTURE_2D, _handle);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glCreateTextures(GL_TEXTURE_2D, 1, &_handle);
+        glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(_handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 
         stbi_set_flip_vertically_on_load(true);
@@ -31,9 +30,9 @@ namespace goon
             _width = width;
             _height = height;
             _channels = channels;
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-                         channels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
+            glTextureStorage2D(_handle, 1, GL_RGBA8, _width, _height);
+            glTextureSubImage2D(_handle, 0, 0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+            glGenerateTextureMipmap(_handle);
         }
         stbi_image_free(data);
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -115,7 +114,6 @@ namespace goon
 
     void Texture::bind(const uint8_t index) const
     {
-        glActiveTexture(GL_TEXTURE0 + index);
-        glBindTexture(GL_TEXTURE_2D, _handle);
+        glBindTextureUnit(index, _handle);
     }
 }
