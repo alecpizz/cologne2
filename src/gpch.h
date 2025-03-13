@@ -36,6 +36,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <GLM/glm.hpp>
 #include <GLM/gtc/type_ptr.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 #include <GLM/gtc/matrix_transform.hpp>
 #include <GLM/gtx/rotate_vector.hpp>
 #include <GLM/gtx/quaternion.hpp>

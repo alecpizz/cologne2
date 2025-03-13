@@ -112,6 +112,7 @@ namespace goon
     Model::Model(const char *path)
     {
         _impl = new Impl();
+        _transform = new Transform();
         auto path_str = std::string(path);
         // path_str = path_str.substr(0, path_str.find_last_of('/'));
         _impl->directory = path_str;
@@ -171,6 +172,22 @@ namespace goon
                 break;
             default: break;
         }
+    }
+
+    void Model::set_textures(const char *directory, const char *albedo, const char *normal, const char *ao,
+        const char *roughness, const char *metallic)
+    {
+        std::string path = std::string(directory);
+        set_texture(std::string(path + "/" + albedo).c_str(), TextureType::ALBEDO);
+        set_texture(std::string(path + "/" + normal).c_str(), TextureType::NORMAL);
+        set_texture(std::string(path + "/" + ao).c_str(), TextureType::AO);
+        set_texture(std::string(path + "/" + roughness).c_str(), TextureType::ROUGHNESS);
+        set_texture(std::string(path + "/" + metallic).c_str(), TextureType::METALLIC);
+    }
+
+    Transform * Model::get_transform() const
+    {
+        return _transform;
     }
 
 

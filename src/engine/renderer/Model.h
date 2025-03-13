@@ -2,6 +2,7 @@
 
 #include "Texture.h"
 #include "Mesh.h"
+#include "../Transform.h"
 
 namespace goon
 {
@@ -12,13 +13,23 @@ namespace goon
 
         ~Model();
 
-        Texture* get_albedo() const;
-        Texture* get_normal() const;
-        Texture* get_ao() const;
-        Texture* get_roughness() const;
-        Texture* get_metallic() const;
+        Texture *get_albedo() const;
 
-        void set_texture(const char* path, TextureType type);
+        Texture *get_normal() const;
+
+        Texture *get_ao() const;
+
+        Texture *get_roughness() const;
+
+        Texture *get_metallic() const;
+
+        void set_texture(const char *path, TextureType type);
+
+        void set_textures(const char *directory, const char *albedo, const char *normal, const char *ao,
+                          const char *roughness, const char *metallic);
+
+        Transform *get_transform() const;
+
         // Model(Model &&) = delete;
 
         // Model &operator=(Model &&) = delete;
@@ -32,7 +43,8 @@ namespace goon
         uint64_t get_num_meshes() const;
 
     private:
+        Transform *_transform = nullptr;
         struct Impl;
-        Impl * _impl;
+        Impl *_impl;
     };
 }

@@ -20,8 +20,23 @@ namespace goon
         bool running = true;
     };
 
+    struct ElapsedTime
+    {
+        std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
+        std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
+        float elapsed = 0.0f;
+
+        void update()
+        {
+            end = std::chrono::system_clock::now();
+            elapsed = static_cast<std::chrono::duration<float>>(end - start).count();
+            start = end;
+        }
+    };
+
     Engine::Engine()
     {
+        _instance = this;
         _impl = new Impl();
         LOG_INFO("Starting up engine. the world is a shit place, and this is a shit engine. good luck!");
     }
@@ -46,6 +61,12 @@ namespace goon
         return _impl->event_manager.get();
     }
 
+    Scene * Engine::get_scene()
+    {
+        return _instance->_impl->scene.get();
+    }
+
+
     bool Engine::init(uint32_t width, uint32_t height)
     {
         _impl->debug_ui = std::unique_ptr<DebugUI>(new DebugUI());
@@ -58,15 +79,14 @@ namespace goon
             LOG_ERROR("Failed to initialize window or renderer!");
             return false;
         }
-        _impl->scene->add_model(RESOURCES_PATH "backpack/backpack.glb");
-        auto& model = _impl->scene->get_models()[0];
-        model.set_texture(RESOURCES_PATH "backpack/diffuse.jpg", TextureType::ALBEDO);
+
         return true;
     }
 
     void Engine::run()
     {
         _impl->running = true;
+        ElapsedTime et;
         while (!_impl->event_manager->should_quit())
         {
             _impl->window->resize();
@@ -77,11 +97,14 @@ namespace goon
 
             _impl->window->clear();
 
+            _impl->scene->update(et.elapsed);
+
             _impl->renderer->render_scene(*_impl->scene);
 
             _impl->debug_ui->present();
 
             _impl->window->present();
+            et.update();
         }
     }
 } // goon

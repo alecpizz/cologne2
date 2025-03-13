@@ -57,7 +57,37 @@ namespace goon
     {
         ImGui::Begin("gooning window");
 
-        ImGui::Text("i'm sdling my window!");
+        size_t model_count = Engine::get_scene()->get_model_count();
+        for (size_t i = 0; i < model_count; i++)
+        {
+            auto &model = Engine::get_scene()->get_models()[i];
+            glm::mat4 model_matrix = model.get_transform()->get_model_matrix();
+            glm::vec3 scale;
+            glm::quat rotation;
+            glm::vec3 translation;
+            glm::vec3 skew;
+            glm::vec4 perspective;
+            glm::decompose(model_matrix, scale, rotation, translation, skew, perspective);
+            glm::conjugate(rotation);
+            glm::vec3 euler = glm::eulerAngles(rotation);
+            euler.x = glm::degrees(euler.x);
+            euler.y = glm::degrees(euler.y);
+            euler.z = glm::degrees(euler.z);
+
+            if (ImGui::InputFloat3("Position", glm::value_ptr(translation)))
+            {
+                model.get_transform()->set_translation(translation);
+            }
+            if (ImGui::InputFloat3("Euler", glm::value_ptr(euler)))
+            {
+                model.get_transform()->set_rotation(glm::vec3(glm::radians(euler.x),
+                    glm::radians(euler.y), glm::radians(euler.z)));
+            }
+            if (ImGui::InputFloat3("Scale", glm::value_ptr(scale)))
+            {
+                model.get_transform()->set_scale(scale);
+            }
+        }
 
         ImGui::End();
         ImGui::Render();

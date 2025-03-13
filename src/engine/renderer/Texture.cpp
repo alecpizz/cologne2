@@ -6,7 +6,6 @@
 
 namespace goon
 {
-
     Texture::Texture(const char *texture_path)
     {
         set_path(texture_path);
@@ -41,26 +40,26 @@ namespace goon
     Texture::Texture(void *data, const char *texture_path, uint32_t width, uint32_t height, uint32_t channels)
     {
         set_path(texture_path);
-        glGenTextures(1, &_handle);
-        glBindTexture(GL_TEXTURE_2D, _handle);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glCreateTextures(GL_TEXTURE_2D, 1, &_handle);
+        glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(_handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
         if (!data)
         {
+            LOG_ERROR("Failed to load texture from ptr");
+            LOG_ERROR(texture_path);
             glDeleteTextures(1, &_handle);
-        }
-        else
+        } else
         {
             _width = width;
             _height = height;
             _channels = channels;
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-                         channels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
+            glTextureStorage2D(_handle, 1, GL_RGBA8, _width, _height);
+            glTextureSubImage2D(_handle, 0, 0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+            glGenerateTextureMipmap(_handle);
         }
-        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     Texture::Texture()

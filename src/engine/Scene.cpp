@@ -16,6 +16,17 @@ namespace goon
     Scene::Scene()
     {
         _impl = new Impl();
+        auto &model = add_model(RESOURCES_PATH "backpack/backpack.glb");
+        model.set_textures(RESOURCES_PATH "backpack",
+                           "diffuse.jpg", "normal.png",
+                           "ao.jpg", "roughness.jpg",
+                           "specular.jpg");
+        model.get_transform()->set_translation(glm::vec3(0.0f, 0.0f, 10.0f));
+        model.get_transform()->set_rotation(glm::vec3(glm::radians(0.0f), glm::radians(90.0f), glm::radians(90.0f)));
+    }
+
+    void Scene::update(float delta_time)
+    {
     }
 
     Scene::~Scene()
@@ -33,8 +44,8 @@ namespace goon
         return _impl->models.size();
     }
 
-    void Scene::add_model(const char *path) const
+    Model &Scene::add_model(const char *path) const
     {
-        _impl->models.emplace_back(path);
+        return _impl->models.emplace_back(path);
     }
 }

@@ -28,6 +28,8 @@ namespace goon
 
         EventManager *get_event_manager() const;
 
+        static Scene *get_scene();
+
         Engine(Engine &&) = delete;
 
         Engine(const Engine &) = delete;
@@ -41,6 +43,7 @@ namespace goon
         void run();
 
     private:
+       inline static Engine *_instance;
         struct Impl;
         Impl *_impl;
     };
