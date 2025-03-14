@@ -6,6 +6,7 @@
 
 #include "DebugUI.h"
 #include "gpch.h"
+#include "Input.h"
 
 
 namespace goon
@@ -17,6 +18,7 @@ namespace goon
         std::unique_ptr<EventManager> event_manager = nullptr;
         std::unique_ptr<DebugUI> debug_ui = nullptr;
         std::unique_ptr<Scene> scene = nullptr;
+        std::unique_ptr<Camera> camera = nullptr;
         bool running = true;
     };
 
@@ -46,22 +48,27 @@ namespace goon
         delete _impl;
     }
 
-    Renderer * Engine::get_renderer() const
+    Renderer *Engine::get_renderer() const
     {
         return _impl->renderer.get();
     }
 
-    Window * Engine::get_window() const
+    Window *Engine::get_window()
     {
-        return _impl->window.get();
+        return _instance->_impl->window.get();
     }
 
-    EventManager * Engine::get_event_manager() const
+    EventManager *Engine::get_event_manager() const
     {
         return _impl->event_manager.get();
     }
 
-    Scene * Engine::get_scene()
+    Camera *Engine::get_camera()
+    {
+        return _instance->_impl->camera.get();
+    }
+
+    Scene *Engine::get_scene()
     {
         return _instance->_impl->scene.get();
     }
@@ -74,6 +81,8 @@ namespace goon
         _impl->renderer = std::unique_ptr<Renderer>(new Renderer());
         _impl->event_manager = std::unique_ptr<EventManager>(new EventManager());
         _impl->scene = std::make_unique<Scene>();
+        _impl->camera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, -10.0f), glm::vec3(0.0f, 0.0f, 1.0f),
+                                                 glm::vec3(0.0f, 1.0f, 0.0f));
         if (_impl->window == nullptr || _impl->renderer == nullptr)
         {
             LOG_ERROR("Failed to initialize window or renderer!");
@@ -91,7 +100,11 @@ namespace goon
         {
             _impl->window->resize();
 
+            Input::update();
+
             _impl->event_manager->poll_events();
+
+            _impl->camera->update(et.elapsed);
 
             _impl->debug_ui->clear();
 

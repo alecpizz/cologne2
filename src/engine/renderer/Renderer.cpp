@@ -3,6 +3,9 @@
 //
 
 #include "Renderer.h"
+
+#include <engine/Engine.h>
+
 #include "../Scene.h"
 #include "Shader.h"
 
@@ -27,11 +30,8 @@ namespace goon
         _impl->lit_shader->bind();
 
         //TEMP
-        glm::mat4 projection = glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 0.1f, 100.0f);
-        glm::mat4 view = glm::lookAt(glm::vec3(0.0), glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, 1.0, 0.0));
-        _impl->lit_shader->set_mat4("projection", &projection[0][0]);
-        _impl->lit_shader->set_mat4("view", &view[0][0]);
-
+        _impl->lit_shader->set_mat4("projection", &Engine::get_camera()->get_projection_matrix()[0][0]);
+        _impl->lit_shader->set_mat4("view",  &Engine::get_camera()->get_view_matrix()[0][0]);
         _impl->lit_shader->set_int("texture_diffuse1", 0);
         for (size_t i = 0; i < scene.get_model_count(); i++)
         {

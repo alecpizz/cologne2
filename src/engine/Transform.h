@@ -17,7 +17,7 @@ struct Transform
 
     void set_rotation(glm::vec3 euler)
     {
-         rotation = glm::conjugate(glm::quat(euler));
+         rotation = (glm::quat(euler));
     }
 
     void set_scale(glm::vec3 new_scale)

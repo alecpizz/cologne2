@@ -80,6 +80,8 @@ namespace goon
         int w = 0, h = 0;
         SDL_GetWindowSize(_impl->window, &w, &h);
         glViewport(0, 0, w, h);
+        _impl->width = w;
+        _impl->height = h;
     }
 
     void Window::present() const

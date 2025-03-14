@@ -4,6 +4,7 @@
 
 #include "EventManager.h"
 #include "gpch.h"
+#include "Input.h"
 
 namespace goon
 {
@@ -26,6 +27,18 @@ namespace goon
             if (event.type == SDL_EVENT_QUIT || event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
             {
                 _impl->should_quit = true;
+            }
+            if (event.type == SDL_EVENT_KEY_DOWN)
+            {
+                Input::update_key_down(static_cast<uint32_t>(event.key.scancode));
+            }
+            if (event.type == SDL_EVENT_KEY_UP)
+            {
+                Input::update_key_up(static_cast<uint32_t>(event.key.scancode));
+            }
+            if (event.type == SDL_EVENT_MOUSE_MOTION)
+            {
+                Input::update_mouse(event.motion.xrel, event.motion.yrel);
             }
         }
     }

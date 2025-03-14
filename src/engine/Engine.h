@@ -11,6 +11,7 @@
 #pragma once
 #include "engine/renderer/Renderer.h"
 #include "engine/Window.h"
+#include "engine/Camera.h"
 #include "engine/EventManager.h"
 
 namespace goon
@@ -24,10 +25,11 @@ namespace goon
 
         Renderer *get_renderer() const;
 
-        Window *get_window() const;
+        static Window *get_window();
 
         EventManager *get_event_manager() const;
 
+        static Camera *get_camera();
         static Scene *get_scene();
 
         Engine(Engine &&) = delete;

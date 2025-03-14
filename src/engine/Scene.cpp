@@ -22,7 +22,7 @@ namespace goon
                            "ao.jpg", "roughness.jpg",
                            "specular.jpg");
         model.get_transform()->set_translation(glm::vec3(0.0f, 0.0f, 10.0f));
-        model.get_transform()->set_rotation(glm::vec3(glm::radians(0.0f), glm::radians(90.0f), glm::radians(90.0f)));
+        model.get_transform()->set_rotation(glm::rotate(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
     }
 
     void Scene::update(float delta_time)
