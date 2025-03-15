@@ -26,6 +26,8 @@ namespace goon::Input
 
     void init();
     void update();
+    void disable_mouse();
+    void enable_mouse();
     void update_mouse(float x, float y);
     void update_key_up(uint32_t scan_code);
     void update_key_down(uint32_t scan_code);

@@ -4,11 +4,10 @@
 
 namespace goon::Input
 {
-    bool _key_pressed[372];
-    bool _key_down[372];
-    bool _key_down_last_frame[372];
     glm::vec2 _mouse_motion = {0.0f, 0.0f};
     std::unordered_map<Key, bool> _key_down_map;
+    std::unordered_map<Key, bool> _key_pressed_map;
+    std::unordered_map<Key, bool> _key_pressed_last_frame_map;
 
     Key translate_key(uint32_t scan_code)
     {
@@ -126,6 +125,10 @@ namespace goon::Input
     {
         _mouse_motion.x = 0.0f;
         _mouse_motion.y = 0.0f;
+        for (auto key_down_map: _key_pressed_map)
+        {
+            _key_pressed_map[key_down_map.first] = false;
+        }
     }
 
     void update_mouse(float x, float y)
@@ -136,13 +139,30 @@ namespace goon::Input
 
     void update_key_up(uint32_t scan_code)
     {
-        _key_down_map[translate_key(scan_code)] = false;
+        Key key = translate_key(scan_code);
+        _key_down_map[key] = false;
+
+        if (_key_pressed_last_frame_map[key])
+        {
+            _key_pressed_last_frame_map[key] = false;
+        }
+        // if (!_key_pressed_last_frame_map[key])
+        //     _key_pressed_map[key] = false;
+        // else
+        //     _key_pressed_map[key] = true;
+        // _key_pressed_last_frame_map[key] = _key_down_map[key];
+        // _key_pressed_last_frame_map[key] = _key_down_map[key];
     }
 
     void update_key_down(uint32_t scan_code)
     {
-        _key_down_map[translate_key(scan_code)] = true;
-
+        Key key = translate_key(scan_code);
+        _key_down_map[key] = true;
+        if (!_key_pressed_last_frame_map[key])
+        {
+            _key_pressed_map[key] = true;
+            _key_pressed_last_frame_map[key] = true;
+        }
     }
 
     glm::vec2 get_relative_mouse()
@@ -152,11 +172,11 @@ namespace goon::Input
 
     bool key_pressed(Key key)
     {
-        return _key_down_map.contains(key) && _key_down_map[key];
+        return _key_pressed_map[key];
     }
 
     bool key_down(Key key)
     {
-        return false;
+        return _key_down_map.contains(key) && _key_down_map[key];
     }
 }

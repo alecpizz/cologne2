@@ -32,6 +32,7 @@ namespace goon
         glm::vec3 _position = {0.0f, 0.0f, 0.0f};
         glm::vec3 _forward = {0.0f, 0.0f, 1.0f};
         glm::vec3 _up = {0.0f, 1.0f, 0.0f};
+        bool _active = true;
         float _pitch = 0.0f;
         float _yaw = 0.0f;
     };

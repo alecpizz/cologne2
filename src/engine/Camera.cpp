@@ -46,19 +46,34 @@ namespace goon
 
     void Camera::update(float dt)
     {
-        if (goon::Input::key_pressed(Input::Key::W))
+        if (goon::Input::key_pressed(Input::Key::Escape))
+        {
+            _active = !_active;
+            if (!_active)
+            {
+                Engine::get_window()->show_mouse();
+            } else
+            {
+                Engine::get_window()->hide_mouse();
+            }
+        }
+        if (!_active)
+        {
+            return;
+        }
+        if (goon::Input::key_down(Input::Key::W))
         {
             _position += _forward * dt * 10.0f;
         }
-        if (goon::Input::key_pressed(Input::Key::S))
+        if (goon::Input::key_down(Input::Key::S))
         {
             _position -= _forward * dt * 10.0f;
         }
-        if (goon::Input::key_pressed(Input::Key::A))
+        if (goon::Input::key_down(Input::Key::A))
         {
             _position -= glm::normalize(glm::cross(_forward, _up)) * dt * 10.0f;
         }
-        if (goon::Input::key_pressed(Input::Key::D))
+        if (goon::Input::key_down(Input::Key::D))
         {
             _position += glm::normalize(glm::cross(_forward, _up)) * dt * 10.0f;
         }

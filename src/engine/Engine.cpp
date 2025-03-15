@@ -48,9 +48,9 @@ namespace goon
         delete _impl;
     }
 
-    Renderer *Engine::get_renderer() const
+    Renderer *Engine::get_renderer()
     {
-        return _impl->renderer.get();
+        return _instance->_impl->renderer.get();
     }
 
     Window *Engine::get_window()

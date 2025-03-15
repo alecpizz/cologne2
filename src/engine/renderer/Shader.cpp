@@ -82,7 +82,7 @@ namespace goon
             {
                 char info_log[512];
                 glGetShaderInfoLog(shader, 512, nullptr, info_log);
-                LOG_ERROR("Failed to compile shader with reason: %s", info_log);
+                LOG_ERROR("Failed to compile shader %s with reason: %s", shader_path, info_log);
             }
             return shader;
         }

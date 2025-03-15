@@ -81,6 +81,11 @@ namespace goon
             }
         }
 
+        if (ImGui::Button("Hot reload shaders"))
+        {
+            Engine::get_renderer()->reload_shaders();
+        }
+
         ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

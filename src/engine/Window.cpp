@@ -90,10 +90,21 @@ namespace goon
         SDL_GL_SwapWindow(_impl->window);
     }
 
+    void Window::hide_mouse() const
+    {
+        SDL_SetWindowRelativeMouseMode(_impl->window, true);
+    }
+
+    void Window::show_mouse() const
+    {
+        SDL_SetWindowRelativeMouseMode(_impl->window, false);
+    }
+
     Window::Window(uint32_t width, uint32_t height)
     {
         _impl = new Impl();
         _impl->init(width, height);
+        hide_mouse();
     }
 
     Window::~Window()

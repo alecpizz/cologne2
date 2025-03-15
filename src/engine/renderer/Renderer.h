@@ -21,6 +21,7 @@ namespace goon
 
         Renderer &operator=(const Renderer &) = delete;
         void render_scene(Scene &scene);
+        void reload_shaders();
 
     private:
         Renderer();

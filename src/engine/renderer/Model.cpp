@@ -155,11 +155,11 @@ namespace goon
         {
             case TextureType::ALBEDO:
                 _impl->albedo = std::make_unique<Texture>(path);
-                _impl->albedo.get()->set_texture_type(TextureType::ALBEDO);
+                _impl->albedo->set_texture_type(TextureType::ALBEDO);
                 break;
             case TextureType::NORMAL:
                 _impl->normal = std::make_unique<Texture>(path);
-                _impl->normal.get()->set_texture_type(TextureType::NORMAL);
+                _impl->normal->set_texture_type(TextureType::NORMAL);
                 break;
             case TextureType::AO:
                 _impl->ao = std::make_unique<Texture>(path);

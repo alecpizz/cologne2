@@ -23,7 +23,7 @@ namespace goon
 
         ~Engine();
 
-        Renderer *get_renderer() const;
+        static Renderer *get_renderer();
 
         static Window *get_window();
 

@@ -21,14 +21,17 @@ namespace goon
         glEnableVertexArrayAttrib(_vao, 0);
         glEnableVertexArrayAttrib(_vao, 1);
         glEnableVertexArrayAttrib(_vao, 2);
+        glEnableVertexArrayAttrib(_vao, 3);
 
         glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, position));
         glVertexArrayAttribFormat(_vao, 1, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, normal));
         glVertexArrayAttribFormat(_vao, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, uv));
+        glVertexArrayAttribFormat(_vao, 3, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, tangent));
 
         glVertexArrayAttribBinding(_vao, 0, 0);
         glVertexArrayAttribBinding(_vao, 1, 0);
         glVertexArrayAttribBinding(_vao, 2, 0);
+        glVertexArrayAttribBinding(_vao, 3, 0);
     }
 
     Mesh::~Mesh()

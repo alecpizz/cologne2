@@ -5,6 +5,8 @@ layout (location = 2) in vec2 uv;
 layout (location = 3) in vec3 tangent;
 
 out vec2 TexCoords;
+out vec3 WorldPos;
+out mat3 TBN;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -12,6 +14,13 @@ uniform mat4 projection;
 
 void main()
 {
+    WorldPos = vec3(model * vec4(position, 1.0));
+    gl_Position = projection * view * vec4(WorldPos, 1.0);
     TexCoords = uv;
-    gl_Position = projection * view * model * vec4(position, 1.0);
+
+    mat3 normalMatrix = transpose(inverse(mat3(model)));
+    vec3 T = normalize(normalMatrix * tangent);
+    vec3 N = normalize(normalMatrix * normal);
+    vec3 B = cross(N, T);
+    TBN = mat3(T, B, N);
 }

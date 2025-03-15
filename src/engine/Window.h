@@ -26,6 +26,9 @@ namespace goon
 
         void present() const;
 
+        void hide_mouse() const;
+        void show_mouse() const;
+
     private:
         Window(uint32_t width, uint32_t height);
 
