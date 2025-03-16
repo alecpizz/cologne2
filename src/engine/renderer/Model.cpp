@@ -33,13 +33,15 @@ namespace goon
                 return;
             }
             process_node(scene->mRootNode, scene);
+            load_materials(scene);
+        }
+
+        void load_materials(const aiScene *scene)
+        {
             for (size_t i = 0; i < scene->mNumMaterials; i++)
             {
                 Material mat;
                 auto material = scene->mMaterials[i];
-                aiString mat_name;
-                material->Get(AI_MATKEY_NAME, mat_name);
-                LOG_INFO("Material name %s", mat_name.C_Str());
 
                 aiString diffuse_path;
                 if (material->GetTexture(aiTextureType_BASE_COLOR, 0, &diffuse_path) == aiReturn_SUCCESS)
@@ -58,7 +60,7 @@ namespace goon
                     if (auto texture = scene->GetEmbeddedTexture(normalPath.C_Str()); texture != nullptr)
                     {
                         mat.normal = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
-                                         texture->mHeight);
+                                             texture->mHeight);
                     }
                 }
 
@@ -69,7 +71,7 @@ namespace goon
                     if (auto texture = scene->GetEmbeddedTexture(ambient_path.C_Str()); texture != nullptr)
                     {
                         mat.ao = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
-                                                    texture->mHeight);
+                                         texture->mHeight);
                     }
                 }
 
@@ -79,7 +81,7 @@ namespace goon
                     if (auto texture = scene->GetEmbeddedTexture(roughness_path.C_Str()); texture != nullptr)
                     {
                         mat.roughness = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
-                                            texture->mHeight);
+                                                texture->mHeight);
                     }
                 }
 
@@ -89,7 +91,7 @@ namespace goon
                     if (auto texture = scene->GetEmbeddedTexture(metallic_path.C_Str()); texture != nullptr)
                     {
                         mat.metallic = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
-                                           texture->mHeight);
+                                               texture->mHeight);
                     }
                 }
 
@@ -100,7 +102,16 @@ namespace goon
                     if (auto texture = scene->GetEmbeddedTexture(emission_path.C_Str()); texture != nullptr)
                     {
                         mat.emission = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
-                                           texture->mHeight);
+                                               texture->mHeight);
+                    }
+                }
+
+                aiString misc_path;
+                if (material->GetTexture(aiTextureType_UNKNOWN, 0, &misc_path) == aiReturn_SUCCESS)
+                {
+                    if (auto texture = scene->GetEmbeddedTexture(misc_path.C_Str()); texture != nullptr)
+                    {
+                        LOG_INFO("FOUND MISC TEXTURE AT: %s", texture->mFilename.C_Str());
                     }
                 }
 

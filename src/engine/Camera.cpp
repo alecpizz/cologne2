@@ -39,9 +39,9 @@ namespace goon
     glm::mat4 Camera::get_projection_matrix() const
     {
         return glm::perspective(fov,
-            static_cast<float>(Engine::get_window()->get_width()) /
-            static_cast<float>(Engine::get_window()->get_height()),
-            0.1f, 500.0f);
+                                static_cast<float>(Engine::get_window()->get_width()) /
+                                static_cast<float>(Engine::get_window()->get_height()),
+                                0.1f, 500.0f);
     }
 
     void Camera::update(float dt)
@@ -57,25 +57,40 @@ namespace goon
                 Engine::get_window()->hide_mouse();
             }
         }
+
         if (!_active)
         {
             return;
         }
+
+        float speed = 10.0f;
+        if (goon::Input::key_down(Input::Key::LeftShift))
+        {
+            speed *= 2.5f;
+        }
         if (goon::Input::key_down(Input::Key::W))
         {
-            _position += _forward * dt * 10.0f;
+            _position += _forward * dt * speed;
         }
         if (goon::Input::key_down(Input::Key::S))
         {
-            _position -= _forward * dt * 10.0f;
+            _position -= _forward * dt * speed;
         }
         if (goon::Input::key_down(Input::Key::A))
         {
-            _position -= glm::normalize(glm::cross(_forward, _up)) * dt * 10.0f;
+            _position -= glm::normalize(glm::cross(_forward, _up)) * dt * speed;
         }
         if (goon::Input::key_down(Input::Key::D))
         {
-            _position += glm::normalize(glm::cross(_forward, _up)) * dt * 10.0f;
+            _position += glm::normalize(glm::cross(_forward, _up)) * dt * speed;
+        }
+        if (goon::Input::key_down(Input::Key::Space))
+        {
+            _position += _up * dt * speed;
+        }
+        if (goon::Input::key_down(Input::Key::LeftCtrl))
+        {
+            _position -= _up * dt * speed;
         }
 
         glm::vec2 mouse = Input::get_relative_mouse();

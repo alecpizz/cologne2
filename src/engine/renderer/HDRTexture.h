@@ -1,16 +1,19 @@
-﻿#pragma once
+//
+// Created by alecp on 3/16/2025.
+//
 
-namespace goon
-{
-    class Texture
+#pragma once
+#include "gpch.h"
+
+namespace goon{
+    class HDRTexture
     {
     public:
-        explicit Texture(const char *texture_path);
-        Texture(unsigned char* data, uint32_t width, uint32_t height);
-        Texture(uint32_t handle, uint32_t width, uint32_t height, uint32_t channels);
-        Texture();
+        explicit HDRTexture(const char *texture_path);
+        HDRTexture(unsigned char* data, uint32_t width, uint32_t height);
+        HDRTexture();
 
-        ~Texture();
+        ~HDRTexture();
 
         uint32_t get_width() const;
 
@@ -30,4 +33,8 @@ namespace goon
         uint32_t _height = 0;
         uint32_t _channels = 0;
     };
+
+
 }
+
+

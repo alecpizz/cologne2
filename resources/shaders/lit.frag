@@ -31,6 +31,12 @@ uniform sampler2D texture_roughness;
 uniform sampler2D texture_metallic;
 uniform sampler2D texture_ao;
 uniform sampler2D texture_emission;
+
+uniform samplerCube irradiance_map;
+uniform samplerCube prefilter_map;
+uniform sampler2D brdf;
+
+
 uniform float ao_strength = 0.2;
 uniform int has_ao_texture = 0;
 
@@ -43,7 +49,13 @@ float klemenVisibility(vec3 L, vec3 H);
 
 void main()
 {
-    vec3 albedo = pow(texture2D(texture_albedo, TexCoords).rgb, vec3(2.2));
+    vec4 albedo_texture = texture2D(texture_albedo, TexCoords).rgba;
+    if(albedo_texture.a < 0.5)
+    {
+        discard;
+    }
+    vec3 albedo = pow(albedo_texture.rgb, vec3(2.2));
+
     float metallic = texture2D(texture_metallic, TexCoords).r;
     float roughness = texture2D(texture_roughness, TexCoords).r;
     float ao = 0.0;
@@ -101,7 +113,20 @@ void main()
         Lo += (kD * albedo / PI + specular) * radiance * NdotL;
     }
 
-    vec3 ambient = vec3(0.03) * albedo * ao;
+    vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+    vec3 kS = F;
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metallic;
+    vec3 irradiance = texture(irradiance_map, N).rgb;
+    vec3 diffuse = irradiance * albedo;
+
+    const float MAX_RELFECTION_LOD = 4.0;
+    vec3 prefilteredColor = textureLod(prefilter_map, R, roughness * MAX_RELFECTION_LOD).rgb;
+    vec2 brdf = texture(brdf, vec2(max(dot(N, V), 0.0), roughness)).rg;
+    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+
+
+    vec3 ambient = (kD * diffuse + specular) * ao;
     vec3 emission = texture2D(texture_emission, TexCoords).rgb;
     vec3 color = ambient + Lo + emission;
 

@@ -11,7 +11,7 @@ namespace goon
         glCreateTextures(GL_TEXTURE_2D, 1, &_handle);
         glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTextureParameteri(_handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 
@@ -52,7 +52,7 @@ namespace goon
         glCreateTextures(GL_TEXTURE_2D, 1, &_handle);
         glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTextureParameteri(_handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         if (!image_data)
@@ -76,6 +76,14 @@ namespace goon
             glGenerateTextureMipmap(_handle);
         }
         stbi_image_free(image_data);
+    }
+
+    Texture::Texture(uint32_t handle, uint32_t width, uint32_t height, uint32_t channels)
+    {
+        _handle = handle;
+        _width = width;
+        _height = height;
+        _channels = channels;
     }
 
     Texture::Texture()
@@ -107,16 +115,6 @@ namespace goon
         return _handle;
     }
 
-
-    TextureType Texture::get_type() const
-    {
-        return _type;
-    }
-
-    void Texture::set_texture_type(const TextureType type)
-    {
-        _type = type;
-    }
 
     void Texture::bind(const uint8_t index) const
     {
