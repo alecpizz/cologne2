@@ -10,11 +10,11 @@ namespace goon
 
         ~Scene();
 
-        Model* get_models() const;
+        Model* get_model_by_index(size_t idx) const;
 
         uint64_t get_model_count() const;
 
-        Model& add_model(const char* path) const;
+        Model& add_model(const char* path, bool flip_textures) const;
 
         void update(float delta_time);
 

@@ -8,7 +8,6 @@ namespace goon
 {
     Texture::Texture(const char *texture_path)
     {
-        set_path(texture_path);
         glCreateTextures(GL_TEXTURE_2D, 1, &_handle);
         glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -16,7 +15,6 @@ namespace goon
         glTextureParameteri(_handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 
-        stbi_set_flip_vertically_on_load(true);
         int width, height, channels;
         auto data = stbi_load(texture_path, &width, &height, &channels, STBI_rgb_alpha);
         if (!data)
@@ -37,29 +35,47 @@ namespace goon
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    Texture::Texture(void *data, const char *texture_path, uint32_t width, uint32_t height, uint32_t channels)
+    Texture::Texture( unsigned char* data, uint32_t width, uint32_t height)
     {
-        set_path(texture_path);
+        int new_width, new_height, new_channels;
+        stbi_uc* image_data;
+        if (height == 0)
+        {
+            image_data = stbi_load_from_memory(data, width, &new_width, &new_height, &new_channels, 0);
+        }
+        else
+        {
+            image_data = stbi_load_from_memory(data, width * height, &new_width, &new_height, &new_channels, 0);
+        }
+
+
         glCreateTextures(GL_TEXTURE_2D, 1, &_handle);
         glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTextureParameteri(_handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        if (!data)
+        if (!image_data)
         {
             LOG_ERROR("Failed to load texture from ptr");
-            LOG_ERROR(texture_path);
             glDeleteTextures(1, &_handle);
         } else
         {
-            _width = width;
-            _height = height;
-            _channels = channels;
+            _width = new_width;
+            _height = new_height;
+            _channels = new_channels;
+            int32_t format;
+            if (new_channels == 1)
+                format = GL_RED;
+            else if (new_channels == 3)
+                format = GL_RGB;
+            else if (new_channels == 4)
+                format = GL_RGBA;
             glTextureStorage2D(_handle, 1, GL_RGBA8, _width, _height);
-            glTextureSubImage2D(_handle, 0, 0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+            glTextureSubImage2D(_handle, 0, 0, 0, _width, _height, format, GL_UNSIGNED_BYTE, image_data);
             glGenerateTextureMipmap(_handle);
         }
+        stbi_image_free(image_data);
     }
 
     Texture::Texture()
@@ -68,7 +84,7 @@ namespace goon
 
     Texture::~Texture()
     {
-        glDeleteTextures(1, &_handle);
+        // glDeleteTextures(1, &_handle);
     }
 
     uint32_t Texture::get_width() const
@@ -91,15 +107,6 @@ namespace goon
         return _handle;
     }
 
-    const char *Texture::get_path() const
-    {
-        return _path;
-    }
-
-    void Texture::set_path(const char *path)
-    {
-        _path = std::string(path).c_str();
-    }
 
     TextureType Texture::get_type() const
     {
@@ -113,6 +120,15 @@ namespace goon
 
     void Texture::bind(const uint8_t index) const
     {
+        if (_handle == 0)
+        {
+            return;
+        }
         glBindTextureUnit(index, _handle);
+    }
+
+    bool Texture::is_valid() const
+    {
+        return _handle != 0;
     }
 }

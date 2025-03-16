@@ -15,7 +15,7 @@ namespace goon
     {
     public:
         explicit Texture(const char *texture_path);
-        explicit Texture(void *data, const char *texture_path, uint32_t width, uint32_t height, uint32_t channels);
+        Texture(unsigned char* data, uint32_t width, uint32_t height);
         Texture();
 
         ~Texture();
@@ -28,22 +28,19 @@ namespace goon
 
         uint32_t get_handle() const;
 
-        const char* get_path() const;
-
-        void set_path(const char* path);
-
         TextureType get_type() const;
 
         void set_texture_type(TextureType type);
 
         void bind(uint8_t index) const;
 
+        bool is_valid() const;
+
     private:
         uint32_t _handle = 0;
         uint32_t _width = 0;
         uint32_t _height = 0;
         uint32_t _channels = 0;
-        const char* _path = nullptr;
         TextureType _type = TextureType::NONE;
     };
 }

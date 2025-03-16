@@ -19,6 +19,8 @@ struct Light
 
 #define MAX_LIGHTS 8
 #define PI 3.1415926535897932384626433832795
+#define DIRECTIONAL 0
+#define POINT 1
 
 uniform vec3 camera_pos;
 uniform Light lights[MAX_LIGHTS];
@@ -28,6 +30,9 @@ uniform sampler2D texture_normal;
 uniform sampler2D texture_roughness;
 uniform sampler2D texture_metallic;
 uniform sampler2D texture_ao;
+uniform sampler2D texture_emission;
+uniform float ao_strength = 0.2;
+uniform int has_ao_texture = 0;
 
 vec3 fresnelSchlick(float cosTheta, vec3 F0);
 vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness);
@@ -41,7 +46,15 @@ void main()
     vec3 albedo = pow(texture2D(texture_albedo, TexCoords).rgb, vec3(2.2));
     float metallic = texture2D(texture_metallic, TexCoords).r;
     float roughness = texture2D(texture_roughness, TexCoords).r;
-    float ao = texture2D(texture_ao, TexCoords).r;
+    float ao = 0.0;
+    if(has_ao_texture == 1)
+    {
+        ao = texture2D(texture_ao, TexCoords).r;
+    }
+    else
+    {
+        ao = ao_strength;
+    }
 
     vec3 N = texture2D(texture_normal, TexCoords).rgb;
     N = N * 2.0 - 1.0;
@@ -57,7 +70,15 @@ void main()
 
     for(int i = 0; i < num_lights; i++)
     {
-        vec3 L = normalize(lights[i].position - WorldPos);
+        vec3 L = vec3(0.0);
+        if(lights[i].type == DIRECTIONAL)
+        {
+            L = normalize(-lights[i].direction);
+        }
+        else if(lights[i].type == POINT)
+        {
+            L = normalize(lights[i].position - WorldPos);
+        }
         vec3 H = normalize(V + L);
 
         float distance = length(lights[i].position - WorldPos);
@@ -81,7 +102,8 @@ void main()
     }
 
     vec3 ambient = vec3(0.03) * albedo * ao;
-    vec3 color = ambient + Lo;
+    vec3 emission = texture2D(texture_emission, TexCoords).rgb;
+    vec3 color = ambient + Lo + emission;
 
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));

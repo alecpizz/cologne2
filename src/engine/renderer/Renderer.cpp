@@ -6,7 +6,7 @@
 
 #include <engine/Engine.h>
 #include <engine/Input.h>
-
+#include "Material.h"
 #include "Light.h"
 #include "../Scene.h"
 #include "Shader.h"
@@ -33,6 +33,7 @@ namespace goon
             lit_shader->set_int("texture_roughness", 2);
             lit_shader->set_int("texture_metallic", 3);
             lit_shader->set_int("texture_ao", 4);
+            lit_shader->set_int("texture_emission", 5);
         }
 
         void add_light(Light light)
@@ -108,16 +109,38 @@ namespace goon
         _impl->lit_shader->set_mat4("view", &Engine::get_camera()->get_view_matrix()[0][0]);
         for (size_t i = 0; i < scene.get_model_count(); i++)
         {
-            auto &modelM = scene.get_models()[i];
-            _impl->lit_shader->set_mat4("model", &modelM.get_transform()->get_model_matrix()[0][0]);
-            modelM.get_albedo()->bind(0);
-            modelM.get_normal()->bind(1);
-            modelM.get_roughness()->bind(2);
-            modelM.get_metallic()->bind(3);
-            modelM.get_ao()->bind(4);
-            for (size_t j = 0; j < modelM.get_num_meshes(); j++)
+            auto model = scene.get_model_by_index(i);
+            _impl->lit_shader->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
+            // modelM.get_albedo()->bind(0);
+            // modelM.get_normal()->bind(1);
+            // modelM.get_roughness()->bind(2);
+            // modelM.get_metallic()->bind(3);
+            // if (modelM.get_ao() != nullptr)
+            // {
+            //     _impl->lit_shader->set_bool("has_ao_texture", true);
+            //     modelM.get_ao()->bind(4);
+            // }
+            // else
+            // {
+            //     _impl->lit_shader->set_bool("has_ao_texture", false);
+            // }
+            for (size_t j = 0; j < model->get_num_meshes(); j++)
             {
-                modelM.get_meshes()[j].draw();
+                Mesh mesh = model->get_meshes()[j];
+                Material mat = model->get_materials()[mesh.get_material_index()];
+                mat.albedo.bind(0);
+                mat.ao.bind(1);
+                mat.metallic.bind(2);
+                mat.roughness.bind(3);
+                mat.normal.bind(4);
+                mat.emission.bind(5);
+                mesh.draw();
+                //todo: reduce uncessary bindings
+                glBindTextureUnit(1, 0);
+                glBindTextureUnit(2, 0);
+                glBindTextureUnit(3, 0);
+                glBindTextureUnit(4, 0);
+                glBindTextureUnit(5, 0);
             }
         }
     }
@@ -130,14 +153,34 @@ namespace goon
         LOG_INFO("RELOADED SHADERS");
     }
 
+    Light & Renderer::get_directional_light() const
+    {
+        for (auto& light: _impl->lights)
+        {
+            if (light.type == LightType::Directional)
+            {
+                return light;
+            }
+        }
+        LOG_WARN("No light found");
+        return _impl->lights[0];
+    }
+
+    void Renderer::set_directional_light(glm::vec3 direction)
+    {
+        auto& directional_light = get_directional_light();
+        directional_light.direction = direction;
+        reload_shaders();
+    }
+
     Renderer::Renderer()
     {
         _impl = new Impl();
         _impl->init();
         _impl->init_lit_shader();
-        _impl->add_light(Light(glm::vec3(-10.0f, 10.0f, 10.0f), glm::vec3(0.0f),
+        _impl->add_light(Light(glm::vec3(-10.0f, 10.0f, 10.0f), glm::vec3(-2.0f, -1.0f, -0.3f),
                                glm::vec3(300.0f, 300.0f, 300.0f), 6.0f, 1.0f,
-                               LightType::Point));
+                               LightType::Directional));
         _impl->add_light(Light(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(0.0f),
                                glm::vec3(300.0f, 300.0f, 300.0f), 6.0f, 1.0f,
                                LightType::Point));

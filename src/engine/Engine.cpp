@@ -81,7 +81,7 @@ namespace goon
         _impl->renderer = std::unique_ptr<Renderer>(new Renderer());
         _impl->event_manager = std::unique_ptr<EventManager>(new EventManager());
         _impl->scene = std::make_unique<Scene>();
-        _impl->camera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, -10.0f), glm::vec3(0.0f, 0.0f, 1.0f),
+        _impl->camera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 1.0f),
                                                  glm::vec3(0.0f, 1.0f, 0.0f));
         if (_impl->window == nullptr || _impl->renderer == nullptr)
         {

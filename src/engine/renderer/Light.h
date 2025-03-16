@@ -4,7 +4,7 @@ namespace goon
 {
     enum LightType
     {
-         Directional,
+         Directional = 0,
          Point
     };
 

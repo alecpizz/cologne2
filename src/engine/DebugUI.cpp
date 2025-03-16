@@ -60,16 +60,19 @@ namespace goon
         size_t model_count = Engine::get_scene()->get_model_count();
         for (size_t i = 0; i < model_count; i++)
         {
-            auto &model = Engine::get_scene()->get_models()[i];
-            glm::vec3 scale = model.get_transform()->scale;
-            glm::quat rotation = model.get_transform()->rotation;
-            glm::vec3 translation = model.get_transform()->translation;
+            ImGui::PushID(i);
+            auto model = Engine::get_scene()->get_model_by_index(i);
+            glm::vec3 scale = model->get_transform()->scale;
+            glm::quat rotation = model->get_transform()->rotation;
+            glm::vec3 translation = model->get_transform()->translation;
 
             glm::vec3 euler = glm::degrees(glm::eulerAngles(rotation));
 
+            ImGui::LabelText("%s", model->get_path());
+
             if (ImGui::InputFloat3("Position", glm::value_ptr(translation)))
             {
-                model.get_transform()->set_translation(translation);
+                model->get_transform()->set_translation(translation);
             }
             if (ImGui::InputFloat3("Euler", glm::value_ptr(euler)))
             {
@@ -77,13 +80,20 @@ namespace goon
             }
             if (ImGui::InputFloat3("Scale", glm::value_ptr(scale)))
             {
-                model.get_transform()->set_scale(scale);
+                model->get_transform()->set_scale(scale);
             }
+            ImGui::PopID();
         }
 
         if (ImGui::Button("Hot reload shaders"))
         {
             Engine::get_renderer()->reload_shaders();
+        }
+
+        glm::vec3 dir_light = Engine::get_renderer()->get_directional_light().direction;
+        if (ImGui::InputFloat3("Directional light", glm::value_ptr(dir_light)))
+        {
+            Engine::get_renderer()->set_directional_light(dir_light);
         }
 
         ImGui::End();

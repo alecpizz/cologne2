@@ -10,19 +10,16 @@ namespace goon
 {
     struct Scene::Impl
     {
-        std::vector<Model> models = std::vector<Model>();
+        std::vector<std::unique_ptr<Model>> models = std::vector<std::unique_ptr<Model>>();
     };
 
     Scene::Scene()
     {
         _impl = new Impl();
-        auto &model = add_model(RESOURCES_PATH "backpack/backpack.glb");
-        model.set_textures(RESOURCES_PATH "backpack",
-                           "diffuse.jpg", "normal.png",
-                           "ao.jpg", "roughness.jpg",
-                           "specular.jpg");
+        auto &model = add_model(RESOURCES_PATH "backpack/backpack.glb", true);
         model.get_transform()->set_translation(glm::vec3(0.0f, 0.0f, 10.0f));
-        model.get_transform()->set_rotation(glm::rotate(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+        auto &model2 = add_model(RESOURCES_PATH "Lantern.glb", false);
+        model2.get_transform()->set_translation(glm::vec3(0.0f, 0.0f, -10.0f));
     }
 
     void Scene::update(float delta_time)
@@ -34,9 +31,9 @@ namespace goon
         delete _impl;
     }
 
-    Model *Scene::get_models() const
+    Model *Scene::get_model_by_index(size_t idx) const
     {
-        return _impl->models.data();
+        return _impl->models[idx].get();
     }
 
     uint64_t Scene::get_model_count() const
@@ -44,8 +41,8 @@ namespace goon
         return _impl->models.size();
     }
 
-    Model &Scene::add_model(const char *path) const
+    Model &Scene::add_model(const char* path, bool flip_textures) const
     {
-        return _impl->models.emplace_back(path);
+        return *_impl->models.emplace_back(std::make_unique<Model>(path, flip_textures));
     }
 }

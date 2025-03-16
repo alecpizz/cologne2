@@ -3,7 +3,7 @@
 namespace goon
 {
     Mesh::Mesh(const Vertex *vertices, size_t num_vertices,
-               const uint32_t *indices, size_t num_indices)
+               const uint32_t *indices, size_t num_indices, uint32_t material)
     {
         _indices_count = static_cast<uint32_t>(num_indices);
 
@@ -32,6 +32,8 @@ namespace goon
         glVertexArrayAttribBinding(_vao, 1, 0);
         glVertexArrayAttribBinding(_vao, 2, 0);
         glVertexArrayAttribBinding(_vao, 3, 0);
+
+        _material_index = material;
     }
 
     Mesh::~Mesh()
@@ -39,6 +41,11 @@ namespace goon
         // glDeleteBuffers(1, &_vbo);
         // glDeleteBuffers(1, &_ibo);
         // glDeleteVertexArrays(1, &_vao);
+    }
+
+    uint32_t Mesh::get_material_index() const
+    {
+        return _material_index;
     }
 
 

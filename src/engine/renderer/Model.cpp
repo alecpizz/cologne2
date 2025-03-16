@@ -17,25 +17,95 @@ namespace goon
     struct Model::Impl
     {
         std::vector<Mesh> meshes = std::vector<Mesh>();
+        std::vector<Material> materials = std::vector<Material>();
         std::string directory = "";
-        std::unique_ptr<Texture> albedo = nullptr;
-        std::unique_ptr<Texture> normal = nullptr;
-        std::unique_ptr<Texture> ao = nullptr;
-        std::unique_ptr<Texture> roughness = nullptr;
-        std::unique_ptr<Texture> metallic = nullptr;
 
         void load_model()
         {
             Assimp::Importer importer;
             const aiScene *scene = importer.ReadFile(directory, aiProcess_Triangulate |
                                                                 aiProcess_FlipUVs | aiProcess_GenSmoothNormals |
-                                                                aiProcess_CalcTangentSpace);
+                                                                aiProcess_CalcTangentSpace |
+                                                                aiProcess_RemoveRedundantMaterials);
             if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
             {
                 LOG_ERROR("ASSIMP ERROR: %s", importer.GetErrorString());
                 return;
             }
             process_node(scene->mRootNode, scene);
+            for (size_t i = 0; i < scene->mNumMaterials; i++)
+            {
+                Material mat;
+                auto material = scene->mMaterials[i];
+                aiString mat_name;
+                material->Get(AI_MATKEY_NAME, mat_name);
+                LOG_INFO("Material name %s", mat_name.C_Str());
+
+                aiString diffuse_path;
+                if (material->GetTexture(aiTextureType_BASE_COLOR, 0, &diffuse_path) == aiReturn_SUCCESS)
+                {
+                    if (auto texture = scene->GetEmbeddedTexture(diffuse_path.C_Str()); texture != nullptr)
+                    {
+                        mat.albedo = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
+                                             texture->mHeight);
+                    }
+                }
+
+                aiString normalPath;
+                if (material->GetTexture(aiTextureType_NORMAL_CAMERA, 0, &normalPath) == aiReturn_SUCCESS || material->
+                    GetTexture(aiTextureType_NORMALS, 0, &normalPath) == aiReturn_SUCCESS)
+                {
+                    if (auto texture = scene->GetEmbeddedTexture(normalPath.C_Str()); texture != nullptr)
+                    {
+                        mat.normal = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
+                                         texture->mHeight);
+                    }
+                }
+
+                aiString ambient_path;
+                if (material->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &ambient_path) == aiReturn_SUCCESS ||
+                    material->GetTexture(aiTextureType_AMBIENT, 0, &ambient_path) == aiReturn_SUCCESS)
+                {
+                    if (auto texture = scene->GetEmbeddedTexture(ambient_path.C_Str()); texture != nullptr)
+                    {
+                        mat.ao = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
+                                                    texture->mHeight);
+                    }
+                }
+
+                aiString roughness_path;
+                if (material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &roughness_path) == aiReturn_SUCCESS)
+                {
+                    if (auto texture = scene->GetEmbeddedTexture(roughness_path.C_Str()); texture != nullptr)
+                    {
+                        mat.roughness = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
+                                            texture->mHeight);
+                    }
+                }
+
+                aiString metallic_path;
+                if (material->GetTexture(aiTextureType_METALNESS, 0, &metallic_path) == aiReturn_SUCCESS)
+                {
+                    if (auto texture = scene->GetEmbeddedTexture(metallic_path.C_Str()); texture != nullptr)
+                    {
+                        mat.metallic = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
+                                           texture->mHeight);
+                    }
+                }
+
+                aiString emission_path;
+                if (material->GetTexture(aiTextureType_EMISSION_COLOR, 0, &emission_path) == aiReturn_SUCCESS ||
+                    material->GetTexture(aiTextureType_EMISSIVE, 0, &emission_path) == aiReturn_SUCCESS)
+                {
+                    if (auto texture = scene->GetEmbeddedTexture(emission_path.C_Str()); texture != nullptr)
+                    {
+                        mat.emission = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
+                                           texture->mHeight);
+                    }
+                }
+
+                materials.push_back(mat);
+            }
         }
 
         void process_node(const aiNode *node, const aiScene *scene)
@@ -104,18 +174,19 @@ namespace goon
             }
 
             return Mesh(vertices.data(), static_cast<uint32_t>(vertices.size()), indices.data(),
-                        static_cast<uint32_t>(indices.size()));
+                        static_cast<uint32_t>(indices.size()), mesh->mMaterialIndex);
         }
     };
 
 
-    Model::Model(const char *path)
+    Model::Model(const char *path, bool flip_textures)
     {
         _impl = new Impl();
         _transform = new Transform();
         auto path_str = std::string(path);
         // path_str = path_str.substr(0, path_str.find_last_of('/'));
         _impl->directory = path_str;
+        stbi_set_flip_vertically_on_load(flip_textures);
         _impl->load_model();
     }
 
@@ -124,70 +195,19 @@ namespace goon
         delete _impl;
     }
 
-    Texture * Model::get_albedo() const
-    {
-        return _impl->albedo.get();
-    }
-
-    Texture * Model::get_normal() const
-    {
-        return _impl->normal.get();
-    }
-
-    Texture * Model::get_ao() const
-    {
-        return _impl->ao.get();
-    }
-
-    Texture * Model::get_roughness() const
-    {
-        return _impl->roughness.get();
-    }
-
-    Texture * Model::get_metallic() const
-    {
-        return _impl->metallic.get();
-    }
-
-    void Model::set_texture(const char *path, TextureType type)
-    {
-        switch (type)
-        {
-            case TextureType::ALBEDO:
-                _impl->albedo = std::make_unique<Texture>(path);
-                _impl->albedo->set_texture_type(TextureType::ALBEDO);
-                break;
-            case TextureType::NORMAL:
-                _impl->normal = std::make_unique<Texture>(path);
-                _impl->normal->set_texture_type(TextureType::NORMAL);
-                break;
-            case TextureType::AO:
-                _impl->ao = std::make_unique<Texture>(path);
-                break;
-            case TextureType::ROUGHNESS:
-                _impl->roughness = std::make_unique<Texture>(path);
-                break;
-            case TextureType::METALLIC:
-                _impl->metallic = std::make_unique<Texture>(path);
-                break;
-            default: break;
-        }
-    }
-
-    void Model::set_textures(const char *directory, const char *albedo, const char *normal, const char *ao,
-        const char *roughness, const char *metallic)
-    {
-        std::string path = std::string(directory);
-        set_texture(std::string(path + "/" + albedo).c_str(), TextureType::ALBEDO);
-        set_texture(std::string(path + "/" + normal).c_str(), TextureType::NORMAL);
-        set_texture(std::string(path + "/" + ao).c_str(), TextureType::AO);
-        set_texture(std::string(path + "/" + roughness).c_str(), TextureType::ROUGHNESS);
-        set_texture(std::string(path + "/" + metallic).c_str(), TextureType::METALLIC);
-    }
-
-    Transform * Model::get_transform() const
+    Transform *Model::get_transform() const
     {
         return _transform;
+    }
+
+    const char *Model::get_path() const
+    {
+        return _impl->directory.c_str();
+    }
+
+    Material *Model::get_materials() const
+    {
+        return _impl->materials.data();
     }
 
 
@@ -199,5 +219,17 @@ namespace goon
     uint64_t Model::get_num_meshes() const
     {
         return _impl->meshes.size();
+    }
+
+    void Model::draw() const
+    {
+        for (size_t i = 0; i < _impl->meshes.size(); i++)
+        {
+            _impl->meshes[i].draw();
+        }
+        for (auto &mesh: _impl->meshes)
+        {
+            mesh.draw();
+        }
     }
 }
