@@ -20,6 +20,7 @@ namespace goon
         model.get_transform()->set_translation(glm::vec3(0.0f, 0.0f, 10.0f));
         auto &model2 = add_model(RESOURCES_PATH "Lantern.glb", false);
         model2.get_transform()->set_translation(glm::vec3(0.0f, 0.0f, -10.0f));
+        auto &model3 = add_model(RESOURCES_PATH "sponza/sponza.glb", false);
     }
 
     void Scene::update(float delta_time)
