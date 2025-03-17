@@ -41,7 +41,7 @@ namespace goon
         return glm::perspective(fov,
                                 static_cast<float>(Engine::get_window()->get_width()) /
                                 static_cast<float>(Engine::get_window()->get_height()),
-                                0.1f, 500.0f);
+                                0.1f, 1000.0f);
     }
 
     void Camera::update(float dt)

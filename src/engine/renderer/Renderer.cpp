@@ -6,6 +6,8 @@
 
 #include <engine/Engine.h>
 #include <engine/Input.h>
+
+#include "FrameBuffer.h"
 #include "Material.h"
 #include "Light.h"
 #include "../Scene.h"
@@ -38,7 +40,6 @@ namespace goon
         void init()
         {
             glEnable(GL_DEPTH_TEST);
-            glDepthFunc(GL_LEQUAL);
             glEnable(GL_CULL_FACE);
             glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
             glCullFace(GL_BACK);
@@ -49,12 +50,6 @@ namespace goon
             lit_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/lit.vert",
                                                   RESOURCES_PATH "shaders/lit.frag");
             lit_shader->bind();
-            lit_shader->set_int("texture_albedo", ALBEDO_INDEX);
-            lit_shader->set_int("texture_normal", NORMAL_INDEX);
-            lit_shader->set_int("texture_roughness", ROUGHNESS_INDEX);
-            lit_shader->set_int("texture_metallic", METALLIC_INDEX);
-            lit_shader->set_int("texture_ao", AO_INDEX);
-            lit_shader->set_int("texture_emission", EMISSION_INDEX);
             lit_shader->set_int("irradiance_map", IRRADIANCE_INDEX);
             lit_shader->set_int("prefilter_map", PREFILTER_INDEX);
             lit_shader->set_int("brdf", BRDF_INDEX);
@@ -62,16 +57,16 @@ namespace goon
             skybox_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/skybox.vert",
                                                      RESOURCES_PATH "shaders/skybox.frag");
             skybox_shader->bind();
-            skybox_shader->set_int("environment_map", SKYBOX_INDEX);
+            skybox_shader->set_int("equirectangular_map", SKYBOX_INDEX);
         }
 
         void gen_environment_map(const std::string &path)
         {
-            auto hdr = HDRTexture(RESOURCES_PATH "newport_loft.hdr");
+            auto hdr = HDRTexture(std::string(RESOURCES_PATH + path).c_str());
 
             Shader environment(RESOURCES_PATH "shaders/environment.vert", RESOURCES_PATH "shaders/environment.frag");
 
-            uint32_t captureFBO, captureRBO;
+            GLuint captureFBO, captureRBO;
             glGenFramebuffers(1, &captureFBO);
             glGenRenderbuffers(1, &captureRBO);
 
@@ -80,10 +75,10 @@ namespace goon
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
-            uint32_t envCubemap;
+            GLuint envCubemap;
             glGenTextures(1, &envCubemap);
             glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
-            for (uint32_t i = 0; i < 6; i++)
+            for (GLuint i = 0; i < 6; i++)
             {
                 glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 512, 512, 0, GL_RGB, GL_FLOAT, nullptr);
             }
@@ -106,22 +101,22 @@ namespace goon
 
             environment.bind();
             environment.set_int("equirectangular_map", 0);
-            environment.set_mat4("projection", glm::value_ptr(captureProjection));
+            environment.set_mat4("projection", &captureProjection[0][0]);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, hdr.get_handle());
 
             glViewport(0, 0, 512, 512);
             glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-            for (uint32_t i = 0; i < 6; i++)
+            for (GLuint i = 0; i < 6; i++)
             {
-                environment.set_mat4("view", glm::value_ptr(captureViews[i]));
+                environment.set_mat4("view", &captureViews[i][0][0]);
                 glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                        GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, envCubemap, 0);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 render_cube();
             }
-            // glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
-            // glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+            glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             env_cubemap = Texture(envCubemap, 512, 512, 3);
         }
@@ -371,21 +366,36 @@ namespace goon
                     -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f // bottom-left
                 };
 
-                glGenVertexArrays(1, &cubeVAO);
-                glGenBuffers(1, &cubeVBO);
-                // fill buffer
-                glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-                glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-                // link vertex attributes
-                glBindVertexArray(cubeVAO);
-                glEnableVertexAttribArray(0);
-                glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
-                glEnableVertexAttribArray(1);
-                glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (3 * sizeof(float)));
-                glEnableVertexAttribArray(2);
-                glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
-                glBindBuffer(GL_ARRAY_BUFFER, 0);
-                glBindVertexArray(0);
+                // glGenVertexArrays(1, &cubeVAO);
+                // glGenBuffers(1, &cubeVBO);
+                // // fill buffer
+                // glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+                // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+                // // link vertex attributes
+                // glBindVertexArray(cubeVAO);
+                // glEnableVertexAttribArray(0);
+                // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
+                // glEnableVertexAttribArray(1);
+                // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (3 * sizeof(float)));
+                // glEnableVertexAttribArray(2);
+                // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
+                // glBindBuffer(GL_ARRAY_BUFFER, 0);
+                glCreateBuffers(1, &cubeVBO);
+                glNamedBufferStorage(cubeVBO, sizeof(vertices), vertices, GL_MAP_READ_BIT);
+                glCreateVertexArrays(1, &cubeVAO);
+                glVertexArrayVertexBuffer(cubeVAO, 0, cubeVBO, 0, 8 * sizeof(float));
+
+                glEnableVertexArrayAttrib(cubeVAO, 0);
+                glEnableVertexArrayAttrib(cubeVAO, 1);
+                glEnableVertexArrayAttrib(cubeVAO, 2);
+
+                glVertexArrayAttribFormat(cubeVAO, 0, 3, GL_FLOAT, GL_FALSE, 0);
+                glVertexArrayAttribFormat(cubeVAO, 1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float));
+                glVertexArrayAttribFormat(cubeVAO, 2, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float));
+
+                glVertexArrayAttribBinding(cubeVAO, 0, 0);
+                glVertexArrayAttribBinding(cubeVAO, 1, 0);
+                glVertexArrayAttribBinding(cubeVAO, 2, 0);
             }
 
             glBindVertexArray(cubeVAO);
@@ -456,18 +466,24 @@ namespace goon
             for (size_t i = 0; i < scene.get_model_count(); i++)
             {
                 auto model = scene.get_model_by_index(i);
+                if (!model->get_active())
+                {
+                    continue;
+                }
                 lit_shader->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
                 for (size_t j = 0; j < model->get_num_meshes(); j++)
                 {
                     Mesh mesh = model->get_meshes()[j];
                     Material mat = model->get_materials()[mesh.get_material_index()];
-                    mat.albedo.bind(ALBEDO_INDEX);
-                    mat.ao.bind(AO_INDEX);
-                    mat.metallic.bind(METALLIC_INDEX);
-                    mat.roughness.bind(ROUGHNESS_INDEX);
-                    mat.normal.bind(NORMAL_INDEX);
-                    mat.emission.bind(EMISSION_INDEX);
+                    mat.albedo.bind(0);
+                    mat.ao.bind(1);
+                    mat.metallic.bind(2);
+                    mat.roughness.bind(3);
+                    mat.normal.bind(4);
+                    mat.emission.bind(5);
                     mesh.draw();
+
+                    glBindTextureUnit(0, 0);
                     glBindTextureUnit(1, 0);
                     glBindTextureUnit(2, 0);
                     glBindTextureUnit(3, 0);
@@ -479,14 +495,15 @@ namespace goon
 
         void skybox_pass()
         {
+            glDisable(GL_CULL_FACE);
             glDepthFunc(GL_LEQUAL);
             skybox_shader->bind();
-            skybox_shader->set_mat4("projection", glm::value_ptr(Engine::get_camera()->get_projection_matrix()));
-            skybox_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, env_cubemap.get_handle());
+            skybox_shader->set_mat4("projection", &Engine::get_camera()->get_projection_matrix()[0][0]);
+            skybox_shader->set_mat4("view", &Engine::get_camera()->get_view_matrix()[0][0]);
+            env_cubemap.bind(0);
             render_cube();
             glDepthFunc(GL_LESS);
+            glEnable(GL_CULL_FACE);
         }
     };
 
@@ -550,10 +567,12 @@ namespace goon
         _impl = new Impl();
         _impl->init();
         _impl->init_lit_shader();
-        _impl->gen_environment_map("newport_loft.hdr");
+        glDisable(GL_CULL_FACE);
+        _impl->gen_environment_map("golden_gate_hills_4k.hdr");
         _impl->gen_irradiance_map();
         _impl->gen_prefilter_map();
         _impl->gen_brdf_map();
+        glEnable(GL_CULL_FACE);
         _impl->add_light(Light(glm::vec3(-10.0f, 10.0f, 10.0f), glm::vec3(-2.0f, -1.0f, -0.3f),
                                glm::vec3(300.0f, 300.0f, 300.0f), 6.0f, 1.0f,
                                LightType::Directional));

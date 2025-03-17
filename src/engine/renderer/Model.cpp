@@ -232,15 +232,14 @@ namespace goon
         return _impl->meshes.size();
     }
 
-    void Model::draw() const
+
+    void Model::set_active(bool active)
     {
-        for (size_t i = 0; i < _impl->meshes.size(); i++)
-        {
-            _impl->meshes[i].draw();
-        }
-        for (auto &mesh: _impl->meshes)
-        {
-            mesh.draw();
-        }
+        _active = active;
+    }
+
+    bool Model::get_active() const
+    {
+        return _active;
     }
 }

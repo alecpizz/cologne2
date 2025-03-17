@@ -34,9 +34,12 @@ namespace goon
 
         uint64_t get_num_meshes() const;
 
-        void draw() const;
+        void set_active(bool active);
+
+        bool get_active() const;
 
     private:
+        bool _active = true;
         Transform *_transform = nullptr;
         struct Impl;
         Impl *_impl;

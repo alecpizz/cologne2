@@ -25,16 +25,17 @@ struct Light
 uniform vec3 camera_pos;
 uniform Light lights[MAX_LIGHTS];
 uniform int num_lights = 0;
-uniform sampler2D texture_albedo;
-uniform sampler2D texture_normal;
-uniform sampler2D texture_roughness;
-uniform sampler2D texture_metallic;
-uniform sampler2D texture_ao;
-uniform sampler2D texture_emission;
 
-uniform samplerCube irradiance_map;
-uniform samplerCube prefilter_map;
-uniform sampler2D brdf;
+layout (binding = 0) uniform sampler2D texture_albedo;
+layout (binding = 1) uniform sampler2D texture_ao;
+layout (binding = 2) uniform sampler2D texture_metallic;
+layout (binding = 3) uniform sampler2D texture_roughness;
+layout (binding = 4) uniform sampler2D texture_normal;
+layout (binding = 5) uniform sampler2D texture_emission;
+
+layout (binding = 6) uniform samplerCube irradiance_map;
+layout (binding = 7) uniform samplerCube prefilter_map;
+layout (binding = 8) uniform sampler2D brdf;
 
 
 uniform float ao_strength = 0.2;
@@ -50,7 +51,7 @@ float klemenVisibility(vec3 L, vec3 H);
 void main()
 {
     vec4 albedo_texture = texture2D(texture_albedo, TexCoords).rgba;
-    if(albedo_texture.a < 0.5)
+    if (albedo_texture.a < 0.5)
     {
         discard;
     }
@@ -59,7 +60,7 @@ void main()
     float metallic = texture2D(texture_metallic, TexCoords).r;
     float roughness = texture2D(texture_roughness, TexCoords).r;
     float ao = 0.0;
-    if(has_ao_texture == 1)
+    if (has_ao_texture == 1)
     {
         ao = texture2D(texture_ao, TexCoords).r;
     }
@@ -80,14 +81,14 @@ void main()
 
     vec3 Lo = vec3(0.0);
 
-    for(int i = 0; i < num_lights; i++)
+    for (int i = 0; i < num_lights; i++)
     {
         vec3 L = vec3(0.0);
-        if(lights[i].type == DIRECTIONAL)
+        if (lights[i].type == DIRECTIONAL)
         {
             L = normalize(-lights[i].direction);
         }
-        else if(lights[i].type == POINT)
+        else if (lights[i].type == POINT)
         {
             L = normalize(lights[i].position - WorldPos);
         }
@@ -131,7 +132,7 @@ void main()
     vec3 color = ambient + Lo + emission;
 
     color = color / (color + vec3(1.0));
-    color = pow(color, vec3(1.0/2.2));
+    color = pow(color, vec3(1.0 / 2.2));
 
     FragColor = vec4(color, 1.0);
 }

@@ -31,7 +31,6 @@ namespace goon
             _channels = channels;
         }
         stbi_image_free(data);
-        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     HDRTexture::HDRTexture(unsigned char *data, uint32_t width, uint32_t height)

@@ -82,6 +82,12 @@ namespace goon
             {
                 model->get_transform()->set_scale(scale);
             }
+
+            bool active = model->get_active();
+            if (ImGui::Checkbox("Active", &active))
+            {
+                model->set_active(active);
+            }
             ImGui::PopID();
         }
 
