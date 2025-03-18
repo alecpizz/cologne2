@@ -19,23 +19,27 @@ namespace goon
 #define ALBEDO_INDEX 0
 #define AO_INDEX 1
 #define METALLIC_INDEX 2
-#define NORMAL_INDEX 3
-#define ROUGHNESS_INDEX 4
+#define ROUGHNESS_INDEX 3
+#define NORMAL_INDEX 4
 #define EMISSION_INDEX 5
 #define IRRADIANCE_INDEX 6
 #define PREFILTER_INDEX 7
 #define BRDF_INDEX 8
-#define SKYBOX_INDEX 0
+#define SHADOW_INDEX 9
 
     struct Renderer::Impl
     {
         std::unique_ptr<Shader> lit_shader = nullptr;
         std::unique_ptr<Shader> skybox_shader = nullptr;
+        std::unique_ptr<Shader> shadowmap_shader = nullptr;
+        std::unique_ptr<Shader> fbo_debug_shader = nullptr;
         std::vector<Light> lights;
         Texture env_cubemap;
         Texture env_irradiance;
         Texture env_prefilter;
         Texture env_brdf;
+        Texture shadow_map;
+        uint32_t shadow_fbo = 0;
 
         void init()
         {
@@ -45,7 +49,7 @@ namespace goon
             glCullFace(GL_BACK);
         }
 
-        void init_lit_shader()
+        void init_shaders()
         {
             lit_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/lit.vert",
                                                   RESOURCES_PATH "shaders/lit.frag");
@@ -56,8 +60,38 @@ namespace goon
 
             skybox_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/skybox.vert",
                                                      RESOURCES_PATH "shaders/skybox.frag");
-            skybox_shader->bind();
-            skybox_shader->set_int("equirectangular_map", SKYBOX_INDEX);
+            shadowmap_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/shadowmap.vert",
+                                                        RESOURCES_PATH "shaders/shadowmap.frag");
+            fbo_debug_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/framebufferoutput.vert",
+                                                        RESOURCES_PATH "shaders/framebufferoutput.frag");
+        }
+
+        void init_shadow_map()
+        {
+            //shadow map framebuffer
+            glGenFramebuffers(1, &shadow_fbo);
+            uint32_t width = 2048, height = 2048;
+            uint32_t shadow_map = 0;
+
+            //shadow map texture
+            glGenTextures(1, &shadow_map);
+            glBindTexture(GL_TEXTURE_2D, shadow_map);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+                         width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            float clamp_color[] = {1.0f, 1.0f, 1.0f, 1.0f};
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, clamp_color);
+
+            //remove shadow map color attachment
+            glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadow_map, 0);
+            glDrawBuffer(GL_NONE);
+            glReadBuffer(GL_NONE);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            this->shadow_map = Texture(shadow_map, width, height, 1);
         }
 
         void gen_environment_map(const std::string &path)
@@ -66,7 +100,7 @@ namespace goon
 
             Shader environment(RESOURCES_PATH "shaders/environment.vert", RESOURCES_PATH "shaders/environment.frag");
 
-            GLuint captureFBO, captureRBO;
+            uint32_t captureFBO, captureRBO;
             glGenFramebuffers(1, &captureFBO);
             glGenRenderbuffers(1, &captureRBO);
 
@@ -75,10 +109,10 @@ namespace goon
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
-            GLuint envCubemap;
+            uint32_t envCubemap;
             glGenTextures(1, &envCubemap);
             glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
-            for (GLuint i = 0; i < 6; i++)
+            for (uint32_t i = 0; i < 6; i++)
             {
                 glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 512, 512, 0, GL_RGB, GL_FLOAT, nullptr);
             }
@@ -107,7 +141,7 @@ namespace goon
 
             glViewport(0, 0, 512, 512);
             glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-            for (GLuint i = 0; i < 6; i++)
+            for (uint32_t i = 0; i < 6; i++)
             {
                 environment.set_mat4("view", &captureViews[i][0][0]);
                 glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
@@ -119,17 +153,27 @@ namespace goon
             glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             env_cubemap = Texture(envCubemap, 512, 512, 3);
+            glDeleteFramebuffers(1, &captureFBO);
+            glDeleteRenderbuffers(1, &captureRBO);
         }
 
         void gen_irradiance_map()
         {
-            uint32_t irradiance_handle = 0;
-            glGenTextures(1, &irradiance_handle);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, irradiance_handle);
-            for (uint32_t i = 0; i < 6; ++i)
+            uint32_t captureFBO, captureRBO;
+            glGenFramebuffers(1, &captureFBO);
+            glGenRenderbuffers(1, &captureRBO);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+            glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
+
+            uint32_t irradianceMap;
+            glGenTextures(1, &irradianceMap);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
+            for (uint32_t i = 0; i < 6; i++)
             {
-                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0,
-                             GL_RGB16F, 32, 32, 0,
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 32, 32, 0,
                              GL_RGB, GL_FLOAT, nullptr);
             }
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -138,16 +182,9 @@ namespace goon
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-            uint32_t captureFBO = 0;
-            uint32_t captureRBO = 0;
-            glCreateFramebuffers(1, &captureFBO);
-            glCreateRenderbuffers(1, &captureRBO);
             glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
             glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                      GL_RENDERBUFFER, captureRBO);
-
 
             glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
             glm::mat4 captureViews[] =
@@ -160,33 +197,38 @@ namespace goon
                 glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f))
             };
 
-            Shader irradiance_shader(RESOURCES_PATH "shaders/environment.vert",
-                                     RESOURCES_PATH "shaders/irradiance.frag");
-            irradiance_shader.bind();
-            irradiance_shader.set_int("environment_map", 0);
-            irradiance_shader.set_mat4("projection", glm::value_ptr(captureProjection));
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, env_cubemap.get_handle());
+            Shader irradianceShader(RESOURCES_PATH "shaders/environment.vert",
+                                    RESOURCES_PATH "shaders/irradiance.frag");
+            irradianceShader.bind();
+            irradianceShader.set_mat4("projection", &captureProjection[0][0]);
+            env_cubemap.bind(0);
             glViewport(0, 0, 32, 32);
             glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-            glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-            for (uint32_t i = 0; i < 6; ++i)
+
+            for (uint32_t i = 0; i < 6; i++)
             {
-                irradiance_shader.set_mat4("view", glm::value_ptr(captureViews[i]));
+                irradianceShader.set_mat4("view", &captureViews[i][0][0]);
                 glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                       GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradiance_handle, 0);
+                                       GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradianceMap, 0);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 render_cube();
             }
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            env_irradiance = Texture(irradiance_handle, 32, 32, 3);
-            glDeleteFramebuffers(1, &captureFBO);
-            glDeleteRenderbuffers(1, &captureRBO);
+            env_irradiance = Texture(irradianceMap, 512, 512, 3);
         }
 
         void gen_prefilter_map()
         {
+            uint32_t captureFBO, captureRBO;
+            glGenFramebuffers(1, &captureFBO);
+            glGenRenderbuffers(1, &captureRBO);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+            glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
+
             uint32_t prefilterMap;
             glGenTextures(1, &prefilterMap);
             glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
@@ -201,6 +243,7 @@ namespace goon
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
+            Shader prefilter(RESOURCES_PATH "shaders/environment.vert", RESOURCES_PATH "shaders/prefilter.frag");
             glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
             glm::mat4 captureViews[] =
             {
@@ -211,25 +254,11 @@ namespace goon
                 glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
                 glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f))
             };
-
-            Shader prefilter(RESOURCES_PATH "shaders/environment.vert", RESOURCES_PATH "shaders/prefilter.frag");
             prefilter.bind();
-            prefilter.set_int("environment_map", 0);
-            prefilter.set_mat4("projection", glm::value_ptr(captureProjection));
-
-
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, env_cubemap.get_handle());
+            prefilter.set_int("environmentMap", 0);
+            prefilter.set_mat4("projection", &captureProjection[0][0]);
+            env_cubemap.bind(0);
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-            GLuint captureFBO, captureRBO;
-            glGenFramebuffers(1, &captureFBO);
-            glGenRenderbuffers(1, &captureRBO);
-
-            glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-            glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
             glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
             uint32_t maxMipLevels = 5;
@@ -247,17 +276,17 @@ namespace goon
 
                 for (uint32_t i = 0; i < 6; i++)
                 {
-                    prefilter.set_mat4("view", glm::value_ptr(captureViews[i]));
+                    prefilter.set_mat4("view", &captureViews[i][0][0]);
                     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                            GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilterMap, mip);
                     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                     render_cube();
                 }
             }
-            env_prefilter = Texture(prefilterMap, 128, 128, 3);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            glDeleteRenderbuffers(1, &captureRBO);
+            env_prefilter = Texture(prefilterMap, 128, 128, 3);
             glDeleteFramebuffers(1, &captureFBO);
+            glDeleteRenderbuffers(1, &captureRBO);
         }
 
         void gen_brdf_map()
@@ -316,8 +345,8 @@ namespace goon
 
         void render_cube()
         {
-            static GLuint cubeVAO = 0;
-            static GLuint cubeVBO = 0;
+            static uint32_t cubeVAO = 0;
+            static uint32_t cubeVBO = 0;
 
             if (cubeVAO == 0)
             {
@@ -366,20 +395,6 @@ namespace goon
                     -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f // bottom-left
                 };
 
-                // glGenVertexArrays(1, &cubeVAO);
-                // glGenBuffers(1, &cubeVBO);
-                // // fill buffer
-                // glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-                // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-                // // link vertex attributes
-                // glBindVertexArray(cubeVAO);
-                // glEnableVertexAttribArray(0);
-                // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
-                // glEnableVertexAttribArray(1);
-                // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (3 * sizeof(float)));
-                // glEnableVertexAttribArray(2);
-                // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
-                // glBindBuffer(GL_ARRAY_BUFFER, 0);
                 glCreateBuffers(1, &cubeVBO);
                 glNamedBufferStorage(cubeVBO, sizeof(vertices), vertices, GL_MAP_READ_BIT);
                 glCreateVertexArrays(1, &cubeVAO);
@@ -463,6 +478,7 @@ namespace goon
             env_irradiance.bind(IRRADIANCE_INDEX);
             env_prefilter.bind(PREFILTER_INDEX);
             env_brdf.bind(BRDF_INDEX);
+            shadow_map.bind(SHADOW_INDEX);
             for (size_t i = 0; i < scene.get_model_count(); i++)
             {
                 auto model = scene.get_model_by_index(i);
@@ -475,22 +491,70 @@ namespace goon
                 {
                     Mesh mesh = model->get_meshes()[j];
                     Material mat = model->get_materials()[mesh.get_material_index()];
-                    mat.albedo.bind(0);
-                    mat.ao.bind(1);
-                    mat.metallic.bind(2);
-                    mat.roughness.bind(3);
-                    mat.normal.bind(4);
-                    mat.emission.bind(5);
+                    mat.albedo.bind(ALBEDO_INDEX);
+                    mat.ao.bind(AO_INDEX);
+                    mat.metallic.bind(METALLIC_INDEX);
+                    mat.roughness.bind(ROUGHNESS_INDEX);
+                    mat.normal.bind(NORMAL_INDEX);
+                    mat.emission.bind(EMISSION_INDEX);
                     mesh.draw();
 
-                    glBindTextureUnit(0, 0);
-                    glBindTextureUnit(1, 0);
-                    glBindTextureUnit(2, 0);
-                    glBindTextureUnit(3, 0);
-                    glBindTextureUnit(4, 0);
-                    glBindTextureUnit(5, 0);
+                    glBindTextureUnit(ALBEDO_INDEX, 0);
+                    glBindTextureUnit(AO_INDEX, 0);
+                    glBindTextureUnit(METALLIC_INDEX, 0);
+                    glBindTextureUnit(ROUGHNESS_INDEX, 0);
+                    glBindTextureUnit(NORMAL_INDEX, 0);
+                    glBindTextureUnit(EMISSION_INDEX, 0);
                 }
             }
+        }
+
+        void shadow_pass(Scene &scene)
+        {
+            glDisable(GL_CULL_FACE);
+            Light dir_light;
+            for (auto &light: lights)
+            {
+                if (light.type == LightType::Directional)
+                {
+                    dir_light = light;
+                    break;
+                }
+            }
+
+            glm::mat4 orthogonal = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, 0.1f, 75.0f);
+            glm::mat4 lightView = glm::lookAt(dir_light.position * 20.0f, glm::vec3(0.0f),
+                                              glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::mat4 lightVP = orthogonal * lightView;
+
+            shadowmap_shader->bind();
+            shadowmap_shader->set_mat4("light_projection", &lightVP[0][0]);
+
+
+            glViewport(0, 0, shadow_map.get_width(), shadow_map.get_height());
+            glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
+            glClear(GL_DEPTH_BUFFER_BIT);
+
+            for (size_t i = 0; i < scene.get_model_count(); i++)
+            {
+                auto model = scene.get_model_by_index(i);
+                if (!model->get_active())
+                {
+                    continue;
+                }
+                for (size_t j = 0; j < model->get_num_meshes(); j++)
+                {
+                    shadowmap_shader->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
+                    Mesh mesh = model->get_meshes()[j];
+                    mesh.draw();
+                }
+            }
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
+            glEnable(GL_CULL_FACE);
+            lit_shader->bind();
+            lit_shader->set_mat4("lightVP", &lightVP[0][0]);
         }
 
         void skybox_pass()
@@ -529,15 +593,19 @@ namespace goon
             //hot reload shaders
             reload_shaders();
         }
-
+        _impl->shadow_pass(scene);
         _impl->lit_pass(scene);
         _impl->skybox_pass();
+
+        _impl->shadowmap_shader->bind();
+        _impl->shadow_map.bind(0);
+        _impl->render_quad();
     }
 
     void Renderer::reload_shaders()
     {
         _impl->lit_shader.release();
-        _impl->init_lit_shader();
+        _impl->init_shaders();
         _impl->bind_lights(*_impl->lit_shader);
         LOG_INFO("RELOADED SHADERS");
     }
@@ -555,9 +623,10 @@ namespace goon
         return _impl->lights[0];
     }
 
-    void Renderer::set_directional_light(glm::vec3 direction)
+    void Renderer::set_directional_light(glm::vec3 position, glm::vec3 direction)
     {
         auto &directional_light = get_directional_light();
+        directional_light.position = position;
         directional_light.direction = direction;
         reload_shaders();
     }
@@ -566,9 +635,9 @@ namespace goon
     {
         _impl = new Impl();
         _impl->init();
-        _impl->init_lit_shader();
+        _impl->init_shaders();
         glDisable(GL_CULL_FACE);
-        _impl->gen_environment_map("golden_gate_hills_4k.hdr");
+        _impl->gen_environment_map("newport_loft.hdr");
         _impl->gen_irradiance_map();
         _impl->gen_prefilter_map();
         _impl->gen_brdf_map();
@@ -585,5 +654,6 @@ namespace goon
         _impl->add_light(Light(glm::vec3(10.0f, -10.0f, 10.0f), glm::vec3(0.0f),
                                glm::vec3(300.0f, 300.0f, 300.0f), 6.0f, 1.0f,
                                LightType::Point));
+        _impl->init_shadow_map();
     }
 }

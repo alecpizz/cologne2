@@ -5,7 +5,7 @@ in vec2 TexCoords;
 in vec3 FragPos;
 in vec3 WorldPos;
 in mat3 TBN;
-
+in vec4 FragPosLight;
 
 struct Light
 {
@@ -36,6 +36,8 @@ layout (binding = 5) uniform sampler2D texture_emission;
 layout (binding = 6) uniform samplerCube irradiance_map;
 layout (binding = 7) uniform samplerCube prefilter_map;
 layout (binding = 8) uniform sampler2D brdf;
+
+layout (binding = 9) uniform sampler2D shadow_map;
 
 
 uniform float ao_strength = 0.2;
@@ -126,8 +128,20 @@ void main()
     vec2 brdf = texture(brdf, vec2(max(dot(N, V), 0.0), roughness)).rg;
     vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 
+    float shadow = 0.0f;
+    vec3 lightCoords = FragPosLight.xyz / FragPosLight.w;
+    if (lightCoords.z <= 1.0f)
+    {
+        lightCoords = (lightCoords + 1.0f) * 0.5f;
 
-    vec3 ambient = (kD * diffuse + specular) * ao;
+        float closestDepth = texture(shadow_map, lightCoords.xy).r;
+        float currentDepth = lightCoords.z;
+
+        if (currentDepth > closestDepth)
+        shadow = 1.0f;
+    }
+
+    vec3 ambient = (kD * (diffuse * (1.0f - shadow)) + (specular * (1.0f - shadow))) * ao;
     vec3 emission = texture2D(texture_emission, TexCoords).rgb;
     vec3 color = ambient + Lo + emission;
 

@@ -24,7 +24,7 @@ namespace goon
         void render_scene(Scene &scene);
         void reload_shaders();
         Light& get_directional_light() const;
-        void set_directional_light(glm::vec3 direction);
+        void set_directional_light(glm::vec3 position, glm::vec3 direction);
 
     private:
         Renderer();

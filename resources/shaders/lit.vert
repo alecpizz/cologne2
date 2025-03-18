@@ -7,10 +7,12 @@ layout (location = 3) in vec3 tangent;
 out vec2 TexCoords;
 out vec3 WorldPos;
 out mat3 TBN;
+out vec4 FragPosLight;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 lightVP;
 
 void main()
 {
@@ -23,4 +25,6 @@ void main()
     vec3 N = normalize(normalMatrix * normal);
     vec3 B = cross(N, T);
     TBN = mat3(T, B, N);
+
+    FragPosLight = lightVP * vec4(WorldPos, 1.0f);
 }

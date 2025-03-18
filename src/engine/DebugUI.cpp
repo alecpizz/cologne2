@@ -97,9 +97,14 @@ namespace goon
         }
 
         glm::vec3 dir_light = Engine::get_renderer()->get_directional_light().direction;
-        if (ImGui::InputFloat3("Directional light", glm::value_ptr(dir_light)))
+        glm::vec3 dir_light_pos = Engine::get_renderer()->get_directional_light().position;;
+        if (ImGui::InputFloat3("Directional light direction", glm::value_ptr(dir_light)))
         {
-            Engine::get_renderer()->set_directional_light(dir_light);
+            Engine::get_renderer()->set_directional_light(dir_light_pos, dir_light);
+        }
+        if (ImGui::InputFloat3("Directional light position", glm::value_ptr(dir_light_pos)))
+        {
+            Engine::get_renderer()->set_directional_light(dir_light_pos, dir_light);
         }
 
         ImGui::End();

@@ -2,7 +2,7 @@
 out vec4 FragColor;
 in vec3 LocalPosition;
 
-uniform samplerCube environment_map;
+layout (binding = 0) uniform samplerCube environment_map;
 uniform float roughness;
 
 float radical_inverse_vdc(uint bits);
