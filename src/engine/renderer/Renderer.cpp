@@ -511,7 +511,7 @@ namespace goon
 
         void shadow_pass(Scene &scene)
         {
-            glDisable(GL_CULL_FACE);
+            glCullFace(GL_FRONT);
             Light dir_light;
             for (auto &light: lights)
             {
@@ -528,7 +528,7 @@ namespace goon
             glm::vec3 light_dir = glm::normalize(dir_light.direction);
             glm::vec3 up_world = glm::vec3(0.0f, 1.0f, 0.0f);
 
-            glm::vec3 target_position = light_pos + (10.0f * light_dir);
+            glm::vec3 target_position = light_pos + (50.0f * light_dir);
 
             glm::vec3 light_right = glm::normalize(glm::cross(light_dir, up_world));
             glm::vec3 light_up = glm::normalize(glm::cross(light_right, light_dir));
@@ -561,7 +561,7 @@ namespace goon
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
-            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
             lit_shader->bind();
             lit_shader->set_mat4("lightVP", &lightVP[0][0]);
         }
