@@ -6,6 +6,6 @@ layout (binding = 0) uniform sampler2D fbo;
 
 void main()
 {
-    vec3 color =  texture(fbo, TexCoords).rgb;
-    FragColor = vec4(color.r, color.r, color.r, 1.0);
+    float depth = texture2D(fbo, TexCoords).r;
+    FragColor = vec4(vec3(depth), 1.0);
 }

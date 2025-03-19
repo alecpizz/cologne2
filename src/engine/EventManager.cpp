@@ -3,6 +3,8 @@
 //
 
 #include "EventManager.h"
+
+#include "Engine.h"
 #include "gpch.h"
 #include "Input.h"
 
@@ -48,8 +50,21 @@ namespace goon
         return _impl->should_quit;
     }
 
+    bool event_watch(void *data, SDL_Event *event)
+    {
+        if (event->type == SDL_EVENT_WINDOW_RESIZED)
+        {
+            Engine::get_window()->resize();
+            Engine::get_window()->clear();
+            Engine::get_renderer()->render_scene(*Engine::get_scene());
+            Engine::get_window()->present();
+        }
+        return true;
+    }
+
     EventManager::EventManager()
     {
         _impl = new Impl;
+        SDL_AddEventWatch(event_watch, nullptr);
     }
 }

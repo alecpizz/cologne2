@@ -106,6 +106,15 @@ namespace goon
         {
             Engine::get_renderer()->set_directional_light(dir_light_pos, dir_light);
         }
+        glm::vec3 cam_pos = Engine::get_camera()->get_position();
+        glm::vec3 cam_fwd = Engine::get_camera()->get_forward();
+        if (ImGui::Button("Align dir light to camera"))
+        {
+            Engine::get_renderer()->set_directional_light(cam_pos, cam_fwd);
+        }
+
+        ImGui::InputFloat3("Camera Position", glm::value_ptr(cam_pos));
+        ImGui::InputFloat3("Camera Forward", glm::value_ptr(cam_fwd));
 
         ImGui::End();
         ImGui::Render();

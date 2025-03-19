@@ -522,10 +522,19 @@ namespace goon
                 }
             }
 
-            glm::mat4 orthogonal = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, 0.1f, 75.0f);
-            glm::mat4 lightView = glm::lookAt(dir_light.position * 20.0f, glm::vec3(0.0f),
-                                              glm::vec3(0.0f, 1.0f, 0.0f));
-            glm::mat4 lightVP = orthogonal * lightView;
+            glm::mat4 orthogonal = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, 0.1f, 1000.0f);
+
+            glm::vec3 light_pos = dir_light.position;
+            glm::vec3 light_dir = glm::normalize(dir_light.direction);
+            glm::vec3 up_world = glm::vec3(0.0f, 1.0f, 0.0f);
+
+            glm::vec3 target_position = light_pos + (10.0f * light_dir);
+
+            glm::vec3 light_right = glm::normalize(glm::cross(light_dir, up_world));
+            glm::vec3 light_up = glm::normalize(glm::cross(light_right, light_dir));
+            glm::mat4 light_view = glm::lookAt(light_pos, target_position, light_up);
+
+            glm::mat4 lightVP = orthogonal * light_view;
 
             shadowmap_shader->bind();
             shadowmap_shader->set_mat4("light_projection", &lightVP[0][0]);
@@ -542,9 +551,9 @@ namespace goon
                 {
                     continue;
                 }
+                shadowmap_shader->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
                 for (size_t j = 0; j < model->get_num_meshes(); j++)
                 {
-                    shadowmap_shader->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
                     Mesh mesh = model->get_meshes()[j];
                     mesh.draw();
                 }
@@ -597,7 +606,8 @@ namespace goon
         _impl->lit_pass(scene);
         _impl->skybox_pass();
 
-        _impl->shadowmap_shader->bind();
+        glViewport(20, 20, 250, 250);
+        _impl->fbo_debug_shader->bind();
         _impl->shadow_map.bind(0);
         _impl->render_quad();
     }

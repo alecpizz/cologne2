@@ -98,8 +98,6 @@ namespace goon
         ElapsedTime et;
         while (!_impl->event_manager->should_quit())
         {
-            _impl->window->resize();
-
             Input::update();
 
             _impl->event_manager->poll_events();

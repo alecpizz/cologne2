@@ -82,6 +82,7 @@ void main()
     F0 = mix(F0, albedo, metallic);
 
     vec3 Lo = vec3(0.0);
+    vec3 lightDirection = vec3(0.0);
 
     for (int i = 0; i < num_lights; i++)
     {
@@ -89,6 +90,7 @@ void main()
         if (lights[i].type == DIRECTIONAL)
         {
             L = normalize(-lights[i].direction);
+            lightDirection = L;
         }
         else if (lights[i].type == POINT)
         {
@@ -134,11 +136,23 @@ void main()
     {
         lightCoords = (lightCoords + 1.0f) * 0.5f;
 
-        float closestDepth = texture(shadow_map, lightCoords.xy).r;
         float currentDepth = lightCoords.z;
+        float bias = max(0.025f * (1.0f - dot(N, lightDirection)), 0.0005f);
 
-        if (currentDepth > closestDepth)
-        shadow = 1.0f;
+        int sampleRadius = 2;
+        vec2 pixelSize = 1.0 / textureSize(shadow_map, 0);
+        for(int y = -sampleRadius; y <= sampleRadius; y++)
+        {
+            for(int x = -sampleRadius; x <= sampleRadius; x++)
+            {
+                float closestDepth = texture(shadow_map, lightCoords.xy).r;
+                if(currentDepth > closestDepth + bias)
+                {
+                    shadow += 1.0f;
+                }
+            }
+        }
+        shadow /= pow((sampleRadius * 2 + 1), 2);
     }
 
     vec3 ambient = (kD * (diffuse * (1.0f - shadow)) + (specular * (1.0f - shadow))) * ao;
