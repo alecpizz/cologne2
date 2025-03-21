@@ -17,11 +17,12 @@ namespace goon
     {
         _impl = new Impl();
         auto &model = add_model(RESOURCES_PATH "backpack/backpack.glb", true);
-        model.get_transform()->set_translation(glm::vec3(0.0f, 0.0f, 10.0f));
+        model.get_transform()->set_translation(glm::vec3(0.0f, 2.0f, 10.0f));
         auto &model2 = add_model(RESOURCES_PATH "Lantern.glb", false);
-        model2.get_transform()->set_translation(glm::vec3(0.0f, 0.0f, -10.0f));
-        auto &model3 = add_model(RESOURCES_PATH "sponza/sponza.glb", false);
-        model3.get_transform()->set_scale(glm::vec3(0.1f));
+        model2.get_transform()->set_translation(glm::vec3(0.0f, 10.0f, -10.0f));
+        auto &model3 = add_model(RESOURCES_PATH "sponza/sponza2.glb", false);
+        model3.get_transform()->set_scale(glm::vec3(.1f));
+        model3.get_transform()->set_rotation(glm::rotate(glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
     }
 
     void Scene::update(float delta_time)

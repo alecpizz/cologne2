@@ -59,8 +59,8 @@ void main()
     }
     vec3 albedo = pow(albedo_texture.rgb, vec3(2.2));
 
-    float metallic = texture2D(texture_metallic, TexCoords).r;
-    float roughness = texture2D(texture_roughness, TexCoords).r;
+    float metallic = texture2D(texture_metallic, TexCoords).b;
+    float roughness = texture2D(texture_roughness, TexCoords).g;
     float ao = 0.0;
     if (has_ao_texture == 1)
     {
@@ -132,21 +132,21 @@ void main()
 
     float shadow = 0.0f;
     vec3 lightCoords = FragPosLight.xyz / FragPosLight.w;
+    float bias = max(0.025f * (1.0f - dot(N, lightDirection)), 0.0005f);
     if (lightCoords.z <= 1.0f)
     {
         lightCoords = (lightCoords + 1.0f) * 0.5f;
 
         float currentDepth = lightCoords.z;
-        float bias = max(0.025f * (1.0f - dot(N, lightDirection)), 0.0005f);
 
         int sampleRadius = 2;
         vec2 pixelSize = 1.0 / textureSize(shadow_map, 0);
-        for(int y = -sampleRadius; y <= sampleRadius; y++)
+        for (int y = -sampleRadius; y <= sampleRadius; y++)
         {
-            for(int x = -sampleRadius; x <= sampleRadius; x++)
+            for (int x = -sampleRadius; x <= sampleRadius; x++)
             {
                 float closestDepth = texture(shadow_map, lightCoords.xy).r;
-                if(currentDepth > closestDepth + bias)
+                if (currentDepth > closestDepth + bias)
                 {
                     shadow += 1.0f;
                 }

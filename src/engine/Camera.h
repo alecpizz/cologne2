@@ -21,9 +21,13 @@ namespace goon
 
         glm::vec3 get_up() const;
 
+        glm::vec3 get_right() const;
+
         glm::mat4 get_view_matrix() const;
 
         glm::mat4 get_projection_matrix() const;
+
+        float get_fov() const;
 
         void update(float dt);
 

@@ -31,6 +31,11 @@ namespace goon
         return _up;
     }
 
+    glm::vec3 Camera::get_right() const
+    {
+        return glm::normalize(glm::cross(_forward, _up));
+    }
+
     glm::mat4 Camera::get_view_matrix() const
     {
         return glm::lookAt(_position, _position + _forward, _up);
@@ -41,7 +46,12 @@ namespace goon
         return glm::perspective(fov,
                                 static_cast<float>(Engine::get_window()->get_width()) /
                                 static_cast<float>(Engine::get_window()->get_height()),
-                                0.1f, 1000.0f);
+                                0.1f, 300.0f);
+    }
+
+    float Camera::get_fov() const
+    {
+        return fov;
     }
 
     void Camera::update(float dt)
