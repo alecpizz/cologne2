@@ -5,7 +5,6 @@ in vec2 TexCoords;
 in vec3 FragPos;
 in vec3 WorldPos;
 in mat3 TBN;
-in vec4 FragPosLight;
 
 struct Light
 {
@@ -37,7 +36,7 @@ layout (binding = 6) uniform samplerCube irradiance_map;
 layout (binding = 7) uniform samplerCube prefilter_map;
 layout (binding = 8) uniform sampler2D brdf;
 
-layout (binding = 9) uniform sampler2D shadow_map;
+layout (binding = 9) uniform samplerCube shadow_map;
 
 
 uniform float ao_strength = 0.2;
@@ -49,6 +48,15 @@ float distributionGGX(vec3 N, vec3 H, float roughness);
 float geometrySchlickGGX(float NdotV, float roughness);
 float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
 float klemenVisibility(vec3 L, vec3 H);
+
+vec3 sampleOffsetDirections[20] = vec3[]
+(
+vec3(1, 1, 1), vec3(1, -1, 1), vec3(-1, -1, 1), vec3(-1, 1, 1),
+vec3(1, 1, -1), vec3(1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
+vec3(1, 1, 0), vec3(1, -1, 0), vec3(-1, -1, 0), vec3(-1, 1, 0),
+vec3(1, 0, 1), vec3(-1, 0, 1), vec3(1, 0, -1), vec3(-1, 0, -1),
+vec3(0, 1, 1), vec3(0, -1, 1), vec3(0, -1, -1), vec3(0, 1, -1)
+);
 
 void main()
 {
@@ -84,6 +92,32 @@ void main()
     vec3 Lo = vec3(0.0);
     vec3 lightDirection = vec3(0.0);
 
+    //    float bias = 0.0215;
+    //    int samples = 10;
+    //    float viewDistance = length(camera_pos - FragPos);
+    //    float diskRadius = (1.0 + (viewDistance / 20.0f)) / 150.0f;
+    vec3 fragToLight = FragPos - lights[0].position;
+    float currentDepth = length(fragToLight);
+    //    float closestDepth = texture(shadow_map, fragToLight).r;
+    //    closestDepth *= 20.0f;
+    //    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+    //    shadow = 1.0 - shadow;
+    float shadow = 0.0;
+    float bias = 0.15;
+    int samples = 20;
+    float viewDistance = length(camera_pos - FragPos);
+    float diskRadius = (1.0 + (viewDistance / 20.0)) / 25.0;
+
+    for(int i = 0; i < samples; i++)
+    {
+        float closestDepth = texture(shadow_map, fragToLight + sampleOffsetDirections[i] * diskRadius).r;
+        closestDepth *= 20.0f;
+        if(currentDepth - bias > closestDepth)
+                shadow += 1.0;
+    }
+    shadow /= float(samples);
+    shadow = 1.0 - shadow;
+
     for (int i = 0; i < num_lights; i++)
     {
         vec3 L = vec3(0.0);
@@ -115,7 +149,7 @@ void main()
         kD *= 1.0 - metallic;
 
         float NdotL = max(dot(N, L), 0.0);
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+        Lo += ((kD * albedo / PI + specular) * radiance * NdotL) * shadow;
     }
 
     vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
@@ -130,37 +164,17 @@ void main()
     vec2 brdf = texture(brdf, vec2(max(dot(N, V), 0.0), roughness)).rg;
     vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 
-    float shadow = 0.0f;
-    vec3 lightCoords = FragPosLight.xyz / FragPosLight.w;
-    float bias = max(0.025f * (1.0f - dot(N, lightDirection)), 0.0005f);
-    if (lightCoords.z <= 1.0f)
-    {
-        lightCoords = (lightCoords + 1.0f) * 0.5f;
 
-        float currentDepth = lightCoords.z;
 
-        int sampleRadius = 2;
-        vec2 pixelSize = 1.0 / textureSize(shadow_map, 0);
-        for (int y = -sampleRadius; y <= sampleRadius; y++)
-        {
-            for (int x = -sampleRadius; x <= sampleRadius; x++)
-            {
-                float closestDepth = texture(shadow_map, lightCoords.xy).r;
-                if (currentDepth > closestDepth + bias)
-                {
-                    shadow += 1.0f;
-                }
-            }
-        }
-        shadow /= pow((sampleRadius * 2 + 1), 2);
-    }
 
-    vec3 ambient = (kD * (diffuse * (1.0f - shadow)) + (specular * (1.0f - shadow))) * ao;
+    vec3 ambient = (kD * (diffuse) + (specular)) * ao;
     vec3 emission = texture2D(texture_emission, TexCoords).rgb;
     vec3 color = ambient + Lo + emission;
 
+
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0 / 2.2));
+
 
     FragColor = vec4(color, 1.0);
 }

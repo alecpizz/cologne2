@@ -49,9 +49,6 @@ namespace goon
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_CULL_FACE);
             glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glCullFace(GL_BACK);
         }
 
         void init_shaders()
@@ -66,7 +63,8 @@ namespace goon
             skybox_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/skybox.vert",
                                                      RESOURCES_PATH "shaders/skybox.frag");
             shadowmap_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/shadowmap.vert",
-                                                        RESOURCES_PATH "shaders/shadowmap.frag");
+                                                        RESOURCES_PATH "shaders/shadowmap.frag",
+                                                        RESOURCES_PATH "shaders/shadowmap.geom");
             fbo_debug_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/framebufferoutput.vert",
                                                         RESOURCES_PATH "shaders/framebufferoutput.frag");
         }
@@ -75,28 +73,29 @@ namespace goon
         {
             //shadow map framebuffer
             glGenFramebuffers(1, &shadow_fbo);
-            uint32_t width = 2048, height = 2048;
-            uint32_t shadow_map = 0;
+            uint32_t width = 1024, height = 1024;
+            uint32_t shadowID = 0;
 
             //shadow map texture
-            glGenTextures(1, &shadow_map);
-            glBindTexture(GL_TEXTURE_2D, shadow_map);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-                         width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-            float clamp_color[] = {1.0f, 1.0f, 1.0f, 1.0f};
-            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, clamp_color);
+            glGenTextures(1, &shadowID);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, shadowID);
 
-            //remove shadow map color attachment
+            for (uint32_t i = 0; i < 6; i++)
+            {
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT,
+                             width, height, 0,GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            }
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
             glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadow_map, 0);
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowID, 0);
             glDrawBuffer(GL_NONE);
             glReadBuffer(GL_NONE);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            this->shadow_map = Texture(shadow_map, width, height, 1);
+            this->shadow_map = Texture(shadowID, width, height, 1);
         }
 
         void gen_environment_map(const std::string &path)
@@ -476,6 +475,8 @@ namespace goon
 
         void lit_pass(Scene &scene)
         {
+            glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             lit_shader->bind();
             lit_shader->set_vec3("camera_pos", glm::value_ptr(Engine::get_camera()->get_position()));
             lit_shader->set_mat4("projection", &Engine::get_camera()->get_projection_matrix()[0][0]);
@@ -514,119 +515,49 @@ namespace goon
             }
         }
 
-        glm::mat4 calc_ortho()
-        {
-            float ar = static_cast<float>(Engine::get_window()->get_width()) / static_cast<float>(Engine::get_window()->
-                           get_height());
-            float fov = Engine::get_camera()->get_fov();
-            float nearDist = 0.01f;
-            float farDist = 100.0f;
-            float Hnear = 2 * tan(fov / 2) * nearDist;
-            float Wnear = Hnear * ar;
-            float Hfar = 2 * tan(fov / 2) * farDist;
-            float Wfar = Hfar * ar;
-
-            glm::vec3 cameraPos = Engine::get_camera()->get_position();
-            glm::vec3 cameraFwd = Engine::get_camera()->get_forward();
-            glm::vec3 cameraUp = Engine::get_camera()->get_up();
-            glm::vec3 cameraRight = Engine::get_camera()->get_right();
-            glm::vec3 centerFar = cameraPos + cameraFwd * farDist;
-
-            glm::vec3 topLeftFar = centerFar + (cameraUp * Hfar / 2.0f) - (cameraRight * Wfar / 2.0f);
-            glm::vec3 topRightFar = centerFar + (cameraUp * Hfar / 2.0f) + (cameraRight * Wfar / 2.0f);
-            glm::vec3 bottomLeftFar = centerFar - (cameraUp * Hfar / 2.0f) - (cameraRight * Wfar / 2.0f);
-            glm::vec3 bottomRightFar = centerFar - (cameraUp * Hfar / 2.0f) + (cameraRight * Wfar / 2.0f);
-
-            glm::vec3 centerNear = cameraPos + cameraFwd * nearDist;
-
-            glm::vec3 topLeftNear = centerNear + (cameraUp * Hnear / 2.0f) - (cameraRight * Wnear / 2.0f);
-            glm::vec3 topRightNear = centerNear + (cameraUp * Hnear / 2.0f) + (cameraRight * Wnear / 2.0f);
-            glm::vec3 bottomLeftNear = centerNear - (cameraUp * Hnear / 2.0f) - (cameraRight * Wnear / 2.0f);
-            glm::vec3 bottomRightNear = centerNear - (cameraUp * Hnear / 2.0f) + (cameraRight * Wnear / 2.0f);
-
-            glm::vec3 frustrumCenter = (centerFar - centerNear) * 0.5f;
-
-            glm::mat4 lightView = glm::lookAt(glm::normalize(lights[0].position), glm::vec3(0.0f, 0.0f, 0.0f),
-                                              glm::vec3(0.0f, 1.0f, 0.0f));
-
-            std::array<glm::vec3, 8> frustumToLightView
-            {
-                lightView * glm::vec4(bottomRightNear, 1.0f),
-                lightView * glm::vec4(topRightNear, 1.0f),
-                lightView * glm::vec4(bottomLeftNear, 1.0f),
-                lightView * glm::vec4(topLeftNear, 1.0f),
-                lightView * glm::vec4(bottomRightFar, 1.0f),
-                lightView * glm::vec4(topRightFar, 1.0f),
-                lightView * glm::vec4(bottomLeftFar, 1.0f),
-                lightView * glm::vec4(topLeftFar, 1.0f)
-            };
-
-            glm::vec3 min{INFINITY, INFINITY, INFINITY};
-            glm::vec3 max{-INFINITY, -INFINITY, -INFINITY};
-            for (uint32_t i = 0; i < frustumToLightView.size(); i++)
-            {
-                if (frustumToLightView[i].x < min.x)
-                    min.x = frustumToLightView[i].x;
-                if (frustumToLightView[i].y < min.y)
-                    min.y = frustumToLightView[i].y;
-                if (frustumToLightView[i].z < min.z)
-                    min.z = frustumToLightView[i].z;
-
-                if (frustumToLightView[i].x > max.x)
-                    max.x = frustumToLightView[i].x;
-                if (frustumToLightView[i].y > max.y)
-                    max.y = frustumToLightView[i].y;
-                if (frustumToLightView[i].z > max.z)
-                    max.z = frustumToLightView[i].z;
-            }
-
-            float l = min.x;
-            float r = max.x;
-            float b = min.y;
-            float t = max.y;
-            // because max.z is positive and in NDC the positive z axis is
-            // towards us so need to set it as the near plane flipped same for min.z.
-            float n = -max.z;
-            float f = -min.z;
-
-            glm::mat4 lightProjection = glm::ortho(l, r, b, n, t, f);
-            return lightProjection * lightView;
-        }
 
         void shadow_pass(Scene &scene)
         {
-            glCullFace(GL_FRONT);
-            Light dir_light;
-            for (auto &light: lights)
-            {
-                if (light.type == LightType::Directional)
-                {
-                    dir_light = light;
-                    break;
-                }
-            }
-
-            glm::mat4 orthogonal = glm::ortho(-10.f,10.f,-10.f,10.f,-5.f,300.f);
-
-            glm::vec3 light_pos = dir_light.position;
-            glm::vec3 up_world = glm::vec3(0.0f, 1.0f, 0.0f);
-
-            glm::vec3 target_position = light_pos + (dir_light.direction);
-
-            glm::vec3 light_right = glm::normalize(glm::cross(dir_light.direction, up_world));
-            glm::vec3 light_up = glm::normalize(glm::cross(light_right, dir_light.direction));
-            glm::mat4 light_view = glm::lookAt(light_pos, target_position, light_up);
-
-            glm::mat4 lightVP = orthogonal * light_view;
-
-            shadowmap_shader->bind();
-            shadowmap_shader->set_mat4("light_projection", &lightVP[0][0]);
-
+            glDepthMask(true);
+            glDisable(GL_BLEND);
+            float aspect = static_cast<float>(shadow_map.get_width()) / static_cast<float>(shadow_map.get_height());
+            float near = 0.1f;
+            float far = 20.0f;
+            glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), aspect, near, far);
+            glm::vec3 lightPos = lights[0].position;
+            std::vector<glm::mat4> shadowTransforms;
+            shadowTransforms.push_back(shadowProj *
+                                       glm::lookAt(lightPos, lightPos + glm::vec3(1.0, 0.0, 0.0),
+                                                   glm::vec3(0.0, -1.0, 0.0)));
+            shadowTransforms.push_back(shadowProj *
+                                       glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0),
+                                                   glm::vec3(0.0, -1.0, 0.0)));
+            shadowTransforms.push_back(shadowProj *
+                                       glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 1.0, 0.0),
+                                                   glm::vec3(0.0, 0.0, 1.0)));
+            shadowTransforms.push_back(shadowProj *
+                                       glm::lookAt(lightPos, lightPos + glm::vec3(0.0, -1.0, 0.0),
+                                                   glm::vec3(0.0, 0.0, -1.0)));
+            shadowTransforms.push_back(shadowProj *
+                                       glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, 1.0),
+                                                   glm::vec3(0.0, -1.0, 0.0)));
+            shadowTransforms.push_back(shadowProj *
+                                       glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, -1.0),
+                                                   glm::vec3(0.0, -1.0, 0.0)));
 
             glViewport(0, 0, shadow_map.get_width(), shadow_map.get_height());
             glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
+            glEnable(GL_DEPTH_TEST);
             glClear(GL_DEPTH_BUFFER_BIT);
-
+            shadowmap_shader->bind();
+            for (unsigned int i = 0; i < 6; ++i)
+                shadowmap_shader->set_mat4(std::string("shadowMatrices[" + std::to_string(i) + "]").c_str(),
+                                           glm::value_ptr(shadowTransforms[i]));
+            shadowmap_shader->set_float("far_plane", far);
+            shadowmap_shader->set_vec3("lightPos", glm::value_ptr(lightPos));
+            glReadBuffer(GL_NONE);
+            glDrawBuffer(GL_NONE);
+            glEnable(GL_CULL_FACE);
             for (size_t i = 0; i < scene.get_model_count(); i++)
             {
                 auto model = scene.get_model_by_index(i);
@@ -638,15 +569,12 @@ namespace goon
                 for (size_t j = 0; j < model->get_num_meshes(); j++)
                 {
                     Mesh mesh = model->get_meshes()[j];
+                    Material mat = model->get_materials()[mesh.get_material_index()];
+                    mat.albedo.bind(ALBEDO_INDEX);
                     mesh.draw();
                 }
             }
-
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
-            glCullFace(GL_BACK);
-            lit_shader->bind();
-            lit_shader->set_mat4("lightVP", &lightVP[0][0]);
         }
 
         void skybox_pass()
@@ -688,11 +616,6 @@ namespace goon
         _impl->shadow_pass(scene);
         _impl->lit_pass(scene);
         _impl->skybox_pass();
-
-        glViewport(20, 20, 250, 250);
-        _impl->fbo_debug_shader->bind();
-        _impl->shadow_map.bind(0);
-        _impl->render_quad();
     }
 
     void Renderer::reload_shaders()
@@ -712,7 +635,6 @@ namespace goon
                 return light;
             }
         }
-        LOG_WARN("No light found");
         return _impl->lights[0];
     }
 
@@ -735,9 +657,9 @@ namespace goon
         _impl->gen_prefilter_map();
         _impl->gen_brdf_map();
         glEnable(GL_CULL_FACE);
-        _impl->add_light(Light(glm::vec3(-10.0f, 10.0f, 10.0f), glm::vec3(-2.0f, -1.0f, -0.3f),
+        _impl->add_light(Light(glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(-2.0f, -1.0f, -0.3f),
                                glm::vec3(300.0f, 300.0f, 300.0f), 6.0f, 1.0f,
-                               LightType::Directional));
+                               LightType::Point));
         _impl->init_shadow_map();
     }
 }

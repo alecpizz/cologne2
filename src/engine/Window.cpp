@@ -56,6 +56,9 @@ namespace goon
             enableReportGlErrors();
             ImGui_ImplSDL3_InitForOpenGL(window, context);
             ImGui_ImplOpenGL3_Init("#version 460");
+            const GLubyte* vendor = glGetString(GL_VENDOR); // Returns the vendor
+            const GLubyte* renderer = glGetString(GL_RENDERER); // Returns a hint to the model
+            LOG_INFO("Created window for GPU: %s %s", vendor, renderer);
         }
     };
 

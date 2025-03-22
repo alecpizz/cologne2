@@ -13,6 +13,7 @@
 #include "engine/Window.h"
 #include "engine/Camera.h"
 #include "engine/EventManager.h"
+#include "engine/GoodGPUs.h"
 
 namespace goon
 {

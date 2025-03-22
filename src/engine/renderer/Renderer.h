@@ -5,6 +5,7 @@
 class Scene;
 
 
+
 namespace goon
 {
     class Renderer
