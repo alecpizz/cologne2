@@ -3,8 +3,12 @@ layout (triangles) in;
 layout (triangle_strip, max_vertices=18) out;
 
 in vec2 UV[];
-out vec2 TexCoords;
+in vec3 Norm[];
+in vec3 Pos[];
 
+out vec2 TexCoords;
+out vec3 Position;
+out vec3 Normal;
 uniform mat4 shadowMatrices[6];
 
 out vec4 FragPos; // FragPos from GS (output per emitvertex)
@@ -18,6 +22,8 @@ void main()
         {
             FragPos = gl_in[i].gl_Position;
             TexCoords = UV[i];
+            Position = Pos[i];
+            Normal = Norm[i];
             gl_Position = shadowMatrices[face] * FragPos;
             EmitVertex();
         }

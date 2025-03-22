@@ -37,6 +37,9 @@ layout (binding = 7) uniform samplerCube prefilter_map;
 layout (binding = 8) uniform sampler2D brdf;
 
 layout (binding = 9) uniform samplerCube shadow_map;
+layout (binding = 10) uniform samplerCube normal_map;
+layout (binding = 11) uniform samplerCube position_map;
+layout (binding = 12) uniform samplerCube flux_map;
 
 uniform float far_plane = 20.0f;
 uniform float ao_strength = 0.2;
@@ -57,6 +60,29 @@ vec3(1, 1, 0), vec3(1, -1, 0), vec3(-1, -1, 0), vec3(-1, 1, 0),
 vec3(1, 0, 1), vec3(-1, 0, 1), vec3(1, 0, -1), vec3(-1, 0, -1),
 vec3(0, 1, 1), vec3(0, -1, 1), vec3(0, -1, -1), vec3(0, 1, -1)
 );
+
+uint xorshift(uint state)
+{
+    state ^= (state << 13);
+    state ^= (state >> 17);
+    state ^= (state << 5);
+    return state;
+}
+
+float randomFloat(inout uint seed)
+{
+    seed = xorshift(seed);
+    return float(seed) / float(0xFFFFFFFFu);
+}
+
+vec3 get_random_vector(int index)
+{
+    uint seed = uint(index);
+    float x = randomFloat(seed);
+    float y = randomFloat(seed);
+    float z = randomFloat(seed);
+    return vec3(x * 2.0 - 1.0, y * 2.0 - 1.0, z * 2.0 - 1.0);
+}
 
 void main()
 {
@@ -101,15 +127,29 @@ void main()
     float viewDistance = length(camera_pos - FragPos);
     float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
 
-    for(int i = 0; i < samples; i++)
+    vec3 indirect = vec3(0.0);
+    for (int i = 0; i < samples; i++)
     {
-        float closestDepth = texture(shadow_map, fragToLight + sampleOffsetDirections[i] * diskRadius).r;
+        vec3 sample_coord = fragToLight + sampleOffsetDirections[i] * diskRadius;
+        float closestDepth = texture(shadow_map, sample_coord).r;
         closestDepth *= far_plane;
-        if(currentDepth - bias > closestDepth)
-                shadow += 1.0;
+        if (currentDepth - bias > closestDepth)
+            shadow += 1.0;
+
+        vec3 target_normal = normalize(texture(normal_map, N).xyz);
+        vec3 target_worldPos = texture(position_map, N).xyz;
+        vec3 target_flux = texture(flux_map, N).xyz;
+        float distSq = dot(FragPos - target_worldPos, FragPos - target_worldPos);
+        vec3 indirect_result = target_flux * max(0.0, dot(target_normal, FragPos - target_worldPos)) *
+        max(0.0, dot(N, target_worldPos - FragPos)) / (distSq * distSq + 0.0001);
+        indirect += indirect_result;
     }
+
     shadow /= float(samples);
     shadow = 1.0 - shadow;
+
+    indirect /= float(samples);
+
 
     for (int i = 0; i < num_lights; i++)
     {
@@ -162,7 +202,7 @@ void main()
 
     vec3 ambient = (kD * (diffuse) + (specular)) * ao;
     vec3 emission = texture2D(texture_emission, TexCoords).rgb;
-    vec3 color = ambient + Lo + emission;
+    vec3 color = ambient + Lo + emission + indirect * 5;
 
 
     color = color / (color + vec3(1.0));

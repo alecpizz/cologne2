@@ -26,6 +26,10 @@ namespace goon
 #define PREFILTER_INDEX 7
 #define BRDF_INDEX 8
 #define SHADOW_INDEX 9
+#define NORMAL_SHADOW_INDEX 10
+#define POSITION_INDEX 11
+#define FLUX_INDEX 12
+
 
     struct Renderer::Impl
     {
@@ -75,6 +79,9 @@ namespace goon
             glGenFramebuffers(1, &shadow_fbo);
             uint32_t width = 1024, height = 1024;
             uint32_t shadowID = 0;
+            uint32_t normalID = 0;
+            uint32_t positionID = 0;
+            uint32_t fluxID = 0;
 
             //shadow map texture
             glGenTextures(1, &shadowID);
@@ -90,12 +97,67 @@ namespace goon
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+            shadow_map = Texture(shadowID, width, height, 1);
+
+            //normal map texture
+            glGenTextures(1, &normalID);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, normalID);
+            for (uint32_t i = 0; i < 6; i++)
+            {
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB32F,
+                             width, height, 0, GL_RGB, GL_FLOAT, nullptr);
+            }
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+            normal_map = Texture(normalID, width, height, 1);
+
+            //position texture
+            glGenTextures(1, &positionID);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, positionID);
+            for (uint32_t i = 0; i < 6; i++)
+            {
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB32F, width, height,
+                             0, GL_RGB, GL_FLOAT, nullptr);
+            }
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+            position_map = Texture(positionID, width, height, 1);
+
+            //flux texture
+            glGenTextures(1, &fluxID);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, fluxID);
+            for (uint32_t i = 0; i < 6; i++)
+            {
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height,
+                             0, GL_RGB, GL_FLOAT, nullptr);
+            }
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+            flux_map = Texture(fluxID, width, height, 1);
+
+
             glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
             glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowID, 0);
-            glDrawBuffer(GL_NONE);
-            glReadBuffer(GL_NONE);
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, normalID, 0);
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, positionID, 0);
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, fluxID, 0);
+
+            GLenum rsm_draw_buffer[] = {
+                GL_COLOR_ATTACHMENT0,
+                GL_COLOR_ATTACHMENT1,
+                GL_COLOR_ATTACHMENT2
+            };
+            glDrawBuffers(3, rsm_draw_buffer);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            this->shadow_map = Texture(shadowID, width, height, 1);
         }
 
         void gen_environment_map(const std::string &path)
@@ -485,6 +547,9 @@ namespace goon
             env_prefilter.bind(PREFILTER_INDEX);
             env_brdf.bind(BRDF_INDEX);
             shadow_map.bind(SHADOW_INDEX);
+            normal_map.bind(NORMAL_SHADOW_INDEX);
+            position_map.bind(POSITION_INDEX);
+            flux_map.bind(FLUX_INDEX);
             for (size_t i = 0; i < scene.get_model_count(); i++)
             {
                 auto model = scene.get_model_by_index(i);
@@ -518,8 +583,6 @@ namespace goon
 
         void shadow_pass(Scene &scene)
         {
-            glDepthMask(true);
-            glDisable(GL_BLEND);
             float aspect = static_cast<float>(shadow_map.get_width()) / static_cast<float>(shadow_map.get_height());
             float near = 0.1f;
             float far = 50.0f;
@@ -547,7 +610,6 @@ namespace goon
 
             glViewport(0, 0, shadow_map.get_width(), shadow_map.get_height());
             glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
-            glEnable(GL_DEPTH_TEST);
             glClear(GL_DEPTH_BUFFER_BIT);
             shadowmap_shader->bind();
             for (unsigned int i = 0; i < 6; ++i)
@@ -555,9 +617,6 @@ namespace goon
                                            glm::value_ptr(shadowTransforms[i]));
             shadowmap_shader->set_float("far_plane", far);
             shadowmap_shader->set_vec3("lightPos", glm::value_ptr(lightPos));
-            glReadBuffer(GL_NONE);
-            glDrawBuffer(GL_NONE);
-            glEnable(GL_CULL_FACE);
             for (size_t i = 0; i < scene.get_model_count(); i++)
             {
                 auto model = scene.get_model_by_index(i);
