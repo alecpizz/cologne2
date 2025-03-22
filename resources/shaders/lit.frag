@@ -38,7 +38,7 @@ layout (binding = 8) uniform sampler2D brdf;
 
 layout (binding = 9) uniform samplerCube shadow_map;
 
-
+uniform float far_plane = 20.0f;
 uniform float ao_strength = 0.2;
 uniform int has_ao_texture = 0;
 
@@ -92,26 +92,19 @@ void main()
     vec3 Lo = vec3(0.0);
     vec3 lightDirection = vec3(0.0);
 
-    //    float bias = 0.0215;
-    //    int samples = 10;
-    //    float viewDistance = length(camera_pos - FragPos);
-    //    float diskRadius = (1.0 + (viewDistance / 20.0f)) / 150.0f;
+
     vec3 fragToLight = FragPos - lights[0].position;
     float currentDepth = length(fragToLight);
-    //    float closestDepth = texture(shadow_map, fragToLight).r;
-    //    closestDepth *= 20.0f;
-    //    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
-    //    shadow = 1.0 - shadow;
     float shadow = 0.0;
     float bias = 0.15;
     int samples = 20;
     float viewDistance = length(camera_pos - FragPos);
-    float diskRadius = (1.0 + (viewDistance / 20.0)) / 25.0;
+    float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
 
     for(int i = 0; i < samples; i++)
     {
         float closestDepth = texture(shadow_map, fragToLight + sampleOffsetDirections[i] * diskRadius).r;
-        closestDepth *= 20.0f;
+        closestDepth *= far_plane;
         if(currentDepth - bias > closestDepth)
                 shadow += 1.0;
     }

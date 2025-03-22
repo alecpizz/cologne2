@@ -522,7 +522,7 @@ namespace goon
             glDisable(GL_BLEND);
             float aspect = static_cast<float>(shadow_map.get_width()) / static_cast<float>(shadow_map.get_height());
             float near = 0.1f;
-            float far = 20.0f;
+            float far = 50.0f;
             glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), aspect, near, far);
             glm::vec3 lightPos = lights[0].position;
             std::vector<glm::mat4> shadowTransforms;
@@ -575,6 +575,8 @@ namespace goon
                 }
             }
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            lit_shader->bind();
+            lit_shader->set_float("far_plane", far);
         }
 
         void skybox_pass()
