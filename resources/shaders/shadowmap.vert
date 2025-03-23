@@ -13,6 +13,6 @@ void main()
     vec4 worldPos = model * vec4(position, 1.0);
     gl_Position = worldPos;
     UV = uv;
-    Norm = normal;
+    Norm = mat3(transpose(inverse(model))) * normal;
     Pos = worldPos.xyz;
 }

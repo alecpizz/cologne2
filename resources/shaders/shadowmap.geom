@@ -22,7 +22,7 @@ void main()
         {
             FragPos = gl_in[i].gl_Position;
             TexCoords = UV[i];
-            Position = (shadowMatrices[face] * vec4(Pos[i], 1.0)).xyz;
+            Position = vec3(FragPos);
             Normal = Norm[i];
             gl_Position = shadowMatrices[face] * FragPos;
             EmitVertex();
