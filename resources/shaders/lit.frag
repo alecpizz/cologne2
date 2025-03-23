@@ -131,6 +131,7 @@ void main()
     for (int i = 0; i < samples; i++)
     {
         vec3 sample_coord = fragToLight + sampleOffsetDirections[i] * diskRadius;
+
         float closestDepth = texture(shadow_map, sample_coord).r;
         closestDepth *= far_plane;
         if (currentDepth - bias > closestDepth)

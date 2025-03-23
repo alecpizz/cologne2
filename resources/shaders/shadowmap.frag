@@ -25,8 +25,8 @@ void main()
     // write this as modified depth
     gl_FragDepth = lightDistance;
 
-    normal = Normal;
-    worldPos = Position;
+    normal = normalize(Normal);
+    worldPos = FragPos.xyz;
 
     //flux calc here
     vec3 lightPos = vec3(0.0f, 10.0f, 0.0f);
@@ -34,7 +34,7 @@ void main()
     float distance = length(lightPos - Position);
     vec3 lightDir = normalize(lightPos - Position);
     float attenuation = 1.0 / (distance * distance);
-    float diff = max(0.0, dot(normalize(normal), lightDir));
+    float diff = max(0.0, dot(normalize(normal.xyz), lightDir));
     vec3 radiance = lightCol * attenuation;
-    flux = texture2D(albedo, TexCoords).xyz * diff * radiance;
+    flux = texture2D(albedo, TexCoords).xyz * radiance;
 }
