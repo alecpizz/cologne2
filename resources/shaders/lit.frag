@@ -92,6 +92,11 @@ float randomFloat(inout uint seed)
     return float(seed) / float(0xFFFFFFFFu);
 }
 
+float rand(vec2 v)
+{
+    return fract(sin(dot(v, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
 vec3 get_random_vector(int index)
 {
     uint seed = uint(index);
@@ -215,12 +220,17 @@ void main()
     vec3 indirect = vec3(0.0);
     vec3 projCoords = FragPosLightSpace.xyz / FragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
-    uint rsmSamples = 128;
+
+    //TODO: store this in a viewport sized texture.
+    uint rsmSamples = 64;
     float totalWeight = 0.0;
     for (uint i = 0; i < rsmSamples; i++)
     {
         vec2 xi = hammersley(i, rsmSamples);
-        float r = xi.x * 0.3;
+        float t = rand(FragPos.xy );
+        mat2 rot = mat2(cos(t), sin(t), -sin(t), cos(t));
+        xi = (rot * (xi - 0.5)) + 0.5;
+        float r = xi.x * 0.2;
         float theta = xi.y * (2 * PI);
         vec2 pixelLightUV = projCoords.xy + vec2(r * cos(theta), r * sin(theta));
         float weight = xi.x * xi.x;
@@ -237,7 +247,7 @@ void main()
         indirect += result * weight;
         totalWeight += weight;
     }
-    indirect /= totalWeight;
+    indirect /= rsmSamples;
 
     vec3 ambient = (kD * (diffuse) + (specular)) * ao;
     vec3 emission = texture2D(texture_emission, TexCoords).rgb;
@@ -314,15 +324,15 @@ float shadowCalculation(vec4 fragPos, vec3 n, vec3 l)
     float currentDepth = projCoords.z;
     float bias = max(0.025 * (1.0 - dot(n, l)), 0.0005);
     int samples = 2;
-    for (int x = -samples; x <= samples; ++x)
+    for (int x = -1; x <= 1; ++x)
     {
-        for (int y = samples; y <= samples; ++y)
+        for (int y = 1; y <= 1; ++y)
         {
             float pcfDepth = texture(shadow_map, projCoords.xy + vec2(x, y) * texelSize).r;
             shadow += currentDepth > pcfDepth + bias ? 1.0 : 0.0;
         }
     }
-    shadow /= pow((samples * 2 + 1), 2);
+    shadow /= 9;
     //    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
     return shadow;
 }

@@ -655,6 +655,7 @@ namespace goon
             //hot reload shaders
             reload_shaders();
         }
+
         _impl->shadow_pass(scene);
         _impl->lit_pass(scene);
         _impl->skybox_pass();
