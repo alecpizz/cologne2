@@ -12,10 +12,10 @@ out vec4 FragPos;
 
 void main()
 {
+    Normal = mat3(transpose(inverse(model))) * normal;
     vec4 worldPos = model * vec4(position, 1.0);
     gl_Position = lightSpaceMatrix * model * vec4(position, 1.0);
     TexCoords = uv;
-    Normal = mat3(transpose(inverse(model))) * normal;
     Position = worldPos.xyz;
     FragPos = worldPos;
 }

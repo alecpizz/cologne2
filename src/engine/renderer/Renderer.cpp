@@ -592,6 +592,9 @@ namespace goon
             glClear(GL_DEPTH_BUFFER_BIT);
             shadowmap_shader->bind();
             shadowmap_shader->set_mat4("lightSpaceMatrix", glm::value_ptr(lightViewProj));
+            shadowmap_shader->set_vec3("light.position", glm::value_ptr(light_pos));
+            shadowmap_shader->set_vec3("light.direction", glm::value_ptr(light_dir));
+            shadowmap_shader->set_vec3("light.color", glm::value_ptr(lights[0].color));
 
             for (size_t i = 0; i < scene.get_model_count(); i++)
             {
@@ -654,10 +657,6 @@ namespace goon
         _impl->shadow_pass(scene);
         _impl->lit_pass(scene);
         _impl->skybox_pass();
-        glViewport(0, 0, 250, 250);
-        _impl->fbo_debug_shader->bind();
-        _impl->shadow_map.bind(0);
-        _impl->render_cube();
     }
 
     void Renderer::reload_shaders()

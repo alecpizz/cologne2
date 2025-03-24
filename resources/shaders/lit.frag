@@ -63,6 +63,21 @@ vec3(1, 0, 1), vec3(-1, 0, 1), vec3(1, 0, -1), vec3(-1, 0, -1),
 vec3(0, 1, 1), vec3(0, -1, 1), vec3(0, -1, -1), vec3(0, 1, -1)
 );
 
+float radical_inverse_vdc(uint bits)
+{
+    bits = (bits << 16u) | (bits >> 16u);
+    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+    return float(bits) * 2.3283064365386963e-10; // / 0x100000000
+}
+
+vec2 hammersley(uint i, uint n)
+{
+    return vec2(float(i) / float(n), radical_inverse_vdc(i));
+}
+
 uint xorshift(uint state)
 {
     state ^= (state << 13);
@@ -83,7 +98,7 @@ vec3 get_random_vector(int index)
     float x = randomFloat(seed);
     float y = randomFloat(seed);
     float z = randomFloat(seed);
-    return vec3(x * 2.0 - 1.0, y * 2.0 - 1.0, z * 2.0 - 1.0);
+    return vec3(x * 2.0 - 1.0, y * 2.0 - 1.0, z);
 }
 
 
@@ -157,8 +172,8 @@ void main()
 
     shadow = 1.0 - shadowCalculation(FragPosLightSpace, N, lightDirection);
 
-//    vec3 indirect = indirectLighting(fragToLight, N, FragPos);
 
+//    indirect /= rsmSamples;
 
     for (int i = 0; i < num_lights; i++)
     {
@@ -192,7 +207,7 @@ void main()
         kD *= 1.0 - metallic;
 
         float NdotL = max(dot(N, L), 0.0);
-        Lo += ((kD * albedo / PI + specular) * radiance * NdotL) * shadow;
+        Lo += ((kD * albedo / PI + specular) * radiance * NdotL) * shadow ;
     }
 
     vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
@@ -208,12 +223,39 @@ void main()
     vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 
 
+    vec3 indirect = vec3(0.0);
+    vec3 projCoords = FragPosLightSpace.xyz / FragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    uint rsmSamples = 151;
+    float totalWeight = 0.0;
+    for (uint i = 0; i < rsmSamples; i++)
+    {
+        vec2 xi = hammersley(i, rsmSamples);
+        float r = xi.x * 0.3;
+        float theta = xi.y * (2 * PI);
+        vec2 pixelLightUV = projCoords.xy + vec2(r * cos(theta), r * sin(theta));
+        float weight = xi.x * xi.x;
+        vec3 target_norm = normalize(texture(normal_map, pixelLightUV).xyz);
+        vec3 target_world_pos = (texture(position_map, pixelLightUV).xyz);
+        vec3 target_flux = texture(flux_map, pixelLightUV).rgb;
 
+        vec3 light_dir = normalize(target_world_pos - FragPos);
+        float distance_sq = dot(target_world_pos - FragPos, target_world_pos - FragPos);
+        float light_geo = max(0.0, dot(target_norm, -light_dir));
+        float receiver_geo = max(0.0, dot(N, light_dir));
+        float geometry_term = receiver_geo * light_geo;
+        vec3 irradiance = target_flux * geometry_term / distance_sq;
+        //        vec3 result = target_world_pos * target_flux * ((max(0.0, dot(target_norm, (FragPos - target_world_pos))) *
+        //        max(0.0, dot(N, (target_world_pos - FragPos)))) / pow(length(FragPos - target_world_pos), 4.0));
+
+        indirect += irradiance * weight;
+        totalWeight += weight;
+    }
 
     vec3 ambient = (kD * (diffuse) + (specular)) * ao;
     vec3 emission = texture2D(texture_emission, TexCoords).rgb;
-    vec3 color =  ambient +  Lo + emission;// + indirect;
-
+    vec3 color = (indirect * 20 * Lo) + emission  + ambient;
+//    vec3 color = ((indirect * 200) * Lo) + emission;
 
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0 / 2.2));
@@ -276,7 +318,7 @@ float shadowCalculation(vec4 fragPos, vec3 n, vec3 l)
 {
     vec3 projCoords = fragPos.xyz / fragPos.w;
     projCoords = projCoords * 0.5 + 0.5;
-    if(projCoords.z > 1.0)
+    if (projCoords.z > 1.0)
     {
         return 0.0;
     }
@@ -284,15 +326,15 @@ float shadowCalculation(vec4 fragPos, vec3 n, vec3 l)
     vec2 texelSize = 1.0 / textureSize(shadow_map, 0);
     float currentDepth = projCoords.z;
     float bias = max(0.05 * (1.0 - dot(n, l)), 0.005);
-    for(int x = -1; x <= 1; ++x)
+    for (int x = -1; x <= 1; ++x)
     {
-        for(int y = -1; y <= 1; ++y)
+        for (int y = -1; y <= 1; ++y)
         {
             float pcfDepth = texture(shadow_map, projCoords.xy + vec2(x, y) * texelSize).r;
             shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
         }
     }
     shadow /= 9.0;
-//    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+    //    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
     return shadow;
 }
