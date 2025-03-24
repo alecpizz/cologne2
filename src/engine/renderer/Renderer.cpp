@@ -53,6 +53,7 @@ namespace goon
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_CULL_FACE);
             glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+            glEnable(GL_MULTISAMPLE);
         }
 
         void init_shaders()
@@ -701,6 +702,9 @@ namespace goon
         _impl->add_light(Light(glm::vec3(30.0f, 40.0f, 10.0f), glm::vec3(-.8f, -.4f, -0.4f),
                                glm::vec3(2.0f, 2.0f, 2.0f), 6.0f, 1.0f,
                                LightType::Directional));
+        _impl->add_light(Light(glm::vec3(0.0f, 10.0f, 10.0f), glm::vec3(.0f),
+                               glm::vec3(200.0f, 200.0f, 200.0f), 6.0f, 1.0f,
+                               LightType::Point));
         _impl->init_shadow_map();
     }
 }

@@ -159,18 +159,7 @@ void main()
     vec3 Lo = vec3(0.0);
     vec3 lightDirection = normalize(-lights[0].direction);
 
-
-    vec3 fragToLight = FragPos - lights[0].position;
-    float currentDepth = length(fragToLight);
-    float shadow = 0.0;
-    float bias = 0.15;
-    int samples = 20;
-    float viewDistance = length(camera_pos - FragPos);
-    float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
-
-
-
-    shadow = 1.0 - shadowCalculation(FragPosLightSpace, N, lightDirection);
+    float shadow = 1.0 - shadowCalculation(FragPosLightSpace, N, lightDirection);
 
 
 //    indirect /= rsmSamples;
@@ -207,7 +196,7 @@ void main()
         kD *= 1.0 - metallic;
 
         float NdotL = max(dot(N, L), 0.0);
-        Lo += ((kD * albedo / PI + specular) * radiance * NdotL) * shadow ;
+        Lo += ((kD * albedo / PI + specular) * radiance * NdotL)  ;
     }
 
     vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
@@ -226,7 +215,7 @@ void main()
     vec3 indirect = vec3(0.0);
     vec3 projCoords = FragPosLightSpace.xyz / FragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
-    uint rsmSamples = 151;
+    uint rsmSamples = 128;
     float totalWeight = 0.0;
     for (uint i = 0; i < rsmSamples; i++)
     {
@@ -239,29 +228,27 @@ void main()
         vec3 target_world_pos = (texture(position_map, pixelLightUV).xyz);
         vec3 target_flux = texture(flux_map, pixelLightUV).rgb;
 
-        vec3 light_dir = normalize(target_world_pos - FragPos);
-        float distance_sq = dot(target_world_pos - FragPos, target_world_pos - FragPos);
-        float light_geo = max(0.0, dot(target_norm, -light_dir));
-        float receiver_geo = max(0.0, dot(N, light_dir));
-        float geometry_term = receiver_geo * light_geo;
-        vec3 irradiance = target_flux * geometry_term / distance_sq;
-        //        vec3 result = target_world_pos * target_flux * ((max(0.0, dot(target_norm, (FragPos - target_world_pos))) *
-        //        max(0.0, dot(N, (target_world_pos - FragPos)))) / pow(length(FragPos - target_world_pos), 4.0));
+        float num = max(0.0, dot(target_norm, FragPos - target_world_pos)) * max(0.0, dot(target_norm, target_world_pos - FragPos));
+        float denom = pow(length(FragPos - target_world_pos), 4.0);
+//        vec3 result = target_flux * (num / denom);
+                vec3 result = target_flux * ((max(0.0, dot(target_norm, (FragPos - target_world_pos))) *
+                max(0.0, dot(N, (target_world_pos - FragPos)))) / pow(length(FragPos - target_world_pos), 4.0));
 
-        indirect += irradiance * weight;
+        indirect += result * weight;
         totalWeight += weight;
     }
+    indirect /= totalWeight;
 
     vec3 ambient = (kD * (diffuse) + (specular)) * ao;
     vec3 emission = texture2D(texture_emission, TexCoords).rgb;
-    vec3 color = (indirect * 20 * Lo) + emission  + ambient;
+    vec3 color = (indirect * 20 * Lo * shadow) + emission ;
 //    vec3 color = ((indirect * 200) * Lo) + emission;
 
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0 / 2.2));
 
 
-    FragColor = vec4(color, 1.0);
+    FragColor = vec4(color * 20, 1.0);
 }
 
 
@@ -325,16 +312,17 @@ float shadowCalculation(vec4 fragPos, vec3 n, vec3 l)
     float shadow = 0.0;
     vec2 texelSize = 1.0 / textureSize(shadow_map, 0);
     float currentDepth = projCoords.z;
-    float bias = max(0.05 * (1.0 - dot(n, l)), 0.005);
-    for (int x = -1; x <= 1; ++x)
+    float bias = max(0.025 * (1.0 - dot(n, l)), 0.0005);
+    int samples = 2;
+    for (int x = -samples; x <= samples; ++x)
     {
-        for (int y = -1; y <= 1; ++y)
+        for (int y = samples; y <= samples; ++y)
         {
             float pcfDepth = texture(shadow_map, projCoords.xy + vec2(x, y) * texelSize).r;
-            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+            shadow += currentDepth > pcfDepth + bias ? 1.0 : 0.0;
         }
     }
-    shadow /= 9.0;
+    shadow /= pow((samples * 2 + 1), 2);
     //    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
     return shadow;
 }
