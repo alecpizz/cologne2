@@ -5,6 +5,7 @@ in vec2 TexCoords;
 in vec3 FragPos;
 in vec3 WorldPos;
 in mat3 TBN;
+in vec4 FragPosLightSpace;
 
 struct Light
 {
@@ -36,10 +37,10 @@ layout (binding = 6) uniform samplerCube irradiance_map;
 layout (binding = 7) uniform samplerCube prefilter_map;
 layout (binding = 8) uniform sampler2D brdf;
 
-layout (binding = 9) uniform samplerCube shadow_map;
-layout (binding = 10) uniform samplerCube normal_map;
-layout (binding = 11) uniform samplerCube position_map;
-layout (binding = 12) uniform samplerCube flux_map;
+layout (binding = 9) uniform sampler2D shadow_map;
+layout (binding = 10) uniform sampler2D normal_map;
+layout (binding = 11) uniform sampler2D position_map;
+layout (binding = 12) uniform sampler2D flux_map;
 
 uniform float far_plane = 20.0f;
 uniform float ao_strength = 0.2;
@@ -51,6 +52,7 @@ float distributionGGX(vec3 N, vec3 H, float roughness);
 float geometrySchlickGGX(float NdotV, float roughness);
 float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
 float klemenVisibility(vec3 L, vec3 H);
+float shadowCalculation(vec4 fragPos, vec3 n, vec3 l);
 
 vec3 sampleOffsetDirections[20] = vec3[]
 (
@@ -85,28 +87,28 @@ vec3 get_random_vector(int index)
 }
 
 
-vec3 indirectLighting(vec3 uvFrag, vec3 n, vec3 x)
-{
-    vec3 result = vec3(0.0);
-    const int samples = 64;
-    const float sampleRadius = 0.09;
-    for(int i = 0; i < samples; i++)
-    {
-        vec3 rand = get_random_vector(i);
-        vec3 uv = uvFrag * sampleRadius * rand;
-        vec3 flux = texture(flux_map, uv).rgb;
-        vec3 x_p = texture(position_map, uv).xyz;
-        vec3 n_p = texture(normal_map, uv).xyz;
-
-        vec3 r = x - x_p;
-        float d2 = dot(r, r);
-        vec3 E_p = flux * (max(0.0, dot(n_p, r)) * max(0.0, dot(n, -r)));
-        E_p *= rand.x * rand.x / (d2 * d2);
-        result += E_p;
-    }
-    const float intensity = 7.5;
-    return result * intensity;
-}
+//vec3 indirectLighting(vec3 uvFrag, vec3 n, vec3 x)
+//{
+//    vec3 result = vec3(0.0);
+//    const int samples = 64;
+//    const float sampleRadius = 0.09;
+//    for(int i = 0; i < samples; i++)
+//    {
+//        vec3 rand = get_random_vector(i);
+//        vec3 uv = uvFrag * sampleRadius * rand;
+//        vec3 flux = texture(flux_map, uv).rgb;
+//        vec3 x_p = texture(position_map, uv).xyz;
+//        vec3 n_p = texture(normal_map, uv).xyz;
+//
+//        vec3 r = x - x_p;
+//        float d2 = dot(r, r);
+//        vec3 E_p = flux * (max(0.0, dot(n_p, r)) * max(0.0, dot(n, -r)));
+//        E_p *= rand.x * rand.x / (d2 * d2);
+//        result += E_p;
+//    }
+//    const float intensity = 7.5;
+//    return result * intensity;
+//}
 
 void main()
 {
@@ -140,7 +142,7 @@ void main()
     F0 = mix(F0, albedo, metallic);
 
     vec3 Lo = vec3(0.0);
-    vec3 lightDirection = vec3(0.0);
+    vec3 lightDirection = normalize(-lights[0].direction);
 
 
     vec3 fragToLight = FragPos - lights[0].position;
@@ -152,39 +154,30 @@ void main()
     float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
 
 
-    for (int i = 0; i < samples; i++)
-    {
-        vec3 sample_coord = fragToLight + sampleOffsetDirections[i] * diskRadius;
 
-        float closestDepth = texture(shadow_map, sample_coord).r;
-        closestDepth *= far_plane;
-        if (currentDepth - bias > closestDepth)
-            shadow += 1.0;
-    }
+    shadow = 1.0 - shadowCalculation(FragPosLightSpace, N, lightDirection);
 
-    shadow /= float(samples);
-    shadow = 1.0 - shadow;
-
-    vec3 indirect = indirectLighting(fragToLight, N, FragPos);
+//    vec3 indirect = indirectLighting(fragToLight, N, FragPos);
 
 
     for (int i = 0; i < num_lights; i++)
     {
         vec3 L = vec3(0.0);
+        vec3 radiance = vec3(0.0);
         if (lights[i].type == DIRECTIONAL)
         {
             L = normalize(-lights[i].direction);
-            lightDirection = L;
+            radiance = lights[i].color;
         }
         else if (lights[i].type == POINT)
         {
             L = normalize(lights[i].position - WorldPos);
+            float distance = length(lights[i].position - WorldPos);
+            float attenuation = 1.0 / (distance * distance);
+            radiance = lights[i].color * attenuation;
         }
         vec3 H = normalize(V + L);
 
-        float distance = length(lights[i].position - WorldPos);
-        float attenuation = 1.0 / (distance * distance);
-        vec3 radiance = lights[i].color * attenuation;
 
         float NDF = distributionGGX(N, H, roughness);
         float G = geometrySmith(N, V, L, roughness);
@@ -219,7 +212,7 @@ void main()
 
     vec3 ambient = (kD * (diffuse) + (specular)) * ao;
     vec3 emission = texture2D(texture_emission, TexCoords).rgb;
-    vec3 color =   Lo + emission + indirect;
+    vec3 color =  ambient +  Lo + emission;// + indirect;
 
 
     color = color / (color + vec3(1.0));
@@ -277,4 +270,29 @@ float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
     float ggx2 = geometrySchlickGGX(NdotV, roughness);
     float ggx1 = geometrySchlickGGX(NdotL, roughness);
     return ggx1 * ggx2;
+}
+
+float shadowCalculation(vec4 fragPos, vec3 n, vec3 l)
+{
+    vec3 projCoords = fragPos.xyz / fragPos.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    if(projCoords.z > 1.0)
+    {
+        return 0.0;
+    }
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(shadow_map, 0);
+    float currentDepth = projCoords.z;
+    float bias = max(0.05 * (1.0 - dot(n, l)), 0.005);
+    for(int x = -1; x <= 1; ++x)
+    {
+        for(int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture(shadow_map, projCoords.xy + vec2(x, y) * texelSize).r;
+            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+        }
+    }
+    shadow /= 9.0;
+//    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+    return shadow;
 }

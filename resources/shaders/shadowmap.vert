@@ -4,15 +4,18 @@ layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 uv;
 
 uniform mat4 model;
-out vec2 UV;
-out vec3 Norm;
-out vec3 Pos;
+uniform mat4 lightSpaceMatrix;
+out vec2 TexCoords;
+out vec3 Normal;
+out vec3 Position;
+out vec4 FragPos;
 
 void main()
 {
     vec4 worldPos = model * vec4(position, 1.0);
-    gl_Position = worldPos;
-    UV = uv;
-    Norm = mat3(transpose(inverse(model))) * normal;
-    Pos = worldPos.xyz;
+    gl_Position = lightSpaceMatrix * model * vec4(position, 1.0);
+    TexCoords = uv;
+    Normal = mat3(transpose(inverse(model))) * normal;
+    Position = worldPos.xyz;
+    FragPos = worldPos;
 }

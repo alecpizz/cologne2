@@ -67,8 +67,7 @@ namespace goon
             skybox_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/skybox.vert",
                                                      RESOURCES_PATH "shaders/skybox.frag");
             shadowmap_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/shadowmap.vert",
-                                                        RESOURCES_PATH "shaders/shadowmap.frag",
-                                                        RESOURCES_PATH "shaders/shadowmap.geom");
+                                                        RESOURCES_PATH "shaders/shadowmap.frag");
             fbo_debug_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/framebufferoutput.vert",
                                                         RESOURCES_PATH "shaders/framebufferoutput.frag");
         }
@@ -85,63 +84,52 @@ namespace goon
 
             //shadow map texture
             glGenTextures(1, &shadowID);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, shadowID);
-
-            for (uint32_t i = 0; i < 6; i++)
-            {
-                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT,
-                             width, height, 0,GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-            }
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+            glBindTexture(GL_TEXTURE_2D, shadowID);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+                         width, height, 0,GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            float clamp_color[] = {1.0f, 1.0f, 1.0f, 1.0f};
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, clamp_color);
             shadow_map = Texture(shadowID, width, height, 1);
 
             //normal map texture
             glGenTextures(1, &normalID);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, normalID);
-            for (uint32_t i = 0; i < 6; i++)
-            {
-                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB32F,
-                             width, height, 0, GL_RGB, GL_FLOAT, nullptr);
-            }
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+            glBindTexture(GL_TEXTURE_2D, normalID);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F,
+                         width, height, 0, GL_RGB, GL_FLOAT, nullptr);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            float border_color[] = {0.0f, 0.0f, 0.0f, 0.0f};
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border_color);
             normal_map = Texture(normalID, width, height, 1);
 
             //position texture
             glGenTextures(1, &positionID);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, positionID);
-            for (uint32_t i = 0; i < 6; i++)
-            {
-                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB32F, width, height,
-                             0, GL_RGB, GL_FLOAT, nullptr);
-            }
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+            glBindTexture(GL_TEXTURE_2D, positionID);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height,
+                         0, GL_RGB, GL_FLOAT, nullptr);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border_color);
             position_map = Texture(positionID, width, height, 1);
 
             //flux texture
             glGenTextures(1, &fluxID);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, fluxID);
-            for (uint32_t i = 0; i < 6; i++)
-            {
-                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height,
-                             0, GL_RGB, GL_FLOAT, nullptr);
-            }
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+            glBindTexture(GL_TEXTURE_2D, fluxID);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height,
+                         0, GL_RGB, GL_FLOAT, nullptr);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, clamp_color);
             flux_map = Texture(fluxID, width, height, 1);
 
 
@@ -583,40 +571,28 @@ namespace goon
 
         void shadow_pass(Scene &scene)
         {
-            float aspect = static_cast<float>(shadow_map.get_width()) / static_cast<float>(shadow_map.get_height());
+            glDisable(GL_CULL_FACE);
             float near = 0.1f;
-            float far = 50.0f;
-            glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), aspect, near, far);
-            glm::vec3 lightPos = lights[0].position;
-            std::vector<glm::mat4> shadowTransforms;
-            shadowTransforms.push_back(shadowProj *
-                                       glm::lookAt(lightPos, lightPos + glm::vec3(1.0, 0.0, 0.0),
-                                                   glm::vec3(0.0, -1.0, 0.0)));
-            shadowTransforms.push_back(shadowProj *
-                                       glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0),
-                                                   glm::vec3(0.0, -1.0, 0.0)));
-            shadowTransforms.push_back(shadowProj *
-                                       glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 1.0, 0.0),
-                                                   glm::vec3(0.0, 0.0, 1.0)));
-            shadowTransforms.push_back(shadowProj *
-                                       glm::lookAt(lightPos, lightPos + glm::vec3(0.0, -1.0, 0.0),
-                                                   glm::vec3(0.0, 0.0, -1.0)));
-            shadowTransforms.push_back(shadowProj *
-                                       glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, 1.0),
-                                                   glm::vec3(0.0, -1.0, 0.0)));
-            shadowTransforms.push_back(shadowProj *
-                                       glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, -1.0),
-                                                   glm::vec3(0.0, -1.0, 0.0)));
+            float far = 300.0f;
+            glm::mat4 lightProjection = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, near, far);
+            glm::vec3 light_pos = lights[0].position;
+            glm::vec3 light_dir = glm::normalize(lights[0].direction);
+            glm::vec3 up_world = glm::vec3(0.0f, 1.0f, 0.0f);
+
+            glm::vec3 target_position = light_pos + (50.0f * light_dir);
+
+            glm::vec3 light_right = glm::normalize(glm::cross(light_dir, up_world));
+            glm::vec3 light_up = glm::normalize(glm::cross(light_right, light_dir));
+            glm::mat4 light_view = glm::lookAt(light_pos, target_position, light_up);
+            glm::mat4 lightViewProj = lightProjection * light_view;
+
 
             glViewport(0, 0, shadow_map.get_width(), shadow_map.get_height());
             glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
             glClear(GL_DEPTH_BUFFER_BIT);
             shadowmap_shader->bind();
-            for (unsigned int i = 0; i < 6; ++i)
-                shadowmap_shader->set_mat4(std::string("shadowMatrices[" + std::to_string(i) + "]").c_str(),
-                                           glm::value_ptr(shadowTransforms[i]));
-            shadowmap_shader->set_float("far_plane", far);
-            shadowmap_shader->set_vec3("lightPos", glm::value_ptr(lightPos));
+            shadowmap_shader->set_mat4("lightSpaceMatrix", glm::value_ptr(lightViewProj));
+
             for (size_t i = 0; i < scene.get_model_count(); i++)
             {
                 auto model = scene.get_model_by_index(i);
@@ -635,7 +611,8 @@ namespace goon
             }
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             lit_shader->bind();
-            lit_shader->set_float("far_plane", far);
+            lit_shader->set_mat4("lightSpaceMatrix", glm::value_ptr(lightViewProj));
+            glEnable(GL_CULL_FACE);
         }
 
         void skybox_pass()
@@ -677,6 +654,10 @@ namespace goon
         _impl->shadow_pass(scene);
         _impl->lit_pass(scene);
         _impl->skybox_pass();
+        glViewport(0, 0, 250, 250);
+        _impl->fbo_debug_shader->bind();
+        _impl->shadow_map.bind(0);
+        _impl->render_cube();
     }
 
     void Renderer::reload_shaders()
@@ -718,9 +699,9 @@ namespace goon
         _impl->gen_prefilter_map();
         _impl->gen_brdf_map();
         glEnable(GL_CULL_FACE);
-        _impl->add_light(Light(glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(-2.0f, -1.0f, -0.3f),
-                               glm::vec3(300.0f, 300.0f, 300.0f), 6.0f, 1.0f,
-                               LightType::Point));
+        _impl->add_light(Light(glm::vec3(30.0f, 40.0f, 10.0f), glm::vec3(-.8f, -.4f, -0.4f),
+                               glm::vec3(2.0f, 2.0f, 2.0f), 6.0f, 1.0f,
+                               LightType::Directional));
         _impl->init_shadow_map();
     }
 }
