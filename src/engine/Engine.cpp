@@ -3,7 +3,7 @@
 //
 
 #include "Engine.h"
-
+#include "Physics.h"
 #include "DebugUI.h"
 #include "gpch.h"
 #include "Input.h"
@@ -45,6 +45,7 @@ namespace goon
 
     Engine::~Engine()
     {
+        goon::physics::destroy();
         delete _impl;
     }
 
@@ -83,6 +84,7 @@ namespace goon
         _impl->event_manager = std::unique_ptr<EventManager>(new EventManager());
         _impl->camera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 1.0f),
                                                  glm::vec3(0.0f, 1.0f, 0.0f));
+        physics::init();
         if (_impl->window == nullptr || _impl->renderer == nullptr)
         {
             LOG_ERROR("Failed to initialize window or renderer!");
@@ -103,12 +105,13 @@ namespace goon
             _impl->event_manager->poll_events();
 
             _impl->camera->update(et.elapsed);
+            _impl->scene->update(et.elapsed);
+            physics::update(et.elapsed);
 
             _impl->debug_ui->clear();
 
             _impl->window->clear();
 
-            _impl->scene->update(et.elapsed);
 
             _impl->renderer->render_scene(*_impl->scene);
 

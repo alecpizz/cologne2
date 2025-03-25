@@ -222,7 +222,7 @@ void main()
     projCoords = projCoords * 0.5 + 0.5;
 
     //TODO: store this in a viewport sized texture.
-    uint rsmSamples = 128;
+    uint rsmSamples = 64;
     float totalWeight = 0.0;
     for (uint i = 0; i < rsmSamples; i++)
     {
@@ -230,7 +230,7 @@ void main()
 //        float t = rand(FragPos.xy );
 //        mat2 rot = mat2(cos(t), sin(t), -sin(t), cos(t));
 //        xi = (rot * (xi - 0.5)) + 0.5;
-        float r = xi.x * 0.2;
+        float r = xi.x * 0.3;
         float theta = xi.y * (2 * PI);
         vec2 pixelLightUV = projCoords.xy + vec2(r * cos(theta), r * sin(theta));
         float weight = xi.x * xi.x;
