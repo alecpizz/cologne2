@@ -31,7 +31,7 @@ namespace goon
             SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
             SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
             SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
-            window = SDL_CreateWindow("gooner joshua", w, h, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+            window = SDL_CreateWindow("cologne 2", w, h, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
             if (window == nullptr)
             {
                 SDL_Quit();

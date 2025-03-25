@@ -55,7 +55,7 @@ namespace goon
 
     void DebugUI::present()
     {
-        ImGui::Begin("gooning window");
+        ImGui::Begin("cologne window");
 
         size_t model_count = Engine::get_scene()->get_model_count();
         for (size_t i = 0; i < model_count; i++)
