@@ -5,6 +5,7 @@
 #include "Engine.h"
 #include "Physics.h"
 #include "DebugUI.h"
+#include "engine/renderer/DebugRenderer.h"
 #include "gpch.h"
 #include "Input.h"
 
@@ -18,6 +19,7 @@ namespace goon
         std::unique_ptr<EventManager> event_manager = nullptr;
         std::unique_ptr<DebugUI> debug_ui = nullptr;
         std::unique_ptr<Scene> scene = nullptr;
+        std::unique_ptr<DebugRenderer> debug_renderer = nullptr;
         std::unique_ptr<Camera> camera = nullptr;
         bool running = true;
     };
@@ -84,6 +86,7 @@ namespace goon
         _impl->event_manager = std::unique_ptr<EventManager>(new EventManager());
         _impl->camera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 1.0f),
                                                  glm::vec3(0.0f, 1.0f, 0.0f));
+        _impl->debug_renderer = std::unique_ptr<DebugRenderer>();
         physics::init();
         if (_impl->window == nullptr || _impl->renderer == nullptr)
         {
@@ -112,9 +115,11 @@ namespace goon
 
             _impl->window->clear();
 
+            _impl->debug_renderer->clear();
 
             _impl->renderer->render_scene(*_impl->scene);
 
+            _impl->debug_renderer->present();
             _impl->debug_ui->present();
 
             _impl->window->present();
