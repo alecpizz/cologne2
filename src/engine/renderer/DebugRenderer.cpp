@@ -11,8 +11,46 @@ namespace goon
 
     struct DebugRenderer::Impl
     {
-        uint32_t vao;
         std::vector<debug_cmd> cmds;
+        std::vector<float> vertices;
+        std::vector<uint32_t> indices;
+        uint32_t VAO, VBO, EBO;
+
+        void init()
+        {
+            glGenVertexArrays(1, &VAO);
+            glGenBuffers(1, &VBO);
+            glGenBuffers(1, &EBO);
+
+        }
+
+        void draw()
+        {
+            vertices.clear();
+            indices.clear();
+            uint32_t index = 0;
+            for (auto& cmd : cmds)
+            {
+                vertices.push_back(cmd.p1.x);
+                vertices.push_back(cmd.p1.y);
+                vertices.push_back(cmd.p1.z);
+                vertices.push_back(cmd.color.r);
+                vertices.push_back(cmd.color.g);
+                vertices.push_back(cmd.color.b);
+
+                vertices.push_back(cmd.p2.x);
+                vertices.push_back(cmd.p2.y);
+                vertices.push_back(cmd.p2.z);
+                vertices.push_back(cmd.color.r);
+                vertices.push_back(cmd.color.g);
+                vertices.push_back(cmd.color.b);
+
+                indices.push_back(index);
+                indices.push_back(index + 1);
+                index += 2;
+            }
+
+        }
     };
 
 
@@ -38,16 +76,19 @@ namespace goon
 
     void DebugRenderer::clear()
     {
+        _impl->cmds.clear();
     }
 
     void DebugRenderer::present()
     {
+        _impl->draw();
     }
 
     DebugRenderer::DebugRenderer()
     {
         LOG_INFO("Starting DebugRenderer");
         _impl = new Impl();
+        _impl->init();
     }
 
     DebugRenderer::~DebugRenderer()
