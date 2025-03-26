@@ -1,62 +1,106 @@
 #include "DebugRenderer.h"
+
+#include <engine/Engine.h>
+#include "engine/Input.h"
 #include "gpch.h"
+#include "Shader.h"
 
 namespace goon
 {
-    struct debug_cmd
+    struct DebugVertex
+    {
+        glm::vec3 point;
+        glm::vec3 color;
+    };
+    struct DebugCmd
     {
         glm::vec3 p1, p2;
         glm::vec3 color;
     };
 
+
     struct DebugRenderer::Impl
     {
-        std::vector<debug_cmd> cmds;
-        std::vector<float> vertices;
-        std::vector<uint32_t> indices;
-        uint32_t VAO, VBO, EBO;
+        std::vector<DebugVertex> cmds;
+        uint32_t VAO, VBO;
+        uint32_t allocated_buffer_size;
+        uint32_t vertex_count;
+        std::unique_ptr<Shader> shader = nullptr;
+        bool is_drawing = true;
 
         void init()
         {
-            glGenVertexArrays(1, &VAO);
-            glGenBuffers(1, &VBO);
-            glGenBuffers(1, &EBO);
+            is_drawing = true;
+            shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/debug.vert", RESOURCES_PATH "shaders/debug.frag");
+        }
 
+        void update_vertex_data(std::vector<DebugVertex>& vertices)
+        {
+            if (VAO == 0)
+            {
+                glGenVertexArrays(1, &VAO);
+                glGenBuffers(1, &VBO);
+            }
+            glBindVertexArray(VAO);
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+            size_t bufferSize = vertices.size() * sizeof(DebugVertex);
+            if (bufferSize > allocated_buffer_size)
+            {
+                glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_DYNAMIC_DRAW);
+                allocated_buffer_size = bufferSize;
+            }
+
+            glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSize, vertices.data());
+
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void*)offsetof(DebugVertex, point));
+
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void*)offsetof(DebugVertex, color));
+            glBindVertexArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            vertex_count = vertices.size();
         }
 
         void draw()
         {
-            vertices.clear();
-            indices.clear();
-            uint32_t index = 0;
-            for (auto& cmd : cmds)
+            if (goon::Input::key_pressed(Input::Key::P))
             {
-                vertices.push_back(cmd.p1.x);
-                vertices.push_back(cmd.p1.y);
-                vertices.push_back(cmd.p1.z);
-                vertices.push_back(cmd.color.r);
-                vertices.push_back(cmd.color.g);
-                vertices.push_back(cmd.color.b);
-
-                vertices.push_back(cmd.p2.x);
-                vertices.push_back(cmd.p2.y);
-                vertices.push_back(cmd.p2.z);
-                vertices.push_back(cmd.color.r);
-                vertices.push_back(cmd.color.g);
-                vertices.push_back(cmd.color.b);
-
-                indices.push_back(index);
-                indices.push_back(index + 1);
-                index += 2;
+                is_drawing = !is_drawing;
             }
+            if (!is_drawing)
+            {
+                cmds.clear();
+                return;
+            }
+            glDisable(GL_DEPTH_TEST);
+            glDisable(GL_CULL_FACE);
+            glDisable(GL_BLEND);
+            glPointSize(8.0f);
 
+            shader->bind();
+
+            update_vertex_data(cmds);
+
+            cmds.clear();
+
+            shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
+            shader->set_mat4("projection", glm::value_ptr(Engine::get_camera()->get_projection_matrix()));
+            glBindVertexArray(VAO);
+            glDrawArrays(GL_LINES, 0, vertex_count);
+
+            glEnable(GL_DEPTH_TEST);
+            glEnable(GL_CULL_FACE);
+            glEnable(GL_BLEND);
         }
     };
 
 
     void DebugRenderer::draw_line(glm::vec3 p1, glm::vec3 p2, glm::vec3 color)
     {
-        _impl->cmds.emplace_back(debug_cmd{p1, p2, color});
+        _impl->cmds.emplace_back(DebugVertex(p1, color));
+        _impl->cmds.emplace_back(DebugVertex(p2, color));
     }
 
     void DebugRenderer::draw_box(glm::vec3 center, glm::vec3 size, glm::vec3 color)
@@ -69,15 +113,11 @@ namespace goon
 
     void DebugRenderer::draw_triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 color)
     {
-        _impl->cmds.emplace_back(debug_cmd{p1, p2, color});
-        _impl->cmds.emplace_back(debug_cmd{p2, p3, color});
-        _impl->cmds.emplace_back(debug_cmd{p3, p1, color});
+        draw_line(p1, p2, color);
+        draw_line(p2, p3, color);
+        draw_line(p3, p1, color);
     }
 
-    void DebugRenderer::clear()
-    {
-        _impl->cmds.clear();
-    }
 
     void DebugRenderer::present()
     {

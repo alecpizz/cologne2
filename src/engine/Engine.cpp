@@ -76,6 +76,10 @@ namespace goon
         return _instance->_impl->scene.get();
     }
 
+    DebugRenderer *Engine::get_debug_renderer()
+    {
+        return _instance->_impl->debug_renderer.get();
+    }
 
     bool Engine::init(uint32_t width, uint32_t height)
     {
@@ -86,7 +90,7 @@ namespace goon
         _impl->event_manager = std::unique_ptr<EventManager>(new EventManager());
         _impl->camera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 1.0f),
                                                  glm::vec3(0.0f, 1.0f, 0.0f));
-        _impl->debug_renderer = std::unique_ptr<DebugRenderer>();
+        _impl->debug_renderer = std::make_unique<DebugRenderer>();
         physics::init();
         if (_impl->window == nullptr || _impl->renderer == nullptr)
         {
@@ -114,8 +118,6 @@ namespace goon
             _impl->debug_ui->clear();
 
             _impl->window->clear();
-
-            _impl->debug_renderer->clear();
 
             _impl->renderer->render_scene(*_impl->scene);
 

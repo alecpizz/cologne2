@@ -17,6 +17,10 @@
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 #include <Jolt/RegisterTypes.h>
 
+#include "Engine.h"
+#include "Jolt/Renderer/DebugRendererSimple.h"
+#include "renderer/DebugRenderer.h"
+
 JPH_SUPPRESS_WARNINGS
 
 using namespace JPH;
@@ -124,6 +128,28 @@ namespace goon::physics
         }
     };
 
+    class PhysDebugRenderer : public JPH::DebugRendererSimple
+    {
+    public:
+        void DrawLine(RVec3Arg inFrom, RVec3Arg inTo, ColorArg inColor) override
+        {
+            Engine::get_debug_renderer()->draw_line(glm::vec3(inFrom.GetX(), inFrom.GetY(), inFrom.GetZ()),
+                glm::vec3(inTo.GetX(), inTo.GetY(), inTo.GetZ()),
+                glm::vec3(inColor.r, inColor.g, inColor.b));
+        }
+        void DrawTriangle(RVec3Arg inV1, RVec3Arg inV2, RVec3Arg inV3, ColorArg inColor, ECastShadow inCastShadow) override
+        {
+            Engine::get_debug_renderer()->draw_triangle(glm::vec3(inV1.GetX(), inV1.GetY(), inV1.GetZ()),
+                glm::vec3(inV2.GetX(), inV2.GetY(), inV2.GetZ()),
+                glm::vec3(inV3.GetX(), inV3.GetY(), inV3.GetZ()),
+                glm::vec3(inColor.r, inColor.g, inColor.b));
+        }
+        void DrawText3D(RVec3Arg inPosition, const string_view &inString, ColorArg inColor, float inHeight)
+        {
+            //TODO!
+        }
+    };
+
     TempAllocatorImpl* temp_allocator = nullptr;
     JobSystemThreadPool* job_system = nullptr;
     BroadPhaseLayerImpl broad_phase_layer;
@@ -132,6 +158,7 @@ namespace goon::physics
     PhysicsSystem physics_system;
     Body *floor = nullptr;
     BodyID box_id;
+    PhysDebugRenderer* debug_renderer = nullptr;
 
     void init()
     {
@@ -151,8 +178,9 @@ namespace goon::physics
         const uint32_t max_body_contact_constraints = 1024;
         physics_system.Init(max_bodies, max_body_mutexes, max_body_pairs, max_body_contact_constraints,
                             broad_phase_layer, object_vs_broad_phase_layer_filter, object_vs_object_filter);
-        auto &body_interface = physics_system.GetBodyInterface();
 
+        auto &body_interface = physics_system.GetBodyInterface();
+        debug_renderer = new PhysDebugRenderer();
         //make a floor
         BoxShapeSettings floor_shape_settings = (Vec3(100.0f, 1.0f, 100.0f));
         floor_shape_settings.SetEmbedded();
@@ -167,7 +195,7 @@ namespace goon::physics
 
         body_interface.AddBody(floor->GetID(), EActivation::DontActivate);
 
-        BodyCreationSettings box_settings(new BoxShape(Vec3(0.5f, 0.5f, 0.5f)),
+        BodyCreationSettings box_settings(new BoxShape(Vec3(1.0f, 1.0f, 1.0f)),
                                           RVec3(0.0f, 2.0f, 0.0f), Quat::sIdentity(), EMotionType::Dynamic,
                                           Layers::MOVING);
         box_id = body_interface.CreateAndAddBody(box_settings, EActivation::Activate);
@@ -179,6 +207,10 @@ namespace goon::physics
     {
         const int collisionSteps = 1;
         physics_system.Update(dt, collisionSteps, temp_allocator, job_system);
+        BodyManager::DrawSettings draw_settings;
+        draw_settings.mDrawShape = true;
+        draw_settings.mDrawShapeWireframe = true;
+        physics_system.DrawBodies(draw_settings, debug_renderer);
     }
 
     void destroy()
@@ -190,6 +222,7 @@ namespace goon::physics
         body_interface.DestroyBody(floor->GetID());
         UnregisterTypes();
         delete temp_allocator;
+        delete debug_renderer;
         delete job_system;
         delete Factory::sInstance;
         Factory::sInstance = nullptr;

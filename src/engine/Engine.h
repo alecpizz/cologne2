@@ -14,6 +14,8 @@
 #include "engine/Camera.h"
 #include "engine/EventManager.h"
 #include "engine/GoodGPUs.h"
+#include "engine/renderer/DebugRenderer.h"
+
 
 namespace goon
 {
@@ -30,6 +32,7 @@ namespace goon
 
         EventManager *get_event_manager() const;
 
+        static DebugRenderer *get_debug_renderer();
         static Camera *get_camera();
         static Scene *get_scene();
 
