@@ -8,6 +8,18 @@ namespace goon
 {
     struct Player::Impl
     {
-
+        glm::vec3 position;
     };
+
+    Player::Player()
+    {
+        _impl = new Impl();
+    }
+
+    Player::~Player()
+    {
+        delete _impl;
+    }
+
+
 }
