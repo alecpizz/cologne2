@@ -21,6 +21,7 @@ namespace goon
         std::unique_ptr<Scene> scene = nullptr;
         std::unique_ptr<DebugRenderer> debug_renderer = nullptr;
         std::unique_ptr<Camera> camera = nullptr;
+        std::unique_ptr<Player> player = nullptr;
         bool running = true;
     };
 
@@ -90,6 +91,7 @@ namespace goon
         _impl->event_manager = std::unique_ptr<EventManager>(new EventManager());
         _impl->camera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 1.0f),
                                                  glm::vec3(0.0f, 1.0f, 0.0f));
+        _impl->player = std::make_unique<Player>();
         _impl->debug_renderer = std::make_unique<DebugRenderer>();
         physics::init();
         if (_impl->window == nullptr || _impl->renderer == nullptr)

@@ -9,6 +9,7 @@
 
 */
 #pragma once
+#include "Player.h"
 #include "engine/renderer/Renderer.h"
 #include "engine/Window.h"
 #include "engine/Camera.h"
@@ -35,6 +36,7 @@ namespace goon
         static DebugRenderer *get_debug_renderer();
         static Camera *get_camera();
         static Scene *get_scene();
+        static Player *get_player();
 
         Engine(Engine &&) = delete;
 
