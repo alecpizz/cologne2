@@ -3,12 +3,17 @@
 //
 
 #include "Player.h"
+#include <Jolt/Jolt.h>
 
 namespace goon
 {
     struct Player::Impl
     {
         glm::vec3 position;
+        void init()
+        {
+
+        }
     };
 
     Player::Player()
@@ -21,5 +26,8 @@ namespace goon
         delete _impl;
     }
 
+    void Player::update(float dt)
+    {
 
+    }
 }
