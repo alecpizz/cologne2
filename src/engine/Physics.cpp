@@ -160,8 +160,6 @@ namespace goon::physics
     ObjectVsBroadPhaseLayerFilterImpl object_vs_broad_phase_layer_filter;
     ObjectLayerPairFilterImpl object_vs_object_filter;
     PhysicsSystem physics_system;
-    Body *floor = nullptr;
-    BodyID box_id;
     PhysDebugRenderer *debug_renderer = nullptr;
     std::unordered_map<Model *, std::vector<JPH::BodyID> > colliders;
 
@@ -186,24 +184,6 @@ namespace goon::physics
 
         auto &body_interface = physics_system.GetBodyInterface();
         debug_renderer = new PhysDebugRenderer();
-        //make a floor
-        BoxShapeSettings floor_shape_settings = (Vec3(100.0f, 1.0f, 100.0f));
-        floor_shape_settings.SetEmbedded();
-
-        ShapeSettings::ShapeResult floor_shape_result = floor_shape_settings.Create();
-        ShapeRefC floor_shape = floor_shape_result.Get();
-
-        BodyCreationSettings floor_settings(floor_shape,
-                                            RVec3(0.0f, -1.0f, 0.0f), Quat::sIdentity(),
-                                            EMotionType::Static, Layers::NON_MOVING);
-        floor = body_interface.CreateBody(floor_settings);
-
-        body_interface.AddBody(floor->GetID(), EActivation::DontActivate);
-
-        BodyCreationSettings box_settings(new BoxShape(Vec3(0.5f, 0.5f, 0.5f)),
-                                          RVec3(0.0f, 2.0f, 0.0f), Quat::sIdentity(), EMotionType::Dynamic,
-                                          Layers::MOVING);
-        box_id = body_interface.CreateAndAddBody(box_settings, EActivation::Activate);
 
         physics_system.OptimizeBroadPhase();
     }
@@ -248,13 +228,13 @@ namespace goon::physics
                               size_t num_indices)
     {
         JPH::TriangleList triangle_list;
-        for (size_t i = 0; i < num_vertices / 3; i += 3)
+        for (int i = 0; i * 3 < num_indices; i++)
         {
-            JPH::Triangle triangle =
+            Triangle triangle =
             {
-                glm_vec3_to_float3(vertices[indices[i]].position),
-                glm_vec3_to_float3(vertices[indices[i + 1]].position),
-                glm_vec3_to_float3(vertices[indices[i + 2]].position),
+                glm_vec3_to_float3(vertices[indices[3 * i]].position),
+                glm_vec3_to_float3(vertices[indices[3 * i + 1]].position),
+                glm_vec3_to_float3(vertices[indices[3 * i + 2]].position)
             };
             triangle_list.emplace_back(triangle);
         }
@@ -270,6 +250,7 @@ namespace goon::physics
             colliders[model] = std::vector<JPH::BodyID>();
         }
         colliders[model].push_back(id);
+        physics_system.OptimizeBroadPhase();
     }
 
     void update_mesh_collider(Model *model)
@@ -290,15 +271,12 @@ namespace goon::physics
                                                   glm_quat_to_quat(model->get_transform()->rotation),
                                                   EActivation::DontActivate);
         }
+        physics_system.OptimizeBroadPhase();
     }
 
     void destroy()
     {
         auto &body_interface = physics_system.GetBodyInterface();
-        body_interface.RemoveBody(box_id);
-        body_interface.DestroyBody(box_id);
-        body_interface.RemoveBody(floor->GetID());
-        body_interface.DestroyBody(floor->GetID());
         UnregisterTypes();
         delete temp_allocator;
         delete debug_renderer;

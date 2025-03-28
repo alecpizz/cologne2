@@ -13,6 +13,7 @@ namespace goon::physics
 
     static constexpr uint8_t NON_MOVING(0);
     static constexpr uint8_t MOVING(1);
+    //TODO: Get these out!
     JPH::PhysicsSystem* get_physics_system();
     JPH::TempAllocator* get_temp_allocator();
     void create_mesh_collider(Model*, const Vertex *vertices, size_t num_vertices,
