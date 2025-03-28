@@ -18,6 +18,7 @@ namespace goon
         Player &operator=(const Player &) = delete;
 
         glm::vec3 get_position();
+        glm::vec3 get_camera_position();
 
         void update(float dt);
 

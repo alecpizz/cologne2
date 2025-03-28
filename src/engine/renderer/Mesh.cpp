@@ -1,7 +1,9 @@
 ﻿#include "Mesh.h"
 
+
 namespace goon
 {
+
     Mesh::Mesh(const Vertex *vertices, size_t num_vertices,
                const uint32_t *indices, size_t num_indices, uint32_t material)
     {
@@ -34,6 +36,7 @@ namespace goon
         glVertexArrayAttribBinding(_vao, 3, 0);
 
         _material_index = material;
+
     }
 
     Mesh::~Mesh()

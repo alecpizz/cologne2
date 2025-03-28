@@ -96,6 +96,12 @@ namespace goon
             Engine::get_renderer()->reload_shaders();
         }
 
+        bool free_cam = Engine::get_camera()->is_free_cam();
+        if (ImGui::Checkbox("Free Cam", &free_cam))
+        {
+            Engine::get_camera()->set_free_cam(free_cam);
+        }
+
         glm::vec3 dir_light = Engine::get_renderer()->get_directional_light().direction;
         glm::vec3 dir_light_pos = Engine::get_renderer()->get_directional_light().position;;
         if (ImGui::InputFloat3("Directional light direction", glm::value_ptr(dir_light)))

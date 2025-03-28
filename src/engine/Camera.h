@@ -27,11 +27,16 @@ namespace goon
 
         glm::mat4 get_projection_matrix() const;
 
+        void set_free_cam(bool on);
+
+        bool is_free_cam() const;
+
         float get_fov() const;
 
         void update(float dt);
 
     private:
+        bool _is_free_cam = false;
         float fov = glm::radians(45.0f);
         glm::vec3 _position = {0.0f, 0.0f, 0.0f};
         glm::vec3 _forward = {0.0f, 0.0f, 1.0f};

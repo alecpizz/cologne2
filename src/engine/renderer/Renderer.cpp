@@ -574,13 +574,13 @@ namespace goon
         {
             glDisable(GL_CULL_FACE);
             float near = 0.1f;
-            float far = 300.0f;
+            float far = 20.0f;
             glm::mat4 lightProjection = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, near, far);
             glm::vec3 light_pos = lights[0].position;
             glm::vec3 light_dir = glm::normalize(lights[0].direction);
             glm::vec3 up_world = glm::vec3(0.0f, 1.0f, 0.0f);
 
-            glm::vec3 target_position = light_pos + (50.0f * light_dir);
+            glm::vec3 target_position = light_pos + (5.0f * light_dir);
 
             glm::vec3 light_right = glm::normalize(glm::cross(light_dir, up_world));
             glm::vec3 light_up = glm::normalize(glm::cross(light_right, light_dir));
@@ -700,7 +700,7 @@ namespace goon
         _impl->gen_prefilter_map();
         _impl->gen_brdf_map();
         glEnable(GL_CULL_FACE);
-        _impl->add_light(Light(glm::vec3(30.0f, 40.0f, 10.0f), glm::vec3(-.8f, -.4f, -0.4f),
+        _impl->add_light(Light(glm::vec3(0.790f, -0.613f, 0.024f), glm::vec3(0.790f, -0.613f, 0.024f),
                                glm::vec3(2.0f, 2.0f, 2.0f), 6.0f, 1.0f,
                                LightType::Directional));
         _impl->add_light(Light(glm::vec3(0.0f, 10.0f, 10.0f), glm::vec3(.0f),

@@ -16,9 +16,10 @@
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 #include <Jolt/RegisterTypes.h>
+#include <Jolt/Physics/Collision/Shape/MeshShape.h>
+#include <Jolt/Renderer/DebugRendererSimple.h>
 
 #include "Engine.h"
-#include "Jolt/Renderer/DebugRendererSimple.h"
 #include "renderer/DebugRenderer.h"
 
 JPH_SUPPRESS_WARNINGS
@@ -134,31 +135,35 @@ namespace goon::physics
         void DrawLine(RVec3Arg inFrom, RVec3Arg inTo, ColorArg inColor) override
         {
             Engine::get_debug_renderer()->draw_line(glm::vec3(inFrom.GetX(), inFrom.GetY(), inFrom.GetZ()),
-                glm::vec3(inTo.GetX(), inTo.GetY(), inTo.GetZ()),
-                glm::vec3(inColor.r, inColor.g, inColor.b));
+                                                    glm::vec3(inTo.GetX(), inTo.GetY(), inTo.GetZ()),
+                                                    glm::vec3(inColor.r, inColor.g, inColor.b));
         }
-        void DrawTriangle(RVec3Arg inV1, RVec3Arg inV2, RVec3Arg inV3, ColorArg inColor, ECastShadow inCastShadow) override
+
+        void DrawTriangle(RVec3Arg inV1, RVec3Arg inV2, RVec3Arg inV3, ColorArg inColor,
+                          ECastShadow inCastShadow) override
         {
             Engine::get_debug_renderer()->draw_triangle(glm::vec3(inV1.GetX(), inV1.GetY(), inV1.GetZ()),
-                glm::vec3(inV2.GetX(), inV2.GetY(), inV2.GetZ()),
-                glm::vec3(inV3.GetX(), inV3.GetY(), inV3.GetZ()),
-                glm::vec3(inColor.r, inColor.g, inColor.b));
+                                                        glm::vec3(inV2.GetX(), inV2.GetY(), inV2.GetZ()),
+                                                        glm::vec3(inV3.GetX(), inV3.GetY(), inV3.GetZ()),
+                                                        glm::vec3(inColor.r, inColor.g, inColor.b));
         }
+
         void DrawText3D(RVec3Arg inPosition, const string_view &inString, ColorArg inColor, float inHeight)
         {
             //TODO!
         }
     };
 
-    TempAllocatorImpl* temp_allocator = nullptr;
-    JobSystemThreadPool* job_system = nullptr;
+    TempAllocatorImpl *temp_allocator = nullptr;
+    JobSystemThreadPool *job_system = nullptr;
     BroadPhaseLayerImpl broad_phase_layer;
     ObjectVsBroadPhaseLayerFilterImpl object_vs_broad_phase_layer_filter;
     ObjectLayerPairFilterImpl object_vs_object_filter;
     PhysicsSystem physics_system;
     Body *floor = nullptr;
     BodyID box_id;
-    PhysDebugRenderer* debug_renderer = nullptr;
+    PhysDebugRenderer *debug_renderer = nullptr;
+    std::unordered_map<Model *, std::vector<JPH::BodyID> > colliders;
 
     void init()
     {
@@ -195,7 +200,7 @@ namespace goon::physics
 
         body_interface.AddBody(floor->GetID(), EActivation::DontActivate);
 
-        BodyCreationSettings box_settings(new BoxShape(Vec3(1.0f, 1.0f, 1.0f)),
+        BodyCreationSettings box_settings(new BoxShape(Vec3(0.5f, 0.5f, 0.5f)),
                                           RVec3(0.0f, 2.0f, 0.0f), Quat::sIdentity(), EMotionType::Dynamic,
                                           Layers::MOVING);
         box_id = body_interface.CreateAndAddBody(box_settings, EActivation::Activate);
@@ -213,9 +218,83 @@ namespace goon::physics
         physics_system.DrawBodies(draw_settings, debug_renderer);
     }
 
+    JPH::PhysicsSystem *get_physics_system()
+    {
+        return &physics_system;
+    }
+
+    JPH::TempAllocator *get_temp_allocator()
+    {
+        return temp_allocator;
+    }
+
+    JPH::Float3 glm_vec3_to_float3(const glm::vec3 &v)
+    {
+        return JPH::Float3(v.x, v.y, v.z);
+    }
+
+    JPH::Vec3 glm_vec3_to_vec3(const glm::vec3 &v)
+    {
+        return JPH::Vec3(v.x, v.y, v.z);
+    }
+
+    JPH::Quat glm_quat_to_quat(const glm::quat &q)
+    {
+        return JPH::Quat(q.x, q.y, q.z, q.w).Normalized();
+    }
+
+
+    void create_mesh_collider(Model *model, const Vertex *vertices, size_t num_vertices, const uint32_t *indices,
+                              size_t num_indices)
+    {
+        JPH::TriangleList triangle_list;
+        for (size_t i = 0; i < num_vertices / 3; i += 3)
+        {
+            JPH::Triangle triangle =
+            {
+                glm_vec3_to_float3(vertices[indices[i]].position),
+                glm_vec3_to_float3(vertices[indices[i + 1]].position),
+                glm_vec3_to_float3(vertices[indices[i + 2]].position),
+            };
+            triangle_list.emplace_back(triangle);
+        }
+        JPH::MeshShapeSettings mesh_settings(triangle_list);
+        mesh_settings.SetEmbedded();
+        JPH::BodyCreationSettings settings(&mesh_settings, JPH::Vec3::sZero(), JPH::Quat::sIdentity(),
+                                           JPH::EMotionType::Static, goon::physics::NON_MOVING);
+        auto id = physics_system.GetBodyInterface().CreateAndAddBody(
+            settings, JPH::EActivation::DontActivate);
+        LOG_INFO("Created id %d", id);
+        if (!colliders.contains(model))
+        {
+            colliders[model] = std::vector<JPH::BodyID>();
+        }
+        colliders[model].push_back(id);
+    }
+
+    void update_mesh_collider(Model *model)
+    {
+        if (!colliders.contains(model))
+        {
+            LOG_ERROR("Collider does not exist");
+        }
+        LOG_INFO("Updating mesh collider, model has %d colliders", colliders[model].size());
+        auto &body_interface = physics_system.GetBodyInterface();
+        for (size_t i = 0; i < colliders[model].size(); i++)
+        {
+            auto id = colliders[model][i];
+            const auto shape = body_interface.GetShape(id);
+            const auto new_shape = shape->ScaleShape(glm_vec3_to_vec3(model->get_transform()->scale)).Get();
+            body_interface.SetShape(id, new_shape, true, EActivation::DontActivate);
+            body_interface.SetPositionAndRotation(id, glm_vec3_to_vec3(model->get_transform()->translation),
+                                                  glm_quat_to_quat(model->get_transform()->rotation),
+                                                  EActivation::DontActivate);
+        }
+    }
+
     void destroy()
     {
-        auto& body_interface = physics_system.GetBodyInterface();
+        auto &body_interface = physics_system.GetBodyInterface();
         body_interface.RemoveBody(box_id);
         body_interface.DestroyBody(box_id);
         body_interface.RemoveBody(floor->GetID());

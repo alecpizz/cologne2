@@ -49,6 +49,16 @@ namespace goon
                                 0.1f, 300.0f);
     }
 
+    void Camera::set_free_cam(bool on)
+    {
+        _is_free_cam = on;
+    }
+
+    bool Camera::is_free_cam() const
+    {
+        return _is_free_cam;
+    }
+
     float Camera::get_fov() const
     {
         return fov;
@@ -68,10 +78,37 @@ namespace goon
             }
         }
 
+
         if (!_active)
         {
             return;
         }
+
+        glm::vec2 mouse = Input::get_relative_mouse();
+
+        _yaw += mouse.x * dt * 10.0f;
+        _pitch -= mouse.y * dt * 10.0f;
+        if (_pitch > 89.0f)
+        {
+            _pitch = 89.0f;
+        }
+        if (_pitch < -89.0f)
+        {
+            _pitch = -89.0f;
+        }
+        glm::vec3 front;
+        front.x = cos(glm::radians(_yaw)) * cos(glm::radians(_pitch));
+        front.y = sin(glm::radians(_pitch));
+        front.z = sin(glm::radians(_yaw)) * cos(glm::radians(_pitch));
+        _forward = glm::normalize(front);
+
+        if (!_is_free_cam)
+        {
+            glm::vec3 pos = Engine::get_player()->get_camera_position();
+            _position = pos;
+            return;
+        }
+
 
         float speed = 10.0f;
         if (goon::Input::key_down(Input::Key::LeftShift))
@@ -103,22 +140,6 @@ namespace goon
             _position -= _up * dt * speed;
         }
 
-        glm::vec2 mouse = Input::get_relative_mouse();
 
-        _yaw += mouse.x * dt * 10.0f;
-        _pitch -= mouse.y * dt * 10.0f;
-        if (_pitch > 89.0f)
-        {
-            _pitch = 89.0f;
-        }
-        if (_pitch < -89.0f)
-        {
-            _pitch = -89.0f;
-        }
-        glm::vec3 front;
-        front.x = cos(glm::radians(_yaw)) * cos(glm::radians(_pitch));
-        front.y = sin(glm::radians(_pitch));
-        front.z = sin(glm::radians(_yaw)) * cos(glm::radians(_pitch));
-        _forward = glm::normalize(front);
     }
 }

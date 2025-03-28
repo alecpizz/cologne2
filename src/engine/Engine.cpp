@@ -82,10 +82,16 @@ namespace goon
         return _instance->_impl->debug_renderer.get();
     }
 
+    Player *Engine::get_player()
+    {
+        return _instance->_impl->player.get();
+    }
+
     bool Engine::init(uint32_t width, uint32_t height)
     {
         _impl->debug_ui = std::unique_ptr<DebugUI>(new DebugUI());
         _impl->window = std::unique_ptr<Window>(new Window(width, height));
+        physics::init();
         _impl->scene = std::make_unique<Scene>();
         _impl->renderer = std::unique_ptr<Renderer>(new Renderer());
         _impl->event_manager = std::unique_ptr<EventManager>(new EventManager());
@@ -93,7 +99,6 @@ namespace goon
                                                  glm::vec3(0.0f, 1.0f, 0.0f));
         _impl->player = std::make_unique<Player>();
         _impl->debug_renderer = std::make_unique<DebugRenderer>();
-        physics::init();
         if (_impl->window == nullptr || _impl->renderer == nullptr)
         {
             LOG_ERROR("Failed to initialize window or renderer!");
@@ -115,6 +120,7 @@ namespace goon
 
             _impl->camera->update(et.elapsed);
             _impl->scene->update(et.elapsed);
+            _impl->player->update(et.elapsed);
             physics::update(et.elapsed);
 
             _impl->debug_ui->clear();

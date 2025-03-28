@@ -167,7 +167,7 @@ void main()
     float shadow = 1.0 - shadowCalculation(FragPosLightSpace, N, lightDirection);
 
 
-//    indirect /= rsmSamples;
+    //    indirect /= rsmSamples;
 
     for (int i = 0; i < num_lights; i++)
     {
@@ -201,7 +201,7 @@ void main()
         kD *= 1.0 - metallic;
 
         float NdotL = max(dot(N, L), 0.0);
-        Lo += ((kD * albedo / PI + specular) * radiance * NdotL)  ;
+        Lo += ((kD * albedo / PI + specular) * radiance * NdotL) * shadow;
     }
 
     vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
@@ -227,10 +227,10 @@ void main()
     for (uint i = 0; i < rsmSamples; i++)
     {
         vec2 xi = hammersley(i, rsmSamples);
-//        float t = rand(FragPos.xy );
-//        mat2 rot = mat2(cos(t), sin(t), -sin(t), cos(t));
-//        xi = (rot * (xi - 0.5)) + 0.5;
-        float r = xi.x * 0.3;
+//                float t = rand(FragPos.xy );
+//                mat2 rot = mat2(cos(t), sin(t), -sin(t), cos(t));
+//                xi = (rot * (xi - 0.5)) + 0.5;
+        float r = xi.x * 0.02;
         float theta = xi.y * (2 * PI);
         vec2 pixelLightUV = projCoords.xy + vec2(r * cos(theta), r * sin(theta));
         float weight = xi.x * xi.x;
@@ -240,25 +240,25 @@ void main()
 
         float num = max(0.0, dot(target_norm, FragPos - target_world_pos)) * max(0.0, dot(target_norm, target_world_pos - FragPos));
         float denom = pow(length(FragPos - target_world_pos), 4.0);
-//        vec3 result = target_flux * (num / denom);
-                vec3 result = target_flux * ((max(0.0, dot(target_norm, (FragPos - target_world_pos))) *
-                max(0.0, dot(N, (target_world_pos - FragPos)))) / pow(length(FragPos - target_world_pos), 4.0));
+        //        vec3 result = target_flux * (num / denom);
+        vec3 result = target_flux * ((max(0.0, dot(target_norm, (FragPos - target_world_pos))) *
+        max(0.0, dot(N, (target_world_pos - FragPos)))) / pow(length(FragPos - target_world_pos), 4.0));
 
         indirect += result * weight;
         totalWeight += weight;
     }
-    indirect /= rsmSamples;
+    //    indirect /= totalWeight;
 
     vec3 ambient = (kD * (diffuse) + (specular)) * ao;
     vec3 emission = texture2D(texture_emission, TexCoords).rgb;
-    vec3 color = (indirect * 20 * Lo * shadow) + emission ;
-//    vec3 color = ((indirect * 200) * Lo) + emission;
+    vec3 color = ambient + (indirect * Lo) + emission;
+    //    vec3 color = ((indirect * 200) * Lo) + emission;
 
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0 / 2.2));
 
 
-    FragColor = vec4(color * 20, 1.0);
+    FragColor = vec4(color, 1.0);
 }
 
 

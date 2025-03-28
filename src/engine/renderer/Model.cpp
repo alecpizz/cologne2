@@ -3,6 +3,9 @@
 //
 
 #include "Model.h"
+
+#include <engine/Physics.h>
+
 #include "gpch.h"
 #include "Mesh.h"
 #include "Texture.h"
@@ -19,6 +22,7 @@ namespace goon
         std::vector<Mesh> meshes = std::vector<Mesh>();
         std::vector<Material> materials = std::vector<Material>();
         std::string directory = "";
+        Model* model;
 
         void load_model()
         {
@@ -34,6 +38,7 @@ namespace goon
             }
             process_node(scene->mRootNode, scene);
             load_materials(scene);
+            LOG_INFO("Loaded model with %d meshes", meshes.size());
         }
 
         void load_materials(const aiScene *scene)
@@ -183,7 +188,8 @@ namespace goon
                     indices.push_back(face.mIndices[j]);
                 }
             }
-
+            goon::physics::create_mesh_collider(model,vertices.data(), static_cast<uint32_t>(vertices.size()), indices.data(),
+                        static_cast<uint32_t>(indices.size()) );
             return Mesh(vertices.data(), static_cast<uint32_t>(vertices.size()), indices.data(),
                         static_cast<uint32_t>(indices.size()), mesh->mMaterialIndex);
         }
@@ -193,6 +199,7 @@ namespace goon
     Model::Model(const char *path, bool flip_textures)
     {
         _impl = new Impl();
+        _impl->model = this;
         _transform = new Transform();
         auto path_str = std::string(path);
         // path_str = path_str.substr(0, path_str.find_last_of('/'));
@@ -204,6 +211,7 @@ namespace goon
     Model::~Model()
     {
         delete _impl;
+        delete _transform;
     }
 
     Transform *Model::get_transform() const
