@@ -78,6 +78,11 @@ namespace goon
             }
         }
 
+        if (Input::key_pressed(Input::Key::F))
+        {
+            _is_free_cam = !_is_free_cam;
+        }
+
 
         if (!_active)
         {
