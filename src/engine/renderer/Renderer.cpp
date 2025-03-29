@@ -7,12 +7,14 @@
 #include <engine/Engine.h>
 #include <engine/Input.h>
 
+#include "DebugRenderer.h"
 #include "FrameBuffer.h"
 #include "Material.h"
 #include "Light.h"
 #include "../Scene.h"
 #include "Shader.h"
 #include "HDRTexture.h"
+#include "TextRenderer.h"
 
 namespace goon
 {
@@ -37,6 +39,8 @@ namespace goon
         std::unique_ptr<Shader> skybox_shader = nullptr;
         std::unique_ptr<Shader> shadowmap_shader = nullptr;
         std::unique_ptr<Shader> fbo_debug_shader = nullptr;
+        std::unique_ptr<DebugRenderer> debug_renderer = nullptr;
+        std::unique_ptr<TextRenderer> text_renderer = nullptr;
         std::vector<Light> lights;
         Texture env_cubemap;
         Texture env_irradiance;
@@ -54,6 +58,9 @@ namespace goon
             glEnable(GL_CULL_FACE);
             glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
             glEnable(GL_MULTISAMPLE);
+            debug_renderer = std::make_unique<DebugRenderer>();
+            text_renderer = std::unique_ptr<TextRenderer>(
+                new TextRenderer(RESOURCES_PATH "fonts/Montserrat-Regular.ttf"));
         }
 
         void init_shaders()
@@ -639,6 +646,26 @@ namespace goon
     }
 
 
+    void Renderer::draw_line(glm::vec3 p1, glm::vec3 p2, glm::vec3 color)
+    {
+        _impl->debug_renderer->draw_line(p1, p2, color);
+    }
+
+    void Renderer::draw_box(glm::vec3 center, glm::vec3 size, glm::vec3 color)
+    {
+        _impl->debug_renderer->draw_box(center, size, color);
+    }
+
+    void Renderer::draw_sphere(glm::vec3 center, float radius, glm::vec3 color)
+    {
+        _impl->debug_renderer->draw_sphere(center, radius, color);
+    }
+
+    void Renderer::draw_triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 color)
+    {
+        _impl->debug_renderer->draw_triangle(p1, p2, p3, color);
+    }
+
     void Renderer::render_scene(Scene &scene)
     {
         //indirect pass
@@ -659,6 +686,8 @@ namespace goon
         _impl->shadow_pass(scene);
         _impl->lit_pass(scene);
         _impl->skybox_pass();
+        _impl->debug_renderer->present();
+        _impl->text_renderer->present();
     }
 
     void Renderer::reload_shaders()

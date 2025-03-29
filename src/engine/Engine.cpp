@@ -19,7 +19,6 @@ namespace goon
         std::unique_ptr<EventManager> event_manager = nullptr;
         std::unique_ptr<DebugUI> debug_ui = nullptr;
         std::unique_ptr<Scene> scene = nullptr;
-        std::unique_ptr<DebugRenderer> debug_renderer = nullptr;
         std::unique_ptr<Camera> camera = nullptr;
         std::unique_ptr<Player> player = nullptr;
         bool running = true;
@@ -77,10 +76,6 @@ namespace goon
         return _instance->_impl->scene.get();
     }
 
-    DebugRenderer *Engine::get_debug_renderer()
-    {
-        return _instance->_impl->debug_renderer.get();
-    }
 
     Player *Engine::get_player()
     {
@@ -98,7 +93,6 @@ namespace goon
         _impl->camera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 1.0f),
                                                  glm::vec3(0.0f, 1.0f, 0.0f));
         _impl->player = std::make_unique<Player>();
-        _impl->debug_renderer = std::make_unique<DebugRenderer>();
         if (_impl->window == nullptr || _impl->renderer == nullptr)
         {
             LOG_ERROR("Failed to initialize window or renderer!");
@@ -129,7 +123,6 @@ namespace goon
 
             _impl->renderer->render_scene(*_impl->scene);
 
-            _impl->debug_renderer->present();
             _impl->debug_ui->present();
 
             _impl->window->present();
