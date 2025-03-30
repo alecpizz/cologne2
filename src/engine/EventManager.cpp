@@ -55,8 +55,7 @@ namespace goon
         if (event->type == SDL_EVENT_WINDOW_RESIZED)
         {
             Engine::get_window()->resize();
-            Engine::get_window()->clear();
-            Engine::get_renderer()->render_scene(*Engine::get_scene());
+            Engine::get_renderer()->window_resized(event->window.data1, event->window.data2);
             Engine::get_window()->present();
         }
         return true;

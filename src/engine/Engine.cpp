@@ -114,22 +114,15 @@ namespace goon
         while (!_impl->event_manager->should_quit())
         {
             Input::update();
-
             _impl->event_manager->poll_events();
-
             _impl->camera->update(et.elapsed);
             _impl->scene->update(et.elapsed);
             _impl->player->update(et.elapsed);
             physics::update(et.elapsed);
-
             _impl->debug_ui->clear();
-
             _impl->window->clear();
-
             _impl->renderer->render_scene(*_impl->scene);
-
             _impl->debug_ui->present();
-
             _impl->window->present();
             et.update();
         }

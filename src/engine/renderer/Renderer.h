@@ -27,6 +27,7 @@ namespace goon
         void draw_sphere(glm::vec3 center, float radius, glm::vec3 color);
         void draw_triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 color);
         void render_scene(Scene &scene);
+        void window_resized(uint32_t width, uint32_t height);
         void reload_shaders();
         Light& get_directional_light() const;
         void set_directional_light(glm::vec3 position, glm::vec3 direction);

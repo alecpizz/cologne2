@@ -2,10 +2,10 @@
 out vec4 FragColor;
 
 in vec2 TexCoords;
-in vec3 FragPos;
-in vec3 WorldPos;
-in mat3 TBN;
-in vec4 FragPosLightSpace;
+//in vec3 FragPos;
+//in vec3 WorldPos;
+//in mat3 TBN;
+//in vec4 FragPosLightSpace;
 
 struct Light
 {
@@ -25,13 +25,18 @@ struct Light
 uniform vec3 camera_pos;
 uniform Light lights[MAX_LIGHTS];
 uniform int num_lights = 0;
+uniform mat4 lightSpaceMatrix;
 
-layout (binding = 0) uniform sampler2D texture_albedo;
-layout (binding = 1) uniform sampler2D texture_ao;
-layout (binding = 2) uniform sampler2D texture_metallic;
-layout (binding = 3) uniform sampler2D texture_roughness;
-layout (binding = 4) uniform sampler2D texture_normal;
-layout (binding = 5) uniform sampler2D texture_emission;
+//layout (binding = 0) uniform sampler2D texture_albedo;
+//layout (binding = 1) uniform sampler2D texture_ao;
+//layout (binding = 2) uniform sampler2D texture_metallic;
+//layout (binding = 3) uniform sampler2D texture_roughness;
+//layout (binding = 4) uniform sampler2D texture_normal;
+//layout (binding = 5) uniform sampler2D texture_emission;
+layout (binding = 0) uniform sampler2D gPosition;
+layout (binding = 1) uniform sampler2D gNormal;
+layout (binding = 2) uniform sampler2D gAlbedo;
+layout (binding = 3) uniform sampler2D gORM;
 
 layout (binding = 6) uniform samplerCube irradiance_map;
 layout (binding = 7) uniform samplerCube prefilter_map;
@@ -132,30 +137,19 @@ vec3 get_random_vector(int index)
 
 void main()
 {
-    vec4 albedo_texture = texture2D(texture_albedo, TexCoords).rgba;
-    if (albedo_texture.a < 0.5)
-    {
-        discard;
-    }
+    vec3 FragPos = texture(gPosition, TexCoords).rgb;
+
+    vec4 albedo_texture = texture2D(gAlbedo, TexCoords).rgba;
+
     vec3 albedo = pow(albedo_texture.rgb, vec3(2.2));
+    vec3 orm = texture2D(gORM, TexCoords).rgb;
+    float metallic = orm.r;
+    float roughness = orm.g;
+    float ao = orm.b + ao_strength;
 
-    float metallic = texture2D(texture_metallic, TexCoords).b;
-    float roughness = texture2D(texture_roughness, TexCoords).g;
-    float ao = 0.0;
-    if (has_ao_texture == 1)
-    {
-        ao = texture2D(texture_ao, TexCoords).r;
-    }
-    else
-    {
-        ao = ao_strength;
-    }
+    vec3 N = texture2D(gNormal, TexCoords).rgb;
 
-    vec3 N = texture2D(texture_normal, TexCoords).rgb;
-    N = N * 2.0 - 1.0;
-    N = normalize(TBN * N);
-
-    vec3 V = normalize(camera_pos - WorldPos);
+    vec3 V = normalize(camera_pos - FragPos);
     vec3 R = reflect(-V, N);
 
     vec3 F0 = vec3(0.04);
@@ -164,6 +158,7 @@ void main()
     vec3 Lo = vec3(0.0);
     vec3 lightDirection = normalize(-lights[0].direction);
 
+    vec4 FragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0);
     float shadow = 1.0 - shadowCalculation(FragPosLightSpace, N, lightDirection);
 
 
@@ -180,8 +175,8 @@ void main()
         }
         else if (lights[i].type == POINT)
         {
-            L = normalize(lights[i].position - WorldPos);
-            float distance = length(lights[i].position - WorldPos);
+            L = normalize(lights[i].position - FragPos);
+            float distance = length(lights[i].position - FragPos);
             float attenuation = 1.0 / (distance * distance);
             radiance = lights[i].color * attenuation;
         }
@@ -222,7 +217,7 @@ void main()
     projCoords = projCoords * 0.5 + 0.5;
 
     //TODO: store this in a viewport sized texture.
-    uint rsmSamples = 64;
+    uint rsmSamples = 128;
     float totalWeight = 0.0;
     for (uint i = 0; i < rsmSamples; i++)
     {
@@ -250,15 +245,15 @@ void main()
     //    indirect /= totalWeight;
 
     vec3 ambient = (kD * (diffuse) + (specular)) * ao;
-    vec3 emission = texture2D(texture_emission, TexCoords).rgb;
-    vec3 color = ambient + (indirect * Lo) + emission;
+//    vec3 emission = texture2D(texture_emission, TexCoords).rgb;
+    vec3 color = ambient + (indirect * Lo) ;//+ emission;
     //    vec3 color = ((indirect * 200) * Lo) + emission;
 
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0 / 2.2));
-
-
-    FragColor = vec4(color, 1.0);
+    float alpha = albedo_texture.a;
+    color.rgb = color.rgb * alpha;
+    FragColor = vec4(color, alpha);
 }
 
 

@@ -36,6 +36,7 @@ namespace goon
     struct Renderer::Impl
     {
         std::unique_ptr<Shader> lit_shader = nullptr;
+        std::unique_ptr<Shader> g_buffer_shader = nullptr;
         std::unique_ptr<Shader> skybox_shader = nullptr;
         std::unique_ptr<Shader> shadowmap_shader = nullptr;
         std::unique_ptr<Shader> fbo_debug_shader = nullptr;
@@ -51,6 +52,12 @@ namespace goon
         Texture position_map;
         Texture flux_map;
         uint32_t shadow_fbo = 0;
+        uint32_t g_buffer = 0;
+        uint32_t g_position = 0;
+        uint32_t g_albedo;
+        uint32_t g_normal;
+        uint32_t g_metallic_roughness_ao;
+        uint32_t g_depth;
 
         void init()
         {
@@ -67,10 +74,8 @@ namespace goon
         {
             lit_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/lit.vert",
                                                   RESOURCES_PATH "shaders/lit.frag");
-            lit_shader->bind();
-            lit_shader->set_int("irradiance_map", IRRADIANCE_INDEX);
-            lit_shader->set_int("prefilter_map", PREFILTER_INDEX);
-            lit_shader->set_int("brdf", BRDF_INDEX);
+            g_buffer_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/gbuffer.vert",
+                RESOURCES_PATH "shaders/gbuffer.frag");
 
             skybox_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/skybox.vert",
                                                      RESOURCES_PATH "shaders/skybox.frag");
@@ -78,6 +83,79 @@ namespace goon
                                                         RESOURCES_PATH "shaders/shadowmap.frag");
             fbo_debug_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/framebufferoutput.vert",
                                                         RESOURCES_PATH "shaders/framebufferoutput.frag");
+        }
+
+        void init_gbuffer(uint32_t width, uint32_t height)
+        {
+            if (g_buffer != 0)
+            {
+                glDeleteFramebuffers(1, &g_buffer);
+            }
+            glGenFramebuffers(1, &g_buffer);
+            glBindFramebuffer(GL_FRAMEBUFFER, g_buffer);
+
+            //position
+            glGenTextures(1, &g_position);
+            glBindTexture(GL_TEXTURE_2D, g_position);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0,
+                         GL_RGBA, GL_FLOAT, nullptr);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                                   g_position, 0);
+
+            //normal
+            glGenTextures(1, &g_normal);
+            glBindTexture(GL_TEXTURE_2D, g_normal);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0,
+                         GL_RGBA, GL_FLOAT, nullptr);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,
+                                   g_normal, 0);
+
+            //albedo
+            glGenTextures(1, &g_albedo);
+            glBindTexture(GL_TEXTURE_2D, g_albedo);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+                         GL_UNSIGNED_BYTE, nullptr);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D,
+                                   g_albedo, 0);
+
+            //orm
+            glGenTextures(1, &g_metallic_roughness_ao);
+            glBindTexture(GL_TEXTURE_2D, g_metallic_roughness_ao);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+                         GL_UNSIGNED_BYTE, nullptr);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D,
+                                   g_metallic_roughness_ao, 0);
+
+            //depth
+
+            glGenTextures(1, &g_depth);
+            glBindTexture(GL_TEXTURE_2D, g_depth);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+                         width, height, 0,GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, g_depth, 0);
+
+            uint32_t attachments[4] = {
+                GL_COLOR_ATTACHMENT0,
+                GL_COLOR_ATTACHMENT1,
+                GL_COLOR_ATTACHMENT2,
+                GL_COLOR_ATTACHMENT3
+            };
+            glDrawBuffers(4, attachments);
+            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            {
+                LOG_ERROR("Framebuffer is not complete! %s", glGetError());
+            }
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
         void init_shadow_map()
@@ -530,22 +608,15 @@ namespace goon
             lit_shader->set_int("num_lights", lights.size());
         }
 
-
-        void lit_pass(Scene &scene)
+        void gbuffer_pass(Scene &scene)
         {
+            glBindFramebuffer(GL_FRAMEBUFFER, g_buffer);
             glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            lit_shader->bind();
-            lit_shader->set_vec3("camera_pos", glm::value_ptr(Engine::get_camera()->get_position()));
-            lit_shader->set_mat4("projection", &Engine::get_camera()->get_projection_matrix()[0][0]);
-            lit_shader->set_mat4("view", &Engine::get_camera()->get_view_matrix()[0][0]);
-            env_irradiance.bind(IRRADIANCE_INDEX);
-            env_prefilter.bind(PREFILTER_INDEX);
-            env_brdf.bind(BRDF_INDEX);
-            shadow_map.bind(SHADOW_INDEX);
-            normal_map.bind(NORMAL_SHADOW_INDEX);
-            position_map.bind(POSITION_INDEX);
-            flux_map.bind(FLUX_INDEX);
+            g_buffer_shader->bind();
+            g_buffer_shader->set_mat4("projection", &Engine::get_camera()->get_projection_matrix()[0][0]);
+            g_buffer_shader->set_mat4("view", &Engine::get_camera()->get_view_matrix()[0][0]);
+
             for (size_t i = 0; i < scene.get_model_count(); i++)
             {
                 auto model = scene.get_model_by_index(i);
@@ -553,7 +624,7 @@ namespace goon
                 {
                     continue;
                 }
-                lit_shader->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
+                g_buffer_shader->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
                 for (size_t j = 0; j < model->get_num_meshes(); j++)
                 {
                     Mesh mesh = model->get_meshes()[j];
@@ -574,6 +645,32 @@ namespace goon
                     glBindTextureUnit(EMISSION_INDEX, 0);
                 }
             }
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+
+        void lit_pass(Scene &scene)
+        {
+            glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            lit_shader->bind();
+            lit_shader->set_vec3("camera_pos", glm::value_ptr(Engine::get_camera()->get_position()));
+            env_irradiance.bind(IRRADIANCE_INDEX);
+            env_prefilter.bind(PREFILTER_INDEX);
+            env_brdf.bind(BRDF_INDEX);
+            shadow_map.bind(SHADOW_INDEX);
+            normal_map.bind(NORMAL_SHADOW_INDEX);
+            position_map.bind(POSITION_INDEX);
+            flux_map.bind(FLUX_INDEX);
+            glBindTextureUnit(0, g_position);
+            glBindTextureUnit(1, g_normal);
+            glBindTextureUnit(2, g_albedo);
+            glBindTextureUnit(3, g_metallic_roughness_ao);
+            render_quad();
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+            glBlitFramebuffer(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height(), 0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
 
@@ -629,14 +726,18 @@ namespace goon
         void skybox_pass()
         {
             glDisable(GL_CULL_FACE);
+            glDisable(GL_BLEND);
+            glDepthMask(GL_FALSE);
             glDepthFunc(GL_LEQUAL);
             skybox_shader->bind();
             skybox_shader->set_mat4("projection", &Engine::get_camera()->get_projection_matrix()[0][0]);
             skybox_shader->set_mat4("view", &Engine::get_camera()->get_view_matrix()[0][0]);
             env_cubemap.bind(0);
             render_cube();
-            glDepthFunc(GL_LESS);
             glEnable(GL_CULL_FACE);
+            glEnable(GL_BLEND);
+            glDepthMask(GL_TRUE);
+            glDepthFunc(GL_LESS);
         }
     };
 
@@ -684,10 +785,18 @@ namespace goon
         }
 
         _impl->shadow_pass(scene);
+        _impl->gbuffer_pass(scene);
         _impl->lit_pass(scene);
         _impl->skybox_pass();
         _impl->debug_renderer->present();
         _impl->text_renderer->present();
+    }
+
+    void Renderer::window_resized(uint32_t width, uint32_t height)
+    {
+        //regen framebuffers here
+        _impl->init_gbuffer(width, height);
+        render_scene(*Engine::get_scene());
     }
 
     void Renderer::reload_shaders()
@@ -722,6 +831,7 @@ namespace goon
     {
         _impl = new Impl();
         _impl->init();
+        _impl->init_gbuffer(Engine::get_window()->get_width(), Engine::get_window()->get_height());
         _impl->init_shaders();
         glDisable(GL_CULL_FACE);
         _impl->gen_environment_map("newport_loft.hdr");
