@@ -9,6 +9,7 @@
 #include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 
+#include "Audio.h"
 #include "Engine.h"
 #include "Input.h"
 #include "Physics.h"
@@ -38,8 +39,13 @@ namespace goon
         bool switch_stance = false;
         bool was_switch_stance = false;
         bool allow_sliding = false;
+        bool grounded = true;
+        bool grounded_last_frame = true;
+        bool footstep_played = false;
+        float bob_time = 0.0f;
         JPH::Vec3 input = JPH::Vec3::sZero();
         JPH::Vec3 desired_velocity = JPH::Vec3::sZero();
+        std::vector<std::string> footstep_sounds;
 
         void init()
         {
@@ -66,6 +72,14 @@ namespace goon
 
             character = new JPH::CharacterVirtual(settings, JPH::RVec3::sZero(), JPH::Quat::sIdentity(), 0,
                                                   goon::physics::get_physics_system());
+            footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_1.wav");
+            footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_2.wav");
+            footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_3.wav");
+            footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_4.wav");
+            for (const auto& footstep_sound : footstep_sounds)
+            {
+                Audio::add_sound(footstep_sound.c_str());
+            }
         }
 
         void handle_input(float dt)
@@ -91,7 +105,10 @@ namespace goon
             bool jump = goon::Input::key_pressed(goon::Input::Key::Space);
             bool crouch = goon::Input::key_pressed(goon::Input::Key::LeftCtrl);
             JPH::Vec3 movement = JPH::Vec3(x, 0.0f, y);
-
+            if (!movement.IsNearZero())
+            {
+                movement = movement.Normalized();
+            }
             glm::vec3 cam_fwd = Engine::get_camera()->get_forward();
             cam_fwd.y = 0.0f;
             glm::normalize(cam_fwd);
@@ -119,7 +136,9 @@ namespace goon
             JPH::Vec3 new_velocity;
 
             bool moving_towards_ground = (current_vertical_velocity.GetY() - ground_velocity.GetY()) < 0.1f;
-            if (character->GetGroundState() == JPH::CharacterVirtual::EGroundState::OnGround && !character->
+            grounded_last_frame = grounded;
+            grounded = character->GetGroundState() == JPH::CharacterVirtual::EGroundState::OnGround;
+            if (grounded && !character->
                 IsSlopeTooSteep(character->GetGroundNormal()))
             {
                 new_velocity = ground_velocity;
@@ -143,6 +162,38 @@ namespace goon
             //     auto shape = is_standing ? crouching_shape : standing_shape;
             //     if (character->SetShape(shape, 1.5f * physics::get_physics_system()->GetPhysicsSettings().mPenetrationSlop, physics::get_physics_system()->GetDefaultLayerFilter(physics::MOVING), ))
             // }
+            play_footsteps(dt);
+        }
+
+        void play_footsteps(float dt)
+        {
+            auto vel = character->GetLinearVelocity();
+            vel.SetY(0.0f);
+            if (vel.IsNearZero())
+            {
+                return;
+            }
+
+            bob_time += dt;
+            float bob_offset = glm::sin(bob_time * 4.5f * character_speed) * 0.05f;
+            if (bob_offset < -0.04f && !footstep_played && grounded)
+            {
+                auto idx = rand() % 4;
+                Audio::play_sound(footstep_sounds[idx].c_str(), 30);
+                footstep_played = true;
+            }
+
+            if (bob_offset > 0.0f)
+            {
+                footstep_played = false;
+            }
+
+            if (grounded && !grounded_last_frame)
+            {
+                auto idx = rand() % 4;
+                Audio::play_sound(footstep_sounds[idx].c_str(), 30);
+                bob_time = 0.0f;
+            }
         }
     };
 
@@ -150,6 +201,7 @@ namespace goon
     {
         _impl = new Impl();
         _impl->init();
+
     }
 
     Player::~Player()

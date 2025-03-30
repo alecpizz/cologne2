@@ -20,6 +20,7 @@
 #include <Jolt/Renderer/DebugRendererSimple.h>
 
 #include "Engine.h"
+#include "Input.h"
 
 JPH_SUPPRESS_WARNINGS
 
@@ -134,17 +135,17 @@ namespace goon::physics
         void DrawLine(RVec3Arg inFrom, RVec3Arg inTo, ColorArg inColor) override
         {
             Engine::get_renderer()->draw_line(glm::vec3(inFrom.GetX(), inFrom.GetY(), inFrom.GetZ()),
-                                                    glm::vec3(inTo.GetX(), inTo.GetY(), inTo.GetZ()),
-                                                    glm::vec3(inColor.r, inColor.g, inColor.b));
+                                              glm::vec3(inTo.GetX(), inTo.GetY(), inTo.GetZ()),
+                                              glm::vec3(inColor.r, inColor.g, inColor.b));
         }
 
         void DrawTriangle(RVec3Arg inV1, RVec3Arg inV2, RVec3Arg inV3, ColorArg inColor,
                           ECastShadow inCastShadow) override
         {
             Engine::get_renderer()->draw_triangle(glm::vec3(inV1.GetX(), inV1.GetY(), inV1.GetZ()),
-                                                        glm::vec3(inV2.GetX(), inV2.GetY(), inV2.GetZ()),
-                                                        glm::vec3(inV3.GetX(), inV3.GetY(), inV3.GetZ()),
-                                                        glm::vec3(inColor.r, inColor.g, inColor.b));
+                                                  glm::vec3(inV2.GetX(), inV2.GetY(), inV2.GetZ()),
+                                                  glm::vec3(inV3.GetX(), inV3.GetY(), inV3.GetZ()),
+                                                  glm::vec3(inColor.r, inColor.g, inColor.b));
         }
 
         void DrawText3D(RVec3Arg inPosition, const string_view &inString, ColorArg inColor, float inHeight)
@@ -161,6 +162,7 @@ namespace goon::physics
     PhysicsSystem physics_system;
     PhysDebugRenderer *debug_renderer = nullptr;
     std::unordered_map<Model *, std::vector<JPH::BodyID> > colliders;
+    bool drawing = false;
 
     void init()
     {
@@ -189,12 +191,19 @@ namespace goon::physics
 
     void update(float dt)
     {
+        if (goon::Input::key_pressed(Input::Key::P))
+        {
+            drawing = !drawing;
+        }
         const int collisionSteps = 1;
         physics_system.Update(dt, collisionSteps, temp_allocator, job_system);
-        BodyManager::DrawSettings draw_settings;
-        draw_settings.mDrawShape = true;
-        draw_settings.mDrawShapeWireframe = true;
-        physics_system.DrawBodies(draw_settings, debug_renderer);
+        if (drawing)
+        {
+            BodyManager::DrawSettings draw_settings;
+            draw_settings.mDrawShape = true;
+            draw_settings.mDrawShapeWireframe = true;
+            physics_system.DrawBodies(draw_settings, debug_renderer);
+        }
     }
 
     JPH::PhysicsSystem *get_physics_system()

@@ -65,10 +65,6 @@ namespace goon
 
         void draw()
         {
-            if (goon::Input::key_pressed(Input::Key::P))
-            {
-                is_drawing = !is_drawing;
-            }
             if (!is_drawing)
             {
                 cmds.clear();
