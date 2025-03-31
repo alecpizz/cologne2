@@ -39,10 +39,12 @@ namespace goon
         std::unique_ptr<Shader> g_buffer_shader = nullptr;
         std::unique_ptr<Shader> skybox_shader = nullptr;
         std::unique_ptr<Shader> shadowmap_shader = nullptr;
+        std::unique_ptr<Shader> shadowmap_shader2 = nullptr;
         std::unique_ptr<Shader> fbo_debug_shader = nullptr;
         std::unique_ptr<DebugRenderer> debug_renderer = nullptr;
         std::unique_ptr<TextRenderer> text_renderer = nullptr;
         std::vector<Light> lights;
+        std::vector<float> shadowCascadeLevels;
         Texture env_cubemap;
         Texture env_irradiance;
         Texture env_prefilter;
@@ -58,6 +60,9 @@ namespace goon
         uint32_t g_normal;
         uint32_t g_metallic_roughness_ao;
         uint32_t g_depth;
+        uint32_t shadow_fbo_2 = 0;
+        uint32_t shadow_maps = 0;
+        uint32_t shadow_cascade_ubo = 0;
 
         void init()
         {
@@ -68,14 +73,28 @@ namespace goon
             debug_renderer = std::make_unique<DebugRenderer>();
             text_renderer = std::unique_ptr<TextRenderer>(
                 new TextRenderer(RESOURCES_PATH "fonts/Montserrat-Regular.ttf"));
+            float far = Engine::get_camera()->get_far_plane();
+            shadowCascadeLevels.push_back(far / 50.0f);
+            shadowCascadeLevels.push_back(far / 25.0f);
+            shadowCascadeLevels.push_back(far / 10.0f);
+            shadowCascadeLevels.push_back(far / 2.0f);
         }
 
         void init_shaders()
         {
             lit_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/lit.vert",
                                                   RESOURCES_PATH "shaders/lit.frag");
+            lit_shader->bind();
+            for (size_t i = 0; i < shadowCascadeLevels.size(); i++)
+            {
+                lit_shader->set_float(std::string("cascadePlaneDistances[" + std::to_string(i) + "]").c_str(),
+                                      shadowCascadeLevels[i]);
+            }
+            lit_shader->set_float("farPlane", Engine::get_camera()->get_far_plane());
+            lit_shader->set_int("cascadeCount", shadowCascadeLevels.size());
+
             g_buffer_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/gbuffer.vert",
-                RESOURCES_PATH "shaders/gbuffer.frag");
+                                                       RESOURCES_PATH "shaders/gbuffer.frag");
 
             skybox_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/skybox.vert",
                                                      RESOURCES_PATH "shaders/skybox.frag");
@@ -83,6 +102,9 @@ namespace goon
                                                         RESOURCES_PATH "shaders/shadowmap.frag");
             fbo_debug_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/framebufferoutput.vert",
                                                         RESOURCES_PATH "shaders/framebufferoutput.frag");
+            shadowmap_shader2 = std::make_unique<Shader>(RESOURCES_PATH "shaders/shadowmap2.vert",
+                                                         RESOURCES_PATH "shaders/shadowmap2.frag",
+                                                         RESOURCES_PATH "shaders/shadowmap2.geom");
         }
 
         void init_gbuffer(uint32_t width, uint32_t height)
@@ -232,6 +254,41 @@ namespace goon
             };
             glDrawBuffers(3, rsm_draw_buffer);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+
+        void init_shadow_map2()
+        {
+            glGenFramebuffers(1, &shadow_fbo_2);
+            glGenTextures(1, &shadow_maps);
+            glBindTexture(GL_TEXTURE_2D_ARRAY, shadow_maps);
+
+            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT32F, 4096, 4096,
+                         shadowCascadeLevels.size() + 1, 0,
+                         GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            constexpr float border_color[] = {1.0f, 1.0f, 1.0f, 1.0f};
+            glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, border_color);
+            glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo_2);
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadow_maps, 0);
+            glDrawBuffer(GL_NONE);
+            glReadBuffer(GL_NONE);
+
+            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            {
+                LOG_ERROR("Framebuffer is not complete!");
+                return;
+            }
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+            glGenBuffers(1, &shadow_cascade_ubo);
+            glBindBuffer(GL_UNIFORM_BUFFER, shadow_cascade_ubo);
+            glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4x4) * 16, nullptr, GL_STATIC_DRAW);
+            glBindBufferBase(GL_UNIFORM_BUFFER, 0, shadow_cascade_ubo);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
         void gen_environment_map(const std::string &path)
@@ -658,18 +715,21 @@ namespace goon
             env_irradiance.bind(IRRADIANCE_INDEX);
             env_prefilter.bind(PREFILTER_INDEX);
             env_brdf.bind(BRDF_INDEX);
-            shadow_map.bind(SHADOW_INDEX);
-            normal_map.bind(NORMAL_SHADOW_INDEX);
-            position_map.bind(POSITION_INDEX);
-            flux_map.bind(FLUX_INDEX);
+            // shadow_map.bind(SHADOW_INDEX);
+            // normal_map.bind(NORMAL_SHADOW_INDEX);
+            // position_map.bind(POSITION_INDEX);
+            // flux_map.bind(FLUX_INDEX);
             glBindTextureUnit(0, g_position);
             glBindTextureUnit(1, g_normal);
             glBindTextureUnit(2, g_albedo);
             glBindTextureUnit(3, g_metallic_roughness_ao);
+            glBindTextureUnit(13, shadow_maps);
             render_quad();
             glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
-            glBlitFramebuffer(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height(), 0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+            glBlitFramebuffer(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height(), 0, 0,
+                              Engine::get_window()->get_width(), Engine::get_window()->get_height(),
+                              GL_DEPTH_BUFFER_BIT, GL_NEAREST);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
@@ -721,6 +781,152 @@ namespace goon
             lit_shader->bind();
             lit_shader->set_mat4("lightSpaceMatrix", glm::value_ptr(lightViewProj));
             glEnable(GL_CULL_FACE);
+        }
+
+
+        void shadow_pass2(Scene &scene)
+        {
+            const auto light_matrices = get_light_space_matrices();
+            glBindBuffer(GL_UNIFORM_BUFFER, shadow_cascade_ubo);
+            for (size_t i = 0; i < light_matrices.size(); i++)
+            {
+                glBufferSubData(GL_UNIFORM_BUFFER, i * sizeof(glm::mat4x4), sizeof(glm::mat4x4), &light_matrices[i]);
+            }
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+            shadowmap_shader2->bind();
+            glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo_2);
+            glViewport(0, 0, 4096, 4096);
+            glClear(GL_DEPTH_BUFFER_BIT);
+            glCullFace(GL_FRONT);
+            glDisable(GL_CULL_FACE);
+            glEnable(GL_DEPTH_CLAMP);
+
+            for (size_t i = 0; i < scene.get_model_count(); i++)
+            {
+                auto model = scene.get_model_by_index(i);
+                if (!model->get_active())
+                {
+                    continue;
+                }
+                shadowmap_shader2->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
+                for (size_t j = 0; j < model->get_num_meshes(); j++)
+                {
+                    Mesh mesh = model->get_meshes()[j];
+                    Material mat = model->get_materials()[mesh.get_material_index()];
+                    // mat.albedo.bind(ALBEDO_INDEX);
+                    mesh.draw();
+                }
+            }
+            glCullFace(GL_BACK);
+            glDisable(GL_DEPTH_CLAMP);
+            glEnable(GL_CULL_FACE);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
+        }
+
+        std::vector<glm::mat4> get_light_space_matrices()
+        {
+            std::vector<glm::mat4> result;
+            for (size_t i = 0; i < shadowCascadeLevels.size(); i++)
+            {
+                if (i == 0)
+                {
+                    result.push_back(
+                        get_light_space_matrix(Engine::get_camera()->get_near_plane(), shadowCascadeLevels[i]));
+                } else if (i < shadowCascadeLevels.size())
+                {
+                    result.push_back(get_light_space_matrix(shadowCascadeLevels[i - 1], shadowCascadeLevels[i]));
+                } else
+                {
+                    result.push_back(
+                        get_light_space_matrix(shadowCascadeLevels[i - 1], Engine::get_camera()->get_far_plane()));
+                }
+            }
+            return result;
+        }
+
+        glm::mat4 get_light_space_matrix(const float near_plane, const float far_plane)
+        {
+            const auto proj = glm::perspective(
+                Engine::get_camera()->get_fov(),
+                (float) Engine::get_window()->get_width() / (float) Engine::get_window()->get_height(),
+                near_plane, far_plane);
+
+            const auto corners = get_frustum_corners_world_space(proj, Engine::get_camera()->get_view_matrix());
+
+            glm::vec3 center = glm::vec3(0.0);
+            for (const auto &v: corners)
+            {
+                center += glm::vec3(v);
+            }
+            center /= corners.size();
+
+            const auto light_view = glm::lookAt(center + lights[0].direction, center, glm::vec3(0.0f, 1.0f, 0.0f));
+            float minX = std::numeric_limits<float>::max();
+            float maxX = std::numeric_limits<float>::lowest();
+            float minY = std::numeric_limits<float>::max();
+            float maxY = std::numeric_limits<float>::lowest();
+            float minZ = std::numeric_limits<float>::max();
+            float maxZ = std::numeric_limits<float>::lowest();
+
+            for (const auto &v: corners)
+            {
+                const auto trf = light_view * v;
+                minX = std::min(minX, trf.x);
+                maxX = std::max(maxX, trf.x);
+                minY = std::min(minY, trf.y);
+                maxY = std::max(maxY, trf.y);
+                minZ = std::min(minZ, trf.z);
+                maxZ = std::max(maxZ, trf.z);
+            }
+
+            constexpr float zMult = 5.0f;
+            if (minZ < 0.0f)
+            {
+                minZ *= zMult;
+            } else
+            {
+                minZ /= zMult;
+            }
+            if (maxZ < 0.0f)
+            {
+                maxZ /= zMult;
+            } else
+            {
+                maxZ *= zMult;
+            }
+            auto temp = -minZ;
+            minZ = -maxZ;
+            maxZ = temp;
+            auto mid = (maxZ - minZ) / 2.0f;
+            minZ -= mid * 5.0f;
+            maxZ += mid * 5.0f;
+            const glm::mat4 light_projection = glm::ortho(minX, maxX, minY, maxY, minZ, maxZ);
+            return light_projection * light_view;
+        }
+
+        std::vector<glm::vec4> get_frustum_corners_world_space(const glm::mat4 &proj, const glm::mat4 &view)
+        {
+            return get_frustum_corners_world_space(proj * view);
+        }
+
+        std::vector<glm::vec4> get_frustum_corners_world_space(const glm::mat4 &proj_view)
+        {
+            const auto inv = glm::inverse(proj_view);
+            std::vector<glm::vec4> result;
+            for (uint32_t x = 0; x < 2; x++)
+            {
+                for (uint32_t y = 0; y < 2; y++)
+                {
+                    for (uint32_t z = 0; z < 2; z++)
+                    {
+                        const glm::vec4 pt = inv * glm::vec4(2.0f * x - 1.0f, 2.0f * y - 1.0f, 2.0f * z - 1.0f, 1.0f);
+                        result.push_back(pt / pt.w);
+                    }
+                }
+            }
+            return result;
         }
 
         void skybox_pass()
@@ -784,7 +990,8 @@ namespace goon
             reload_shaders();
         }
 
-        _impl->shadow_pass(scene);
+        // _impl->shadow_pass(scene);
+        _impl->shadow_pass2(scene);
         _impl->gbuffer_pass(scene);
         _impl->lit_pass(scene);
         _impl->skybox_pass();
@@ -845,6 +1052,7 @@ namespace goon
         _impl->add_light(Light(glm::vec3(0.0f, 10.0f, 10.0f), glm::vec3(.0f),
                                glm::vec3(200.0f, 200.0f, 200.0f), 6.0f, 1.0f,
                                LightType::Point));
-        _impl->init_shadow_map();
+        // _impl->init_shadow_map();
+        _impl->init_shadow_map2();
     }
 }

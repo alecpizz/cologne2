@@ -147,4 +147,14 @@ namespace goon
 
 
     }
+
+    float Camera::get_far_plane() const
+    {
+        return 300.0f;
+    }
+
+    float Camera::get_near_plane() const
+    {
+        return 0.1f;
+    }
 }

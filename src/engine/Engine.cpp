@@ -89,8 +89,8 @@ namespace goon
         _impl->window = std::unique_ptr<Window>(new Window(width, height));
         physics::init();
         Audio::init();
-        Audio::add_music(RESOURCES_PATH "sounds/music.mp3");
-        Audio::play_music(RESOURCES_PATH "sounds/music.mp3");
+        Audio::add_music(RESOURCES_PATH "sounds/music2.mp3");
+        Audio::play_music(RESOURCES_PATH "sounds/music2.mp3");
         Audio::set_music_volume(12);
         _impl->scene = std::make_unique<Scene>();
         _impl->renderer = std::unique_ptr<Renderer>(new Renderer());

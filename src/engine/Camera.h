@@ -34,6 +34,8 @@ namespace goon
         float get_fov() const;
 
         void update(float dt);
+        float get_far_plane() const;
+        float get_near_plane() const;
 
     private:
         bool _is_free_cam = false;

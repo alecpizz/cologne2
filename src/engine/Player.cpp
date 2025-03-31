@@ -23,7 +23,7 @@ namespace goon
         float height_crouching = 0.8f;
         float radius_crouching = 0.3f;
         float inner_friction = 0.9f;
-        float character_speed = 6.0f;
+        float character_speed = 3.5f;
         float jump_speed = 4.0f;
         glm::vec3 position;
 
@@ -43,6 +43,7 @@ namespace goon
         bool grounded_last_frame = true;
         bool footstep_played = false;
         float bob_time = 0.0f;
+        float bob_offset = 0.0f;
         JPH::Vec3 input = JPH::Vec3::sZero();
         JPH::Vec3 desired_velocity = JPH::Vec3::sZero();
         std::vector<std::string> footstep_sounds;
@@ -175,7 +176,7 @@ namespace goon
             }
 
             bob_time += dt;
-            float bob_offset = glm::sin(bob_time * 4.5f * character_speed) * 0.05f;
+            bob_offset = glm::sin(bob_time * 4.5f * character_speed) * 0.05f;
             if (bob_offset < -0.04f && !footstep_played && grounded)
             {
                 auto idx = rand() % 4;
@@ -211,7 +212,7 @@ namespace goon
 
     glm::vec3 Player::get_camera_position()
     {
-        return _impl->position + glm::vec3(0.0f, 1.45f, 0.0f);
+        return _impl->position + glm::vec3(0.0f, 1.45f + _impl->bob_offset, 0.0f);
     }
 
     void Player::update(float dt)

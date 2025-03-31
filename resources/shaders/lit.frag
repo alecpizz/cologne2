@@ -26,6 +26,7 @@ uniform vec3 camera_pos;
 uniform Light lights[MAX_LIGHTS];
 uniform int num_lights = 0;
 uniform mat4 lightSpaceMatrix;
+uniform mat4 view;
 
 //layout (binding = 0) uniform sampler2D texture_albedo;
 //layout (binding = 1) uniform sampler2D texture_ao;
@@ -46,10 +47,19 @@ layout (binding = 9) uniform sampler2D shadow_map;
 layout (binding = 10) uniform sampler2D normal_map;
 layout (binding = 11) uniform sampler2D position_map;
 layout (binding = 12) uniform sampler2D flux_map;
+layout (binding = 13) uniform sampler2DArray shadow_cascades;
+
+layout (std140) uniform LightSpaceMatrices
+{
+    mat4 lightSpaceMatrices[16];
+};
 
 uniform float far_plane = 20.0f;
 uniform float ao_strength = 0.2;
 uniform int has_ao_texture = 0;
+uniform float cascadePlaneDistances[16];
+uniform int cascadeCount;   // number of frusta - 1
+
 
 vec3 fresnelSchlick(float cosTheta, vec3 F0);
 vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness);
@@ -57,7 +67,7 @@ float distributionGGX(vec3 N, vec3 H, float roughness);
 float geometrySchlickGGX(float NdotV, float roughness);
 float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
 float klemenVisibility(vec3 L, vec3 H);
-float shadowCalculation(vec4 fragPos, vec3 n, vec3 l);
+float shadowCalculation(vec3 fragPos, vec3 n, vec3 l);
 
 vec3 sampleOffsetDirections[20] = vec3[]
 (
@@ -159,7 +169,7 @@ void main()
     vec3 lightDirection = normalize(-lights[0].direction);
 
     vec4 FragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0);
-    float shadow = 1.0 - shadowCalculation(FragPosLightSpace, N, lightDirection);
+    float shadow = 1.0 - shadowCalculation(FragPos, N, lightDirection);
 
 
     //    indirect /= rsmSamples;
@@ -244,9 +254,12 @@ void main()
     }
     //    indirect /= totalWeight;
 
-    vec3 ambient = (kD * (diffuse) + (specular)) * ao;
+
+    vec3 ambient = (kD * diffuse + specular) * ao;
+    vec3 color = ambient + Lo;
+//    vec3 ambient = (kD * (diffuse) + (specular)) * ao;
 //    vec3 emission = texture2D(texture_emission, TexCoords).rgb;
-    vec3 color = ambient + (indirect * Lo) ;//+ emission;
+//    vec3 color = ambient  + (indirect * Lo) ;//+ emission;
     //    vec3 color = ((indirect * 200) * Lo) + emission;
 
     color = color / (color + vec3(1.0));
@@ -306,28 +319,80 @@ float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
     return ggx1 * ggx2;
 }
 
-float shadowCalculation(vec4 fragPos, vec3 n, vec3 l)
+float shadowCalculation(vec3 fragPos, vec3 n, vec3 l)
 {
-    vec3 projCoords = fragPos.xyz / fragPos.w;
+    vec4 fragPosViewSpace = view * vec4(fragPos, 1.0);
+    float depthValue = abs(fragPosViewSpace.z);
+
+    int layer = -1;
+    for(int i = 0; i < cascadeCount; i++)
+    {
+        if(depthValue < cascadePlaneDistances[i])
+        {
+            layer = i;
+            break;
+        }
+    }
+    if(layer == -1)
+    {
+        layer = cascadeCount;
+    }
+
+    vec4 fragPosLightSpace = lightSpaceMatrices[layer] * vec4(fragPos, 1.0);
+
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+
     projCoords = projCoords * 0.5 + 0.5;
-    if (projCoords.z > 1.0)
+
+    float currentDepth = projCoords.z;
+    if(currentDepth > 1.0)
     {
         return 0.0;
     }
-    float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(shadow_map, 0);
-    float currentDepth = projCoords.z;
-    float bias = max(0.025 * (1.0 - dot(n, l)), 0.0005);
-    int samples = 2;
-    for (int x = -1; x <= 1; ++x)
+
+    vec3 normal = normalize(n);
+    float bias = max(0.05 * (1.0 - dot(n, l)), 0.005);
+    const float biasMod = 0.5f;
+    if(layer == cascadeCount)
     {
-        for (int y = 1; y <= 1; ++y)
+        bias *= 1 / (far_plane * biasMod);
+    }
+    else
+    {
+        bias *= 1 / (cascadePlaneDistances[layer] * biasMod);
+    }
+
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / vec2(textureSize(shadow_cascades, 0));
+    for(int x = -1; x <= 1; x++)
+    {
+        for(int y = -1; y <= 1; y++)
         {
-            float pcfDepth = texture(shadow_map, projCoords.xy + vec2(x, y) * texelSize).r;
-            shadow += currentDepth > pcfDepth + bias ? 1.0 : 0.0;
+            float pcfDepth = texture(shadow_cascades, vec3(projCoords.xy + vec2(x,y) * texelSize, layer)).r;
+            shadow += (currentDepth - bias) > pcfDepth ? 1.0 : 0.0;
         }
     }
-    shadow /= 9;
-    //    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+    shadow /= 9.0;
     return shadow;
+//    vec3 projCoords = fragPos.xyz / fragPos.w;
+//    projCoords = projCoords * 0.5 + 0.5;
+//    if (projCoords.z > 1.0)
+//    {
+//        return 0.0;
+//    }
+//    float shadow = 0.0;
+//    vec2 texelSize = 1.0 / textureSize(shadow_map, 0);
+//    float currentDepth = projCoords.z;
+//    float bias = max(0.025 * (1.0 - dot(n, l)), 0.0005);
+//    int samples = 2;
+//    for (int x = -1; x <= 1; ++x)
+//    {
+//        for (int y = 1; y <= 1; ++y)
+//        {
+//            float pcfDepth = texture(shadow_map, projCoords.xy + vec2(x, y) * texelSize).r;
+//            shadow += currentDepth > pcfDepth + bias ? 1.0 : 0.0;
+//        }
+//    }
+//    shadow /= 9;
+//    //    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
 }
