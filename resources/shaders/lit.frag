@@ -28,12 +28,6 @@ uniform int num_lights = 0;
 uniform mat4 lightSpaceMatrix;
 uniform mat4 view;
 
-//layout (binding = 0) uniform sampler2D texture_albedo;
-//layout (binding = 1) uniform sampler2D texture_ao;
-//layout (binding = 2) uniform sampler2D texture_metallic;
-//layout (binding = 3) uniform sampler2D texture_roughness;
-//layout (binding = 4) uniform sampler2D texture_normal;
-//layout (binding = 5) uniform sampler2D texture_emission;
 layout (binding = 0) uniform sampler2D gPosition;
 layout (binding = 1) uniform sampler2D gNormal;
 layout (binding = 2) uniform sampler2D gAlbedo;
@@ -57,7 +51,7 @@ layout (std140) uniform LightSpaceMatrices
 uniform float far_plane = 20.0f;
 uniform float ao_strength = 0.2;
 uniform int has_ao_texture = 0;
-uniform float cascadePlaneDistances[16];
+uniform float cascadePlaneDistances[4];
 uniform int cascadeCount;   // number of frusta - 1
 
 
@@ -68,6 +62,7 @@ float geometrySchlickGGX(float NdotV, float roughness);
 float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
 float klemenVisibility(vec3 L, vec3 H);
 float shadowCalculation(vec3 fragPos, vec3 n, vec3 l);
+vec4 texture2D_bilinear(sampler2DArray t, vec3 uv, vec3 texture_size, vec3 texel_size, int layer);
 
 vec3 sampleOffsetDirections[20] = vec3[]
 (
@@ -93,57 +88,13 @@ vec2 hammersley(uint i, uint n)
     return vec2(float(i) / float(n), radical_inverse_vdc(i));
 }
 
-uint xorshift(uint state)
-{
-    state ^= (state << 13);
-    state ^= (state >> 17);
-    state ^= (state << 5);
-    return state;
-}
-
-float randomFloat(inout uint seed)
-{
-    seed = xorshift(seed);
-    return float(seed) / float(0xFFFFFFFFu);
-}
 
 float rand(vec2 v)
 {
     return fract(sin(dot(v, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
-vec3 get_random_vector(int index)
-{
-    uint seed = uint(index);
-    float x = randomFloat(seed);
-    float y = randomFloat(seed);
-    float z = randomFloat(seed);
-    return vec3(x * 2.0 - 1.0, y * 2.0 - 1.0, z);
-}
 
-
-//vec3 indirectLighting(vec3 uvFrag, vec3 n, vec3 x)
-//{
-//    vec3 result = vec3(0.0);
-//    const int samples = 64;
-//    const float sampleRadius = 0.09;
-//    for(int i = 0; i < samples; i++)
-//    {
-//        vec3 rand = get_random_vector(i);
-//        vec3 uv = uvFrag * sampleRadius * rand;
-//        vec3 flux = texture(flux_map, uv).rgb;
-//        vec3 x_p = texture(position_map, uv).xyz;
-//        vec3 n_p = texture(normal_map, uv).xyz;
-//
-//        vec3 r = x - x_p;
-//        float d2 = dot(r, r);
-//        vec3 E_p = flux * (max(0.0, dot(n_p, r)) * max(0.0, dot(n, -r)));
-//        E_p *= rand.x * rand.x / (d2 * d2);
-//        result += E_p;
-//    }
-//    const float intensity = 7.5;
-//    return result * intensity;
-//}
 
 void main()
 {
@@ -170,9 +121,6 @@ void main()
 
     vec4 FragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0);
     float shadow = 1.0 - shadowCalculation(FragPos, N, lightDirection);
-
-
-    //    indirect /= rsmSamples;
 
     for (int i = 0; i < num_lights; i++)
     {
@@ -232,9 +180,9 @@ void main()
     for (uint i = 0; i < rsmSamples; i++)
     {
         vec2 xi = hammersley(i, rsmSamples);
-//                float t = rand(FragPos.xy );
-//                mat2 rot = mat2(cos(t), sin(t), -sin(t), cos(t));
-//                xi = (rot * (xi - 0.5)) + 0.5;
+        //                float t = rand(FragPos.xy );
+        //                mat2 rot = mat2(cos(t), sin(t), -sin(t), cos(t));
+        //                xi = (rot * (xi - 0.5)) + 0.5;
         float r = xi.x * 0.02;
         float theta = xi.y * (2 * PI);
         vec2 pixelLightUV = projCoords.xy + vec2(r * cos(theta), r * sin(theta));
@@ -257,9 +205,9 @@ void main()
 
     vec3 ambient = (kD * diffuse + specular) * ao;
     vec3 color = ambient + Lo;
-//    vec3 ambient = (kD * (diffuse) + (specular)) * ao;
-//    vec3 emission = texture2D(texture_emission, TexCoords).rgb;
-//    vec3 color = ambient  + (indirect * Lo) ;//+ emission;
+    //    vec3 ambient = (kD * (diffuse) + (specular)) * ao;
+    //    vec3 emission = texture2D(texture_emission, TexCoords).rgb;
+    //    vec3 color = ambient  + (indirect * Lo) ;//+ emission;
     //    vec3 color = ((indirect * 200) * Lo) + emission;
 
     color = color / (color + vec3(1.0));
@@ -324,19 +272,10 @@ float shadowCalculation(vec3 fragPos, vec3 n, vec3 l)
     vec4 fragPosViewSpace = view * vec4(fragPos, 1.0);
     float depthValue = abs(fragPosViewSpace.z);
 
-    int layer = -1;
-    for (int i = 0; i < cascadeCount; ++i)
-    {
-        if (depthValue < cascadePlaneDistances[i])
-        {
-            layer = i;
-            break;
-        }
-    }
-    if (layer == -1)
-    {
-        layer = cascadeCount;
-    }
+    vec4 csmClipSpaceZFar = vec4(cascadePlaneDistances[0],
+    cascadePlaneDistances[1], cascadePlaneDistances[2], cascadePlaneDistances[3]);
+    vec4 res = step(csmClipSpaceZFar, vec4(depthValue));
+    int layer = int(res.x + res.y + res.z + res.w);
 
     vec4 fragPosLightSpace = lightSpaceMatrices[layer] * vec4(fragPos, 1.0);
     // perform perspective divide
@@ -367,16 +306,35 @@ float shadowCalculation(vec3 fragPos, vec3 n, vec3 l)
 
     // PCF
     float shadow = 0.0;
-    vec2 texelSize = 1.0 / vec2(textureSize(shadow_cascades, 0));
-    for(int x = -1; x <= 1; ++x)
+    vec2 texture_size = vec2(textureSize(shadow_cascades, 0));
+    vec2 texelSize = 1.0 / texture_size;
+    for (int x = -2; x <= 2; ++x)
     {
-        for(int y = -1; y <= 1; ++y)
+        for (int y = -2; y <= 2; ++y)
         {
             float pcfDepth = texture(shadow_cascades, vec3(projCoords.xy + vec2(x, y) * texelSize, layer)).r;
-            shadow += (currentDepth - bias) > pcfDepth ? 1.0 : 0.0;
+//            float pcfDepth2 = texture2D_bilinear(shadow_cascades,
+            //                                                 vec3(projCoords.xy + vec2(x, y) * texelSize, layer),
+            //                                                 vec3(texture_size.x, texture_size.y, 0.0),
+            //                                                 vec3(texelSize, 0.0),
+            //                                                 layer).x;
+        shadow += (currentDepth - bias) > pcfDepth ? 1.0: 0.0;
         }
     }
-    shadow /= 9.0;
+    shadow /= 25.0;
 
     return shadow;
+}
+
+vec4 texture2D_bilinear(sampler2DArray t, vec3 uv, vec3 texture_size, vec3 texel_size, int layer)
+{
+    vec3 f = fract(uv * texture_size);
+    uv += (0.5 - f) * texel_size;
+    vec4 tl = texture(t, uv, layer);
+    vec4 tr = texture(t, uv + vec3(texel_size.x, 0.0, 0.0), layer);
+    vec4 bl = texture(t, uv + vec3(0.0, texel_size.y, 0.0));
+    vec4 br = texture(t, uv + vec3(texel_size.x, texel_size.y, 0.0), layer);
+    vec4 tA = mix(tl, tr, f.x);
+    vec4 tB = mix(bl, br, f.x);
+    return mix(tA, tB, f.y);
 }

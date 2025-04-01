@@ -65,7 +65,7 @@ namespace goon
         uint32_t shadow_cascade_ubo = 0;
         float zMulti = 10.0f;
         float shadow_near = 0.1f;
-        float shadow_far = 1000.0f;
+        float shadow_far = 1200.0f;
 
         void init()
         {
