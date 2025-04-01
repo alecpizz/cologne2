@@ -1,7 +1,4 @@
 ﻿#pragma once
-#include "engine/Engine.h"
-#include "engine/renderer/Renderer.h"
-#include "engine/Window.h"
 
 namespace goon
 {
@@ -15,6 +12,8 @@ namespace goon
         void clear();
 
         void present();
+
+        void add_float_entry(const char* name, float& value);
 
         DebugUI(DebugUI &&) = delete;
 

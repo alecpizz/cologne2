@@ -83,6 +83,11 @@ namespace goon
         return _instance->_impl->player.get();
     }
 
+    DebugUI * Engine::get_debug_ui()
+    {
+        return _instance->_impl->debug_ui.get();
+    }
+
     bool Engine::init(uint32_t width, uint32_t height)
     {
         _impl->debug_ui = std::unique_ptr<DebugUI>(new DebugUI());

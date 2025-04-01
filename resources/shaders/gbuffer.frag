@@ -26,7 +26,7 @@ void main()
     gl_FragDepth = gl_FragCoord.z;
     gORM.r = texture(texture_metallic, TexCoords).b;
     gORM.g = texture(texture_roughness, TexCoords).g;
-    gORM.b = texture2D(texture_ao, TexCoords).r;
+    gORM.b = texture(texture_ao, TexCoords).r;
     vec4 albedo = texture(texture_albedo, TexCoords).rgba;
     if(albedo.a < 0.5)
     {

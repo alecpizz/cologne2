@@ -9,6 +9,7 @@
 
 */
 #pragma once
+#include "DebugUI.h"
 #include "Player.h"
 #include "engine/renderer/Renderer.h"
 #include "engine/Window.h"
@@ -34,8 +35,12 @@ namespace goon
 
 
         static Camera *get_camera();
+
         static Scene *get_scene();
+
         static Player *get_player();
+
+        static DebugUI *get_debug_ui();
 
         Engine(Engine &&) = delete;
 
@@ -50,8 +55,8 @@ namespace goon
         void run();
 
     private:
-       inline static Engine *_instance;
+        inline static Engine *_instance;
         struct Impl;
         Impl *_impl;
     };
-} 
+}

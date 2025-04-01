@@ -63,6 +63,9 @@ namespace goon
         uint32_t shadow_fbo_2 = 0;
         uint32_t shadow_maps = 0;
         uint32_t shadow_cascade_ubo = 0;
+        float zMulti = 10.0f;
+        float shadow_near = 0.1f;
+        float shadow_far = 1000.0f;
 
         void init()
         {
@@ -73,11 +76,13 @@ namespace goon
             debug_renderer = std::make_unique<DebugRenderer>();
             text_renderer = std::unique_ptr<TextRenderer>(
                 new TextRenderer(RESOURCES_PATH "fonts/Montserrat-Regular.ttf"));
-            float far = Engine::get_camera()->get_far_plane();
-            shadowCascadeLevels.push_back(far / 50.0f);
-            shadowCascadeLevels.push_back(far / 25.0f);
-            shadowCascadeLevels.push_back(far / 10.0f);
-            shadowCascadeLevels.push_back(far / 2.0f);
+            shadowCascadeLevels.push_back(shadow_far / 50.0f);
+            shadowCascadeLevels.push_back(shadow_far / 25.0f);
+            shadowCascadeLevels.push_back(shadow_far / 10.0f);
+            shadowCascadeLevels.push_back(shadow_far / 2.0f);
+            Engine::get_debug_ui()->add_float_entry("ZMulti", zMulti);
+            Engine::get_debug_ui()->add_float_entry("Shadow Far Plane", shadow_far);
+            Engine::get_debug_ui()->add_float_entry("Shadow near Plane", shadow_near);
         }
 
         void init_shaders()
@@ -90,7 +95,7 @@ namespace goon
                 lit_shader->set_float(std::string("cascadePlaneDistances[" + std::to_string(i) + "]").c_str(),
                                       shadowCascadeLevels[i]);
             }
-            lit_shader->set_float("farPlane", Engine::get_camera()->get_far_plane());
+            lit_shader->set_float("farPlane", shadow_far);
             lit_shader->set_int("cascadeCount", shadowCascadeLevels.size());
 
             g_buffer_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/gbuffer.vert",
@@ -263,7 +268,7 @@ namespace goon
             glBindTexture(GL_TEXTURE_2D_ARRAY, shadow_maps);
 
             glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT32F, 4096, 4096,
-                         shadowCascadeLevels.size() + 1, 0,
+                         static_cast<int>(shadowCascadeLevels.size()) + 1, 0,
                          GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -715,6 +720,7 @@ namespace goon
             env_irradiance.bind(IRRADIANCE_INDEX);
             env_prefilter.bind(PREFILTER_INDEX);
             env_brdf.bind(BRDF_INDEX);
+            lit_shader->set_float("far_plane", shadow_far);
             // shadow_map.bind(SHADOW_INDEX);
             // normal_map.bind(NORMAL_SHADOW_INDEX);
             // position_map.bind(POSITION_INDEX);
@@ -723,7 +729,8 @@ namespace goon
             glBindTextureUnit(1, g_normal);
             glBindTextureUnit(2, g_albedo);
             glBindTextureUnit(3, g_metallic_roughness_ao);
-            glBindTextureUnit(13, shadow_maps);
+            glActiveTexture(GL_TEXTURE13);
+            glBindTexture(GL_TEXTURE_2D_ARRAY, shadow_maps);
             render_quad();
             glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
@@ -786,6 +793,10 @@ namespace goon
 
         void shadow_pass2(Scene &scene)
         {
+            shadowCascadeLevels[0] = (shadow_far / 50.0f);
+            shadowCascadeLevels[1] = (shadow_far / 25.0f);
+            shadowCascadeLevels[2] = (shadow_far / 10.0f);
+            shadowCascadeLevels[3] = (shadow_far / 2.0f);
             const auto light_matrices = get_light_space_matrices();
             glBindBuffer(GL_UNIFORM_BUFFER, shadow_cascade_ubo);
             for (size_t i = 0; i < light_matrices.size(); i++)
@@ -799,7 +810,6 @@ namespace goon
             glViewport(0, 0, 4096, 4096);
             glClear(GL_DEPTH_BUFFER_BIT);
             glCullFace(GL_FRONT);
-            glDisable(GL_CULL_FACE);
             glEnable(GL_DEPTH_CLAMP);
 
             for (size_t i = 0; i < scene.get_model_count(); i++)
@@ -820,59 +830,57 @@ namespace goon
             }
             glCullFace(GL_BACK);
             glDisable(GL_DEPTH_CLAMP);
-            glEnable(GL_CULL_FACE);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
         }
 
         std::vector<glm::mat4> get_light_space_matrices()
         {
-            std::vector<glm::mat4> result;
-            for (size_t i = 0; i < shadowCascadeLevels.size(); i++)
+            std::vector<glm::mat4> ret;
+            for (size_t i = 0; i < shadowCascadeLevels.size() + 1; ++i)
             {
                 if (i == 0)
                 {
-                    result.push_back(
-                        get_light_space_matrix(Engine::get_camera()->get_near_plane(), shadowCascadeLevels[i]));
-                } else if (i < shadowCascadeLevels.size())
+                    ret.push_back(get_light_space_matrix(shadow_near, shadowCascadeLevels[i]));
+                }
+                else if (i < shadowCascadeLevels.size())
                 {
-                    result.push_back(get_light_space_matrix(shadowCascadeLevels[i - 1], shadowCascadeLevels[i]));
-                } else
+                    ret.push_back(get_light_space_matrix(shadowCascadeLevels[i - 1], shadowCascadeLevels[i]));
+                }
+                else
                 {
-                    result.push_back(
-                        get_light_space_matrix(shadowCascadeLevels[i - 1], Engine::get_camera()->get_far_plane()));
+                    ret.push_back(get_light_space_matrix(shadowCascadeLevels[i - 1], shadow_far));
                 }
             }
-            return result;
+            return ret;
         }
 
         glm::mat4 get_light_space_matrix(const float near_plane, const float far_plane)
         {
             const auto proj = glm::perspective(
                 Engine::get_camera()->get_fov(),
-                (float) Engine::get_window()->get_width() / (float) Engine::get_window()->get_height(),
-                near_plane, far_plane);
-
+                (float) Engine::get_window()->get_width() / (float) Engine::get_window()->get_height(), near_plane,
+                far_plane);
             const auto corners = get_frustum_corners_world_space(proj, Engine::get_camera()->get_view_matrix());
 
-            glm::vec3 center = glm::vec3(0.0);
+            glm::vec3 center = glm::vec3(0, 0, 0);
             for (const auto &v: corners)
             {
                 center += glm::vec3(v);
             }
             center /= corners.size();
+            glm::vec3 lightDir = lights[0].direction;
+            const auto lightView = glm::lookAt(center - lightDir, center, glm::vec3(0.0f, 1.0f, 0.0f));
 
-            const auto light_view = glm::lookAt(center + lights[0].direction, center, glm::vec3(0.0f, 1.0f, 0.0f));
             float minX = std::numeric_limits<float>::max();
             float maxX = std::numeric_limits<float>::lowest();
             float minY = std::numeric_limits<float>::max();
             float maxY = std::numeric_limits<float>::lowest();
             float minZ = std::numeric_limits<float>::max();
             float maxZ = std::numeric_limits<float>::lowest();
-
             for (const auto &v: corners)
             {
-                const auto trf = light_view * v;
+                const auto trf = lightView * v;
                 minX = std::min(minX, trf.x);
                 maxX = std::max(maxX, trf.x);
                 minY = std::min(minY, trf.y);
@@ -881,29 +889,24 @@ namespace goon
                 maxZ = std::max(maxZ, trf.z);
             }
 
-            constexpr float zMult = 5.0f;
-            if (minZ < 0.0f)
+            // Tune this parameter according to the scene
+            if (minZ < 0)
             {
-                minZ *= zMult;
+                minZ *= zMulti;
             } else
             {
-                minZ /= zMult;
+                minZ /= zMulti;
             }
-            if (maxZ < 0.0f)
+            if (maxZ < 0)
             {
-                maxZ /= zMult;
+                maxZ /= zMulti;
             } else
             {
-                maxZ *= zMult;
+                maxZ *= zMulti;
             }
-            auto temp = -minZ;
-            minZ = -maxZ;
-            maxZ = temp;
-            auto mid = (maxZ - minZ) / 2.0f;
-            minZ -= mid * 5.0f;
-            maxZ += mid * 5.0f;
-            const glm::mat4 light_projection = glm::ortho(minX, maxX, minY, maxY, minZ, maxZ);
-            return light_projection * light_view;
+
+            const glm::mat4 lightProjection = glm::ortho(minX, maxX, minY, maxY, minZ, maxZ);
+            return lightProjection * lightView;
         }
 
         std::vector<glm::vec4> get_frustum_corners_world_space(const glm::mat4 &proj, const glm::mat4 &view)
@@ -914,19 +917,21 @@ namespace goon
         std::vector<glm::vec4> get_frustum_corners_world_space(const glm::mat4 &proj_view)
         {
             const auto inv = glm::inverse(proj_view);
-            std::vector<glm::vec4> result;
-            for (uint32_t x = 0; x < 2; x++)
+
+            std::vector<glm::vec4> frustumCorners;
+            for (unsigned int x = 0; x < 2; ++x)
             {
-                for (uint32_t y = 0; y < 2; y++)
+                for (unsigned int y = 0; y < 2; ++y)
                 {
-                    for (uint32_t z = 0; z < 2; z++)
+                    for (unsigned int z = 0; z < 2; ++z)
                     {
                         const glm::vec4 pt = inv * glm::vec4(2.0f * x - 1.0f, 2.0f * y - 1.0f, 2.0f * z - 1.0f, 1.0f);
-                        result.push_back(pt / pt.w);
+                        frustumCorners.push_back(pt / pt.w);
                     }
                 }
             }
-            return result;
+
+            return frustumCorners;
         }
 
         void skybox_pass()
@@ -1046,7 +1051,7 @@ namespace goon
         _impl->gen_prefilter_map();
         _impl->gen_brdf_map();
         glEnable(GL_CULL_FACE);
-        _impl->add_light(Light(glm::vec3(0.790f, -0.613f, 0.024f), glm::vec3(0.790f, -0.613f, 0.024f),
+        _impl->add_light(Light(glm::vec3(0.790f, -0.613f, 0.024f), glm::vec3(0.20f, -0.913f, 0.024f),
                                glm::vec3(2.0f, 2.0f, 2.0f), 6.0f, 1.0f,
                                LightType::Directional));
         _impl->add_light(Light(glm::vec3(0.0f, 10.0f, 10.0f), glm::vec3(.0f),

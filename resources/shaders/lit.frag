@@ -325,74 +325,58 @@ float shadowCalculation(vec3 fragPos, vec3 n, vec3 l)
     float depthValue = abs(fragPosViewSpace.z);
 
     int layer = -1;
-    for(int i = 0; i < cascadeCount; i++)
+    for (int i = 0; i < cascadeCount; ++i)
     {
-        if(depthValue < cascadePlaneDistances[i])
+        if (depthValue < cascadePlaneDistances[i])
         {
             layer = i;
             break;
         }
     }
-    if(layer == -1)
+    if (layer == -1)
     {
         layer = cascadeCount;
     }
 
     vec4 fragPosLightSpace = lightSpaceMatrices[layer] * vec4(fragPos, 1.0);
-
+    // perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-
+    // transform to [0,1] range
     projCoords = projCoords * 0.5 + 0.5;
 
+    // get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
-    if(currentDepth > 1.0)
+
+    // keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
+    if (currentDepth > 1.0)
     {
         return 0.0;
     }
-
+    // calculate bias (based on depth map resolution and slope)
     vec3 normal = normalize(n);
-    float bias = max(0.05 * (1.0 - dot(n, l)), 0.005);
-    const float biasMod = 0.5f;
-    if(layer == cascadeCount)
+    float bias = max(0.05 * (1.0 - dot(normal, l)), 0.005);
+    const float biasModifier = 0.5f;
+    if (layer == cascadeCount)
     {
-        bias *= 1 / (far_plane * biasMod);
+        bias *= 1 / (far_plane * biasModifier);
     }
     else
     {
-        bias *= 1 / (cascadePlaneDistances[layer] * biasMod);
+        bias *= 1 / (cascadePlaneDistances[layer] * biasModifier);
     }
 
+    // PCF
     float shadow = 0.0;
     vec2 texelSize = 1.0 / vec2(textureSize(shadow_cascades, 0));
-    for(int x = -1; x <= 1; x++)
+    for(int x = -1; x <= 1; ++x)
     {
-        for(int y = -1; y <= 1; y++)
+        for(int y = -1; y <= 1; ++y)
         {
-            float pcfDepth = texture(shadow_cascades, vec3(projCoords.xy + vec2(x,y) * texelSize, layer)).r;
+            float pcfDepth = texture(shadow_cascades, vec3(projCoords.xy + vec2(x, y) * texelSize, layer)).r;
             shadow += (currentDepth - bias) > pcfDepth ? 1.0 : 0.0;
         }
     }
     shadow /= 9.0;
+
     return shadow;
-//    vec3 projCoords = fragPos.xyz / fragPos.w;
-//    projCoords = projCoords * 0.5 + 0.5;
-//    if (projCoords.z > 1.0)
-//    {
-//        return 0.0;
-//    }
-//    float shadow = 0.0;
-//    vec2 texelSize = 1.0 / textureSize(shadow_map, 0);
-//    float currentDepth = projCoords.z;
-//    float bias = max(0.025 * (1.0 - dot(n, l)), 0.0005);
-//    int samples = 2;
-//    for (int x = -1; x <= 1; ++x)
-//    {
-//        for (int y = 1; y <= 1; ++y)
-//        {
-//            float pcfDepth = texture(shadow_map, projCoords.xy + vec2(x, y) * texelSize).r;
-//            shadow += currentDepth > pcfDepth + bias ? 1.0 : 0.0;
-//        }
-//    }
-//    shadow /= 9;
-//    //    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
 }

@@ -4,12 +4,18 @@
 
 #include "DebugUI.h"
 #include "engine/imguiThemes.h"
-
+#include "Engine.h"
 
 namespace goon
 {
+    struct FloatCmd
+    {
+        float& ref;
+        std::string name;
+    };
     struct DebugUI::Impl
     {
+        std::vector<FloatCmd> cmds;
         void init()
         {
             ImGui::CreateContext();
@@ -70,15 +76,15 @@ namespace goon
 
             ImGui::LabelText("%s", model->get_path());
 
-            if (ImGui::InputFloat3("Position", glm::value_ptr(translation)))
+            if (ImGui::DragFloat3("Position", glm::value_ptr(translation)))
             {
                 model->get_transform()->set_translation(translation);
             }
-            if (ImGui::InputFloat3("Euler", glm::value_ptr(euler)))
+            if (ImGui::DragFloat3("Euler", glm::value_ptr(euler)))
             {
 
             }
-            if (ImGui::InputFloat3("Scale", glm::value_ptr(scale)))
+            if (ImGui::DragFloat3("Scale", glm::value_ptr(scale)))
             {
                 model->get_transform()->set_scale(scale);
             }
@@ -96,6 +102,17 @@ namespace goon
             Engine::get_renderer()->reload_shaders();
         }
 
+        for (size_t i = 0; i < _impl->cmds.size(); ++i)
+        {
+            ImGui::PushID(i);
+            float value = _impl->cmds[i].ref;
+            if (ImGui::DragFloat(_impl->cmds[i].name.c_str(), &value, 0.005f))
+            {
+                _impl->cmds[i].ref = value;
+            }
+            ImGui::PopID();
+        }
+
         bool free_cam = Engine::get_camera()->is_free_cam();
         if (ImGui::Checkbox("Free Cam", &free_cam))
         {
@@ -104,11 +121,11 @@ namespace goon
 
         glm::vec3 dir_light = Engine::get_renderer()->get_directional_light().direction;
         glm::vec3 dir_light_pos = Engine::get_renderer()->get_directional_light().position;;
-        if (ImGui::InputFloat3("Directional light direction", glm::value_ptr(dir_light)))
+        if (ImGui::DragFloat3("Directional light direction", glm::value_ptr(dir_light), 0.01f))
         {
             Engine::get_renderer()->set_directional_light(dir_light_pos, dir_light);
         }
-        if (ImGui::InputFloat3("Directional light position", glm::value_ptr(dir_light_pos)))
+        if (ImGui::DragFloat3("Directional light position", glm::value_ptr(dir_light_pos), 0.01f))
         {
             Engine::get_renderer()->set_directional_light(dir_light_pos, dir_light);
         }
@@ -135,5 +152,10 @@ namespace goon
             ImGui::RenderPlatformWindowsDefault();
             SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
         }
+    }
+
+    void DebugUI::add_float_entry(const char *name, float &value)
+    {
+        _impl->cmds.emplace_back(FloatCmd{value, name});
     }
 }

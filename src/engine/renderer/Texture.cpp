@@ -120,6 +120,7 @@ namespace goon
     {
         if (_handle == 0)
         {
+            glBindTextureUnit(index, 0);
             return;
         }
         glBindTextureUnit(index, _handle);
