@@ -63,6 +63,7 @@ namespace goon
         uint32_t shadow_fbo_2 = 0;
         uint32_t shadow_maps = 0;
         uint32_t shadow_cascade_ubo = 0;
+        uint32_t shadow_map_size = 4096;
         float zMulti = 10.0f;
         float shadow_near = 0.1f;
         float shadow_far = 1200.0f;
@@ -267,7 +268,7 @@ namespace goon
             glGenTextures(1, &shadow_maps);
             glBindTexture(GL_TEXTURE_2D_ARRAY, shadow_maps);
 
-            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT32F, 4096, 4096,
+            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT32F, shadow_map_size, shadow_map_size,
                          static_cast<int>(shadowCascadeLevels.size()) + 1, 0,
                          GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -807,7 +808,7 @@ namespace goon
 
             shadowmap_shader2->bind();
             glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo_2);
-            glViewport(0, 0, 4096, 4096);
+            glViewport(0, 0, shadow_map_size, shadow_map_size);
             glClear(GL_DEPTH_BUFFER_BIT);
             glCullFace(GL_FRONT);
             glEnable(GL_DEPTH_CLAMP);
