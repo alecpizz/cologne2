@@ -60,10 +60,13 @@ namespace goon
         uint32_t g_normal;
         uint32_t g_metallic_roughness_ao;
         uint32_t g_depth;
-        uint32_t shadow_fbo_2 = 0;
-        uint32_t shadow_maps = 0;
+        uint32_t rsm_fbo = 0;
+        uint32_t rsm_depth = 0;
+        uint32_t rsm_normal = 0;
+        uint32_t rsm_position = 0;
+        uint32_t rsm_flux = 0;
         uint32_t shadow_cascade_ubo = 0;
-        uint32_t shadow_map_size = 4096;
+        uint32_t rsm_size = 4096;
         float zMulti = 10.0f;
         float shadow_near = 0.1f;
         float shadow_far = 1200.0f;
@@ -264,23 +267,66 @@ namespace goon
 
         void init_shadow_map2()
         {
-            glGenFramebuffers(1, &shadow_fbo_2);
-            glGenTextures(1, &shadow_maps);
-            glBindTexture(GL_TEXTURE_2D_ARRAY, shadow_maps);
+            glGenFramebuffers(1, &rsm_fbo);
+            glGenTextures(1, &rsm_depth);
+            glBindTexture(GL_TEXTURE_2D_ARRAY, rsm_depth);
 
-            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT32F, shadow_map_size, shadow_map_size,
-                         static_cast<int>(shadowCascadeLevels.size()) + 1, 0,
+            int32_t cascade_amount = static_cast<int32_t>(shadowCascadeLevels.size()) + 1;
+
+            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT32F, rsm_size, rsm_size,
+                         cascade_amount, 0,
                          GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-            constexpr float border_color[] = {1.0f, 1.0f, 1.0f, 1.0f};
-            glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, border_color);
-            glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo_2);
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadow_maps, 0);
-            glDrawBuffer(GL_NONE);
-            glReadBuffer(GL_NONE);
+            constexpr float white[] = {1.0f, 1.0f, 1.0f, 1.0f};
+            constexpr float black[] = {0.0f, 0.0f, 0.0f, 0.0f};
+            glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, white);
+
+            glGenTextures(1, &rsm_normal);
+            glBindTexture(GL_TEXTURE_2D_ARRAY, rsm_normal);
+            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, rsm_size, rsm_size,
+                cascade_amount, 0, GL_RGB, GL_FLOAT, nullptr);
+            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, black);
+
+            glGenTextures(1, &rsm_position);
+            glBindTexture(GL_TEXTURE_2D_ARRAY, rsm_position);
+            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, rsm_size, rsm_size,
+                cascade_amount, 0, GL_RGB, GL_FLOAT, nullptr);
+            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, black);
+
+            glGenTextures(1, &rsm_flux);
+            glBindTexture(GL_TEXTURE_2D_ARRAY, rsm_flux);
+            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, rsm_size, rsm_size,
+                cascade_amount, 0, GL_RGB, GL_FLOAT, nullptr);
+            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, white);
+
+
+            glBindFramebuffer(GL_FRAMEBUFFER, rsm_fbo);
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, rsm_depth, 0);
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rsm_normal, 0);
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, rsm_position, 0);
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, rsm_flux, 0);
+
+            GLenum rsm_draw_buffer[] = {
+                GL_COLOR_ATTACHMENT0,
+                GL_COLOR_ATTACHMENT1,
+                GL_COLOR_ATTACHMENT2
+            };
+            glDrawBuffers(3, rsm_draw_buffer);
 
             if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             {
@@ -731,7 +777,7 @@ namespace goon
             glBindTextureUnit(2, g_albedo);
             glBindTextureUnit(3, g_metallic_roughness_ao);
             glActiveTexture(GL_TEXTURE13);
-            glBindTexture(GL_TEXTURE_2D_ARRAY, shadow_maps);
+            glBindTexture(GL_TEXTURE_2D_ARRAY, rsm_depth);
             render_quad();
             glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
@@ -807,8 +853,8 @@ namespace goon
             glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
             shadowmap_shader2->bind();
-            glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo_2);
-            glViewport(0, 0, shadow_map_size, shadow_map_size);
+            glBindFramebuffer(GL_FRAMEBUFFER, rsm_fbo);
+            glViewport(0, 0, rsm_size, rsm_size);
             glClear(GL_DEPTH_BUFFER_BIT);
             glCullFace(GL_FRONT);
             glEnable(GL_DEPTH_CLAMP);
