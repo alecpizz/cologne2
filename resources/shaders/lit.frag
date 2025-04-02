@@ -37,10 +37,10 @@ layout (binding = 6) uniform samplerCube irradiance_map;
 layout (binding = 7) uniform samplerCube prefilter_map;
 layout (binding = 8) uniform sampler2D brdf;
 
-layout (binding = 9) uniform sampler2D shadow_map;
-layout (binding = 10) uniform sampler2D normal_map;
-layout (binding = 11) uniform sampler2D position_map;
-layout (binding = 12) uniform sampler2D flux_map;
+
+layout (binding = 10) uniform sampler2DArray normal_map;
+layout (binding = 11) uniform sampler2DArray position_map;
+layout (binding = 12) uniform sampler2DArray flux_map;
 layout (binding = 13) uniform sampler2DArray shadow_cascades;
 
 layout (std140) uniform LightSpaceMatrices
@@ -177,6 +177,13 @@ void main()
     //TODO: store this in a viewport sized texture.
     uint rsmSamples = 128;
     float totalWeight = 0.0;
+    vec4 fragPosViewSpace = view * vec4(FragPos, 1.0);
+    float depthValue = abs(fragPosViewSpace.z);
+
+    vec4 csmClipSpaceZFar = vec4(cascadePlaneDistances[0],
+    cascadePlaneDistances[1], cascadePlaneDistances[2], cascadePlaneDistances[3]);
+    vec4 res = step(csmClipSpaceZFar, vec4(depthValue));
+    int layer = 1;
     for (uint i = 0; i < rsmSamples; i++)
     {
         vec2 xi = hammersley(i, rsmSamples);
@@ -186,10 +193,11 @@ void main()
         float r = xi.x * 0.02;
         float theta = xi.y * (2 * PI);
         vec2 pixelLightUV = projCoords.xy + vec2(r * cos(theta), r * sin(theta));
+        vec3 pixelLightUVZ = vec3(pixelLightUV.xy, float(layer));
         float weight = xi.x * xi.x;
-        vec3 target_norm = normalize(texture(normal_map, pixelLightUV).xyz);
-        vec3 target_world_pos = (texture(position_map, pixelLightUV).xyz);
-        vec3 target_flux = texture(flux_map, pixelLightUV).rgb;
+        vec3 target_norm = normalize(texture(normal_map, pixelLightUVZ).xyz);
+        vec3 target_world_pos = (texture(position_map, pixelLightUVZ).xyz);
+        vec3 target_flux = texture(flux_map, pixelLightUVZ).rgb;
 
         float num = max(0.0, dot(target_norm, FragPos - target_world_pos)) * max(0.0, dot(target_norm, target_world_pos - FragPos));
         float denom = pow(length(FragPos - target_world_pos), 4.0);
@@ -215,6 +223,7 @@ void main()
     float alpha = albedo_texture.a;
     color.rgb = color.rgb * alpha;
     FragColor = vec4(color, alpha);
+//    FragColor = vec4(indirect, 1.0);
 }
 
 

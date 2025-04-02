@@ -38,7 +38,7 @@ namespace goon
         std::unique_ptr<Shader> lit_shader = nullptr;
         std::unique_ptr<Shader> g_buffer_shader = nullptr;
         std::unique_ptr<Shader> skybox_shader = nullptr;
-        std::unique_ptr<Shader> shadowmap_shader = nullptr;
+        // std::unique_ptr<Shader> shadowmap_shader = nullptr;
         std::unique_ptr<Shader> shadowmap_shader2 = nullptr;
         std::unique_ptr<Shader> fbo_debug_shader = nullptr;
         std::unique_ptr<DebugRenderer> debug_renderer = nullptr;
@@ -107,8 +107,8 @@ namespace goon
 
             skybox_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/skybox.vert",
                                                      RESOURCES_PATH "shaders/skybox.frag");
-            shadowmap_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/shadowmap.vert",
-                                                        RESOURCES_PATH "shaders/shadowmap.frag");
+            // shadowmap_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/shadowmap.vert",
+            //                                             RESOURCES_PATH "shaders/shadowmap.frag");
             fbo_debug_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/framebufferoutput.vert",
                                                         RESOURCES_PATH "shaders/framebufferoutput.frag");
             shadowmap_shader2 = std::make_unique<Shader>(RESOURCES_PATH "shaders/shadowmap2.vert",
@@ -304,16 +304,16 @@ namespace goon
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
             glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, black);
 
+           //flux texture
             glGenTextures(1, &rsm_flux);
             glBindTexture(GL_TEXTURE_2D_ARRAY, rsm_flux);
-            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, rsm_size, rsm_size,
-                cascade_amount, 0, GL_RGB, GL_FLOAT, nullptr);
+            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, rsm_size, rsm_size, cascade_amount,
+                         0, GL_RGB, GL_FLOAT, nullptr);
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
             glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, white);
-
 
             glBindFramebuffer(GL_FRAMEBUFFER, rsm_fbo);
             glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, rsm_depth, 0);
@@ -776,8 +776,11 @@ namespace goon
             glBindTextureUnit(1, g_normal);
             glBindTextureUnit(2, g_albedo);
             glBindTextureUnit(3, g_metallic_roughness_ao);
-            glActiveTexture(GL_TEXTURE13);
-            glBindTexture(GL_TEXTURE_2D_ARRAY, rsm_depth);
+
+            glBindTextureUnit(10, rsm_normal);
+            glBindTextureUnit(11, rsm_position);
+            glBindTextureUnit(12, rsm_flux);
+            glBindTextureUnit(13, rsm_depth);
             render_quad();
             glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
@@ -809,11 +812,11 @@ namespace goon
             glViewport(0, 0, shadow_map.get_width(), shadow_map.get_height());
             glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
             glClear(GL_DEPTH_BUFFER_BIT);
-            shadowmap_shader->bind();
-            shadowmap_shader->set_mat4("lightSpaceMatrix", glm::value_ptr(lightViewProj));
-            shadowmap_shader->set_vec3("light.position", glm::value_ptr(light_pos));
-            shadowmap_shader->set_vec3("light.direction", glm::value_ptr(light_dir));
-            shadowmap_shader->set_vec3("light.color", glm::value_ptr(lights[0].color));
+            // shadowmap_shader->bind();
+            // shadowmap_shader->set_mat4("lightSpaceMatrix", glm::value_ptr(lightViewProj));
+            // shadowmap_shader->set_vec3("light.position", glm::value_ptr(light_pos));
+            // shadowmap_shader->set_vec3("light.direction", glm::value_ptr(light_dir));
+            // shadowmap_shader->set_vec3("light.color", glm::value_ptr(lights[0].color));
 
             for (size_t i = 0; i < scene.get_model_count(); i++)
             {
@@ -822,7 +825,7 @@ namespace goon
                 {
                     continue;
                 }
-                shadowmap_shader->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
+                // shadowmap_shader->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
                 for (size_t j = 0; j < model->get_num_meshes(); j++)
                 {
                     Mesh mesh = model->get_meshes()[j];
@@ -853,6 +856,8 @@ namespace goon
             glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
             shadowmap_shader2->bind();
+            shadowmap_shader2->set_vec3("light.direction", glm::value_ptr(lights[0].direction));
+            shadowmap_shader2->set_vec3("light.color", glm::value_ptr(lights[0].color));
             glBindFramebuffer(GL_FRAMEBUFFER, rsm_fbo);
             glViewport(0, 0, rsm_size, rsm_size);
             glClear(GL_DEPTH_BUFFER_BIT);
@@ -871,7 +876,7 @@ namespace goon
                 {
                     Mesh mesh = model->get_meshes()[j];
                     Material mat = model->get_materials()[mesh.get_material_index()];
-                    // mat.albedo.bind(ALBEDO_INDEX);
+                    mat.albedo.bind(ALBEDO_INDEX);
                     mesh.draw();
                 }
             }
