@@ -62,9 +62,6 @@ namespace goon
         uint32_t g_depth;
         uint32_t rsm_fbo = 0;
         uint32_t rsm_depth = 0;
-        uint32_t rsm_normal = 0;
-        uint32_t rsm_position = 0;
-        uint32_t rsm_flux = 0;
         uint32_t shadow_cascade_ubo = 0;
         uint32_t rsm_size = 4096;
         float zMulti = 10.0f;
@@ -281,52 +278,14 @@ namespace goon
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
             constexpr float white[] = {1.0f, 1.0f, 1.0f, 1.0f};
-            constexpr float black[] = {0.0f, 0.0f, 0.0f, 0.0f};
+
             glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, white);
 
-            glGenTextures(1, &rsm_normal);
-            glBindTexture(GL_TEXTURE_2D_ARRAY, rsm_normal);
-            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, rsm_size, rsm_size,
-                cascade_amount, 0, GL_RGB, GL_FLOAT, nullptr);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-            glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, black);
-
-            glGenTextures(1, &rsm_position);
-            glBindTexture(GL_TEXTURE_2D_ARRAY, rsm_position);
-            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, rsm_size, rsm_size,
-                cascade_amount, 0, GL_RGB, GL_FLOAT, nullptr);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-            glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, black);
-
-           //flux texture
-            glGenTextures(1, &rsm_flux);
-            glBindTexture(GL_TEXTURE_2D_ARRAY, rsm_flux);
-            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, rsm_size, rsm_size, cascade_amount,
-                         0, GL_RGB, GL_FLOAT, nullptr);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-            glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, white);
 
             glBindFramebuffer(GL_FRAMEBUFFER, rsm_fbo);
             glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, rsm_depth, 0);
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rsm_normal, 0);
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, rsm_position, 0);
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, rsm_flux, 0);
-
-            GLenum rsm_draw_buffer[] = {
-                GL_COLOR_ATTACHMENT0,
-                GL_COLOR_ATTACHMENT1,
-                GL_COLOR_ATTACHMENT2
-            };
-            glDrawBuffers(3, rsm_draw_buffer);
+            glDrawBuffer(GL_NONE);
+            glReadBuffer(GL_NONE);
 
             if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             {
@@ -777,9 +736,6 @@ namespace goon
             glBindTextureUnit(2, g_albedo);
             glBindTextureUnit(3, g_metallic_roughness_ao);
 
-            glBindTextureUnit(10, rsm_normal);
-            glBindTextureUnit(11, rsm_position);
-            glBindTextureUnit(12, rsm_flux);
             glBindTextureUnit(13, rsm_depth);
             render_quad();
             glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer);
