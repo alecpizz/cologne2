@@ -13,9 +13,21 @@ namespace goon
         float& ref;
         std::string name;
     };
+    struct IntCmd
+    {
+        int32_t& ref;
+        std::string name;
+    };
+    struct Vec3Cmd
+    {
+        glm::vec3& ref;
+        std::string name;
+    };
     struct DebugUI::Impl
     {
-        std::vector<FloatCmd> cmds;
+        std::vector<FloatCmd> float_cmds;
+        std::vector<IntCmd> int_cmds;
+        std::vector<Vec3Cmd> vec3_cmds;
         void init()
         {
             ImGui::CreateContext();
@@ -102,13 +114,35 @@ namespace goon
             Engine::get_renderer()->reload_shaders();
         }
 
-        for (size_t i = 0; i < _impl->cmds.size(); ++i)
+        for (size_t i = 0; i < _impl->float_cmds.size(); ++i)
         {
             ImGui::PushID(i);
-            float value = _impl->cmds[i].ref;
-            if (ImGui::DragFloat(_impl->cmds[i].name.c_str(), &value, 0.005f))
+            float value = _impl->float_cmds[i].ref;
+            if (ImGui::DragFloat(_impl->float_cmds[i].name.c_str(), &value, 0.005f))
             {
-                _impl->cmds[i].ref = value;
+                _impl->float_cmds[i].ref = value;
+            }
+            ImGui::PopID();
+        }
+
+        for (size_t i = 0; i < _impl->int_cmds.size(); ++i)
+        {
+            ImGui::PushID(i);
+            int32_t value = _impl->int_cmds[i].ref;
+            if (ImGui::DragInt(_impl->int_cmds[i].name.c_str(), &value, 0.005f))
+            {
+                _impl->int_cmds[i].ref = value;
+            }
+            ImGui::PopID();
+        }
+
+        for (size_t i = 0; i < _impl->vec3_cmds.size(); i++)
+        {
+            ImGui::PushID(i);
+            glm::vec3 value = _impl->vec3_cmds[i].ref;
+            if (ImGui::DragFloat3(_impl->vec3_cmds[i].name.c_str(), &value[0], 0.005f))
+            {
+                _impl->vec3_cmds[i].ref = value;
             }
             ImGui::PopID();
         }
@@ -156,6 +190,16 @@ namespace goon
 
     void DebugUI::add_float_entry(const char *name, float &value)
     {
-        _impl->cmds.emplace_back(FloatCmd{value, name});
+        _impl->float_cmds.emplace_back(FloatCmd{value, name});
+    }
+
+    void DebugUI::add_int_entry(const char *name, int &value)
+    {
+        _impl->int_cmds.emplace_back(IntCmd{value, name});
+    }
+
+    void DebugUI::add_vec3_entry(const char *name, glm::vec3 &value)
+    {
+        _impl->vec3_cmds.emplace_back(Vec3Cmd{value, name});
     }
 }

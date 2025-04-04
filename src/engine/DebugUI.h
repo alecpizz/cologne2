@@ -14,6 +14,8 @@ namespace goon
         void present();
 
         void add_float_entry(const char* name, float& value);
+        void add_int_entry(const char* name, int& value);
+        void add_vec3_entry(const char* name, glm::vec3& value);
 
         DebugUI(DebugUI &&) = delete;
 

@@ -28,9 +28,6 @@ namespace goon
 #define PREFILTER_INDEX 7
 #define BRDF_INDEX 8
 #define SHADOW_INDEX 9
-#define NORMAL_SHADOW_INDEX 10
-#define POSITION_INDEX 11
-#define FLUX_INDEX 12
 
 
     struct Renderer::Impl
@@ -38,9 +35,9 @@ namespace goon
         std::unique_ptr<Shader> lit_shader = nullptr;
         std::unique_ptr<Shader> g_buffer_shader = nullptr;
         std::unique_ptr<Shader> skybox_shader = nullptr;
-        // std::unique_ptr<Shader> shadowmap_shader = nullptr;
-        std::unique_ptr<Shader> shadowmap_shader2 = nullptr;
+        std::unique_ptr<Shader> shadowmap_shader = nullptr;
         std::unique_ptr<Shader> fbo_debug_shader = nullptr;
+        std::unique_ptr<Shader> probe_debug_shader = nullptr;
         std::unique_ptr<DebugRenderer> debug_renderer = nullptr;
         std::unique_ptr<TextRenderer> text_renderer = nullptr;
         std::vector<Light> lights;
@@ -50,9 +47,6 @@ namespace goon
         Texture env_prefilter;
         Texture env_brdf;
         Texture shadow_map;
-        Texture normal_map;
-        Texture position_map;
-        Texture flux_map;
         uint32_t shadow_fbo = 0;
         uint32_t g_buffer = 0;
         uint32_t g_position = 0;
@@ -67,6 +61,26 @@ namespace goon
         float zMulti = 10.0f;
         float shadow_near = 0.1f;
         float shadow_far = 1200.0f;
+
+
+        //PROBES
+        int32_t probe_depth = 8;
+        int32_t probe_height = 8;
+        int32_t probe_width = 12;
+        float probe_spacing = 1.0f;
+        glm::vec3 probe_volume_origin = glm::vec3(-6.0f, 0.1f, -4.0f);
+
+        struct ProbeGBuffer
+        {
+            uint32_t fbo;
+            uint32_t color;
+            uint32_t normal;
+            uint32_t position;
+            uint32_t depth;
+        };
+
+        std::vector<ProbeGBuffer> probe_g_buffers;
+
 
         void init()
         {
@@ -84,6 +98,11 @@ namespace goon
             Engine::get_debug_ui()->add_float_entry("ZMulti", zMulti);
             Engine::get_debug_ui()->add_float_entry("Shadow Far Plane", shadow_far);
             Engine::get_debug_ui()->add_float_entry("Shadow near Plane", shadow_near);
+            Engine::get_debug_ui()->add_int_entry("Probe Depth", probe_depth);
+            Engine::get_debug_ui()->add_int_entry("Probe Width", probe_width);
+            Engine::get_debug_ui()->add_int_entry("Probe Height", probe_height);
+            Engine::get_debug_ui()->add_float_entry("Probe Spacing", probe_spacing);
+            Engine::get_debug_ui()->add_vec3_entry("Probe Origin", probe_volume_origin);
         }
 
         void init_shaders()
@@ -104,13 +123,13 @@ namespace goon
 
             skybox_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/skybox.vert",
                                                      RESOURCES_PATH "shaders/skybox.frag");
-            // shadowmap_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/shadowmap.vert",
-            //                                             RESOURCES_PATH "shaders/shadowmap.frag");
             fbo_debug_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/framebufferoutput.vert",
                                                         RESOURCES_PATH "shaders/framebufferoutput.frag");
-            shadowmap_shader2 = std::make_unique<Shader>(RESOURCES_PATH "shaders/shadowmap2.vert",
-                                                         RESOURCES_PATH "shaders/shadowmap2.frag",
-                                                         RESOURCES_PATH "shaders/shadowmap2.geom");
+            shadowmap_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/shadowmap2.vert",
+                                                        RESOURCES_PATH "shaders/shadowmap2.frag",
+                                                        RESOURCES_PATH "shaders/shadowmap2.geom");
+            probe_debug_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/probe_debug.vert",
+                                                          RESOURCES_PATH "shaders/probe_debug.frag");
         }
 
         void init_gbuffer(uint32_t width, uint32_t height)
@@ -186,83 +205,162 @@ namespace goon
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
-        void init_shadow_map()
+        void create_probe_g_buffers()
         {
-            //shadow map framebuffer
-            glGenFramebuffers(1, &shadow_fbo);
-            uint32_t width = 1024, height = 1024;
-            uint32_t shadowID = 0;
-            uint32_t normalID = 0;
-            uint32_t positionID = 0;
-            uint32_t fluxID = 0;
+            LOG_INFO("Generating g buffer textures");
+            Shader probe_g_buffer(RESOURCES_PATH "shaders/probe_g_buffer.vert", RESOURCES_PATH "shaders/probe_g_buffer.frag");
+            probe_g_buffer.bind();
+            for (uint32_t x = 0; x < probe_width; x++)
+            {
+                for (uint32_t y = 0; y < probe_height; y++)
+                {
+                    for (uint32_t z = 0; z < probe_depth; z++)
+                    {
+                        //make the fucking gbuffer
+                        uint32_t fbo;
+                        uint32_t pos_id;
+                        uint32_t col_id;
+                        uint32_t norm_id;
+                        uint32_t depth_id;
+                        int32_t size = 64;
 
-            //shadow map texture
-            glGenTextures(1, &shadowID);
-            glBindTexture(GL_TEXTURE_2D, shadowID);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-                         width, height, 0,GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-            float clamp_color[] = {1.0f, 1.0f, 1.0f, 1.0f};
-            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, clamp_color);
-            shadow_map = Texture(shadowID, width, height, 1);
+                        glGenFramebuffers(1, &fbo);
+                        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+                        glGenTextures(1, &pos_id);
+                        glBindTexture(GL_TEXTURE_CUBE_MAP, pos_id);
+                        for (uint32_t i = 0; i < 6; i++)
+                        {
+                            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA16F, size, size, 0,
+                                         GL_RGBA, GL_FLOAT, nullptr);
+                        }
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+                                               pos_id, 0);
 
-            //normal map texture
-            glGenTextures(1, &normalID);
-            glBindTexture(GL_TEXTURE_2D, normalID);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F,
-                         width, height, 0, GL_RGB, GL_FLOAT, nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-            float border_color[] = {0.0f, 0.0f, 0.0f, 0.0f};
-            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border_color);
-            normal_map = Texture(normalID, width, height, 1);
+                        //normal
+                        glGenTextures(1, &norm_id);
+                        glBindTexture(GL_TEXTURE_CUBE_MAP, norm_id);
+                        for (uint32_t i = 0; i < 6; i++)
+                        {
+                            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA16F, size, size, 0,
+                                         GL_RGBA, GL_FLOAT, nullptr);
+                        }
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+                        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+                                               norm_id, 0);
 
-            //position texture
-            glGenTextures(1, &positionID);
-            glBindTexture(GL_TEXTURE_2D, positionID);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height,
-                         0, GL_RGB, GL_FLOAT, nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border_color);
-            position_map = Texture(positionID, width, height, 1);
+                        //albedo
+                        glGenTextures(1, &col_id);
+                        glBindTexture(GL_TEXTURE_CUBE_MAP, col_id);
+                        for (uint32_t i = 0; i < 6; i++)
+                        {
+                            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, size, size, 0, GL_RGBA,
+                                         GL_UNSIGNED_BYTE, nullptr);
+                        }
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+                        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+                                               col_id, 0);
+                        //depth
 
-            //flux texture
-            glGenTextures(1, &fluxID);
-            glBindTexture(GL_TEXTURE_2D, fluxID);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height,
-                         0, GL_RGB, GL_FLOAT, nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, clamp_color);
-            flux_map = Texture(fluxID, width, height, 1);
+                        glGenTextures(1, &depth_id);
+                        glBindTexture(GL_TEXTURE_CUBE_MAP, depth_id);
+                        for (uint32_t i = 0; i < 6; i++)
+                        {
+                            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT,
+                                         size, size, 0,GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+                        }
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+                        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                               GL_TEXTURE_CUBE_MAP_POSITIVE_X, depth_id, 0);
 
+                        uint32_t attachments[3] = {
+                            GL_COLOR_ATTACHMENT0,
+                            GL_COLOR_ATTACHMENT1,
+                            GL_COLOR_ATTACHMENT2
+                        };
+                        glDrawBuffers(3, attachments);
+                        //render the scene into the gbuffer too
+                        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+                        float x_pos = static_cast<float>(x) * probe_spacing;
+                        float y_pos = static_cast<float>(y) * probe_spacing;
+                        float z_pos = static_cast<float>(z) * probe_spacing;
+                        glm::vec3 capture_pos = glm::vec3(x_pos, y_pos, z_pos);
+                        capture_pos += probe_volume_origin;
+                        glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+                        glm::mat4 captureViews[] = {
+                            glm::lookAt(capture_pos, capture_pos + glm::vec3(1.0f, 0.0f, 0.0f),
+                                        glm::vec3(0.0f, -1.0f, 0.0f)),
+                            glm::lookAt(capture_pos, capture_pos + glm::vec3(-1.0f, 0.0f, 0.0f),
+                                        glm::vec3(0.0f, -1.0f, 0.0f)),
+                            glm::lookAt(capture_pos, capture_pos + glm::vec3(0.0f, 1.0f, 0.0f),
+                                        glm::vec3(0.0f, 0.0f, 1.0f)),
+                            glm::lookAt(capture_pos, capture_pos + glm::vec3(0.0f, -1.0f, 0.0f),
+                                        glm::vec3(0.0f, 0.0f, -1.0f)),
+                            glm::lookAt(capture_pos, capture_pos + glm::vec3(0.0f, 0.0f, 1.0f),
+                                        glm::vec3(0.0f, -1.0f, 0.0f)),
+                            glm::lookAt(capture_pos, capture_pos + glm::vec3(0.0f, 0.0f, -1.0f),
+                                        glm::vec3(0.0f, -1.0f, 0.0f))
+                        };
 
-            glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowID, 0);
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, normalID, 0);
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, positionID, 0);
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, fluxID, 0);
+                        probe_g_buffer.set_mat4("projection", glm::value_ptr(captureProjection));
+                        //render the scene 6 god damn times into gbuffers
+                        //will never change so we can relight them in the future
+                        for (uint32_t i = 0; i < 6; i++)
+                        {
+                            //bind frame buffer per cubemap
+                            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                                   GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, pos_id, 0);
+                            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
+                                                   GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, norm_id, 0);
+                            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2,
+                                                   GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, col_id, 0);
+                            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, depth_id, 0);
 
-            GLenum rsm_draw_buffer[] = {
-                GL_COLOR_ATTACHMENT0,
-                GL_COLOR_ATTACHMENT1,
-                GL_COLOR_ATTACHMENT2
-            };
-            glDrawBuffers(3, rsm_draw_buffer);
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                            //render the fucking scene
+                            probe_g_buffer.set_mat4("view", glm::value_ptr(captureViews[i]));
+                            auto scene = Engine::get_scene();
+                            for (size_t i = 0; i < scene->get_model_count(); i++)
+                            {
+                                auto model = scene->get_model_by_index(i);
+                                if (!model->get_active())
+                                {
+                                    continue;
+                                }
+                                probe_g_buffer.set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
+                                for (size_t j = 0; j < model->get_num_meshes(); j++)
+                                {
+                                    Mesh mesh = model->get_meshes()[j];
+                                    Material mat = model->get_materials()[mesh.get_material_index()];
+                                    mat.albedo.bind(0);
+                                    mat.normal.bind(1);
+                                    mesh.draw();
+                                }
+                            }
+                        }
+                        probe_g_buffers.emplace_back(ProbeGBuffer{fbo, col_id, norm_id, pos_id, depth_id});
+                    }
+                }
+            }
+            LOG_INFO("Generated %d g buffer cube maps", probe_g_buffers.size());
         }
 
-        void init_shadow_map2()
+        void init_shadow_map()
         {
             glGenFramebuffers(1, &rsm_fbo);
             glGenTextures(1, &rsm_depth);
@@ -727,15 +825,10 @@ namespace goon
             env_prefilter.bind(PREFILTER_INDEX);
             env_brdf.bind(BRDF_INDEX);
             lit_shader->set_float("far_plane", shadow_far);
-            // shadow_map.bind(SHADOW_INDEX);
-            // normal_map.bind(NORMAL_SHADOW_INDEX);
-            // position_map.bind(POSITION_INDEX);
-            // flux_map.bind(FLUX_INDEX);
             glBindTextureUnit(0, g_position);
             glBindTextureUnit(1, g_normal);
             glBindTextureUnit(2, g_albedo);
             glBindTextureUnit(3, g_metallic_roughness_ao);
-
             glBindTextureUnit(13, rsm_depth);
             render_quad();
             glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer);
@@ -746,58 +839,7 @@ namespace goon
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
-
         void shadow_pass(Scene &scene)
-        {
-            glDisable(GL_CULL_FACE);
-            float near = 0.1f;
-            float far = 20.0f;
-            glm::mat4 lightProjection = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, near, far);
-            glm::vec3 light_pos = lights[0].position;
-            glm::vec3 light_dir = glm::normalize(lights[0].direction);
-            glm::vec3 up_world = glm::vec3(0.0f, 1.0f, 0.0f);
-
-            glm::vec3 target_position = light_pos + (5.0f * light_dir);
-
-            glm::vec3 light_right = glm::normalize(glm::cross(light_dir, up_world));
-            glm::vec3 light_up = glm::normalize(glm::cross(light_right, light_dir));
-            glm::mat4 light_view = glm::lookAt(light_pos, target_position, light_up);
-            glm::mat4 lightViewProj = lightProjection * light_view;
-
-
-            glViewport(0, 0, shadow_map.get_width(), shadow_map.get_height());
-            glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
-            glClear(GL_DEPTH_BUFFER_BIT);
-            // shadowmap_shader->bind();
-            // shadowmap_shader->set_mat4("lightSpaceMatrix", glm::value_ptr(lightViewProj));
-            // shadowmap_shader->set_vec3("light.position", glm::value_ptr(light_pos));
-            // shadowmap_shader->set_vec3("light.direction", glm::value_ptr(light_dir));
-            // shadowmap_shader->set_vec3("light.color", glm::value_ptr(lights[0].color));
-
-            for (size_t i = 0; i < scene.get_model_count(); i++)
-            {
-                auto model = scene.get_model_by_index(i);
-                if (!model->get_active())
-                {
-                    continue;
-                }
-                // shadowmap_shader->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
-                for (size_t j = 0; j < model->get_num_meshes(); j++)
-                {
-                    Mesh mesh = model->get_meshes()[j];
-                    Material mat = model->get_materials()[mesh.get_material_index()];
-                    mat.albedo.bind(ALBEDO_INDEX);
-                    mesh.draw();
-                }
-            }
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            lit_shader->bind();
-            lit_shader->set_mat4("lightSpaceMatrix", glm::value_ptr(lightViewProj));
-            glEnable(GL_CULL_FACE);
-        }
-
-
-        void shadow_pass2(Scene &scene)
         {
             shadowCascadeLevels[0] = (shadow_far / 50.0f);
             shadowCascadeLevels[1] = (shadow_far / 25.0f);
@@ -811,9 +853,9 @@ namespace goon
             }
             glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-            shadowmap_shader2->bind();
-            shadowmap_shader2->set_vec3("light.direction", glm::value_ptr(lights[0].direction));
-            shadowmap_shader2->set_vec3("light.color", glm::value_ptr(lights[0].color));
+            shadowmap_shader->bind();
+            shadowmap_shader->set_vec3("light.direction", glm::value_ptr(lights[0].direction));
+            shadowmap_shader->set_vec3("light.color", glm::value_ptr(lights[0].color));
             glBindFramebuffer(GL_FRAMEBUFFER, rsm_fbo);
             glViewport(0, 0, rsm_size, rsm_size);
             glClear(GL_DEPTH_BUFFER_BIT);
@@ -827,7 +869,7 @@ namespace goon
                 {
                     continue;
                 }
-                shadowmap_shader2->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
+                shadowmap_shader->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
                 for (size_t j = 0; j < model->get_num_meshes(); j++)
                 {
                     Mesh mesh = model->get_meshes()[j];
@@ -850,12 +892,10 @@ namespace goon
                 if (i == 0)
                 {
                     ret.push_back(get_light_space_matrix(shadow_near, shadowCascadeLevels[i]));
-                }
-                else if (i < shadowCascadeLevels.size())
+                } else if (i < shadowCascadeLevels.size())
                 {
                     ret.push_back(get_light_space_matrix(shadowCascadeLevels[i - 1], shadowCascadeLevels[i]));
-                }
-                else
+                } else
                 {
                     ret.push_back(get_light_space_matrix(shadowCascadeLevels[i - 1], shadow_far));
                 }
@@ -958,6 +998,93 @@ namespace goon
             glDepthMask(GL_TRUE);
             glDepthFunc(GL_LESS);
         }
+
+        void probe_debug_pass()
+        {
+            glDisable(GL_BLEND);
+            glEnable(GL_DEPTH_TEST);
+            glDepthMask(GL_FALSE);
+
+            static uint32_t cube_vao = 0;
+            static uint32_t cube_vbo = 0;
+            if (cube_vao == 0)
+            {
+                float vertices[] = {
+                    // back face
+                    -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+                    1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f, // top-right
+                    1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f, // bottom-right
+                    1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f, // top-right
+                    -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+                    -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, // top-left
+                    // front face
+                    -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom-left
+                    1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, // bottom-right
+                    1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // top-right
+                    1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // top-right
+                    -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, // top-left
+                    -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom-left
+                    // left face
+                    -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-right
+                    -1.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top-left
+                    -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-left
+                    -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-left
+                    -1.0f, -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-right
+                    -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-right
+                    // right face
+                    1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-left
+                    1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-right
+                    1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top-right
+                    1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-right
+                    1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-left
+                    1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-left
+                    // bottom face
+                    -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
+                    1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f, // top-left
+                    1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom-left
+                    1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom-left
+                    -1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom-right
+                    -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
+                    // top face
+                    -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
+                    1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom-right
+                    1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // top-right
+                    1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom-right
+                    -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
+                    -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f // bottom-left
+                };
+
+                glCreateBuffers(1, &cube_vbo);
+                glNamedBufferStorage(cube_vbo, sizeof(vertices), vertices, GL_MAP_READ_BIT);
+                glCreateVertexArrays(1, &cube_vao);
+                glVertexArrayVertexBuffer(cube_vao, 0, cube_vbo, 0, 8 * sizeof(float));
+
+                glEnableVertexArrayAttrib(cube_vao, 0);
+                glEnableVertexArrayAttrib(cube_vao, 1);
+                glEnableVertexArrayAttrib(cube_vao, 2);
+
+                glVertexArrayAttribFormat(cube_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+                glVertexArrayAttribFormat(cube_vao, 1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float));
+                glVertexArrayAttribFormat(cube_vao, 2, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float));
+
+                glVertexArrayAttribBinding(cube_vao, 0, 0);
+                glVertexArrayAttribBinding(cube_vao, 1, 0);
+                glVertexArrayAttribBinding(cube_vao, 2, 0);
+            }
+
+            probe_debug_shader->bind();
+            probe_debug_shader->set_mat4("projection", glm::value_ptr(Engine::get_camera()->get_projection_matrix()));
+            probe_debug_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
+            probe_debug_shader->set_int("depth", probe_depth);
+            probe_debug_shader->set_int("height", probe_height);
+            probe_debug_shader->set_int("width", probe_width);
+            probe_debug_shader->set_float("spacing", probe_spacing);
+            probe_debug_shader->set_vec3("origin", glm::value_ptr(probe_volume_origin));
+            glBindVertexArray(cube_vao);
+            glDrawArraysInstanced(GL_TRIANGLES, 0, 36, probe_depth * probe_width * probe_height);
+            glDepthMask(GL_TRUE);
+            glEnable(GL_BLEND);
+        }
     };
 
     Renderer::~Renderer()
@@ -1004,10 +1131,11 @@ namespace goon
         }
 
         // _impl->shadow_pass(scene);
-        _impl->shadow_pass2(scene);
+        _impl->shadow_pass(scene);
         _impl->gbuffer_pass(scene);
         _impl->lit_pass(scene);
         _impl->skybox_pass();
+        _impl->probe_debug_pass();
         _impl->debug_renderer->present();
         _impl->text_renderer->present();
     }
@@ -1065,7 +1193,7 @@ namespace goon
         _impl->add_light(Light(glm::vec3(0.0f, 10.0f, 10.0f), glm::vec3(.0f),
                                glm::vec3(200.0f, 200.0f, 200.0f), 6.0f, 1.0f,
                                LightType::Point));
-        // _impl->init_shadow_map();
-        _impl->init_shadow_map2();
+        _impl->init_shadow_map();
+        _impl->create_probe_g_buffers();
     }
 }
