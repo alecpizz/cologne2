@@ -33,7 +33,7 @@ add_subdirectory(vendor/SDL_mixer)
 add_subdirectory(vendor/glad)
 add_subdirectory(vendor/stb_image)
 add_subdirectory(vendor/stb_truetype)
-add_subdirectory(vendor/glm)
+add_subdirectory(vendor/glm/glm)
 add_subdirectory(vendor/imgui-docking)
 add_subdirectory(vendor/assimp)
 add_subdirectory(vendor/spdlog)
@@ -115,7 +115,7 @@ endif ()
 target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/")
 target_precompile_headers("${CMAKE_PROJECT_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/gpch.h")
 target_include_directories(${CMAKE_PROJECT_NAME}  PUBLIC ${JoltPhysics_SOURCE_DIR})
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm spdlog::spdlog_header_only
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm_static spdlog::spdlog_header_only
         stb_image stb_truetype imgui SDL3-static assimp Jolt freetype SDL3_mixer-static)
 
 

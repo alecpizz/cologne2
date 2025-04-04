@@ -1,5 +1,6 @@
 #include "engine/Engine.h"
 
+#ifdef _WIN32
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -10,7 +11,7 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-
+#endif
 
 int main()
 {

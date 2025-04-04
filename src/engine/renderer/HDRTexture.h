@@ -3,7 +3,6 @@
 //
 
 #pragma once
-#include "gpch.h"
 
 namespace goon{
     class HDRTexture

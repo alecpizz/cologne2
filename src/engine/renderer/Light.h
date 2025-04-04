@@ -1,5 +1,4 @@
 #pragma once
-#include "gpch.h"
 namespace goon
 {
     enum LightType

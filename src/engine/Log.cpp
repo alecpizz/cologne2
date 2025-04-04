@@ -1,5 +1,4 @@
-﻿#include "Log.h"
-#include <spdlog/spdlog.h>
+﻿#include <spdlog/spdlog.h>
 #include "spdlog/sinks/stdout_color_sinks.h"
 
 #define FORMAT_LOG_ENTRY( msg, formatted_msg ) \

@@ -3,7 +3,6 @@
 //
 
 #include "Physics.h"
-#include "gpch.h"
 
 #include <Jolt/Jolt.h>
 #include <Jolt/Core/Factory.h>

@@ -34,11 +34,12 @@
 
 
 #define GLM_ENABLE_EXPERIMENTAL
-#include <GLM/glm.hpp>
-#include <GLM/gtc/type_ptr.hpp>
-#include <glm/gtx/matrix_decompose.hpp>
-#include <GLM/gtc/matrix_transform.hpp>
-#include <GLM/gtx/rotate_vector.hpp>
-#include <GLM/gtx/quaternion.hpp>
-#include <GLM/gtx/euler_angles.hpp>
+#include "../vendor/glm/glm/glm.hpp"
+#include "../vendor/glm/glm/glm.hpp"
+#include "../vendor/glm/glm/gtc/type_ptr.hpp"
+#include "../vendor/glm/glm/gtx/matrix_decompose.hpp"
+#include "../vendor/glm/glm/gtc/matrix_transform.hpp"
+#include "../vendor/glm/glm/gtx/rotate_vector.hpp"
+#include "../vendor/glm/glm/gtx/quaternion.hpp"
+#include "../vendor/glm/glm/gtx/euler_angles.hpp"
 #include <stb_image/stb_image.h>

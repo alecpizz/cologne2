@@ -1,5 +1,4 @@
 #pragma once
-#include "gpch.h"
 namespace goon::Input
 {
     enum class Key
@@ -20,19 +19,26 @@ namespace goon::Input
         Keypad9, Keypad0,
         LeftShift, RightShift, LeftCtrl, RightCtrl, LeftAlt, RightAlt, LeftGui,
         RightGui, AltGr
-    } ;
-
+    };
 
 
     void init();
-    void update();
-    void disable_mouse();
-    void enable_mouse();
-    void update_mouse(float x, float y);
-    void update_key_up(uint32_t scan_code);
-    void update_key_down(uint32_t scan_code);
-    bool key_pressed(Key key);
-    bool key_down(Key key);
-    glm::vec2 get_relative_mouse();
 
+    void update();
+
+    void disable_mouse();
+
+    void enable_mouse();
+
+    void update_mouse(float x, float y);
+
+    void update_key_up(uint32_t scan_code);
+
+    void update_key_down(uint32_t scan_code);
+
+    bool key_pressed(Key key);
+
+    bool key_down(Key key);
+
+    glm::vec2 get_relative_mouse();
 }

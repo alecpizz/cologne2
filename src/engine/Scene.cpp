@@ -3,7 +3,6 @@
 //
 
 #include "Scene.h"
-#include "gpch.h"
 #include "Physics.h"
 #include "renderer/Model.h"
 

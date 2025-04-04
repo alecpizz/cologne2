@@ -6,7 +6,6 @@
 #include "Physics.h"
 #include "DebugUI.h"
 #include "engine/renderer/DebugRenderer.h"
-#include "gpch.h"
 #include "Input.h"
 #include "Audio.h"
 

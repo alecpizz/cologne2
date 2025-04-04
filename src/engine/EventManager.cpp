@@ -5,7 +5,6 @@
 #include "EventManager.h"
 
 #include "Engine.h"
-#include "gpch.h"
 #include "Input.h"
 
 namespace goon

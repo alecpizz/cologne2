@@ -5,8 +5,8 @@
 #include "Window.h"
 
 #include "DebugUI.h"
-#include "gpch.h"
 #include "openglErrorReporting.h"
+
 namespace goon
 {
     struct Window::Impl
@@ -57,8 +57,8 @@ namespace goon
             enableReportGlErrors();
             ImGui_ImplSDL3_InitForOpenGL(window, context);
             ImGui_ImplOpenGL3_Init("#version 460");
-            const GLubyte* vendor = glGetString(GL_VENDOR); // Returns the vendor
-            const GLubyte* renderer = glGetString(GL_RENDERER); // Returns a hint to the model
+            const GLubyte *vendor = glGetString(GL_VENDOR); // Returns the vendor
+            const GLubyte *renderer = glGetString(GL_RENDERER); // Returns a hint to the model
             LOG_INFO("Created window for GPU: %s %s", vendor, renderer);
         }
     };
@@ -89,7 +89,6 @@ namespace goon
 
     void Window::present() const
     {
-
         SDL_GL_SwapWindow(_impl->window);
     }
 
@@ -116,6 +115,4 @@ namespace goon
         SDL_Quit();
         delete _impl;
     }
-
-
 }

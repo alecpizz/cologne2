@@ -6,7 +6,6 @@
 
 #include <engine/Physics.h>
 
-#include "gpch.h"
 #include "Mesh.h"
 #include "Texture.h"
 #include "Vertex.h"

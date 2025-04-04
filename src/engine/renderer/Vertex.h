@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include <GLM/glm.hpp>
 namespace goon
 {
     struct Vertex

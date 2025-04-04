@@ -2,7 +2,6 @@
 
 #include <engine/Engine.h>
 #include "engine/Input.h"
-#include "gpch.h"
 #include "Shader.h"
 
 namespace goon
