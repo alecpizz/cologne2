@@ -392,6 +392,10 @@ namespace goon
                 }
             }
             LOG_INFO("Generated %d g buffer cube maps", probe_g_buffers.size());
+            //shove all the gbuffers into somewhere where we can access the on gpu
+            //light all the probes, take in 256 random points and do direct lighting on each point. generate SH coefficients
+            //store all SH coefficients in a buffer
+            //sample from the 8 nearest probes
         }
 
         void init_shadow_map()
