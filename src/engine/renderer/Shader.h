@@ -17,6 +17,8 @@ namespace goon
 
         Shader &operator=(const Shader &) = delete;
 
+        Shader(const char* comp_path);
+
         Shader(const char *vert_path, const char *frag_path);
 
         Shader(const char *vert_path, const char *frag_path, const char *geom_path);
@@ -26,6 +28,8 @@ namespace goon
         uint32_t get_handle() const;
 
         void bind() const;
+        void dispatch(uint32_t work_size_x, uint32_t work_size_y, uint32_t work_size_z);
+        void wait();
 
         void set_bool(const char *name, bool value) const;
 

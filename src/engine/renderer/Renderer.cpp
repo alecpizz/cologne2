@@ -38,6 +38,7 @@ namespace goon
         std::unique_ptr<Shader> shadowmap_shader = nullptr;
         std::unique_ptr<Shader> fbo_debug_shader = nullptr;
         std::unique_ptr<Shader> probe_debug_shader = nullptr;
+        std::unique_ptr<Shader> probe_lit_shader = nullptr;
         std::unique_ptr<DebugRenderer> debug_renderer = nullptr;
         std::unique_ptr<TextRenderer> text_renderer = nullptr;
         std::vector<Light> lights;
@@ -81,7 +82,7 @@ namespace goon
         };
 
         std::vector<ProbeGBuffer> probe_g_buffers;
-
+        uint32_t probe_lighting = 0;
 
         void init()
         {
@@ -131,6 +132,7 @@ namespace goon
                                                         RESOURCES_PATH "shaders/shadowmap2.geom");
             probe_debug_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/probe_debug.vert",
                                                           RESOURCES_PATH "shaders/probe_debug.frag");
+            probe_lit_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/probe_lit.comp");
         }
 
         void init_gbuffer(uint32_t width, uint32_t height)
@@ -206,121 +208,147 @@ namespace goon
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
+        void light_probes()
+        {
+            //light all the probes, take in 256 random points and do direct lighting on each point. generate SH coefficients from resulting lighting
+            probe_lit_shader->bind();
+            probe_lit_shader->set_int("probe_depth", probe_depth);
+            probe_lit_shader->set_int("probe_width", probe_width);
+            probe_lit_shader->set_int("probe_height", probe_height);
+            probe_lit_shader->set_float("probe_spacing", probe_spacing);
+            probe_lit_shader->set_vec3("origin", glm::value_ptr(probe_volume_origin));
+
+            for (size_t i = 0; i < lights.size(); ++i)
+            {
+                probe_lit_shader->set_vec3(std::string("lights[" + std::to_string(i) + "].position").c_str(), glm::value_ptr(lights[i].position));
+                probe_lit_shader->set_vec3(std::string("lights[" + std::to_string(i) + "].direction").c_str(), glm::value_ptr(lights[i].direction));
+                probe_lit_shader->set_vec3(std::string("lights[" + std::to_string(i) + "].color").c_str(), glm::value_ptr(lights[i].color));
+                probe_lit_shader->set_float(std::string("lights[" + std::to_string(i) + "].radius").c_str(), (lights[i].radius));
+                probe_lit_shader->set_float(std::string("lights[" + std::to_string(i) + "].strength").c_str(), (lights[i].strength));
+                probe_lit_shader->set_int(std::string("lights[" + std::to_string(i) + "].type").c_str(), lights[i].type);
+            }
+            probe_lit_shader->set_int("num_lights", lights.size());
+            glBindImageTexture(0, probe_lighting, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
+
+            //bind a shit load of textures
+            int32_t texture_idx = 1;
+            for (size_t i = 0; i < probe_g_buffers.size(); ++i)
+            {
+                probe_lit_shader->set_int(std::string("g_colors[" + std::to_string(i) + "]").c_str(), texture_idx);
+                glBindTextureUnit(texture_idx, probe_g_buffers[i].color);
+                texture_idx++;
+                probe_lit_shader->set_int(std::string("g_norms[" + std::to_string(i) + "]").c_str(), texture_idx);
+                glBindTextureUnit(texture_idx, probe_g_buffers[i].normal);
+                texture_idx++;
+                probe_lit_shader->set_int(std::string("g_depths[" + std::to_string(i) + "]").c_str(), texture_idx);
+                glBindTextureUnit(texture_idx, probe_g_buffers[i].depth);
+                texture_idx++;
+                probe_lit_shader->set_int(std::string("g_positions[" + std::to_string(i) + "]").c_str(), texture_idx);
+                glBindTextureUnit(texture_idx, probe_g_buffers[i].position);
+                texture_idx++;
+                probe_lit_shader->set_int(std::string("g_orms[" + std::to_string(i) + "]").c_str(), texture_idx);
+                glBindTextureUnit(texture_idx, probe_g_buffers[i].orm);
+                texture_idx++;
+            }
+            int32_t work_group_size = 4;
+            probe_lit_shader->dispatch(probe_width, probe_height, probe_depth);
+            probe_lit_shader->wait();
+            //store all SH coefficients in a buffer -> 3d texture
+            //sample from the 8 nearest probes
+        }
+
         void create_probe_g_buffers()
         {
             LOG_INFO("Generating g buffer textures");
             Shader probe_g_buffer(RESOURCES_PATH "shaders/probe_g_buffer.vert",
                                   RESOURCES_PATH "shaders/probe_g_buffer.frag");
-            probe_g_buffer.bind();
-            for (uint32_t x = 0; x < probe_width; x++)
+
+            //make probe g buffer
+
+            int32_t size = 64;
+            uint32_t cubemap_amount = probe_width * probe_height * probe_depth;
+            uint32_t max_size = 2048;
+            uint32_t total_depth = cubemap_amount * 6;
+            uint32_t textures_needed = (total_depth + max_size - 1) / max_size;
+
+            for (uint32_t i = 0; i < textures_needed; i++)
             {
-                for (uint32_t y = 0; y < probe_height; y++)
+                uint32_t pos_id;
+                uint32_t col_id;
+                uint32_t norm_id;
+                uint32_t depth_id;
+                uint32_t orm_id;
+                uint32_t start_cube_map = i * (max_size / 6);
+                uint32_t end_cube_map = std::min((i + 1) * (max_size / 6), cubemap_amount);
+                uint32_t depth = (end_cube_map - start_cube_map) * 6;
+
+                //position sampler array
+                glGenTextures(1, &pos_id);
+                glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, pos_id);
+                glTexImage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 0, GL_RGBA8, size, size,
+                             depth, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+                //color sampler array
+                glGenTextures(1, &col_id);
+                glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, col_id);
+                glTexImage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 0, GL_RGB, size, size,
+                             depth, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+                //normal sampler array
+                glGenTextures(1, &norm_id);
+                glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, norm_id);
+                glTexImage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 0, GL_RGBA16F, size, size,
+                             depth, 0, GL_RGB, GL_FLOAT, nullptr);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+                //orm sampler array
+                glGenTextures(1, &orm_id);
+                glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, orm_id);
+                glTexImage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 0, GL_RGB, size, size,
+                             depth, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+                //depth sampler array
+                glGenTextures(1, &depth_id);
+                glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, depth_id);
+                glTexImage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 0, GL_DEPTH_COMPONENT, size,
+                             size, depth, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+                probe_g_buffers.emplace_back(ProbeGBuffer(0, col_id, norm_id, pos_id, depth_id, orm_id));
+            }
+
+            uint32_t count = 0;
+            probe_g_buffer.bind();
+
+            for (int32_t x = 0; x < probe_width; x++)
+            {
+                for (int32_t y = 0; y < probe_height; y++)
                 {
-                    for (uint32_t z = 0; z < probe_depth; z++)
+                    for (int32_t z = 0; z < probe_depth; z++)
                     {
-                        //make the fucking gbuffer
-                        uint32_t fbo;
-                        uint32_t pos_id;
-                        uint32_t col_id;
-                        uint32_t norm_id;
-                        uint32_t depth_id;
-                        uint32_t orm_id;
-                        int32_t size = 64;
-
-                        glGenFramebuffers(1, &fbo);
-                        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-                        glGenTextures(1, &pos_id);
-                        glBindTexture(GL_TEXTURE_CUBE_MAP, pos_id);
-                        for (uint32_t i = 0; i < 6; i++)
-                        {
-                            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA16F, size, size, 0,
-                                         GL_RGBA, GL_FLOAT, nullptr);
-                        }
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-                                               pos_id, 0);
-
-                        //normal
-                        glGenTextures(1, &norm_id);
-                        glBindTexture(GL_TEXTURE_CUBE_MAP, norm_id);
-                        for (uint32_t i = 0; i < 6; i++)
-                        {
-                            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA16F, size, size, 0,
-                                         GL_RGBA, GL_FLOAT, nullptr);
-                        }
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-                        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-                                               norm_id, 0);
-
-                        //albedo
-                        glGenTextures(1, &col_id);
-                        glBindTexture(GL_TEXTURE_CUBE_MAP, col_id);
-                        for (uint32_t i = 0; i < 6; i++)
-                        {
-                            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, size, size, 0, GL_RGBA,
-                                         GL_UNSIGNED_BYTE, nullptr);
-                        }
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-                        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-                                               col_id, 0);
-
-                        //orm
-                        glGenTextures(1, &orm_id);
-                        glBindTexture(GL_TEXTURE_CUBE_MAP, orm_id);
-                        for (uint32_t i = 0; i < 6; i++)
-                        {
-                            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, size, size, 0, GL_RGB,
-                                         GL_UNSIGNED_BYTE, nullptr);
-                        }
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-                        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-                                               orm_id, 0);
-
-                        //depth
-                        glGenTextures(1, &depth_id);
-                        glBindTexture(GL_TEXTURE_CUBE_MAP, depth_id);
-                        for (uint32_t i = 0; i < 6; i++)
-                        {
-                            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT,
-                                         size, size, 0,GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-                        }
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-                        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                               GL_TEXTURE_CUBE_MAP_POSITIVE_X, depth_id, 0);
-
-                        uint32_t attachments[4] = {
-                            GL_COLOR_ATTACHMENT0,
-                            GL_COLOR_ATTACHMENT1,
-                            GL_COLOR_ATTACHMENT2,
-                            GL_COLOR_ATTACHMENT3
-                        };
-                        glDrawBuffers(4, attachments);
-                        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-                        {
-                            LOG_ERROR("Framebuffer is not complete! %s", glGetError());
-                        }
-                        //render the scene into the gbuffer too
-                        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+                        //render the shits
                         float x_pos = static_cast<float>(x) * probe_spacing;
                         float y_pos = static_cast<float>(y) * probe_spacing;
                         float z_pos = static_cast<float>(z) * probe_spacing;
@@ -342,26 +370,49 @@ namespace goon
                                         glm::vec3(0.0f, -1.0f, 0.0f))
                         };
 
+                        int32_t index = x + probe_width * (y + probe_depth * z);
+                        int32_t max_cubemaps_per_array = (2048 / 6);
+                        int32_t texture_array_index = index / max_cubemaps_per_array;
+                        int32_t cubemap_index = index % max_cubemaps_per_array;
+                        auto &g_buffer_array = probe_g_buffers[texture_array_index];
+
+
                         probe_g_buffer.set_mat4("projection", glm::value_ptr(captureProjection));
                         //render the scene 6 god damn times into gbuffers
                         //will never change so we can relight them in the future
-                        for (uint32_t i = 0; i < 6; i++)
+                        for (int32_t face = 0; face < 6; face++)
                         {
-                            //bind frame buffer per cubemap
-                            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                                   GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, pos_id, 0);
-                            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
-                                                   GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, norm_id, 0);
-                            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2,
-                                                   GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, col_id, 0);
-                            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3,
-                                                   GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, orm_id, 0);
-                            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                                   GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, depth_id, 0);
+                            uint32_t fbo;
+                            glGenFramebuffers(1, &fbo);
+                            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+                            int32_t layer = cubemap_index * 6 + face;
+                            glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, g_buffer_array.color, 0,
+                                                      layer);
+                            glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, g_buffer_array.normal, 0,
+                                                      layer);
+                            glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, g_buffer_array.position, 0,
+                                                      layer);
+                            glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, g_buffer_array.orm, 0,
+                                                      layer);
+                            glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, g_buffer_array.depth, 0,
+                                                      layer);
+                            uint32_t attachments[4] = {
+                                GL_COLOR_ATTACHMENT0,
+                                GL_COLOR_ATTACHMENT1,
+                                GL_COLOR_ATTACHMENT2,
+                                GL_COLOR_ATTACHMENT3
+                            };
+                            glDrawBuffers(4, attachments);
+
+                            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+                            {
+                                LOG_ERROR("FRAMEBUFFER INCOMPLETE!");
+                            }
 
                             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                             //render the fucking scene
-                            probe_g_buffer.set_mat4("view", glm::value_ptr(captureViews[i]));
+                            probe_g_buffer.set_mat4("view", glm::value_ptr(captureViews[face]));
                             auto scene = Engine::get_scene();
                             for (size_t i = 0; i < scene->get_model_count(); i++)
                             {
@@ -385,17 +436,26 @@ namespace goon
                                     mesh.draw();
                                 }
                             }
+                            glDeleteFramebuffers(1, &fbo);
+                            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                            count++;
                         }
-                        probe_g_buffers.emplace_back(ProbeGBuffer{fbo, col_id, norm_id, pos_id, depth_id, orm_id});
-                        glBindFramebuffer(GL_FRAMEBUFFER, 0);
                     }
                 }
             }
-            LOG_INFO("Generated %d g buffer cube maps", probe_g_buffers.size());
-            //shove all the gbuffers into somewhere where we can access the on gpu
-            //light all the probes, take in 256 random points and do direct lighting on each point. generate SH coefficients
-            //store all SH coefficients in a buffer
-            //sample from the 8 nearest probes
+
+            //shove all the gbuffers into somewhere where we can access the on gpu -> array of texture cubemap samplers!
+            LOG_INFO("Rendered %d g buffers faces", count);
+            glGenTextures(1, &probe_lighting);
+            glBindTexture(GL_TEXTURE_3D, probe_lighting);
+            glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA16F, probe_width, probe_height, probe_depth,
+                0, GL_RGBA, GL_FLOAT, nullptr);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+            light_probes();
         }
 
         void init_shadow_map()
@@ -1118,6 +1178,7 @@ namespace goon
             probe_debug_shader->set_int("width", probe_width);
             probe_debug_shader->set_float("spacing", probe_spacing);
             probe_debug_shader->set_vec3("origin", glm::value_ptr(probe_volume_origin));
+            glBindTextureUnit(0, probe_lighting);
             glBindVertexArray(cube_vao);
             glDrawArraysInstanced(GL_TRIANGLES, 0, 36, probe_depth * probe_width * probe_height);
             glDepthMask(GL_TRUE);
@@ -1166,9 +1227,11 @@ namespace goon
         {
             //hot reload shaders
             reload_shaders();
+            _impl->light_probes();
         }
 
         // _impl->shadow_pass(scene);
+
         _impl->shadow_pass(scene);
         _impl->gbuffer_pass(scene);
         _impl->lit_pass(scene);

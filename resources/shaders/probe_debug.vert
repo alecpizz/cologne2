@@ -15,6 +15,7 @@ out flat int Probe_index_x;
 out flat int Probe_index_y;
 out flat int Probe_index_z;
 
+
 out vec3 Color;
 
 void main()

@@ -12,6 +12,7 @@ namespace goon
         uint32_t program = 0;
         std::string name;
         std::unordered_map<std::string, int32_t> uniforms;
+
         void compile(const char *vertex_path, const char *fragment_path, const char *geometry_path)
         {
             program = glCreateProgram();
@@ -51,7 +52,34 @@ namespace goon
             glDeleteShader(geometry_shader);
         }
 
-        uint32_t add_shader(const char * shader_path, const GLenum shader_type) const
+        void compile(const char *comp_path)
+        {
+            program = glCreateProgram();
+
+            if (program == 0)
+            {
+                LOG_ERROR("Failed to create program");
+                return;
+            }
+            uint32_t comp_shader = add_shader(comp_path, GL_COMPUTE_SHADER);
+            if (comp_shader != 0)
+            {
+                glAttachShader(program, comp_shader);
+            }
+
+            glLinkProgram(program);
+            int32_t success;
+            glGetProgramiv(program, GL_LINK_STATUS, &success);
+            if (!success)
+            {
+                char infoLog[512];
+                glGetProgramInfoLog(program, 512, nullptr, infoLog);
+                LOG_ERROR("Failed to link program %s", infoLog);
+            }
+            glDeleteShader(comp_shader);
+        }
+
+        uint32_t add_shader(const char *shader_path, const GLenum shader_type) const
         {
             if (shader_path == nullptr)
             {
@@ -67,13 +95,12 @@ namespace goon
                 ss << file.rdbuf();
                 file.close();
                 code = ss.str();
-            }
-            catch (const std::ifstream::failure &e)
+            } catch (const std::ifstream::failure &e)
             {
                 LOG_ERROR("Failed to read file %s %s", shader_path, e.what());
             }
             uint32_t shader = glCreateShader(shader_type);
-            const char* shader_code = code.c_str();
+            const char *shader_code = code.c_str();
             glShaderSource(shader, 1, &shader_code, nullptr);
             glCompileShader(shader);
             int32_t success;
@@ -87,6 +114,12 @@ namespace goon
             return shader;
         }
     };
+
+    Shader::Shader(const char *comp_path)
+    {
+        _impl = new Impl();
+        _impl->compile(comp_path);
+    }
 
     Shader::Shader(const char *vert_path, const char *frag_path)
     {
@@ -114,6 +147,16 @@ namespace goon
     void Shader::bind() const
     {
         glUseProgram(_impl->program);
+    }
+
+    void Shader::dispatch(uint32_t work_size_x, uint32_t work_size_y, uint32_t work_size_z)
+    {
+        glDispatchCompute(work_size_x, work_size_y, work_size_z);
+    }
+
+    void Shader::wait()
+    {
+        glMemoryBarrier(GL_ALL_BARRIER_BITS);
     }
 
     void Shader::set_bool(const char *name, const bool value) const
