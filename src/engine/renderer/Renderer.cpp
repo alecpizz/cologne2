@@ -77,6 +77,7 @@ namespace goon
             uint32_t normal;
             uint32_t position;
             uint32_t depth;
+            uint32_t orm;
         };
 
         std::vector<ProbeGBuffer> probe_g_buffers;
@@ -208,7 +209,8 @@ namespace goon
         void create_probe_g_buffers()
         {
             LOG_INFO("Generating g buffer textures");
-            Shader probe_g_buffer(RESOURCES_PATH "shaders/probe_g_buffer.vert", RESOURCES_PATH "shaders/probe_g_buffer.frag");
+            Shader probe_g_buffer(RESOURCES_PATH "shaders/probe_g_buffer.vert",
+                                  RESOURCES_PATH "shaders/probe_g_buffer.frag");
             probe_g_buffer.bind();
             for (uint32_t x = 0; x < probe_width; x++)
             {
@@ -222,6 +224,7 @@ namespace goon
                         uint32_t col_id;
                         uint32_t norm_id;
                         uint32_t depth_id;
+                        uint32_t orm_id;
                         int32_t size = 64;
 
                         glGenFramebuffers(1, &fbo);
@@ -272,8 +275,24 @@ namespace goon
                         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
                         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_CUBE_MAP_POSITIVE_X,
                                                col_id, 0);
-                        //depth
 
+                        //orm
+                        glGenTextures(1, &orm_id);
+                        glBindTexture(GL_TEXTURE_CUBE_MAP, orm_id);
+                        for (uint32_t i = 0; i < 6; i++)
+                        {
+                            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, size, size, 0, GL_RGB,
+                                         GL_UNSIGNED_BYTE, nullptr);
+                        }
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+                        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+                                               orm_id, 0);
+
+                        //depth
                         glGenTextures(1, &depth_id);
                         glBindTexture(GL_TEXTURE_CUBE_MAP, depth_id);
                         for (uint32_t i = 0; i < 6; i++)
@@ -289,12 +308,17 @@ namespace goon
                         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
                                                GL_TEXTURE_CUBE_MAP_POSITIVE_X, depth_id, 0);
 
-                        uint32_t attachments[3] = {
+                        uint32_t attachments[4] = {
                             GL_COLOR_ATTACHMENT0,
                             GL_COLOR_ATTACHMENT1,
-                            GL_COLOR_ATTACHMENT2
+                            GL_COLOR_ATTACHMENT2,
+                            GL_COLOR_ATTACHMENT3
                         };
-                        glDrawBuffers(3, attachments);
+                        glDrawBuffers(4, attachments);
+                        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+                        {
+                            LOG_ERROR("Framebuffer is not complete! %s", glGetError());
+                        }
                         //render the scene into the gbuffer too
                         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
                         float x_pos = static_cast<float>(x) * probe_spacing;
@@ -330,8 +354,12 @@ namespace goon
                                                    GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, norm_id, 0);
                             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2,
                                                    GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, col_id, 0);
-                            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, depth_id, 0);
+                            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3,
+                                                   GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, orm_id, 0);
+                            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                                   GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, depth_id, 0);
 
+                            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                             //render the fucking scene
                             probe_g_buffer.set_mat4("view", glm::value_ptr(captureViews[i]));
                             auto scene = Engine::get_scene();
@@ -342,18 +370,24 @@ namespace goon
                                 {
                                     continue;
                                 }
-                                probe_g_buffer.set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
+                                probe_g_buffer.set_mat4(
+                                    "model", glm::value_ptr(model->get_transform()->get_model_matrix()));
                                 for (size_t j = 0; j < model->get_num_meshes(); j++)
                                 {
                                     Mesh mesh = model->get_meshes()[j];
                                     Material mat = model->get_materials()[mesh.get_material_index()];
-                                    mat.albedo.bind(0);
-                                    mat.normal.bind(1);
+                                    mat.albedo.bind(ALBEDO_INDEX);
+                                    mat.ao.bind(AO_INDEX);
+                                    mat.metallic.bind(METALLIC_INDEX);
+                                    mat.roughness.bind(ROUGHNESS_INDEX);
+                                    mat.normal.bind(NORMAL_INDEX);
+                                    mat.emission.bind(EMISSION_INDEX);
                                     mesh.draw();
                                 }
                             }
                         }
-                        probe_g_buffers.emplace_back(ProbeGBuffer{fbo, col_id, norm_id, pos_id, depth_id});
+                        probe_g_buffers.emplace_back(ProbeGBuffer{fbo, col_id, norm_id, pos_id, depth_id, orm_id});
+                        glBindFramebuffer(GL_FRAMEBUFFER, 0);
                     }
                 }
             }
