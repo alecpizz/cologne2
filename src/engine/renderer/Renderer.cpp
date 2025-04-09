@@ -15,15 +15,10 @@
 #include "Shader.h"
 #include "HDRTexture.h"
 #include "TextRenderer.h"
+#include "Probe.h"
 
 namespace goon
 {
-#define ALBEDO_INDEX 0
-#define AO_INDEX 1
-#define METALLIC_INDEX 2
-#define ROUGHNESS_INDEX 3
-#define NORMAL_INDEX 4
-#define EMISSION_INDEX 5
 #define IRRADIANCE_INDEX 6
 #define PREFILTER_INDEX 7
 #define BRDF_INDEX 8
@@ -32,15 +27,17 @@ namespace goon
 
     struct Renderer::Impl
     {
-        std::unique_ptr<Shader> lit_shader = nullptr;
-        std::unique_ptr<Shader> g_buffer_shader = nullptr;
-        std::unique_ptr<Shader> skybox_shader = nullptr;
-        std::unique_ptr<Shader> shadowmap_shader = nullptr;
-        std::unique_ptr<Shader> fbo_debug_shader = nullptr;
-        std::unique_ptr<Shader> probe_debug_shader = nullptr;
-        std::unique_ptr<Shader> probe_lit_shader = nullptr;
-        std::unique_ptr<DebugRenderer> debug_renderer = nullptr;
-        std::unique_ptr<TextRenderer> text_renderer = nullptr;
+        std::shared_ptr<Shader> lit_shader = nullptr;
+        std::shared_ptr<Shader> g_buffer_shader = nullptr;
+        std::shared_ptr<Shader> skybox_shader = nullptr;
+        std::shared_ptr<Shader> shadowmap_shader = nullptr;
+        std::shared_ptr<Shader> fbo_debug_shader = nullptr;
+        std::shared_ptr<Shader> probe_debug_shader = nullptr;
+        std::shared_ptr<Shader> probe_lit_shader = nullptr;
+        std::shared_ptr<DebugRenderer> debug_renderer = nullptr;
+        std::shared_ptr<TextRenderer> text_renderer = nullptr;
+        std::shared_ptr<Shader> probe_g_buffer_shader = nullptr;
+        std::unordered_map<std::string, std::shared_ptr<Shader> > shaders = std::unordered_map<std::string, std::shared_ptr<Shader> >();
         std::vector<Light> lights;
         std::vector<float> shadowCascadeLevels;
         Texture env_cubemap;
@@ -70,19 +67,10 @@ namespace goon
         int32_t probe_width = 12;
         float probe_spacing = 1.0f;
         glm::vec3 probe_volume_origin = glm::vec3(-6.0f, 0.1f, -4.0f);
-
-        struct ProbeGBuffer
-        {
-            uint32_t fbo;
-            uint32_t color;
-            uint32_t normal;
-            uint32_t position;
-            uint32_t depth;
-            uint32_t orm;
-        };
-
-        std::vector<ProbeGBuffer> probe_g_buffers;
+        std::vector<Probe> probes;
         uint32_t probe_lighting = 0;
+        uint32_t probe_gbuffer_ssbo = 0;
+        uint32_t probe_positions = 0;
 
         void init()
         {
@@ -109,7 +97,7 @@ namespace goon
 
         void init_shaders()
         {
-            lit_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/lit.vert",
+            lit_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/lit.vert",
                                                   RESOURCES_PATH "shaders/lit.frag");
             lit_shader->bind();
             for (size_t i = 0; i < shadowCascadeLevels.size(); i++)
@@ -120,19 +108,29 @@ namespace goon
             lit_shader->set_float("farPlane", shadow_far);
             lit_shader->set_int("cascadeCount", shadowCascadeLevels.size());
 
-            g_buffer_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/gbuffer.vert",
+            g_buffer_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/gbuffer.vert",
                                                        RESOURCES_PATH "shaders/gbuffer.frag");
 
-            skybox_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/skybox.vert",
+            skybox_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/skybox.vert",
                                                      RESOURCES_PATH "shaders/skybox.frag");
-            fbo_debug_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/framebufferoutput.vert",
+            fbo_debug_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/framebufferoutput.vert",
                                                         RESOURCES_PATH "shaders/framebufferoutput.frag");
-            shadowmap_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/shadowmap2.vert",
+            shadowmap_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/shadowmap2.vert",
                                                         RESOURCES_PATH "shaders/shadowmap2.frag",
                                                         RESOURCES_PATH "shaders/shadowmap2.geom");
-            probe_debug_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/probe_debug.vert",
+            probe_debug_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/probe_debug.vert",
                                                           RESOURCES_PATH "shaders/probe_debug.frag");
-            probe_lit_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/probe_lit.comp");
+            probe_lit_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/probe_lit.comp");
+            probe_g_buffer_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/probe_g_buffer.vert",
+                                  RESOURCES_PATH "shaders/probe_g_buffer.frag");
+            shaders.clear();
+            shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("lit", lit_shader));
+            shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("gbuffer", g_buffer_shader));
+            shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("skybox", skybox_shader));
+            shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("shadowmap", shadowmap_shader));
+            shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("probe_debug", probe_debug_shader));
+            shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("probe_lit", probe_lit_shader));
+            shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("probe_g_buffer", probe_g_buffer_shader));
         }
 
         void init_gbuffer(uint32_t width, uint32_t height)
@@ -217,41 +215,27 @@ namespace goon
             probe_lit_shader->set_int("probe_height", probe_height);
             probe_lit_shader->set_float("probe_spacing", probe_spacing);
             probe_lit_shader->set_vec3("origin", glm::value_ptr(probe_volume_origin));
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, probe_gbuffer_ssbo);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, probe_positions);
 
             for (size_t i = 0; i < lights.size(); ++i)
             {
-                probe_lit_shader->set_vec3(std::string("lights[" + std::to_string(i) + "].position").c_str(), glm::value_ptr(lights[i].position));
-                probe_lit_shader->set_vec3(std::string("lights[" + std::to_string(i) + "].direction").c_str(), glm::value_ptr(lights[i].direction));
-                probe_lit_shader->set_vec3(std::string("lights[" + std::to_string(i) + "].color").c_str(), glm::value_ptr(lights[i].color));
-                probe_lit_shader->set_float(std::string("lights[" + std::to_string(i) + "].radius").c_str(), (lights[i].radius));
-                probe_lit_shader->set_float(std::string("lights[" + std::to_string(i) + "].strength").c_str(), (lights[i].strength));
-                probe_lit_shader->set_int(std::string("lights[" + std::to_string(i) + "].type").c_str(), lights[i].type);
+                probe_lit_shader->set_vec3(std::string("lights[" + std::to_string(i) + "].position").c_str(),
+                                           glm::value_ptr(lights[i].position));
+                probe_lit_shader->set_vec3(std::string("lights[" + std::to_string(i) + "].direction").c_str(),
+                                           glm::value_ptr(lights[i].direction));
+                probe_lit_shader->set_vec3(std::string("lights[" + std::to_string(i) + "].color").c_str(),
+                                           glm::value_ptr(lights[i].color));
+                probe_lit_shader->set_float(std::string("lights[" + std::to_string(i) + "].radius").c_str(),
+                                            (lights[i].radius));
+                probe_lit_shader->set_float(std::string("lights[" + std::to_string(i) + "].strength").c_str(),
+                                            (lights[i].strength));
+                probe_lit_shader->set_int(std::string("lights[" + std::to_string(i) + "].type").c_str(),
+                                          lights[i].type);
             }
             probe_lit_shader->set_int("num_lights", lights.size());
-            glBindImageTexture(0, probe_lighting, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
 
-            //bind a shit load of textures
-            int32_t texture_idx = 1;
-            for (size_t i = 0; i < probe_g_buffers.size(); ++i)
-            {
-                probe_lit_shader->set_int(std::string("g_colors[" + std::to_string(i) + "]").c_str(), texture_idx);
-                glBindTextureUnit(texture_idx, probe_g_buffers[i].color);
-                texture_idx++;
-                probe_lit_shader->set_int(std::string("g_norms[" + std::to_string(i) + "]").c_str(), texture_idx);
-                glBindTextureUnit(texture_idx, probe_g_buffers[i].normal);
-                texture_idx++;
-                probe_lit_shader->set_int(std::string("g_depths[" + std::to_string(i) + "]").c_str(), texture_idx);
-                glBindTextureUnit(texture_idx, probe_g_buffers[i].depth);
-                texture_idx++;
-                probe_lit_shader->set_int(std::string("g_positions[" + std::to_string(i) + "]").c_str(), texture_idx);
-                glBindTextureUnit(texture_idx, probe_g_buffers[i].position);
-                texture_idx++;
-                probe_lit_shader->set_int(std::string("g_orms[" + std::to_string(i) + "]").c_str(), texture_idx);
-                glBindTextureUnit(texture_idx, probe_g_buffers[i].orm);
-                texture_idx++;
-            }
-            int32_t work_group_size = 4;
-            probe_lit_shader->dispatch(probe_width, probe_height, probe_depth);
+            probe_lit_shader->dispatch(probes.size(), 1, 1);
             probe_lit_shader->wait();
             //store all SH coefficients in a buffer -> 3d texture
             //sample from the 8 nearest probes
@@ -259,203 +243,37 @@ namespace goon
 
         void create_probe_g_buffers()
         {
-            LOG_INFO("Generating g buffer textures");
-            Shader probe_g_buffer(RESOURCES_PATH "shaders/probe_g_buffer.vert",
-                                  RESOURCES_PATH "shaders/probe_g_buffer.frag");
-
-            //make probe g buffer
-
-            int32_t size = 64;
-            uint32_t cubemap_amount = probe_width * probe_height * probe_depth;
-            uint32_t max_size = 2048;
-            uint32_t total_depth = cubemap_amount * 6;
-            uint32_t textures_needed = (total_depth + max_size - 1) / max_size;
-
-            for (uint32_t i = 0; i < textures_needed; i++)
+            for (uint32_t x = 0; x < probe_width; x++)
             {
-                uint32_t pos_id;
-                uint32_t col_id;
-                uint32_t norm_id;
-                uint32_t depth_id;
-                uint32_t orm_id;
-                uint32_t start_cube_map = i * (max_size / 6);
-                uint32_t end_cube_map = std::min((i + 1) * (max_size / 6), cubemap_amount);
-                uint32_t depth = (end_cube_map - start_cube_map) * 6;
-
-                //position sampler array
-                glGenTextures(1, &pos_id);
-                glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, pos_id);
-                glTexImage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 0, GL_RGBA8, size, size,
-                             depth, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-                //color sampler array
-                glGenTextures(1, &col_id);
-                glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, col_id);
-                glTexImage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 0, GL_RGB, size, size,
-                             depth, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-                //normal sampler array
-                glGenTextures(1, &norm_id);
-                glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, norm_id);
-                glTexImage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 0, GL_RGBA16F, size, size,
-                             depth, 0, GL_RGB, GL_FLOAT, nullptr);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-                //orm sampler array
-                glGenTextures(1, &orm_id);
-                glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, orm_id);
-                glTexImage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 0, GL_RGB, size, size,
-                             depth, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-                //depth sampler array
-                glGenTextures(1, &depth_id);
-                glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, depth_id);
-                glTexImage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 0, GL_DEPTH_COMPONENT, size,
-                             size, depth, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-                probe_g_buffers.emplace_back(ProbeGBuffer(0, col_id, norm_id, pos_id, depth_id, orm_id));
-            }
-
-            uint32_t count = 0;
-            probe_g_buffer.bind();
-
-            for (int32_t x = 0; x < probe_width; x++)
-            {
-                for (int32_t y = 0; y < probe_height; y++)
+                for (uint32_t y = 0; y < probe_height; y++)
                 {
-                    for (int32_t z = 0; z < probe_depth; z++)
+                    for (uint32_t z = 0; z < probe_depth; z++)
                     {
-                        //render the shits
-                        float x_pos = static_cast<float>(x) * probe_spacing;
-                        float y_pos = static_cast<float>(y) * probe_spacing;
-                        float z_pos = static_cast<float>(z) * probe_spacing;
-                        glm::vec3 capture_pos = glm::vec3(x_pos, y_pos, z_pos);
-                        capture_pos += probe_volume_origin;
-                        glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
-                        glm::mat4 captureViews[] = {
-                            glm::lookAt(capture_pos, capture_pos + glm::vec3(1.0f, 0.0f, 0.0f),
-                                        glm::vec3(0.0f, -1.0f, 0.0f)),
-                            glm::lookAt(capture_pos, capture_pos + glm::vec3(-1.0f, 0.0f, 0.0f),
-                                        glm::vec3(0.0f, -1.0f, 0.0f)),
-                            glm::lookAt(capture_pos, capture_pos + glm::vec3(0.0f, 1.0f, 0.0f),
-                                        glm::vec3(0.0f, 0.0f, 1.0f)),
-                            glm::lookAt(capture_pos, capture_pos + glm::vec3(0.0f, -1.0f, 0.0f),
-                                        glm::vec3(0.0f, 0.0f, -1.0f)),
-                            glm::lookAt(capture_pos, capture_pos + glm::vec3(0.0f, 0.0f, 1.0f),
-                                        glm::vec3(0.0f, -1.0f, 0.0f)),
-                            glm::lookAt(capture_pos, capture_pos + glm::vec3(0.0f, 0.0f, -1.0f),
-                                        glm::vec3(0.0f, -1.0f, 0.0f))
-                        };
-
-                        int32_t index = x + probe_width * (y + probe_depth * z);
-                        int32_t max_cubemaps_per_array = (2048 / 6);
-                        int32_t texture_array_index = index / max_cubemaps_per_array;
-                        int32_t cubemap_index = index % max_cubemaps_per_array;
-                        auto &g_buffer_array = probe_g_buffers[texture_array_index];
-
-
-                        probe_g_buffer.set_mat4("projection", glm::value_ptr(captureProjection));
-                        //render the scene 6 god damn times into gbuffers
-                        //will never change so we can relight them in the future
-                        for (int32_t face = 0; face < 6; face++)
-                        {
-                            uint32_t fbo;
-                            glGenFramebuffers(1, &fbo);
-                            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-                            int32_t layer = cubemap_index * 6 + face;
-                            glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, g_buffer_array.color, 0,
-                                                      layer);
-                            glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, g_buffer_array.normal, 0,
-                                                      layer);
-                            glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, g_buffer_array.position, 0,
-                                                      layer);
-                            glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, g_buffer_array.orm, 0,
-                                                      layer);
-                            glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, g_buffer_array.depth, 0,
-                                                      layer);
-                            uint32_t attachments[4] = {
-                                GL_COLOR_ATTACHMENT0,
-                                GL_COLOR_ATTACHMENT1,
-                                GL_COLOR_ATTACHMENT2,
-                                GL_COLOR_ATTACHMENT3
-                            };
-                            glDrawBuffers(4, attachments);
-
-                            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-                            {
-                                LOG_ERROR("FRAMEBUFFER INCOMPLETE!");
-                            }
-
-                            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                            //render the fucking scene
-                            probe_g_buffer.set_mat4("view", glm::value_ptr(captureViews[face]));
-                            auto scene = Engine::get_scene();
-                            for (size_t i = 0; i < scene->get_model_count(); i++)
-                            {
-                                auto model = scene->get_model_by_index(i);
-                                if (!model->get_active())
-                                {
-                                    continue;
-                                }
-                                probe_g_buffer.set_mat4(
-                                    "model", glm::value_ptr(model->get_transform()->get_model_matrix()));
-                                for (size_t j = 0; j < model->get_num_meshes(); j++)
-                                {
-                                    Mesh mesh = model->get_meshes()[j];
-                                    Material mat = model->get_materials()[mesh.get_material_index()];
-                                    mat.albedo.bind(ALBEDO_INDEX);
-                                    mat.ao.bind(AO_INDEX);
-                                    mat.metallic.bind(METALLIC_INDEX);
-                                    mat.roughness.bind(ROUGHNESS_INDEX);
-                                    mat.normal.bind(NORMAL_INDEX);
-                                    mat.emission.bind(EMISSION_INDEX);
-                                    mesh.draw();
-                                }
-                            }
-                            glDeleteFramebuffers(1, &fbo);
-                            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-                            count++;
-                        }
+                        glm::vec3 pos(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
+                        pos *= probe_spacing;
+                        glm::vec3 probe_pos = probe_volume_origin + pos;
+                        auto &probe = probes.emplace_back(probe_pos);
+                        probe.bake_geo(*probe_g_buffer_shader);
                     }
                 }
             }
-
-            //shove all the gbuffers into somewhere where we can access the on gpu -> array of texture cubemap samplers!
-            LOG_INFO("Rendered %d g buffers faces", count);
-            glGenTextures(1, &probe_lighting);
-            glBindTexture(GL_TEXTURE_3D, probe_lighting);
-            glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA16F, probe_width, probe_height, probe_depth,
-                0, GL_RGBA, GL_FLOAT, nullptr);
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-            light_probes();
+            //put probe info into a ssbo
+            glCreateBuffers(1, &probe_gbuffer_ssbo);
+            glCreateBuffers(1, &probe_positions);
+            std::vector<uint64_t> gbuffer_handles;
+            std::vector<glm::vec3> positions;
+            for (auto &probe: probes)
+            {
+                gbuffer_handles.push_back(probe.get_albedo_bindless());
+                gbuffer_handles.push_back(probe.get_normal_bindless());
+                gbuffer_handles.push_back(probe.get_position_bindless());
+                gbuffer_handles.push_back(probe.get_orm_bindless());
+                positions.push_back(probe.get_position());
+            }
+            glNamedBufferStorage(probe_gbuffer_ssbo, sizeof(uint64_t) * gbuffer_handles.size(),
+                                 reinterpret_cast<const void *>(gbuffer_handles.data()), GL_DYNAMIC_STORAGE_BIT);
+            glNamedBufferStorage(probe_positions, sizeof(glm::vec3) * positions.size(),
+                reinterpret_cast<const void *>(positions.data()), GL_DYNAMIC_STORAGE_BIT);
         }
 
         void init_shadow_map()
@@ -1227,7 +1045,6 @@ namespace goon
         {
             //hot reload shaders
             reload_shaders();
-            _impl->light_probes();
         }
 
         // _impl->shadow_pass(scene);
@@ -1250,10 +1067,20 @@ namespace goon
 
     void Renderer::reload_shaders()
     {
-        _impl->lit_shader.release();
         _impl->init_shaders();
         _impl->bind_lights(*_impl->lit_shader);
         LOG_INFO("RELOADED SHADERS");
+    }
+
+    Shader *Renderer::get_shader_by_name(const char *name)
+    {
+        const auto n = std::string(name);
+        if (!_impl->shaders.contains(n))
+        {
+            LOG_ERROR("Shader %s not found!", name);
+            return nullptr;
+        }
+        return _impl->shaders[n].get();
     }
 
     Light &Renderer::get_directional_light() const

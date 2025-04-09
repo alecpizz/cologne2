@@ -83,7 +83,9 @@ file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/
 
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
-add_executable("${CMAKE_PROJECT_NAME}")
+add_executable("${CMAKE_PROJECT_NAME}"
+        src/engine/renderer/Probe.cpp
+        src/engine/renderer/Probe.h)
 
 set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY CXX_STANDARD 20)
 

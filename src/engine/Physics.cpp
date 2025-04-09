@@ -283,7 +283,6 @@ namespace goon::physics
 
     void destroy()
     {
-        auto &body_interface = physics_system.GetBodyInterface();
         UnregisterTypes();
         delete temp_allocator;
         delete debug_renderer;
