@@ -200,8 +200,12 @@ vec4 PBR(int id, vec3 p)
 void main()
 {
     uint id = gl_WorkGroupID.x;
-    vec3 position = positions[id];
-    vec3 albedo = texture(cubemaps[id * 4 + 0], vec3(0.0)).rgb;
+    vec3 pos = positions[id];
+    vec4 albedo = texture(cubemaps[id * 4 + 0], vec3(0.0)).rgba;
+    vec3 normal = texture(cubemaps[id * 4 + 1], vec3(0.0)).rgb;
+    vec3 position = texture(cubemaps[id * 4 + 2], vec3(0.0)).rgb;
+    vec3 orm = texture(cubemaps[id * 4 + 2], vec3(0.0)).rgb;
+
 //    uint seed = x + y + z;
 //
 //    uint index = x + probe_width * (y + probe_depth * z);
