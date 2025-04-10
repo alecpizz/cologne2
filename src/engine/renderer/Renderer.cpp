@@ -920,6 +920,17 @@ namespace goon
 
         void probe_debug_pass()
         {
+            static bool draw_probes = false;
+
+            if (Input::key_pressed(Input::Key::G))
+            {
+                draw_probes = !draw_probes;
+            }
+
+            if (!draw_probes)
+            {
+                return;
+            }
             glDisable(GL_BLEND);
             glEnable(GL_DEPTH_TEST);
             glDepthMask(GL_FALSE);

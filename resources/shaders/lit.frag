@@ -90,7 +90,14 @@ float rand(vec2 v)
     return fract(sin(dot(v, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
-
+vec3 Tonemap_ACES(const vec3 x) { // Narkowicz 2015, "ACES Filmic Tone Mapping Curve"
+                                  const float a = 2.51;
+                                  const float b = 0.03;
+                                  const float c = 2.43;
+                                  const float d = 0.59;
+                                  const float e = 0.14;
+                                  return (x * (a * x + b)) / (x * (c * x + d) + e);
+}
 
 void main()
 {
@@ -176,9 +183,13 @@ void main()
     //    vec3 emission = texture2D(texture_emission, TexCoords).rgb;
     //    vec3 color = ambient  + (indirect * Lo) ;//+ emission;
     //    vec3 color = ((indirect * 200) * Lo) + emission;
-
+//    color = mix(color, Tonemap_ACES(color), 1.0);
+//    color = pow(color, vec3(1.0 / 2.2));
+//    color = mix(color, Tonemap_ACES(color), 0.35);
+    color = mix(color, Tonemap_ACES(color), 1.0);
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0 / 2.2));
+    color = mix(color, Tonemap_ACES(color), 0.35);
     float alpha = albedo_texture.a;
     color.rgb = color.rgb * alpha;
     FragColor = vec4(color, alpha);
@@ -280,12 +291,12 @@ float shadowCalculation(vec3 fragPos, vec3 n, vec3 l)
         for (int y = -2; y <= 2; ++y)
         {
             float pcfDepth = texture(shadow_cascades, vec3(projCoords.xy + vec2(x, y) * texelSize, layer)).r;
-//            float pcfDepth2 = texture2D_bilinear(shadow_cascades,
+            //            float pcfDepth2 = texture2D_bilinear(shadow_cascades,
             //                                                 vec3(projCoords.xy + vec2(x, y) * texelSize, layer),
             //                                                 vec3(texture_size.x, texture_size.y, 0.0),
             //                                                 vec3(texelSize, 0.0),
             //                                                 layer).x;
-        shadow += (currentDepth - bias) > pcfDepth ? 1.0: 0.0;
+            shadow += (currentDepth - bias) > pcfDepth ? 1.0 : 0.0;
         }
     }
     shadow /= 25.0;
