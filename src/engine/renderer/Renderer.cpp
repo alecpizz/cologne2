@@ -254,12 +254,12 @@ namespace goon
                         float z_pos = static_cast<float>(z) * probe_spacing;
                         glm::vec3 capture_pos = glm::vec3(x_pos, y_pos, z_pos);
                         capture_pos += probe_volume_origin;
-                        LOG_INFO("Capture Pos %f, %f, %f", capture_pos.x, capture_pos.y, capture_pos.z);
                         auto &probe = probes.emplace_back(capture_pos);
                         probe.bake_geo(*probe_g_buffer_shader);
                     }
                 }
             }
+            LOG_INFO("Baked %d G B buffers", probes.size());
             //put probe info into a ssbo
             glCreateBuffers(1, &probe_gbuffer_ssbo);
             glCreateBuffers(1, &probe_positions);
@@ -1000,7 +1000,6 @@ namespace goon
             probe_debug_shader->set_int("width", probe_width);
             probe_debug_shader->set_float("spacing", probe_spacing);
             probe_debug_shader->set_vec3("origin", glm::value_ptr(probe_volume_origin));
-            glBindTextureUnit(0, probe_lighting);
             glBindVertexArray(cube_vao);
             glDrawArraysInstanced(GL_TRIANGLES, 0, 36, probes.size());
             glDepthMask(GL_TRUE);

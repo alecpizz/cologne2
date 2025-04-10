@@ -37,6 +37,7 @@ namespace goon
             }
             process_node(scene->mRootNode, scene);
             load_materials(scene);
+            importer.FreeScene();
             LOG_INFO("Loaded model with %d meshes", meshes.size());
         }
 

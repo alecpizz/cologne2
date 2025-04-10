@@ -11,6 +11,7 @@ namespace goon
     struct Scene::Impl
     {
         std::vector<std::unique_ptr<Model>> models = std::vector<std::unique_ptr<Model>>();
+
     };
 
     Scene::Scene()
