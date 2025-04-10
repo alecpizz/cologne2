@@ -8,7 +8,7 @@
 
 #include "Shader.h"
 
-namespace goon
+namespace cologne
 {
     Probe::Probe(glm::vec3 position)
     {

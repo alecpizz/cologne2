@@ -4,7 +4,7 @@
 
 #include "FrameBuffer.h"
 
-namespace goon
+namespace cologne
 {
     struct FrameBuffer::Impl
     {

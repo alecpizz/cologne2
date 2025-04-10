@@ -7,7 +7,7 @@
 #include "DebugUI.h"
 #include "openglErrorReporting.h"
 
-namespace goon
+namespace cologne
 {
     struct Window::Impl
     {

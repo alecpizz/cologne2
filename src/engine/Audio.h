@@ -4,7 +4,7 @@
 
 #pragma once
 
-namespace goon::Audio
+namespace cologne::Audio
 {
     void init();
     void add_sound(const char* sound_path);

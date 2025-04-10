@@ -5,7 +5,7 @@
 #include "Shader.h"
 #include <fstream>
 
-namespace goon
+namespace cologne
 {
     struct Shader::Impl
     {

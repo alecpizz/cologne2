@@ -9,7 +9,7 @@ vsnprintf( formatted_msg, sizeof( formatted_msg ), msg, ap ) ; \
 va_end( ap ) ;
 
 
-namespace goon
+namespace cologne
 {
     struct Log::Impl
     {
@@ -18,7 +18,7 @@ namespace goon
         void init()
         {
             spdlog::set_pattern("%^[%T] %n: %v%$");
-            logger = spdlog::stdout_color_mt("goon");
+            logger = spdlog::stdout_color_mt("cologne");
             logger->set_level(spdlog::level::trace);
         }
     };

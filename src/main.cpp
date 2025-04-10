@@ -15,7 +15,7 @@ extern "C" {
 
 int main()
 {
-    goon::Engine engine;
+    cologne::Engine engine;
     if (!engine.init(1280, 720))
     {
         return -1;

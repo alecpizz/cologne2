@@ -6,7 +6,7 @@
 #include "Physics.h"
 #include "renderer/Model.h"
 
-namespace goon
+namespace cologne
 {
     struct Scene::Impl
     {
@@ -24,9 +24,9 @@ namespace goon
         auto &model3 = add_model(RESOURCES_PATH "sponza/sponza2.glb", false);
         model3.get_transform()->set_scale(glm::vec3(.01f));
         // model3.get_transform()->set_rotation(glm::rotate(glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
-        // goon::physics::update_mesh_collider(&model);
-        // goon::physics::update_mesh_collider(&model2);
-        goon::physics::update_mesh_collider(&model3);
+        // cologne::physics::update_mesh_collider(&model);
+        // cologne::physics::update_mesh_collider(&model2);
+        cologne::physics::update_mesh_collider(&model3);
     }
 
     void Scene::update(float delta_time)

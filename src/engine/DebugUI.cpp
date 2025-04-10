@@ -6,7 +6,7 @@
 #include "engine/imguiThemes.h"
 #include "Engine.h"
 
-namespace goon
+namespace cologne
 {
     struct FloatCmd
     {

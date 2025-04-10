@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace goon
+namespace cologne
 {
     class Renderer;
     class TextRenderer

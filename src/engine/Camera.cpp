@@ -7,7 +7,7 @@
 #include "Engine.h"
 #include "Input.h"
 
-namespace goon
+namespace cologne
 {
     Camera::Camera(glm::vec3 position, glm::vec3 forward, glm::vec3 up)
     {
@@ -66,7 +66,7 @@ namespace goon
 
     void Camera::update(float dt)
     {
-        if (goon::Input::key_pressed(Input::Key::Escape))
+        if (cologne::Input::key_pressed(Input::Key::Escape))
         {
             _active = !_active;
             if (!_active)
@@ -116,31 +116,31 @@ namespace goon
 
 
         float speed = 10.0f;
-        if (goon::Input::key_down(Input::Key::LeftShift))
+        if (cologne::Input::key_down(Input::Key::LeftShift))
         {
             speed *= 2.5f;
         }
-        if (goon::Input::key_down(Input::Key::W))
+        if (cologne::Input::key_down(Input::Key::W))
         {
             _position += _forward * dt * speed;
         }
-        if (goon::Input::key_down(Input::Key::S))
+        if (cologne::Input::key_down(Input::Key::S))
         {
             _position -= _forward * dt * speed;
         }
-        if (goon::Input::key_down(Input::Key::A))
+        if (cologne::Input::key_down(Input::Key::A))
         {
             _position -= glm::normalize(glm::cross(_forward, _up)) * dt * speed;
         }
-        if (goon::Input::key_down(Input::Key::D))
+        if (cologne::Input::key_down(Input::Key::D))
         {
             _position += glm::normalize(glm::cross(_forward, _up)) * dt * speed;
         }
-        if (goon::Input::key_down(Input::Key::Space))
+        if (cologne::Input::key_down(Input::Key::Space))
         {
             _position += _up * dt * speed;
         }
-        if (goon::Input::key_down(Input::Key::LeftCtrl))
+        if (cologne::Input::key_down(Input::Key::LeftCtrl))
         {
             _position -= _up * dt * speed;
         }

@@ -4,7 +4,7 @@
 #include "engine/Input.h"
 #include "Shader.h"
 
-namespace goon
+namespace cologne
 {
     struct DebugVertex
     {

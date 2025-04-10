@@ -27,7 +27,7 @@ using namespace JPH;
 using namespace JPH::literals;
 
 
-namespace goon::physics
+namespace cologne::physics
 {
     void TraceImpl(const char *inFMT, ...)
     {
@@ -190,7 +190,7 @@ namespace goon::physics
 
     void update(float dt)
     {
-        if (goon::Input::key_pressed(Input::Key::P))
+        if (cologne::Input::key_pressed(Input::Key::P))
         {
             drawing = !drawing;
         }
@@ -248,7 +248,7 @@ namespace goon::physics
         JPH::MeshShapeSettings mesh_settings(triangle_list);
         mesh_settings.SetEmbedded();
         JPH::BodyCreationSettings settings(&mesh_settings, JPH::Vec3::sZero(), JPH::Quat::sIdentity(),
-                                           JPH::EMotionType::Static, goon::physics::NON_MOVING);
+                                           JPH::EMotionType::Static, cologne::physics::NON_MOVING);
         auto id = physics_system.GetBodyInterface().CreateAndAddBody(
             settings, JPH::EActivation::DontActivate);
         LOG_INFO("Created id %d", id);

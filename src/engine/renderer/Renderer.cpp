@@ -17,7 +17,7 @@
 #include "TextRenderer.h"
 #include "Probe.h"
 
-namespace goon
+namespace cologne
 {
 #define IRRADIANCE_INDEX 6
 #define PREFILTER_INDEX 7
@@ -1055,7 +1055,7 @@ namespace goon
         //post processing pass
         //any debug visuals pass
 
-        if (goon::Input::key_pressed(Input::Key::H))
+        if (cologne::Input::key_pressed(Input::Key::H))
         {
             //hot reload shaders
             reload_shaders();

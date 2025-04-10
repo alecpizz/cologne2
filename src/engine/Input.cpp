@@ -2,7 +2,7 @@
 #include <SDL3/SDL.h>
 #include <unordered_map>
 
-namespace goon::Input
+namespace cologne::Input
 {
     glm::vec2 _mouse_motion = {0.0f, 0.0f};
     std::unordered_map<Key, bool> _key_down_map;

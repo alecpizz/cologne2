@@ -4,7 +4,7 @@
 
 #include "HDRTexture.h"
 
-namespace goon
+namespace cologne
 {
     HDRTexture::HDRTexture(const char *texture_path)
     {

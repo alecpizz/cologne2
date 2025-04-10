@@ -5,7 +5,7 @@
 #include "renderer/Model.h"
 #include "renderer/Vertex.h"
 
-namespace goon::physics
+namespace cologne::physics
 {
     void init();
 

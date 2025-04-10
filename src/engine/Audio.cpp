@@ -5,7 +5,7 @@
 #include "Audio.h"
 #include "../../vendor/SDL_mixer/include/SDL3_mixer/SDL_mixer.h"
 
-namespace goon::Audio
+namespace cologne::Audio
 {
     std::unordered_map<std::string, Mix_Music*> musics;
     std::unordered_map<std::string, Mix_Chunk*> sounds;

@@ -1,5 +1,5 @@
 #pragma once
-namespace goon::Input
+namespace cologne::Input
 {
     enum class Key
     {

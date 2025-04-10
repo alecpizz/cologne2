@@ -4,7 +4,7 @@
 
 #pragma once
 
-namespace goon
+namespace cologne
 {
     class Shader
     {

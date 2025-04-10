@@ -18,7 +18,7 @@
 #include "engine/GoodGPUs.h"
 
 
-namespace goon
+namespace cologne
 {
     class Engine
     {

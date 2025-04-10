@@ -9,7 +9,7 @@
 #include "Input.h"
 #include "Audio.h"
 
-namespace goon
+namespace cologne
 {
     struct Engine::Impl
     {
@@ -46,8 +46,8 @@ namespace goon
 
     Engine::~Engine()
     {
-        goon::physics::destroy();
-        goon::Audio::destroy();
+        cologne::physics::destroy();
+        cologne::Audio::destroy();
         delete _impl;
     }
 
@@ -131,4 +131,4 @@ namespace goon
             et.update();
         }
     }
-} // goon
+} // cologne

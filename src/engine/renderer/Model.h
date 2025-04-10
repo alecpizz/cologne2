@@ -5,7 +5,7 @@
 #include "../Transform.h"
 #include "Material.h"
 
-namespace goon
+namespace cologne
 {
     class Model
     {

@@ -3,7 +3,7 @@
 #include "Vertex.h"
 #include "Mesh.h"
 
-namespace goon
+namespace cologne
 {
     class Mesh
     {

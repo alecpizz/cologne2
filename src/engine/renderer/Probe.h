@@ -1,10 +1,10 @@
 #pragma once
-namespace goon
+namespace cologne
 {
     class Shader;
 }
 
-namespace goon
+namespace cologne
 {
     class Probe
     {

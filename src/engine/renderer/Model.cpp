@@ -14,7 +14,7 @@
 #include "assimp/Importer.hpp"
 
 
-namespace goon
+namespace cologne
 {
     struct Model::Impl
     {
@@ -188,7 +188,7 @@ namespace goon
                     indices.push_back(face.mIndices[j]);
                 }
             }
-            goon::physics::create_mesh_collider(model,vertices.data(), static_cast<uint32_t>(vertices.size()), indices.data(),
+            cologne::physics::create_mesh_collider(model,vertices.data(), static_cast<uint32_t>(vertices.size()), indices.data(),
                         static_cast<uint32_t>(indices.size()) );
             return Mesh(vertices.data(), static_cast<uint32_t>(vertices.size()), indices.data(),
                         static_cast<uint32_t>(indices.size()), mesh->mMaterialIndex);

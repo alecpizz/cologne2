@@ -5,7 +5,7 @@
 #define LOG_DEBUG( ... )     Log::get().log_debug( __VA_ARGS__ )
 #define LOG_WARN( ... )    Log::get().log_warning( __VA_ARGS__ )
 
-namespace goon
+namespace cologne
 {
     class Log
     {

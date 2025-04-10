@@ -7,7 +7,7 @@
 #include "Engine.h"
 #include "Input.h"
 
-namespace goon
+namespace cologne
 {
     struct EventManager::Impl
     {

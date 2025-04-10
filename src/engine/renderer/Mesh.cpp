@@ -1,7 +1,7 @@
 ﻿#include "Mesh.h"
 
 
-namespace goon
+namespace cologne
 {
 
     Mesh::Mesh(const Vertex *vertices, size_t num_vertices,

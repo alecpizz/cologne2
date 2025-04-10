@@ -6,7 +6,7 @@
 #include <stb_truetype/stb_truetype.h>
 #include <fstream>
 
-namespace goon
+namespace cologne
 {
     struct Vertex
     {

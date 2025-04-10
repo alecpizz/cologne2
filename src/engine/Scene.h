@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "renderer/Model.h"
 
-namespace goon
+namespace cologne
 {
     class Scene
     {

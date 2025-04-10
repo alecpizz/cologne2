@@ -3,7 +3,7 @@
 #include "engine/Scene.h"
 
 
-namespace goon
+namespace cologne
 {
     class Scene;
     class Shader;

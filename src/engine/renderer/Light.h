@@ -1,5 +1,5 @@
 #pragma once
-namespace goon
+namespace cologne
 {
     enum LightType
     {

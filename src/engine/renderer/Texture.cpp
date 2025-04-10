@@ -4,7 +4,7 @@
 
 #include "Texture.h"
 
-namespace goon
+namespace cologne
 {
     Texture::Texture(const char *texture_path)
     {

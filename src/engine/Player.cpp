@@ -14,7 +14,7 @@
 #include "Input.h"
 #include "Physics.h"
 
-namespace goon
+namespace cologne
 {
     struct Player::Impl
     {
@@ -69,10 +69,10 @@ namespace goon
             settings->mSupportingVolume = JPH::Plane(JPH::Vec3::sAxisY(), -radius_standing);
             settings->mEnhancedInternalEdgeRemoval = false;
             settings->mInnerBodyShape = inner_standing_shape;
-            settings->mInnerBodyLayer = goon::physics::NON_MOVING;
+            settings->mInnerBodyLayer = cologne::physics::NON_MOVING;
 
             character = new JPH::CharacterVirtual(settings, JPH::RVec3::sZero(), JPH::Quat::sIdentity(), 0,
-                                                  goon::physics::get_physics_system());
+                                                  cologne::physics::get_physics_system());
             footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_1.wav");
             footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_2.wav");
             footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_3.wav");
@@ -87,24 +87,24 @@ namespace goon
         {
             float x = 0.0f;
             float y = 0.0f;
-            if (goon::Input::key_down(goon::Input::Key::W))
+            if (cologne::Input::key_down(cologne::Input::Key::W))
             {
                 x += 1.0f;
             }
-            if (goon::Input::key_down(goon::Input::Key::S))
+            if (cologne::Input::key_down(cologne::Input::Key::S))
             {
                 x -= 1.0f;
             }
-            if (goon::Input::key_down(goon::Input::Key::A))
+            if (cologne::Input::key_down(cologne::Input::Key::A))
             {
                 y -= 1.0f;
             }
-            if (goon::Input::key_down(goon::Input::Key::D))
+            if (cologne::Input::key_down(cologne::Input::Key::D))
             {
                 y += 1.0f;
             }
-            bool jump = goon::Input::key_pressed(goon::Input::Key::Space);
-            bool crouch = goon::Input::key_pressed(goon::Input::Key::LeftCtrl);
+            bool jump = cologne::Input::key_pressed(cologne::Input::Key::Space);
+            bool crouch = cologne::Input::key_pressed(cologne::Input::Key::LeftCtrl);
             JPH::Vec3 movement = JPH::Vec3(x, 0.0f, y);
             if (!movement.IsNearZero())
             {
