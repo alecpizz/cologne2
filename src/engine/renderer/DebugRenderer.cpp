@@ -106,6 +106,12 @@ namespace goon
     {
     }
 
+    void DebugRenderer::draw_point(glm::vec3 p, glm::vec3 color)
+    {
+        _impl->cmds.emplace_back(DebugVertex(p, color));
+        _impl->cmds.emplace_back(DebugVertex(p + glm::vec3(0.0f, 0.02f, 0.0f), color));
+    }
+
     void DebugRenderer::draw_triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 color)
     {
         draw_line(p1, p2, color);

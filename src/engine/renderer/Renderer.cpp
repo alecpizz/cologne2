@@ -243,16 +243,19 @@ namespace goon
 
         void create_probe_g_buffers()
         {
-            for (uint32_t x = 0; x < probe_width; x++)
+            for (int32_t x = 0; x < probe_width; x++)
             {
-                for (uint32_t y = 0; y < probe_height; y++)
+                for (int32_t y = 0; y < probe_height; y++)
                 {
-                    for (uint32_t z = 0; z < probe_depth; z++)
+                    for (int32_t z = 0; z < probe_depth; z++)
                     {
-                        glm::vec3 pos(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
-                        pos *= probe_spacing;
-                        glm::vec3 probe_pos = probe_volume_origin + pos;
-                        auto &probe = probes.emplace_back(probe_pos);
+                        float x_pos = static_cast<float>(x) * probe_spacing;
+                        float y_pos = static_cast<float>(y) * probe_spacing;
+                        float z_pos = static_cast<float>(z) * probe_spacing;
+                        glm::vec3 capture_pos = glm::vec3(x_pos, y_pos, z_pos);
+                        capture_pos += probe_volume_origin;
+                        LOG_INFO("Capture Pos %f, %f, %f", capture_pos.x, capture_pos.y, capture_pos.z);
+                        auto &probe = probes.emplace_back(capture_pos);
                         probe.bake_geo(*probe_g_buffer_shader);
                     }
                 }
@@ -261,18 +264,18 @@ namespace goon
             glCreateBuffers(1, &probe_gbuffer_ssbo);
             glCreateBuffers(1, &probe_positions);
             std::vector<uint64_t> gbuffer_handles;
-            std::vector<glm::vec3> positions;
+            std::vector<glm::vec4> positions;
             for (auto &probe: probes)
             {
                 gbuffer_handles.push_back(probe.get_albedo_bindless());
                 gbuffer_handles.push_back(probe.get_normal_bindless());
                 gbuffer_handles.push_back(probe.get_position_bindless());
                 gbuffer_handles.push_back(probe.get_orm_bindless());
-                positions.push_back(probe.get_position());
+                positions.push_back(glm::vec4(probe.get_position(), 1.0));
             }
             glNamedBufferStorage(probe_gbuffer_ssbo, sizeof(uint64_t) * gbuffer_handles.size(),
                                  reinterpret_cast<const void *>(gbuffer_handles.data()), GL_DYNAMIC_STORAGE_BIT);
-            glNamedBufferStorage(probe_positions, sizeof(glm::vec3) * positions.size(),
+            glNamedBufferStorage(probe_positions, sizeof(glm::vec4) * positions.size(),
                 reinterpret_cast<const void *>(positions.data()), GL_DYNAMIC_STORAGE_BIT);
         }
 
@@ -989,6 +992,7 @@ namespace goon
             }
 
             probe_debug_shader->bind();
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, probe_positions);
             probe_debug_shader->set_mat4("projection", glm::value_ptr(Engine::get_camera()->get_projection_matrix()));
             probe_debug_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
             probe_debug_shader->set_int("depth", probe_depth);
@@ -998,7 +1002,7 @@ namespace goon
             probe_debug_shader->set_vec3("origin", glm::value_ptr(probe_volume_origin));
             glBindTextureUnit(0, probe_lighting);
             glBindVertexArray(cube_vao);
-            glDrawArraysInstanced(GL_TRIANGLES, 0, 36, probe_depth * probe_width * probe_height);
+            glDrawArraysInstanced(GL_TRIANGLES, 0, 36, probes.size());
             glDepthMask(GL_TRUE);
             glEnable(GL_BLEND);
         }
