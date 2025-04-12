@@ -70,7 +70,8 @@ namespace cologne
         std::vector<Probe> probes;
         uint32_t probe_lighting = 0;
         uint32_t probe_gbuffer_ssbo = 0;
-        uint32_t probe_positions = 0;
+        uint32_t probe_positions_ssbo = 0;
+        uint32_t probe_sh_ssbo = 0;
 
         void init()
         {
@@ -216,7 +217,8 @@ namespace cologne
             probe_lit_shader->set_float("probe_spacing", probe_spacing);
             probe_lit_shader->set_vec3("origin", glm::value_ptr(probe_volume_origin));
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, probe_gbuffer_ssbo);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, probe_positions);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, probe_positions_ssbo);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, probe_sh_ssbo);
 
             for (size_t i = 0; i < lights.size(); ++i)
             {
@@ -262,7 +264,8 @@ namespace cologne
             LOG_INFO("Baked %d G B buffers", probes.size());
             //put probe info into a ssbo
             glCreateBuffers(1, &probe_gbuffer_ssbo);
-            glCreateBuffers(1, &probe_positions);
+            glCreateBuffers(1, &probe_positions_ssbo);
+            glCreateBuffers(1, &probe_sh_ssbo);
             std::vector<uint64_t> gbuffer_handles;
             std::vector<glm::vec4> positions;
             for (auto &probe: probes)
@@ -275,8 +278,9 @@ namespace cologne
             }
             glNamedBufferStorage(probe_gbuffer_ssbo, sizeof(uint64_t) * gbuffer_handles.size(),
                                  reinterpret_cast<const void *>(gbuffer_handles.data()), GL_DYNAMIC_STORAGE_BIT);
-            glNamedBufferStorage(probe_positions, sizeof(glm::vec4) * positions.size(),
+            glNamedBufferStorage(probe_positions_ssbo, sizeof(glm::vec4) * positions.size(),
                 reinterpret_cast<const void *>(positions.data()), GL_DYNAMIC_STORAGE_BIT);
+            glNamedBufferStorage(probe_sh_ssbo, (10 * sizeof(glm::vec3) * 10000), nullptr, GL_DYNAMIC_STORAGE_BIT);
         }
 
         void init_shadow_map()
@@ -1003,7 +1007,8 @@ namespace cologne
             }
 
             probe_debug_shader->bind();
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, probe_positions);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, probe_positions_ssbo);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, probe_sh_ssbo);
             probe_debug_shader->set_mat4("projection", glm::value_ptr(Engine::get_camera()->get_projection_matrix()));
             probe_debug_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
             probe_debug_shader->set_int("depth", probe_depth);
