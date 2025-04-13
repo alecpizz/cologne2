@@ -281,6 +281,9 @@ namespace cologne
             glNamedBufferStorage(probe_positions_ssbo, sizeof(glm::vec4) * positions.size(),
                 reinterpret_cast<const void *>(positions.data()), GL_DYNAMIC_STORAGE_BIT);
             glNamedBufferStorage(probe_sh_ssbo, (10 * sizeof(glm::vec3) * 10000), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+
+            light_probes();
         }
 
         void init_shadow_map()
@@ -1067,7 +1070,7 @@ namespace cologne
         }
 
         // _impl->shadow_pass(scene);
-
+        _impl->light_probes();
         _impl->shadow_pass(scene);
         _impl->gbuffer_pass(scene);
         _impl->lit_pass(scene);

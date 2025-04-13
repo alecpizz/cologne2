@@ -150,8 +150,8 @@ vec3 direct_lighting(vec3 p, float bias, int probeId)
     vec3 V = normalize(probe_world_pos - FragPos);
 
     vec3 orm = texture(cubemaps[probeId * 4 + 3], p).rgb;
-    float metallic = orm.r;
-    float roughness = orm.g;
+    float metallic = 0.2;
+    float roughness = 1;
     float ao = orm.b + 0.2;
 
     vec3 F0 = mix(vec3(0.04), diffuse, metallic);
@@ -192,7 +192,7 @@ vec3 direct_lighting(vec3 p, float bias, int probeId)
         Lo += ((kD * diffuse / PI + specular) * radiance * NdotL);//TODO shadows
     }
     vec3 ambient = vec3(1.0) * diffuse;
-    vec3 lightColor = ambient * Lo;
+    vec3 lightColor = ambient + Lo;
     return lightColor;
 }
 
