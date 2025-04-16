@@ -161,6 +161,7 @@ namespace cologne
 
         if (ImGui::CollapsingHeader("Images"))
         {
+            ImGui::BeginChild("Images", ImVec2(0, 800));
             for (size_t i = 0; i < _impl->image_cmds.size(); i++)
             {
                 ImGui::PushID(i);
@@ -171,6 +172,7 @@ namespace cologne
                                  ImVec2(0, 1), ImVec2(1, 0));
                 ImGui::PopID();
             }
+            ImGui::EndChild();
         }
 
         bool free_cam = Engine::get_camera()->is_free_cam();
