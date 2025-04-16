@@ -16,6 +16,7 @@ namespace cologne
         void add_float_entry(const char* name, float& value);
         void add_int_entry(const char* name, int& value);
         void add_vec3_entry(const char* name, glm::vec3& value);
+        void add_image_entry(const char* name, uint32_t value, const glm::vec2& image_size);
 
         DebugUI(DebugUI &&) = delete;
 

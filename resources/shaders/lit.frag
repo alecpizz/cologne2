@@ -41,12 +41,17 @@ layout (binding = 3) uniform sampler2D gORM;
 layout (binding = 6) uniform samplerCube irradiance_map;
 layout (binding = 7) uniform samplerCube prefilter_map;
 layout (binding = 8) uniform sampler2D brdf;
-
+layout (binding = 4) uniform sampler3D probeGrid;
 layout (binding = 13) uniform sampler2DArray shadow_cascades;
 
 layout (std140) uniform LightSpaceMatrices
 {
     mat4 lightSpaceMatrices[16];
+};
+
+layout(binding = 1, std430) readonly buffer probe_positions
+{
+    vec4 positions[];
 };
 
 layout(binding = 2, std430) buffer shCoefficients
@@ -63,6 +68,10 @@ uniform float ao_strength = 0.2;
 uniform int has_ao_texture = 0;
 uniform float cascadePlaneDistances[4];
 uniform int cascadeCount;   // number of frusta - 1
+
+uniform mat4 view_inverse;
+uniform vec3 probe_world_pos;
+uniform vec3 probe_spacing;
 
 
 vec3 fresnelSchlick(float cosTheta, vec3 F0);
@@ -198,6 +207,60 @@ vec3 GetRadianceFromSH(SphericalHarmonics shRadiance, vec3 direction)
     return sampleSh;
 }
 
+vec3 get_probe(vec3 world_pos, ivec3 offset, out float weight, vec3 N)
+{
+    vec3 gridCoords = (world_pos - probe_world_pos) / probe_spacing;
+    ivec3 base = ivec3(floor(gridCoords)) + offset;
+    //8 x 8 x 12
+    base.x = clamp(base.x, 0, 8);
+    base.y = clamp(base.y, 0, 8);
+    base.z = clamp(base.z, 0, 12);
+    int probeID = 12 * 12 * 8 + 4 * 8 + 2;
+    vec3 a = gridCoords - base;
+    vec3 probe_world = positions[probeID].xyz + (base) * probe_spacing;
+    vec3 dir = probe_world - world_pos;
+
+    vec3 v = normalize(dir);
+    float VDotN = dot(v, N);
+    vec3 weights = mix(1.0 - a, a, offset);
+
+    SphericalHarmonics shRadiance;
+    shRadiance[0] = L1SH_0[probeID];
+    shRadiance[1] = L1SH_1[probeID];
+    shRadiance[2] = L1SH_2[probeID];
+    shRadiance[3] = L1SH_3[probeID];
+    vec3 probe_color = GetRadianceFromSH(shRadiance, dir);
+    if(VDotN > 0.0 && probe_color != vec3(0.0))
+    {
+        weight = weights.x * weights.y * weights.z;
+    }
+    else
+    {
+        weight = 0.0f;
+    }
+    return probe_color;
+}
+
+vec3 calculate_indirect(vec3 worldPos, vec3 N)
+{
+    //bilinear filter
+    float w;
+    vec3 light;
+    float sum = 0.0;
+    vec3 indirect = vec3(0.0);
+
+    for(int i = 0; i < 8; i++)
+    {
+        ivec3 offset = ivec3(i, i / 2, i / 4) & ivec3(1);
+
+        light = get_probe(worldPos, offset, w, N);
+        indirect += w * light;
+        sum += w;
+    }
+    indirect /= w;
+    return indirect;
+}
+
 void main()
 {
     vec3 FragPos = texture(gPosition, TexCoords).rgb;
@@ -272,14 +335,14 @@ void main()
     vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 
 
-    vec3 indirect = vec3(0.0);
     vec3 projCoords = FragPosLightSpace.xyz / FragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
 
-//    vec3 ambient = (kD * diffuse + specular) * ao;
+    vec3 ambient = (kD * diffuse + specular) * ao;
 //    vec3 color = ambient + Lo;
-    vec3 ambient = vec3(1.0) * albedo;
-    vec3 color =  Lo;
+//    vec3 ambient = vec3(1.0) * albedo;
+//    vec3 indirect = calculate_indirect(FragPos, N);
+    vec3 color = ambient +  Lo;
     //    vec3 ambient = (kD * (diffuse) + (specular)) * ao;
     //    vec3 emission = texture2D(texture_emission, TexCoords).rgb;
     //    vec3 color = ambient  + (indirect * Lo) ;//+ emission;

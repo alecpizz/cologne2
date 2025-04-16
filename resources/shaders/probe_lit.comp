@@ -26,7 +26,8 @@ uniform int probe_width;
 uniform int probe_depth;
 uniform float spacing;
 uniform vec3 origin;
-layout(binding = 0, rgba32f) uniform image3D sh_texture;
+layout(binding = 4, rgba16f) uniform image3D sh_texture;
+
 
 uniform samplerCubeArray g_colors[3];
 uniform samplerCubeArray g_norms[3];
@@ -331,6 +332,9 @@ float random_float(inout uint seed)
 void main()
 {
     uint id = gl_WorkGroupID.x;
+    vec3 probe_pos = positions[id].xyz;
+    ivec3 texture_pos = ivec3(probe_pos);
+    imageStore(sh_texture, texture_pos, vec4(id));
     SphericalHarmonics sh = probe_to_sh(int(id));
     L1SH_0[id] = sh[0];
     L1SH_1[id] = sh[1];

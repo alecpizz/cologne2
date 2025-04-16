@@ -36,6 +36,7 @@ namespace cologne
         void set_int(const char *name, int32_t value) const;
 
         void set_vec3(const char *name, const float *value) const;
+        void set_vec2(const char *name, const float *value) const;
 
         void set_vec4(const char *name, const float *value) const;
 

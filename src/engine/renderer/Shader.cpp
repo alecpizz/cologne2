@@ -186,6 +186,15 @@ namespace cologne
         glUniform3fv(_impl->uniforms[name], 1, value);
     }
 
+    void Shader::set_vec2(const char *name, const float *value) const
+    {
+        if (!_impl->uniforms.contains(name))
+        {
+            _impl->uniforms[name] = glGetUniformLocation(_impl->program, name);
+        }
+        glUniform2fv(_impl->uniforms[name], 1, value);
+    }
+
     void Shader::set_vec4(const char *name, const float *value) const
     {
         if (!_impl->uniforms.contains(name))

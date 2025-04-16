@@ -10,24 +10,37 @@ namespace cologne
 {
     struct FloatCmd
     {
-        float& ref;
+        float &ref;
         std::string name;
     };
+
     struct IntCmd
     {
-        int32_t& ref;
+        int32_t &ref;
         std::string name;
     };
+
     struct Vec3Cmd
     {
-        glm::vec3& ref;
+        glm::vec3 &ref;
         std::string name;
     };
+
+    struct ImageCmd
+    {
+        uint32_t id;
+        std::string name;
+        glm::vec2 image_size;
+        bool flip = true;
+    };
+
     struct DebugUI::Impl
     {
         std::vector<FloatCmd> float_cmds;
         std::vector<IntCmd> int_cmds;
         std::vector<Vec3Cmd> vec3_cmds;
+        std::vector<ImageCmd> image_cmds;
+
         void init()
         {
             ImGui::CreateContext();
@@ -94,7 +107,6 @@ namespace cologne
             }
             if (ImGui::DragFloat3("Euler", glm::value_ptr(euler)))
             {
-
             }
             if (ImGui::DragFloat3("Scale", glm::value_ptr(scale)))
             {
@@ -145,6 +157,20 @@ namespace cologne
                 _impl->vec3_cmds[i].ref = value;
             }
             ImGui::PopID();
+        }
+
+        if (ImGui::CollapsingHeader("Images"))
+        {
+            for (size_t i = 0; i < _impl->image_cmds.size(); i++)
+            {
+                ImGui::PushID(i);
+                ImGui::Text(_impl->image_cmds[i].name.c_str());
+                ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(_impl->image_cmds[i].id)),
+                             ImVec2(_impl->image_cmds[i].image_size.x / 4,
+                                 _impl->image_cmds[i].image_size.y / 4),
+                                 ImVec2(0, 1), ImVec2(1, 0));
+                ImGui::PopID();
+            }
         }
 
         bool free_cam = Engine::get_camera()->is_free_cam();
@@ -201,5 +227,10 @@ namespace cologne
     void DebugUI::add_vec3_entry(const char *name, glm::vec3 &value)
     {
         _impl->vec3_cmds.emplace_back(Vec3Cmd{value, name});
+    }
+
+    void DebugUI::add_image_entry(const char *name, uint32_t value, const glm::vec2 &image_size)
+    {
+        _impl->image_cmds.emplace_back(ImageCmd{value, name, image_size});
     }
 }
