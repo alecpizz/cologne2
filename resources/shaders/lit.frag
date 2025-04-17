@@ -37,11 +37,12 @@ layout (binding = 0) uniform sampler2D gPosition;
 layout (binding = 1) uniform sampler2D gNormal;
 layout (binding = 2) uniform sampler2D gAlbedo;
 layout (binding = 3) uniform sampler2D gORM;
+layout (binding = 4) uniform sampler2D gEmission;
 
 layout (binding = 6) uniform samplerCube irradiance_map;
 layout (binding = 7) uniform samplerCube prefilter_map;
 layout (binding = 8) uniform sampler2D brdf;
-layout (binding = 4) uniform sampler3D probeGrid;
+layout (binding = 9) uniform sampler2D indirect_lighting;
 layout (binding = 13) uniform sampler2DArray shadow_cascades;
 
 layout (std140) uniform LightSpaceMatrices
@@ -67,7 +68,7 @@ uniform float far_plane = 20.0f;
 uniform float ao_strength = 0.2;
 uniform int has_ao_texture = 0;
 uniform float cascadePlaneDistances[4];
-uniform int cascadeCount;   // number of frusta - 1
+uniform int cascadeCount;// number of frusta - 1
 
 uniform mat4 view_inverse;
 uniform vec3 probe_world_pos;
@@ -99,7 +100,7 @@ float radical_inverse_vdc(uint bits)
     bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
     bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
     bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
-    return float(bits) * 2.3283064365386963e-10; // / 0x100000000
+    return float(bits) * 2.3283064365386963e-10;// / 0x100000000
 }
 
 vec2 hammersley(uint i, uint n)
@@ -114,152 +115,14 @@ float rand(vec2 v)
 }
 
 vec3 Tonemap_ACES(const vec3 x) { // Narkowicz 2015, "ACES Filmic Tone Mapping Curve"
-                                  const float a = 2.51;
-                                  const float b = 0.03;
-                                  const float c = 2.43;
-                                  const float d = 0.59;
-                                  const float e = 0.14;
-                                  return (x * (a * x + b)) / (x * (c * x + d) + e);
+    const float a = 2.51;
+    const float b = 0.03;
+    const float c = 2.43;
+    const float d = 0.59;
+    const float e = 0.14;
+    return (x * (a * x + b)) / (x * (c * x + d) + e);
 }
 
-myT shDot(in SphericalHarmonics shA, in SphericalHarmonics shB)
-{
-    myT result = myT(0.0);
-    for (int i = 0; i < shSize(myL); ++i)
-    {
-        result += shA[i] * shB[i];
-    }
-    return result;
-}
-
-const float sqrtPI = 1.7724538509055160272981674833411;
-
-SphericalHarmonics shEvaluate(vec3 p)
-{
-    // From Peter-Pike Sloan's Stupid SH Tricks
-    // http://www.ppsloan.org/publications/StupidSH36.pdf
-    // https://github.com/dariomanesku/cmft/blob/master/src/cmft/cubemapfilter.cpp#L130
-
-    SphericalHarmonics result;
-
-    float x = -p.x;
-    float y = -p.y;
-    float z = p.z;
-
-    float x2 = x*x;
-    float y2 = y*y;
-    float z2 = z*z;
-
-    float z3 = z2*z;
-
-    float x4 = x2*x2;
-    float y4 = y2*y2;
-    float z4 = z2*z2;
-
-    int i = 0;
-
-    result[i++] =  myT(1.0f/(2.0f*sqrtPI));
-
-    #if (myL >= 1)
-    result[i++] = myT(-sqrt(3.0f/(4.0f*PI))*y);
-    result[i++] = myT(sqrt(3.0f/(4.0f*PI))*z);
-    result[i++] = myT(-sqrt(3.0f/(4.0f*PI))*x);
-    #endif
-
-    #if (myL >= 2)
-    result[i++] = myT(sqrt(15.0f/(4.0f*PI))*y*x);
-    result[i++] = myT(-sqrt(15.0f/(4.0f*PI))*y*z);
-    result[i++] = myT(sqrt(5.0f/(16.0f*PI))*(3.0f*z2-1.0f));
-    result[i++] = myT(-sqrt(15.0f/(4.0f*PI))*x*z);
-    result[i++] = myT(sqrt(15.0f/(16.0f*PI))*(x2-y2));
-    #endif
-
-    #if (myL >= 3)
-    result[i++] = myT(-sqrt(70.0f/(64.0f*PI))*y*(3.0f*x2-y2));
-    result[i++] = myT(sqrt(105.0f/ (4.0f*PI))*y*x*z);
-    result[i++] = myT(-sqrt(21.0f/(16.0f*PI))*y*(-1.0f+5.0f*z2));
-    result[i++] = myT(sqrt(7.0f/(16.0f*PI))*(5.0f*z3-3.0f*z));
-    result[i++] = myT(-sqrt(42.0f/(64.0f*PI))*x*(-1.0f+5.0f*z2));
-    result[i++] = myT(sqrt(105.0f/(16.0f*PI))*(x2-y2)*z);
-    result[i++] = myT(-sqrt(70.0f/(64.0f*PI))*x*(x2-3.0f*y2));
-    #endif
-
-    #if (myL >= 4)
-    result[i++] = myT(3.0f*sqrt(35.0f/(16.0f*PI))*x*y*(x2-y2));
-    result[i++] = myT(-3.0f*sqrt(70.0f/(64.0f*PI))*y*z*(3.0f*x2-y2));
-    result[i++] = myT(3.0f*sqrt(5.0f/(16.0f*PI))*y*x*(-1.0f+7.0f*z2));
-    result[i++] = myT(-3.0f*sqrt(10.0f/(64.0f*PI))*y*z*(-3.0f+7.0f*z2));
-    result[i++] = myT((105.0f*z4-90.0f*z2+9.0f)/(16.0f*sqrtPI));
-    result[i++] = myT(-3.0f*sqrt(10.0f/(64.0f*PI))*x*z*(-3.0f+7.0f*z2));
-    result[i++] = myT(3.0f*sqrt(5.0f/(64.0f*PI))*(x2-y2)*(-1.0f+7.0f*z2));
-    result[i++] = myT(-3.0f*sqrt(70.0f/(64.0f*PI))*x*z*(x2-3.0f*y2));
-    result[i++] = myT(3.0f*sqrt(35.0f/(4.0f*(64.0f*PI)))*(x4-6.0f*y2*x2+y4));
-    #endif
-
-    return result;
-}
-
-vec3 GetRadianceFromSH(SphericalHarmonics shRadiance, vec3 direction)
-{
-    SphericalHarmonics shDirection = shEvaluate(direction);
-
-    vec3 sampleSh = max(vec3(0.0), shDot(shRadiance, shDirection));
-    return sampleSh;
-}
-
-vec3 get_probe(vec3 world_pos, ivec3 offset, out float weight, vec3 N)
-{
-    vec3 gridCoords = (world_pos - probe_world_pos) / probe_spacing;
-    ivec3 base = ivec3(floor(gridCoords)) + offset;
-    //8 x 8 x 12
-    base.x = clamp(base.x, 0, 8);
-    base.y = clamp(base.y, 0, 8);
-    base.z = clamp(base.z, 0, 12);
-    int probeID = 12 * 12 * 8 + 4 * 8 + 2;
-    vec3 a = gridCoords - base;
-    vec3 probe_world = positions[probeID].xyz + (base) * probe_spacing;
-    vec3 dir = probe_world - world_pos;
-
-    vec3 v = normalize(dir);
-    float VDotN = dot(v, N);
-    vec3 weights = mix(1.0 - a, a, offset);
-
-    SphericalHarmonics shRadiance;
-    shRadiance[0] = L1SH_0[probeID];
-    shRadiance[1] = L1SH_1[probeID];
-    shRadiance[2] = L1SH_2[probeID];
-    shRadiance[3] = L1SH_3[probeID];
-    vec3 probe_color = GetRadianceFromSH(shRadiance, dir);
-    if(VDotN > 0.0 && probe_color != vec3(0.0))
-    {
-        weight = weights.x * weights.y * weights.z;
-    }
-    else
-    {
-        weight = 0.0f;
-    }
-    return probe_color;
-}
-
-vec3 calculate_indirect(vec3 worldPos, vec3 N)
-{
-    //bilinear filter
-    float w;
-    vec3 light;
-    float sum = 0.0;
-    vec3 indirect = vec3(0.0);
-
-    for(int i = 0; i < 8; i++)
-    {
-        ivec3 offset = ivec3(i, i / 2, i / 4) & ivec3(1);
-
-        light = get_probe(worldPos, offset, w, N);
-        indirect += w * light;
-        sum += w;
-    }
-    indirect /= w;
-    return indirect;
-}
 
 void main()
 {
@@ -339,17 +202,9 @@ void main()
     projCoords = projCoords * 0.5 + 0.5;
 
     vec3 ambient = (kD * diffuse + specular) * ao;
-//    vec3 color = ambient + Lo;
-//    vec3 ambient = vec3(1.0) * albedo;
-//    vec3 indirect = calculate_indirect(FragPos, N);
-    vec3 color = ambient +  Lo;
-    //    vec3 ambient = (kD * (diffuse) + (specular)) * ao;
-    //    vec3 emission = texture2D(texture_emission, TexCoords).rgb;
-    //    vec3 color = ambient  + (indirect * Lo) ;//+ emission;
-    //    vec3 color = ((indirect * 200) * Lo) + emission;
-//    color = mix(color, Tonemap_ACES(color), 1.0);
-//    color = pow(color, vec3(1.0 / 2.2));
-//    color = mix(color, Tonemap_ACES(color), 0.35);
+    vec3 emission = texture2D(gEmission, TexCoords).rgb;
+    vec3 color = ambient + Lo + emission;
+
     color = mix(color, Tonemap_ACES(color), 1.0);
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0 / 2.2));

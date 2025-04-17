@@ -15,7 +15,15 @@ void GLAPIENTRY glDebugOutput(GLenum source,
 		|| id == 131222
 		) return;
 	if (type == GL_DEBUG_TYPE_PERFORMANCE) return;
-
+	std::string msg_string = std::string(message);
+	if (msg_string.find("has not been linked") != std::string::npos)
+	{
+		return;
+	}
+	if (msg_string.find("object is not successfully linked") != std::string::npos)
+	{
+		return;
+	}
 	std::cout << "---------------" << std::endl;
 	std::cout << "Debug message (" << id << "): " << message << std::endl;
 

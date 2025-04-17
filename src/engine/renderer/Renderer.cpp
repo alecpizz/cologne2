@@ -48,6 +48,7 @@ namespace cologne
         Texture env_prefilter;
         Texture env_brdf;
         Texture shadow_map;
+        Texture blue_noise;
         uint32_t shadow_fbo = 0;
         uint32_t g_buffer = 0;
         uint32_t g_position = 0;
@@ -101,6 +102,7 @@ namespace cologne
             Engine::get_debug_ui()->add_int_entry("Probe Height", probe_height);
             Engine::get_debug_ui()->add_float_entry("Probe Spacing", probe_spacing);
             Engine::get_debug_ui()->add_vec3_entry("Probe Origin", probe_volume_origin);
+            blue_noise = Texture(RESOURCES_PATH "bluenoise.png");
         }
 
         void init_shaders()
@@ -824,7 +826,8 @@ namespace cologne
             glBindTextureUnit(1, g_normal);
             glBindTextureUnit(2, g_albedo);
             glBindTextureUnit(3, g_metallic_roughness_ao);
-            glBindTextureUnit(4, probe_lighting);
+            glBindTextureUnit(4, 0);
+            glBindTextureUnit(9, s_raymarch);
             glBindTextureUnit(13, rsm_depth);
             render_quad();
             glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer);
@@ -1103,7 +1106,9 @@ namespace cologne
             glClear(GL_COLOR_BUFFER_BIT);
 
             stochastic_normal_shader->bind();
-            glBindTextureUnit(0, g_normal);
+            glBindTextureUnit(0, g_depth);
+            stochastic_normal_shader->set_mat4("inverse_projection", glm::value_ptr(glm::inverse(Engine::get_camera()->get_projection_matrix())));
+            stochastic_normal_shader->set_mat4("inverse_view", glm::value_ptr(glm::inverse(Engine::get_camera()->get_view_matrix())));
             stochastic_normal_shader->set_int("frame", frame);
             stochastic_normal_shader->set_vec2("screen_resolution",
                                                glm::value_ptr(glm::vec2(Engine::get_window()->get_width(),
@@ -1122,6 +1127,7 @@ namespace cologne
             glBindTextureUnit(1, g_position);
             glBindTextureUnit(2, g_depth);
             glBindTextureUnit(3, g_albedo);
+            blue_noise.bind(4);
             raymarch_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
             raymarch_shader->set_mat4("projection", glm::value_ptr(Engine::get_camera()->get_projection_matrix()));
             render_quad();
