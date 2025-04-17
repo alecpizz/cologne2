@@ -33,6 +33,7 @@ namespace cologne
         std::shared_ptr<Shader> fbo_debug_shader = nullptr;
         std::shared_ptr<Shader> probe_debug_shader = nullptr;
         std::shared_ptr<Shader> probe_lit_shader = nullptr;
+        std::shared_ptr<Shader> voxelize_shader = nullptr;
         std::shared_ptr<DebugRenderer> debug_renderer = nullptr;
         std::shared_ptr<TextRenderer> text_renderer = nullptr;
         std::unordered_map<std::string, std::shared_ptr<Shader> > shaders = std::unordered_map<std::string,
@@ -54,9 +55,13 @@ namespace cologne
         uint32_t shadow_depth = 0;
         uint32_t shadow_cascade_ubo = 0;
         uint32_t rsm_size = 4096;
+        uint32_t voxel_texture = 0;
+        const int32_t voxel_size = 128;
+        const float voxel_grid_size = 150;
         float zMulti = 10.0f;
         float shadow_near = 0.1f;
         float shadow_far = 1200.0f;
+        glm::mat4 projection_x, projection_y, projection_z;
 
 
         void init()
@@ -75,6 +80,72 @@ namespace cologne
             Engine::get_debug_ui()->add_float_entry("ZMulti", zMulti);
             Engine::get_debug_ui()->add_float_entry("Shadow Far Plane", shadow_far);
             Engine::get_debug_ui()->add_float_entry("Shadow near Plane", shadow_near);
+
+
+            glGenTextures(1, &voxel_texture);
+            glBindTexture(GL_TEXTURE_3D, voxel_texture);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            // glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA8, voxel_size, voxel_size, voxel_size);
+            int numVoxels = voxel_size * voxel_size * voxel_size;
+            auto* data = new GLubyte[4 * numVoxels];
+            memset(data, 0, 4 * numVoxels);
+            glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8, voxel_size,
+                voxel_size, voxel_size, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+            delete[] data;
+
+            float size = voxel_grid_size;
+            glm::mat4 voxelize = glm::ortho(-size * 0.5f,
+                                            size * 0.5f,
+                                            -size * 0.5f,
+                                            size * 0.5f,
+                                            size * 0.5f,
+                                            size * 1.5f);
+
+            projection_x = voxelize * glm::lookAt(glm::vec3(size, 0.0f, 0.0f), glm::vec3(0.0f),
+                                                  glm::vec3(0.0f, 1.0f, 0.0f));
+            projection_y = voxelize * glm::lookAt(glm::vec3(0.0f, size, 0.0f), glm::vec3(0.0f),
+                                                  glm::vec3(0.0f, 0.0f, -1.0f));
+            projection_z = voxelize * glm::lookAt(glm::vec3(0.0f, 0.0f, size), glm::vec3(0.0f),
+                                                  glm::vec3(0.0f, 1.0f, 0.0f));
+        }
+
+        void voxelize_scene(Scene &scene)
+        {
+            glDisable(GL_CULL_FACE);
+            glDisable(GL_DEPTH_TEST);
+
+            glViewport(0, 0, voxel_size, voxel_size);
+            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            voxelize_shader->bind();
+            voxelize_shader->set_int("voxel_size", voxel_size);
+            voxelize_shader->set_mat4("projection_x", glm::value_ptr(projection_x));
+            voxelize_shader->set_mat4("projection_y", glm::value_ptr(projection_y));
+            voxelize_shader->set_mat4("projection_z", glm::value_ptr(projection_z));
+
+            glBindImageTexture(6, voxel_texture, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA8);
+            for (size_t i = 0; i < scene.get_model_count(); i++)
+            {
+                auto model = scene.get_model_by_index(i);
+                voxelize_shader->set_mat4("model",
+                                          glm::value_ptr(
+                                              model->get_transform()->get_model_matrix()));
+                for (size_t j = 0; j < model->get_num_meshes(); j++)
+                {
+                    auto &mesh = scene.get_model_by_index(i)->get_meshes()[j];
+                    model->get_materials()[mesh.get_material_index()].bind_all();
+                    mesh.draw();
+                }
+            }
+            glActiveTexture(GL_TEXTURE6);
+            glBindTexture(GL_TEXTURE_3D, voxel_texture);
+            glGenerateMipmap(GL_TEXTURE_3D);
+            glBindTexture(GL_TEXTURE_3D, 0);
+            glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
+            glEnable(GL_CULL_FACE);
+            glEnable(GL_DEPTH_TEST);
         }
 
         void init_shaders()
@@ -103,6 +174,10 @@ namespace cologne
             probe_debug_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/probe_debug.vert",
                                                           RESOURCES_PATH "shaders/probe_debug.frag");
             probe_lit_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/probe_lit.comp");
+
+            voxelize_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/voxelize.vert",
+                                                       RESOURCES_PATH "shaders/voxelize.frag",
+                                                       RESOURCES_PATH "shaders/voxelize.geom");
 
             shaders.clear();
             shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("lit", lit_shader));
@@ -166,7 +241,7 @@ namespace cologne
             glGenTextures(1, &g_emission);
             glBindTexture(GL_TEXTURE_2D, g_emission);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-                        GL_UNSIGNED_BYTE, nullptr);
+                         GL_UNSIGNED_BYTE, nullptr);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D,
@@ -666,6 +741,8 @@ namespace cologne
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             lit_shader->bind();
             lit_shader->set_vec3("camera_pos", glm::value_ptr(Engine::get_camera()->get_position()));
+            lit_shader->set_int("voxel_size", voxel_size);
+            lit_shader->set_float("voxel_grid_size", voxel_grid_size);
             env_irradiance.bind(IRRADIANCE_INDEX);
             env_prefilter.bind(PREFILTER_INDEX);
             env_brdf.bind(BRDF_INDEX);
@@ -678,6 +755,7 @@ namespace cologne
             glBindTextureUnit(3, g_metallic_roughness_ao);
             glBindTextureUnit(4, g_emission);
             glBindTextureUnit(5, shadow_depth);
+            glBindTextureUnit(6, voxel_texture);
             render_quad();
             glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
@@ -893,6 +971,7 @@ namespace cologne
 
         _impl->shadow_pass(scene);
         _impl->gbuffer_pass(scene);
+        // _impl->voxelize_scene(scene);
         _impl->lit_pass(scene);
         _impl->skybox_pass();
         _impl->debug_renderer->present();
@@ -963,5 +1042,6 @@ namespace cologne
                                glm::vec3(200.0f, 200.0f, 200.0f), 6.0f, 1.0f,
                                LightType::Point));
         _impl->init_shadow_map();
+        _impl->voxelize_scene(*Engine::get_scene());
     }
 }

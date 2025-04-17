@@ -44,6 +44,12 @@ layout (binding = 6) uniform samplerCube irradiance_map;
 layout (binding = 7) uniform samplerCube prefilter_map;
 layout (binding = 8) uniform sampler2D brdf;
 
+
+//voxel stuff
+layout (binding = 9) uniform sampler3D voxel_texture;
+uniform int voxel_size;
+uniform float voxel_grid_size;
+
 layout (std140) uniform LightSpaceMatrices
 {
     mat4 lightSpaceMatrices[16];
