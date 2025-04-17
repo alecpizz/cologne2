@@ -3,6 +3,7 @@ layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec4 gNormal;
 layout (location = 2) out vec4 gAlbedo;
 layout (location = 3) out vec3 gORM;
+layout (location = 4) out vec3 gEmission;
 
 in vec3 FragPos;
 in vec2 TexCoords;
@@ -23,6 +24,7 @@ void main()
     N = N * 2.0 - 1.0;
     N = normalize(TBN * N);
     gNormal = vec4(N, 1.0);
+    gEmission = texture(texture_emission, TexCoords).rgb;
     gl_FragDepth = gl_FragCoord.z;
     gORM.r = texture(texture_metallic, TexCoords).b;
     gORM.g = texture(texture_roughness, TexCoords).g;

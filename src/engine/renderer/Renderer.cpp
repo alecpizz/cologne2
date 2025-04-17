@@ -22,7 +22,6 @@ namespace cologne
 #define IRRADIANCE_INDEX 6
 #define PREFILTER_INDEX 7
 #define BRDF_INDEX 8
-#define SHADOW_INDEX 9
 
 
     struct Renderer::Impl
@@ -34,11 +33,8 @@ namespace cologne
         std::shared_ptr<Shader> fbo_debug_shader = nullptr;
         std::shared_ptr<Shader> probe_debug_shader = nullptr;
         std::shared_ptr<Shader> probe_lit_shader = nullptr;
-        std::shared_ptr<Shader> stochastic_normal_shader = nullptr;
-        std::shared_ptr<Shader> raymarch_shader = nullptr;
         std::shared_ptr<DebugRenderer> debug_renderer = nullptr;
         std::shared_ptr<TextRenderer> text_renderer = nullptr;
-        std::shared_ptr<Shader> probe_g_buffer_shader = nullptr;
         std::unordered_map<std::string, std::shared_ptr<Shader> > shaders = std::unordered_map<std::string,
             std::shared_ptr<Shader> >();
         std::vector<Light> lights;
@@ -47,39 +43,21 @@ namespace cologne
         Texture env_irradiance;
         Texture env_prefilter;
         Texture env_brdf;
-        Texture shadow_map;
-        Texture blue_noise;
-        uint32_t shadow_fbo = 0;
         uint32_t g_buffer = 0;
         uint32_t g_position = 0;
         uint32_t g_albedo;
         uint32_t g_normal;
         uint32_t g_metallic_roughness_ao;
+        uint32_t g_emission;
         uint32_t g_depth;
-        uint32_t s_normals;
-        uint32_t s_fbo;
-        uint32_t s_raymarch_fbo;
-        uint32_t s_raymarch;
-        uint32_t rsm_fbo = 0;
-        uint32_t rsm_depth = 0;
+        uint32_t shadow_fbo = 0;
+        uint32_t shadow_depth = 0;
         uint32_t shadow_cascade_ubo = 0;
         uint32_t rsm_size = 4096;
         float zMulti = 10.0f;
         float shadow_near = 0.1f;
         float shadow_far = 1200.0f;
 
-
-        //PROBES
-        int32_t probe_depth = 8;
-        int32_t probe_height = 8;
-        int32_t probe_width = 12;
-        float probe_spacing = 1.0f;
-        glm::vec3 probe_volume_origin = glm::vec3(-6.0f, 0.1f, -4.0f);
-        std::vector<Probe> probes;
-        uint32_t probe_lighting = 0;
-        uint32_t probe_gbuffer_ssbo = 0;
-        uint32_t probe_positions_ssbo = 0;
-        uint32_t probe_sh_ssbo = 0;
 
         void init()
         {
@@ -97,12 +75,6 @@ namespace cologne
             Engine::get_debug_ui()->add_float_entry("ZMulti", zMulti);
             Engine::get_debug_ui()->add_float_entry("Shadow Far Plane", shadow_far);
             Engine::get_debug_ui()->add_float_entry("Shadow near Plane", shadow_near);
-            Engine::get_debug_ui()->add_int_entry("Probe Depth", probe_depth);
-            Engine::get_debug_ui()->add_int_entry("Probe Width", probe_width);
-            Engine::get_debug_ui()->add_int_entry("Probe Height", probe_height);
-            Engine::get_debug_ui()->add_float_entry("Probe Spacing", probe_spacing);
-            Engine::get_debug_ui()->add_vec3_entry("Probe Origin", probe_volume_origin);
-            blue_noise = Texture(RESOURCES_PATH "bluenoise.png");
         }
 
         void init_shaders()
@@ -131,11 +103,7 @@ namespace cologne
             probe_debug_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/probe_debug.vert",
                                                           RESOURCES_PATH "shaders/probe_debug.frag");
             probe_lit_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/probe_lit.comp");
-            probe_g_buffer_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/probe_g_buffer.vert",
-                                                             RESOURCES_PATH "shaders/probe_g_buffer.frag");
-            stochastic_normal_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/stochastic.vert",
-                                                                RESOURCES_PATH "shaders/stochastic.frag");
-            raymarch_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/raymarch.vert", RESOURCES_PATH "shaders/raymarch.frag");
+
             shaders.clear();
             shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("lit", lit_shader));
             shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("gbuffer", g_buffer_shader));
@@ -143,7 +111,6 @@ namespace cologne
             shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("shadowmap", shadowmap_shader));
             shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("probe_debug", probe_debug_shader));
             shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("probe_lit", probe_lit_shader));
-            shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("probe_g_buffer", probe_g_buffer_shader));
         }
 
         void init_gbuffer(uint32_t width, uint32_t height)
@@ -195,6 +162,16 @@ namespace cologne
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D,
                                    g_metallic_roughness_ao, 0);
 
+            //emission
+            glGenTextures(1, &g_emission);
+            glBindTexture(GL_TEXTURE_2D, g_emission);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+                        GL_UNSIGNED_BYTE, nullptr);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D,
+                                   g_emission, 0);
+
             //depth
 
             glGenTextures(1, &g_depth);
@@ -205,156 +182,34 @@ namespace cologne
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, g_depth, 0);
 
-            uint32_t attachments[4] = {
+            uint32_t attachments[5] = {
                 GL_COLOR_ATTACHMENT0,
                 GL_COLOR_ATTACHMENT1,
                 GL_COLOR_ATTACHMENT2,
-                GL_COLOR_ATTACHMENT3
+                GL_COLOR_ATTACHMENT3,
+                GL_COLOR_ATTACHMENT4
             };
-            glDrawBuffers(4, attachments);
+            glDrawBuffers(5, attachments);
             if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             {
                 LOG_ERROR("Framebuffer is not complete! %s", glGetError());
             }
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-            glGenFramebuffers(1, &s_fbo);
-            glBindFramebuffer(GL_FRAMEBUFFER, s_fbo);
-            //normal
-            glGenTextures(1, &s_normals);
-            glBindTexture(GL_TEXTURE_2D, s_normals);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0,
-                         GL_RGBA, GL_FLOAT, nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                                   s_normals, 0);
-            uint32_t attachment[1] = {GL_COLOR_ATTACHMENT0};
-            glDrawBuffers(1, attachment);
-            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            {
-                LOG_ERROR("Framebuffer is not complete! %s", glGetError());
-            }
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-            glGenFramebuffers(1, &s_raymarch_fbo);
-            glBindFramebuffer(GL_FRAMEBUFFER, s_raymarch_fbo);
-            glGenTextures(1, &s_raymarch);
-            glBindTexture(GL_TEXTURE_2D, s_raymarch);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height,
-                0, GL_RGBA, GL_FLOAT, nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, s_raymarch, 0);
-            glDrawBuffers(1, attachment);
-            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            {
-                LOG_ERROR("Framebuffer is not complete! %s", glGetError());
-            }
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
             Engine::get_debug_ui()->add_image_entry("G_Normals", g_normal, glm::vec2(width, height));
             Engine::get_debug_ui()->add_image_entry("G_Position", g_position, glm::vec2(width, height));
             Engine::get_debug_ui()->add_image_entry("G_Albedo", g_albedo, glm::vec2(width, height));
             Engine::get_debug_ui()->add_image_entry("G_ORM", g_metallic_roughness_ao, glm::vec2(width, height));
             Engine::get_debug_ui()->add_image_entry("G_Depth", g_depth, glm::vec2(width, height));
-            Engine::get_debug_ui()->add_image_entry("S_Normals", s_normals, glm::vec2(width, height));
-            Engine::get_debug_ui()->add_image_entry("S_Raymarch", s_raymarch, glm::vec2(width, height));
+            Engine::get_debug_ui()->add_image_entry("G_Emission", g_emission, glm::vec2(width, height));
         }
 
-        void light_probes()
-        {
-            //light all the probes, take in 256 random points and do direct lighting on each point. generate SH coefficients from resulting lighting
-            probe_lit_shader->bind();
-            probe_lit_shader->set_int("probe_depth", probe_depth);
-            probe_lit_shader->set_int("probe_width", probe_width);
-            probe_lit_shader->set_int("probe_height", probe_height);
-            probe_lit_shader->set_float("probe_spacing", probe_spacing);
-            probe_lit_shader->set_vec3("origin", glm::value_ptr(probe_volume_origin));
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, probe_gbuffer_ssbo);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, probe_positions_ssbo);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, probe_sh_ssbo);
-            glBindTextureUnit(4, probe_lighting);
-            for (size_t i = 0; i < lights.size(); ++i)
-            {
-                probe_lit_shader->set_vec3(std::string("lights[" + std::to_string(i) + "].position").c_str(),
-                                           glm::value_ptr(lights[i].position));
-                probe_lit_shader->set_vec3(std::string("lights[" + std::to_string(i) + "].direction").c_str(),
-                                           glm::value_ptr(lights[i].direction));
-                probe_lit_shader->set_vec3(std::string("lights[" + std::to_string(i) + "].color").c_str(),
-                                           glm::value_ptr(lights[i].color));
-                probe_lit_shader->set_float(std::string("lights[" + std::to_string(i) + "].radius").c_str(),
-                                            (lights[i].radius));
-                probe_lit_shader->set_float(std::string("lights[" + std::to_string(i) + "].strength").c_str(),
-                                            (lights[i].strength));
-                probe_lit_shader->set_int(std::string("lights[" + std::to_string(i) + "].type").c_str(),
-                                          lights[i].type);
-            }
-            probe_lit_shader->set_int("num_lights", lights.size());
-
-            probe_lit_shader->dispatch(probes.size(), 1, 1);
-            probe_lit_shader->wait();
-            //store all SH coefficients in a buffer -> 3d texture
-            //sample from the 8 nearest probes
-        }
-
-        void create_probe_g_buffers()
-        {
-            for (int32_t x = 0; x < probe_width; x++)
-            {
-                for (int32_t y = 0; y < probe_height; y++)
-                {
-                    for (int32_t z = 0; z < probe_depth; z++)
-                    {
-                        float x_pos = static_cast<float>(x) * probe_spacing;
-                        float y_pos = static_cast<float>(y) * probe_spacing;
-                        float z_pos = static_cast<float>(z) * probe_spacing;
-                        glm::vec3 capture_pos = glm::vec3(x_pos, y_pos, z_pos);
-                        capture_pos += probe_volume_origin;
-                        auto &probe = probes.emplace_back(capture_pos);
-                        probe.bake_geo(*probe_g_buffer_shader);
-                    }
-                }
-            }
-            LOG_INFO("Baked %d G B buffers", probes.size());
-            //put probe info into a ssbo
-            glCreateBuffers(1, &probe_gbuffer_ssbo);
-            glCreateBuffers(1, &probe_positions_ssbo);
-            glCreateBuffers(1, &probe_sh_ssbo);
-            std::vector<uint64_t> gbuffer_handles;
-            std::vector<glm::vec4> positions;
-            for (auto &probe: probes)
-            {
-                gbuffer_handles.push_back(probe.get_albedo_bindless());
-                gbuffer_handles.push_back(probe.get_normal_bindless());
-                gbuffer_handles.push_back(probe.get_position_bindless());
-                gbuffer_handles.push_back(probe.get_orm_bindless());
-                positions.push_back(glm::vec4(probe.get_position(), 1.0));
-            }
-            glNamedBufferStorage(probe_gbuffer_ssbo, sizeof(uint64_t) * gbuffer_handles.size(),
-                                 reinterpret_cast<const void *>(gbuffer_handles.data()), GL_DYNAMIC_STORAGE_BIT);
-            glNamedBufferStorage(probe_positions_ssbo, sizeof(glm::vec4) * positions.size(),
-                                 reinterpret_cast<const void *>(positions.data()), GL_DYNAMIC_STORAGE_BIT);
-            glNamedBufferStorage(probe_sh_ssbo, (10 * sizeof(glm::vec3) * 10000), nullptr, GL_DYNAMIC_STORAGE_BIT);
-
-            glGenTextures(1, &probe_lighting);
-            glBindTexture(GL_TEXTURE_3D, probe_lighting);
-            glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA16F, probe_width, probe_height, probe_depth, 0, GL_RGBA, GL_FLOAT,
-                         nullptr);
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-            glBindTexture(GL_TEXTURE_3D, 0);
-            //light_probes();
-        }
 
         void init_shadow_map()
         {
-            glGenFramebuffers(1, &rsm_fbo);
-            glGenTextures(1, &rsm_depth);
-            glBindTexture(GL_TEXTURE_2D_ARRAY, rsm_depth);
+            glGenFramebuffers(1, &shadow_fbo);
+            glGenTextures(1, &shadow_depth);
+            glBindTexture(GL_TEXTURE_2D_ARRAY, shadow_depth);
 
             int32_t cascade_amount = static_cast<int32_t>(shadowCascadeLevels.size()) + 1;
 
@@ -370,8 +225,8 @@ namespace cologne
             glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, white);
 
 
-            glBindFramebuffer(GL_FRAMEBUFFER, rsm_fbo);
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, rsm_depth, 0);
+            glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadow_depth, 0);
             glDrawBuffer(GL_NONE);
             glReadBuffer(GL_NONE);
 
@@ -815,20 +670,14 @@ namespace cologne
             env_prefilter.bind(PREFILTER_INDEX);
             env_brdf.bind(BRDF_INDEX);
             lit_shader->set_float("far_plane", shadow_far);
-            lit_shader->set_vec3("probe_world_pos", glm::value_ptr(probe_volume_origin));
             lit_shader->set_mat4("view_inverse", glm::value_ptr(glm::inverse(Engine::get_camera()->get_view_matrix())));
             lit_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
-            lit_shader->set_vec3("probe_spacing", glm::value_ptr(glm::vec3(probe_spacing)));
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, probe_gbuffer_ssbo);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, probe_positions_ssbo);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, probe_sh_ssbo);
             glBindTextureUnit(0, g_position);
             glBindTextureUnit(1, g_normal);
             glBindTextureUnit(2, g_albedo);
             glBindTextureUnit(3, g_metallic_roughness_ao);
-            glBindTextureUnit(4, 0);
-            glBindTextureUnit(9, s_raymarch);
-            glBindTextureUnit(13, rsm_depth);
+            glBindTextureUnit(4, g_emission);
+            glBindTextureUnit(5, shadow_depth);
             render_quad();
             glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
@@ -855,7 +704,7 @@ namespace cologne
             shadowmap_shader->bind();
             shadowmap_shader->set_vec3("light.direction", glm::value_ptr(lights[0].direction));
             shadowmap_shader->set_vec3("light.color", glm::value_ptr(lights[0].color));
-            glBindFramebuffer(GL_FRAMEBUFFER, rsm_fbo);
+            glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
             glViewport(0, 0, rsm_size, rsm_size);
             glClear(GL_DEPTH_BUFFER_BIT);
             glCullFace(GL_FRONT);
@@ -997,142 +846,6 @@ namespace cologne
             glDepthMask(GL_TRUE);
             glDepthFunc(GL_LESS);
         }
-
-        void probe_debug_pass()
-        {
-            static bool draw_probes = false;
-
-            if (Input::key_pressed(Input::Key::G))
-            {
-                draw_probes = !draw_probes;
-            }
-
-            if (!draw_probes)
-            {
-                return;
-            }
-            glDisable(GL_BLEND);
-            glEnable(GL_DEPTH_TEST);
-            glDepthMask(GL_FALSE);
-
-            static uint32_t cube_vao = 0;
-            static uint32_t cube_vbo = 0;
-            if (cube_vao == 0)
-            {
-                float vertices[] = {
-                    // back face
-                    -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-                    1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f, // top-right
-                    1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f, // bottom-right
-                    1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f, // top-right
-                    -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-                    -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, // top-left
-                    // front face
-                    -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom-left
-                    1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, // bottom-right
-                    1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // top-right
-                    1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // top-right
-                    -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, // top-left
-                    -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom-left
-                    // left face
-                    -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-right
-                    -1.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top-left
-                    -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-left
-                    -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-left
-                    -1.0f, -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-right
-                    -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-right
-                    // right face
-                    1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-left
-                    1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-right
-                    1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top-right
-                    1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-right
-                    1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-left
-                    1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-left
-                    // bottom face
-                    -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
-                    1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f, // top-left
-                    1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom-left
-                    1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom-left
-                    -1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom-right
-                    -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
-                    // top face
-                    -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
-                    1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom-right
-                    1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // top-right
-                    1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom-right
-                    -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
-                    -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f // bottom-left
-                };
-
-                glCreateBuffers(1, &cube_vbo);
-                glNamedBufferStorage(cube_vbo, sizeof(vertices), vertices, GL_MAP_READ_BIT);
-                glCreateVertexArrays(1, &cube_vao);
-                glVertexArrayVertexBuffer(cube_vao, 0, cube_vbo, 0, 8 * sizeof(float));
-
-                glEnableVertexArrayAttrib(cube_vao, 0);
-                glEnableVertexArrayAttrib(cube_vao, 1);
-                glEnableVertexArrayAttrib(cube_vao, 2);
-
-                glVertexArrayAttribFormat(cube_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
-                glVertexArrayAttribFormat(cube_vao, 1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float));
-                glVertexArrayAttribFormat(cube_vao, 2, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float));
-
-                glVertexArrayAttribBinding(cube_vao, 0, 0);
-                glVertexArrayAttribBinding(cube_vao, 1, 0);
-                glVertexArrayAttribBinding(cube_vao, 2, 0);
-            }
-
-            probe_debug_shader->bind();
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, probe_positions_ssbo);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, probe_sh_ssbo);
-            probe_debug_shader->set_mat4("projection", glm::value_ptr(Engine::get_camera()->get_projection_matrix()));
-            probe_debug_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
-            probe_debug_shader->set_int("depth", probe_depth);
-            probe_debug_shader->set_int("height", probe_height);
-            probe_debug_shader->set_int("width", probe_width);
-            probe_debug_shader->set_float("spacing", probe_spacing);
-            probe_debug_shader->set_vec3("origin", glm::value_ptr(probe_volume_origin));
-            glBindVertexArray(cube_vao);
-            glDrawArraysInstanced(GL_TRIANGLES, 0, 36, probes.size());
-            glDepthMask(GL_TRUE);
-            glEnable(GL_BLEND);
-        }
-
-        void stochastic_pass()
-        {
-            //render stochastic normals
-            static int frame = 0;
-            glBindFramebuffer(GL_FRAMEBUFFER, s_fbo);
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            stochastic_normal_shader->bind();
-            glBindTextureUnit(0, g_depth);
-            stochastic_normal_shader->set_mat4("inverse_projection", glm::value_ptr(glm::inverse(Engine::get_camera()->get_projection_matrix())));
-            stochastic_normal_shader->set_mat4("inverse_view", glm::value_ptr(glm::inverse(Engine::get_camera()->get_view_matrix())));
-            stochastic_normal_shader->set_int("frame", frame);
-            stochastic_normal_shader->set_vec2("screen_resolution",
-                                               glm::value_ptr(glm::vec2(Engine::get_window()->get_width(),
-                                                                        Engine::get_window()->get_height())));
-            render_quad();
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            frame++;
-
-            //ray march em
-
-            //bind raymarch frame buffer
-            glBindFramebuffer(GL_FRAMEBUFFER, s_raymarch_fbo);
-            glClear(GL_COLOR_BUFFER_BIT);
-            raymarch_shader->bind();
-            glBindTextureUnit(0, s_normals);
-            glBindTextureUnit(1, g_position);
-            glBindTextureUnit(2, g_depth);
-            glBindTextureUnit(3, g_albedo);
-            blue_noise.bind(4);
-            raymarch_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
-            raymarch_shader->set_mat4("projection", glm::value_ptr(Engine::get_camera()->get_projection_matrix()));
-            render_quad();
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        }
     };
 
     Renderer::~Renderer()
@@ -1178,14 +891,10 @@ namespace cologne
             reload_shaders();
         }
 
-        // _impl->shadow_pass(scene);
-        // _impl->light_probes();
         _impl->shadow_pass(scene);
         _impl->gbuffer_pass(scene);
-        _impl->stochastic_pass();
         _impl->lit_pass(scene);
         _impl->skybox_pass();
-        _impl->probe_debug_pass();
         _impl->debug_renderer->present();
         _impl->text_renderer->present();
     }
@@ -1254,6 +963,5 @@ namespace cologne
                                glm::vec3(200.0f, 200.0f, 200.0f), 6.0f, 1.0f,
                                LightType::Point));
         _impl->init_shadow_map();
-        _impl->create_probe_g_buffers();
     }
 }

@@ -38,30 +38,17 @@ layout (binding = 1) uniform sampler2D gNormal;
 layout (binding = 2) uniform sampler2D gAlbedo;
 layout (binding = 3) uniform sampler2D gORM;
 layout (binding = 4) uniform sampler2D gEmission;
+layout (binding = 5) uniform sampler2DArray shadow_cascades;
 
 layout (binding = 6) uniform samplerCube irradiance_map;
 layout (binding = 7) uniform samplerCube prefilter_map;
 layout (binding = 8) uniform sampler2D brdf;
-layout (binding = 9) uniform sampler2D indirect_lighting;
-layout (binding = 13) uniform sampler2DArray shadow_cascades;
 
 layout (std140) uniform LightSpaceMatrices
 {
     mat4 lightSpaceMatrices[16];
 };
 
-layout(binding = 1, std430) readonly buffer probe_positions
-{
-    vec4 positions[];
-};
-
-layout(binding = 2, std430) buffer shCoefficients
-{
-    vec3 L1SH_0[3750 * 2];
-    vec3 L1SH_1[3750 * 2];
-    vec3 L1SH_2[3750 * 2];
-    vec3 L1SH_3[3750 * 2];
-};
 
 
 uniform float far_plane = 20.0f;
@@ -70,9 +57,6 @@ uniform int has_ao_texture = 0;
 uniform float cascadePlaneDistances[4];
 uniform int cascadeCount;// number of frusta - 1
 
-uniform mat4 view_inverse;
-uniform vec3 probe_world_pos;
-uniform vec3 probe_spacing;
 
 
 vec3 fresnelSchlick(float cosTheta, vec3 F0);
