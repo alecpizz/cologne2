@@ -23,6 +23,8 @@ namespace cologne
 
         void add_bool_entry(const char *name, bool &value);
 
+        void add_button(const char* name, std::function<void()> action);
+
         DebugUI(DebugUI &&) = delete;
 
         DebugUI(const DebugUI &) = delete;

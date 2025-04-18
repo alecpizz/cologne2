@@ -5,11 +5,12 @@ layout (triangle_strip, max_vertices = 3) out;
 in vec4 g_world_pos[];
 //in vec3 g_normal[];
 in vec2 g_tex_coords[];
-
+in mat3 TBN[];
 //out vec3 f_normal;
 out vec2 f_tex_coords;
 out vec3 f_voxel_pos;// world coordinates scaled to clip space (-1...1)
 out vec4 f_shadow_coords;
+out mat3 f_TBN;
 
 void main()
 {
@@ -47,7 +48,7 @@ void main()
 //        f_shadow_coords = u_shadowmap_mvp * g_world_pos[i];
 //        f_normal = g_normal[i];
         f_tex_coords = g_tex_coords[i];
-
+        f_TBN = TBN[i];
         EmitVertex();
     }
 

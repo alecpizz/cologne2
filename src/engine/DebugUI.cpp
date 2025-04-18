@@ -40,6 +40,12 @@ namespace cologne
         std::string name;
     };
 
+    struct ButtonCmd
+    {
+        std::function<void()> action;
+        std::string name;
+    };
+
     struct DebugUI::Impl
     {
         std::vector<FloatCmd> float_cmds;
@@ -47,6 +53,7 @@ namespace cologne
         std::vector<Vec3Cmd> vec3_cmds;
         std::vector<ImageCmd> image_cmds;
         std::vector<BoolCmd> bool_cmds;
+        std::vector<ButtonCmd> button_cmds;
 
         void init()
         {
@@ -177,6 +184,16 @@ namespace cologne
             ImGui::PopID();
         }
 
+        for (size_t i = 0; i < _impl->button_cmds.size(); i++)
+        {
+            ImGui::PushID(i);
+            if (ImGui::Button(_impl->button_cmds[i].name.c_str()))
+            {
+                _impl->button_cmds[i].action();
+            }
+            ImGui::PopID();
+        }
+
         if (ImGui::CollapsingHeader("Images"))
         {
             ImGui::BeginChild("Images", ImVec2(0, 800));
@@ -257,5 +274,10 @@ namespace cologne
     void DebugUI::add_bool_entry(const char *name, bool &value)
     {
         _impl->bool_cmds.emplace_back(BoolCmd{value, name});
+    }
+
+    void DebugUI::add_button(const char *name, std::function<void()> action)
+    {
+        _impl->button_cmds.emplace_back(ButtonCmd{action, name});
     }
 }

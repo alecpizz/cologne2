@@ -19,11 +19,6 @@ struct Light
 
 #define MAX_LIGHTS 8
 #define PI 3.1415926535897932384626433832795
-#define myT vec3
-#define myL 1
-#define SphericalHarmonicsTL(T, L) T[(L + 1)*(L + 1)]
-#define SphericalHarmonics SphericalHarmonicsTL(myT, myL)
-#define shSize(L) ((L + 1)*(L + 1))
 #define DIRECTIONAL 0
 #define POINT 1
 
