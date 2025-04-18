@@ -34,12 +34,19 @@ namespace cologne
         bool flip = true;
     };
 
+    struct BoolCmd
+    {
+        bool &ref;
+        std::string name;
+    };
+
     struct DebugUI::Impl
     {
         std::vector<FloatCmd> float_cmds;
         std::vector<IntCmd> int_cmds;
         std::vector<Vec3Cmd> vec3_cmds;
         std::vector<ImageCmd> image_cmds;
+        std::vector<BoolCmd> bool_cmds;
 
         void init()
         {
@@ -159,6 +166,17 @@ namespace cologne
             ImGui::PopID();
         }
 
+        for (size_t i = 0; i < _impl->bool_cmds.size(); i++)
+        {
+            ImGui::PushID(i);
+            bool value = _impl->bool_cmds[i].ref;
+            if (ImGui::Checkbox(_impl->bool_cmds[i].name.c_str(), &value))
+            {
+                _impl->bool_cmds[i].ref = value;
+            }
+            ImGui::PopID();
+        }
+
         if (ImGui::CollapsingHeader("Images"))
         {
             ImGui::BeginChild("Images", ImVec2(0, 800));
@@ -234,5 +252,10 @@ namespace cologne
     void DebugUI::add_image_entry(const char *name, uint32_t value, const glm::vec2 &image_size)
     {
         _impl->image_cmds.emplace_back(ImageCmd{value, name, image_size});
+    }
+
+    void DebugUI::add_bool_entry(const char *name, bool &value)
+    {
+        _impl->bool_cmds.emplace_back(BoolCmd{value, name});
     }
 }

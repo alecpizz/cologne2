@@ -7,36 +7,32 @@ layout (binding = 3) uniform sampler2D texture_roughness;
 layout (binding = 4) uniform sampler2D texture_normal;
 layout (binding = 5) uniform sampler2D texture_emission;
 
-uniform int voxel_size;
-layout(RGBA8, binding = 6) uniform image3D texture_voxel;
+layout (RGBA8, binding = 6) uniform image3D texture_voxel;
+uniform vec3 voxel_size;
+//in vec3 f_normal;
+in vec2 f_tex_coords;
+in vec3 f_voxel_pos;
+in vec4 f_shadow_coords;
 
-in vec2 TexCoord;
-in flat int Axis;
+bool is_inside_clipspace(const vec3 p)
+{
+    return abs(p.x) < 1 && abs(p.y) < 1 && abs(p.z) < 1;
+}
+
+vec3 from_clipspace_to_texcoords(vec3 p)
+{
+    return 0.5f * p + vec3(0.5f);
+}
 
 void main()
 {
-    vec4 color = texture(texture_albedo, TexCoord);
-
-    ivec3 camera = ivec3(gl_FragCoord.x, gl_FragCoord.y, voxel_size * gl_FragCoord.z);
-    ivec3 voxelPos;
-
-    if(Axis == 1)
+    if (!is_inside_clipspace(f_voxel_pos))
     {
-        voxelPos.x = voxel_size - 1 - camera.z;
-        voxelPos.z = voxel_size - 1 - camera.x;
-        voxelPos.y = camera.y;
+        return;
     }
-    else if(Axis == 2)
-    {
-        voxelPos.z = voxel_size - 1 - camera.y;
-        voxelPos.y = voxel_size - 1 - camera.z;
-        voxelPos.x = camera.x;
-    }
-    else
-    {
-        voxelPos = camera;
-        voxelPos.z = voxel_size - 1 - camera.z;
-    }
-
-    imageStore(texture_voxel, voxelPos, vec4(color.rgb, 1.0f));
+    vec4 color = texture(texture_albedo, f_tex_coords);
+    color.a = 1.0f;
+    vec3 voxelgrid_tex_pos = from_clipspace_to_texcoords(f_voxel_pos);
+    ivec3 voxelgrid_resolution = imageSize(texture_voxel);
+    imageStore(texture_voxel, ivec3(voxelgrid_resolution * voxelgrid_tex_pos), color);
 }

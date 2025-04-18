@@ -2,49 +2,54 @@
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
-uniform mat4 projection_x;
-uniform mat4 projection_y;
-uniform mat4 projection_z;
+in vec4 g_world_pos[];
+//in vec3 g_normal[];
+in vec2 g_tex_coords[];
 
-in vec2 v_TexCoord[];
-
-out vec2 TexCoord;
-out flat int Axis;
+//out vec3 f_normal;
+out vec2 f_tex_coords;
+out vec3 f_voxel_pos;// world coordinates scaled to clip space (-1...1)
+out vec4 f_shadow_coords;
 
 void main()
 {
-    vec3 e1 = gl_in[0].gl_Position.xyz - gl_in[1].gl_Position.xyz;
-    vec3 e2 = gl_in[2].gl_Position.xyz - gl_in[0].gl_Position.xyz;
+    mat3 swizzle_mat;
 
-    vec3 n = normalize(cross(e1, e2));
+    const vec3 edge1 = gl_in[1].gl_Position.xyz - gl_in[0].gl_Position.xyz;
+    const vec3 edge2 = gl_in[2].gl_Position.xyz - gl_in[0].gl_Position.xyz;
+    const vec3 face_normal = abs(cross(edge1, edge2));
 
-    n = vec3(abs(n.x), abs(n.y), abs(n.z));
-
-    float nx = n.x;
-    float ny = n.y;
-    float nz = n.z;
-    mat4 projection;
-    if(nx >= ny && nx >= nz)
+    if (face_normal.x >= face_normal.y && face_normal.x >= face_normal.z)
+    { // see: Introduction to Geometric Computing, page 33 (Ghali, 2008)
+        swizzle_mat = mat3(
+        vec3(0.0, 0.0, 1.0),
+        vec3(0.0, 1.0, 0.0),
+        vec3(1.0, 0.0, 0.0));
+    } else if (face_normal.y >= face_normal.z)
     {
-        Axis = 1;
-        projection = projection_x;
+        swizzle_mat = mat3(
+        vec3(1.0, 0.0, 0.0),
+        vec3(0.0, 0.0, 1.0),
+        vec3(0.0, 1.0, 0.0));
+    } else
+    {
+        swizzle_mat = mat3(
+        vec3(1.0, 0.0, 0.0),
+        vec3(0.0, 1.0, 0.0),
+        vec3(0.0, 0.0, 1.0));
     }
-    else if(ny >= nx && ny >= nz)
-    {
-        Axis = 2;
-        projection = projection_y;
-    }
-    else
-    {
-        Axis = 3;
-        projection = projection_z;
-    }
 
-    for(int i = 0; i < gl_in.length(); i++)
+    for (int i=0; i < 3; i++)
     {
-        TexCoord = v_TexCoord[i];
-        gl_Position = projection * gl_in[i].gl_Position;
+        gl_Position = vec4(gl_in[i].gl_Position.xyz * swizzle_mat, 1.0f);
+
+        f_voxel_pos = gl_in[i].gl_Position.xyz;
+//        f_shadow_coords = u_shadowmap_mvp * g_world_pos[i];
+//        f_normal = g_normal[i];
+        f_tex_coords = g_tex_coords[i];
+
         EmitVertex();
     }
+
     EndPrimitive();
 }
