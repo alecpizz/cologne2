@@ -180,6 +180,7 @@ namespace cologne
                                                                               1.0f, -1.0f, 1.0f)));
             voxelize_shader->set_vec3("voxel_size", glm::value_ptr(voxel_size));
             glBindImageTexture(6, voxel_texture, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA8);
+            glBindTextureUnit(7, shadow_depth);
             for (size_t i = 0; i < scene->get_model_count(); i++)
             {
                 auto model = scene->get_model_by_index(i);
@@ -213,7 +214,7 @@ namespace cologne
                 lit_shader->set_float(std::string("cascadePlaneDistances[" + std::to_string(i) + "]").c_str(),
                                       shadowCascadeLevels[i]);
             }
-            lit_shader->set_float("farPlane", shadow_far);
+            lit_shader->set_float("far_plane", shadow_far);
             lit_shader->set_int("cascadeCount", shadowCascadeLevels.size());
 
             g_buffer_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/gbuffer.vert",
@@ -752,6 +753,14 @@ namespace cologne
                                 glm::value_ptr(lights[i].direction));
             }
             shader.set_int("num_lights", lights.size());
+
+            for (size_t i = 0; i < shadowCascadeLevels.size(); i++)
+            {
+                shader.set_float(std::string("cascadePlaneDistances[" + std::to_string(i) + "]").c_str(),
+                                      shadowCascadeLevels[i]);
+            }
+            shader.set_float("far_plane", shadow_far);
+            shader.set_int("cascadeCount", shadowCascadeLevels.size());
         }
 
         void gbuffer_pass(Scene &scene)

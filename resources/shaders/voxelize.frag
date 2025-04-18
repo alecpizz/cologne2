@@ -6,10 +6,18 @@ layout (binding = 2) uniform sampler2D texture_metallic;
 layout (binding = 3) uniform sampler2D texture_roughness;
 layout (binding = 4) uniform sampler2D texture_normal;
 layout (binding = 5) uniform sampler2D texture_emission;
-
 layout (RGBA8, binding = 6) uniform image3D texture_voxel;
+layout (binding = 7) uniform sampler2DArray shadow_cascades;
 uniform vec3 voxel_size;
-//in vec3 f_normal;
+
+layout (std140) uniform LightSpaceMatrices
+{
+    mat4 lightSpaceMatrices[16];
+};
+
+uniform float far_plane = 20.0f;
+uniform float cascadePlaneDistances[4];
+uniform int cascadeCount;// number of frusta - 1
 
 struct Light
 {
@@ -84,6 +92,58 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
+float shadow_calculation(vec3 p, vec3 n, vec3 l)
+{
+    vec4 fragPosViewSpace = view * vec4(p, 1.0);
+    float depthValue = abs(fragPosViewSpace.z);
+
+    vec4 csmClipSpaceZFar = vec4(cascadePlaneDistances[0],
+    cascadePlaneDistances[1], cascadePlaneDistances[2], cascadePlaneDistances[3]);
+    vec4 res = step(csmClipSpaceZFar, vec4(depthValue));
+    int layer = int(res.x + res.y + res.z + res.w);
+
+    vec4 fragPosLightSpace = lightSpaceMatrices[layer] * vec4(p, 1.0);
+    // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+
+    float currentDepth = projCoords.z;
+
+    // keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
+    if (currentDepth > 1.0)
+    {
+        return 0.0;
+    }
+    // calculate bias (based on depth map resolution and slope)
+    vec3 normal = normalize(n);
+    float bias = max(0.05 * (1.0 - dot(normal, l)), 0.005);
+    const float biasModifier = 0.5f;
+    if (layer == cascadeCount)
+    {
+        bias *= 1 / (far_plane * biasModifier);
+    }
+    else
+    {
+        bias *= 1 / (cascadePlaneDistances[layer] * biasModifier);
+    }
+
+    float shadow = 0.0;
+    vec2 texture_size = vec2(textureSize(shadow_cascades, 0));
+    vec2 texelSize = 1.0 / texture_size;
+    for (int x = -2; x <= 2; ++x)
+    {
+        for (int y = -2; y <= 2; ++y)
+        {
+            float pcfDepth = texture(shadow_cascades, vec3(projCoords.xy + vec2(x, y) * texelSize, layer)).r;
+            shadow += (currentDepth - bias) > pcfDepth ? 1.0 : 0.0;
+        }
+    }
+    shadow /= 25.0;
+
+    return shadow;
+}
+
 vec4 pbr()
 {
     vec3 FragPos = f_voxel_pos;
@@ -105,6 +165,8 @@ vec4 pbr()
     F0 = mix(F0, albedo, metallic);
 
     vec3 Lo = vec3(0.0);
+
+    float shadow = 1.0 - shadow_calculation(FragPos, N, -lights[0].direction);
 
     for(int i = 0; i < num_lights; i++)
     {
@@ -134,7 +196,7 @@ vec4 pbr()
         kD *= 1.0 - metallic;
 
         float NDotL = max(dot(N, L), 0.0);
-        Lo += (kD * albedo / PI) * radiance * NDotL;
+        Lo += (kD * albedo / PI) * radiance * NDotL * shadow;
     }
     vec3 ambient = vec3(0.03) * albedo * ao;
     vec3 color = ambient + Lo;
