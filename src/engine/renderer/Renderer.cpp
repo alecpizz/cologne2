@@ -804,7 +804,7 @@ namespace cologne
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
-        void lit_pass(Scene &scene)
+        void lit_pass()
         {
             glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -817,6 +817,15 @@ namespace cologne
             lit_shader->set_float("far_plane", shadow_far);
             lit_shader->set_mat4("view_inverse", glm::value_ptr(glm::inverse(Engine::get_camera()->get_view_matrix())));
             lit_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
+            lit_shader->set_int("voxel_grid_size", voxel_dimensions);
+            lit_shader->set_float("voxel_size", 1.0 / float(voxel_dimensions));
+            lit_shader->set_vec3("voxel_scale", glm::value_ptr(voxel_size));
+            float aperture = tanf(glm::radians(60.0f) * 0.5f);
+
+            lit_shader->set_float("aperture", aperture);
+            lit_shader->set_float("sampling_factor", 0.100f);
+            lit_shader->set_float("distance_offset", 3.9f);
+            lit_shader->set_float("max_distance", 2.0f);
             glBindTextureUnit(0, g_position);
             glBindTextureUnit(1, g_normal);
             glBindTextureUnit(2, g_albedo);
@@ -1091,7 +1100,7 @@ namespace cologne
 
         _impl->shadow_pass(scene);
         _impl->gbuffer_pass(scene);
-        _impl->lit_pass(scene);
+        _impl->lit_pass();
         _impl->skybox_pass();
         _impl->debug_voxel_pass();
         _impl->debug_renderer->present();
