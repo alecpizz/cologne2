@@ -100,11 +100,11 @@ namespace cologne
             glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
             // glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA8, voxel_size, voxel_size, voxel_size);
             int numVoxels = voxel_size * voxel_size * voxel_size;
-            auto* data = new GLubyte[4 * numVoxels];
-            memset(data, 255, 4 * numVoxels);
-
+            auto* data = new GLfloat[4 * numVoxels];
+            memset(data, 0.0f, 4 * numVoxels);
+            // glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8, voxel_size, voxel_size, voxel_size, 0, GL_RGBA, GL_FLOAT, data);
             glTexStorage3D(GL_TEXTURE_3D, log2(voxel_size), GL_RGBA8, voxel_size,voxel_size,voxel_size);
-            glTexSubImage3D(GL_TEXTURE_3D, 0, 0,0,0, voxel_size,voxel_size,voxel_size, GL_RGBA, GL_UNSIGNED_BYTE, data);
+            glTexSubImage3D(GL_TEXTURE_3D, 0, 0,0,0, voxel_size,voxel_size,voxel_size, GL_RGBA, GL_FLOAT, data);
             glGenerateMipmap(GL_TEXTURE_3D);
             glBindTexture(GL_TEXTURE_3D, 0);
             delete[] data;
@@ -128,24 +128,34 @@ namespace cologne
             glBindFramebuffer(GL_FRAMEBUFFER, voxel_cube_back_fbo);
             glGenTextures(1, &voxel_cube_back);
             glBindTexture(GL_TEXTURE_2D, voxel_cube_back);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, Engine::get_window()->get_width(), Engine::get_window()->get_height(), 0, GL_RGB, GL_FLOAT, nullptr);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, voxel_cube_back, 0);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, Engine::get_window()->get_width(), Engine::get_window()->get_height(), 0, GL_RGBA, GL_FLOAT, nullptr);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,  voxel_cube_back, 0);
+
+
+            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            {
+                LOG_ERROR("FRAME BUFFER INCOMPLETE!");
+            }
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             glGenFramebuffers(1, &voxel_cube_front_fbo);
             glBindFramebuffer(GL_FRAMEBUFFER, voxel_cube_front_fbo);
             glGenTextures(1, &voxel_cube_front);
             glBindTexture(GL_TEXTURE_2D, voxel_cube_front);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, Engine::get_window()->get_width(), Engine::get_window()->get_height(), 0, GL_RGB, GL_FLOAT, nullptr);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, Engine::get_window()->get_width(), Engine::get_window()->get_height(), 0, GL_RGBA, GL_FLOAT, nullptr);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, voxel_cube_front_fbo, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,  voxel_cube_front, 0);
+            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            {
+                LOG_ERROR("FRAME BUFFER INCOMPLETE!");
+            }
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glBindTexture(GL_TEXTURE_2D, 0);
             Engine::get_debug_ui()->add_image_entry("Voxel cube front", voxel_cube_front,
@@ -164,8 +174,9 @@ namespace cologne
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             voxelize_shader->bind();
-            voxelize_shader->set_mat4("projection", glm::value_ptr(glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f)));
-            voxelize_shader->set_vec3("voxel_size", glm::value_ptr(glm::vec3(static_cast<float>(voxel_size))));
+            voxelize_shader->set_mat4("projection", glm::value_ptr(glm::ortho(-1.0f, 1.0f, -1.0f,
+                1.0f, -1.0f, 1.0f)));
+            voxelize_shader->set_vec3("voxel_size", glm::value_ptr(glm::vec3(0.0510635,0.122118,0.0830335)));
             glBindImageTexture(6, voxel_texture, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA8);
             for (size_t i = 0; i < scene.get_model_count(); i++)
             {
@@ -978,15 +989,45 @@ namespace cologne
                 return;
             }
 
+            world_pos_shader->bind();
+            glClearColor(0.0, 0.0, 0.0, 1.0);
+            glEnable(GL_CULL_FACE);
+            glEnable(GL_DEPTH_TEST);
+
+            world_pos_shader->set_mat4("projection", glm::value_ptr(Engine::get_camera()->get_projection_matrix()));
+            world_pos_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
+            world_pos_shader->set_vec3("camera_position", glm::value_ptr(Engine::get_camera()->get_position()));
+
+            glCullFace(GL_FRONT);
+            glBindFramebuffer(GL_FRAMEBUFFER, voxel_cube_back_fbo);
+            glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            render_cube();
+
+            glCullFace(GL_BACK);
+            glBindFramebuffer(GL_FRAMEBUFFER, voxel_cube_front_fbo);
+            glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            render_cube();
+
             voxelize_debug_shader->bind();
-            voxelize_debug_shader->set_mat4("view", &Engine::get_camera()->get_view_matrix()[0][0]);
-            voxelize_debug_shader->set_mat4("projection", &Engine::get_camera()->get_projection_matrix()[0][0]);
-            voxelize_debug_shader->set_vec2("screen_resolution",
-                glm::value_ptr(glm::vec2(Engine::get_window()->get_width(), Engine::get_window()->get_height())));
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            glDisable(GL_DEPTH_TEST);
+            glEnable(GL_CULL_FACE);
+
+            voxelize_debug_shader->set_mat4("projection", glm::value_ptr(Engine::get_camera()->get_projection_matrix()));
+            voxelize_debug_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
             voxelize_debug_shader->set_vec3("camera_position", glm::value_ptr(Engine::get_camera()->get_position()));
-            voxelize_debug_shader->set_int("voxel_size", voxel_size);
+
             glBindTextureUnit(0, voxel_texture);
-            render_cube(voxel_size * voxel_size * voxel_size);
+            glBindTextureUnit(1, voxel_cube_back);
+            glBindTextureUnit(2, voxel_cube_front);
+            render_quad();
+
+            glEnable(GL_DEPTH_TEST);
         }
     };
 

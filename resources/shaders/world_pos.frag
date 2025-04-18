@@ -7,4 +7,5 @@ out vec4 Color;
 void main()
 {
     Color.rgb = WorldPosition;
+    Color.a = 1.0;
 }
