@@ -94,7 +94,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 
 float shadow_calculation(vec3 p, vec3 n, vec3 l)
 {
-    vec4 fragPosViewSpace = view * vec4(p, 1.0);
+    vec4 fragPosViewSpace = vec4(p, 1.0);
     float depthValue = abs(fragPosViewSpace.z);
 
     vec4 csmClipSpaceZFar = vec4(cascadePlaneDistances[0],
