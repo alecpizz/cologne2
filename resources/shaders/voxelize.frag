@@ -6,7 +6,7 @@ layout (binding = 2) uniform sampler2D texture_metallic;
 layout (binding = 3) uniform sampler2D texture_roughness;
 layout (binding = 4) uniform sampler2D texture_normal;
 layout (binding = 5) uniform sampler2D texture_emission;
-layout (RGBA8, binding = 6) uniform image3D texture_voxel;
+layout (RGBA16F, binding = 6) uniform image3D texture_voxel;
 layout (binding = 7) uniform sampler2DArray shadow_cascades;
 uniform vec3 voxel_size;
 
@@ -196,7 +196,7 @@ vec4 pbr()
         kD *= 1.0 - metallic;
 
         float NDotL = max(dot(N, L), 0.0);
-        Lo += (kD * albedo / PI) * radiance * NDotL;
+        Lo += (kD * albedo / PI) * radiance * NDotL * shadow;
     }
     vec3 ambient = vec3(0.03) * albedo * ao;
     vec3 color = Lo;

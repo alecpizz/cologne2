@@ -65,7 +65,7 @@ namespace cologne
         uint32_t voxel_cube_front = 0;
         uint32_t voxel_cube_back_fbo = 0;
         uint32_t voxel_cube_back = 0;
-
+        bool apply_indirect_lighting = true;
         const int32_t voxel_dimensions = 256;
         glm::vec3 voxel_size = glm::vec3(0.0510635, 0.122118, 0.0830335);
         float world_size_half = 100.0f;
@@ -91,7 +91,7 @@ namespace cologne
             auto *data = new GLfloat[4 * numVoxels];
             memset(data, 0.0f, 4 * numVoxels);
             // glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8, voxel_size, voxel_size, voxel_size, 0, GL_RGBA, GL_FLOAT, data);
-            glTexStorage3D(GL_TEXTURE_3D, log2(voxel_dimensions), GL_RGBA8, voxel_dimensions, voxel_dimensions,
+            glTexStorage3D(GL_TEXTURE_3D, log2(voxel_dimensions), GL_RGBA16F, voxel_dimensions, voxel_dimensions,
                            voxel_dimensions);
             glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, voxel_dimensions, voxel_dimensions, voxel_dimensions, GL_RGBA,
                             GL_FLOAT, data);
@@ -186,7 +186,7 @@ namespace cologne
             Engine::get_debug_ui()->add_float_entry("Shadow near Plane", shadow_near);
             Engine::get_debug_ui()->add_bool_entry("Voxel Debug Visuals", voxel_debug_visuals);
             Engine::get_debug_ui()->add_vec3_entry("Voxel size", voxel_size);
-
+            Engine::get_debug_ui()->add_bool_entry("Indirect Lighting", apply_indirect_lighting);
             init_voxels();
 
         }
@@ -209,7 +209,7 @@ namespace cologne
             voxelize_shader->set_mat4("projection", glm::value_ptr(glm::ortho(-1.0f, 1.0f, -1.0f,
                                                                               1.0f, -1.0f, 1.0f)));
             voxelize_shader->set_vec3("voxel_size", glm::value_ptr(voxel_size));
-            glBindImageTexture(6, voxel_texture, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA8);
+            glBindImageTexture(6, voxel_texture, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);
             glBindTextureUnit(7, shadow_depth);
             for (size_t i = 0; i < scene->get_model_count(); i++)
             {
@@ -874,6 +874,7 @@ namespace cologne
             lit_shader->set_float("sampling_factor", 0.100f);
             lit_shader->set_float("distance_offset", 3.9f);
             lit_shader->set_float("max_distance", 2.0f);
+            lit_shader->set_bool("indirect_lighting_active", apply_indirect_lighting);
             glBindTextureUnit(0, g_position);
             glBindTextureUnit(1, g_normal);
             glBindTextureUnit(2, g_albedo);
@@ -1148,6 +1149,7 @@ namespace cologne
         if (cologne::Input::key_pressed(Input::Key::H))
         {
             //hot reload shaders
+            _impl->voxelize_scene();
             reload_shaders();
         }
 
@@ -1156,9 +1158,6 @@ namespace cologne
         _impl->lit_pass();
         _impl->skybox_pass();
         _impl->debug_voxel_pass();
-        auto model = Engine::get_scene()->get_model_by_index(0);
-
-        _impl->debug_renderer->draw_aabb(model->get_transform()->get_model_matrix(), model->get_aabb().min, model->get_aabb().max, glm::vec3(1.0f));
         _impl->debug_renderer->present();
         _impl->text_renderer->present();
     }
@@ -1218,7 +1217,7 @@ namespace cologne
         _impl->init_gbuffer(Engine::get_window()->get_width(), Engine::get_window()->get_height());
         _impl->init_shaders();
         glDisable(GL_CULL_FACE);
-        _impl->gen_environment_map("newport_loft.hdr");
+        _impl->gen_environment_map("HDR_blue_local_star.hdr");
         _impl->gen_irradiance_map();
         _impl->gen_prefilter_map();
         _impl->gen_brdf_map();

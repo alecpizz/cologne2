@@ -6,12 +6,12 @@ namespace cologne
     {
         glm::vec3 min{}, max{};
 
-        constexpr AABB() : min(glm::vec3(std::numeric_limits<float>::infinity())),
+        AABB() : min(glm::vec3(std::numeric_limits<float>::infinity())),
                            max(-std::numeric_limits<float>::infinity())
         {
         }
 
-        constexpr AABB(const glm::vec3 &min, const glm::vec3 &max);
+        AABB(const glm::vec3 &min, const glm::vec3 &max);
 
         bool valid() const;
 
@@ -75,7 +75,7 @@ namespace cologne
         max = glm::max(max, o.max);
     }
 
-    constexpr AABB::AABB(const glm::vec3 &min, const glm::vec3 &max)
+    inline AABB::AABB(const glm::vec3 &min, const glm::vec3 &max)
     {
         this->min = min;
         this->max = max;

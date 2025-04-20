@@ -54,6 +54,7 @@ uniform vec3 world_center = vec3(0.0f);
 uniform float sampling_factor = 0.100f;
 uniform float distance_offset = 3.9f;
 uniform float max_distance = 2.0f;
+uniform bool indirect_lighting_active = true;
 const int TOTAL_DIFFUSE_CONES = 6;
 const vec3 DIFFUSE_CONE_DIRECTIONS[TOTAL_DIFFUSE_CONES] = { vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.5f, 0.866025f), vec3(0.823639f, 0.5f, 0.267617f), vec3(0.509037f, 0.5f, -0.7006629f), vec3(-0.50937f, 0.5f, -0.7006629f), vec3(-0.823639f, 0.5f, 0.267617f) };
 const float DIFFUSE_CONE_WEIGHTS[TOTAL_DIFFUSE_CONES] = { 0.25, 0.15, 0.15, 0.15, 0.15, 0.15 };
@@ -114,12 +115,12 @@ float rand(vec2 v)
 }
 
 vec3 Tonemap_ACES(const vec3 x) { // Narkowicz 2015, "ACES Filmic Tone Mapping Curve"
-                                  const float a = 2.51;
-                                  const float b = 0.03;
-                                  const float c = 2.43;
-                                  const float d = 0.59;
-                                  const float e = 0.14;
-                                  return (x * (a * x + b)) / (x * (c * x + d) + e);
+    const float a = 2.51;
+    const float b = 0.03;
+    const float c = 2.43;
+    const float d = 0.59;
+    const float e = 0.14;
+    return (x * (a * x + b)) / (x * (c * x + d) + e);
 }
 
 
@@ -249,16 +250,18 @@ void main()
     vec3 irradiance = texture(irradiance_map, N).rgb;
     vec3 diffuse = irradiance * albedo;
 
-    float occ = 0.0f;
-    vec3 indirect_diffuse = indirect_diffuse(WorldPos, WorldNormal).rgb * 8.0f;
-    float factor = min(1, 1 - roughness * 1.0);
-    float factor2 = min(1, 1 - metallic * 1.0);
-    float factor3 = min(factor, factor2);
-    indirect_diffuse *= vec3(factor2);
-    indirect_diffuse = max(indirect_diffuse, vec3(0.0));
-    indirect_diffuse *= albedo * 1.0;
-    vec3 indirect_specular = metallic * indirect_specular(WorldPos, R, roughness).rgb;
-    Lo += (kD * indirect_diffuse + indirect_specular) * ao;
+    if (indirect_lighting_active)
+    {
+        vec3 indirect_diffuse = indirect_diffuse(WorldPos, WorldNormal).rgb * 8.0f;
+        float factor = min(1, 1 - roughness * 1.0);
+        float factor2 = min(1, 1 - metallic * 1.0);
+        float factor3 = min(factor, factor2);
+        indirect_diffuse *= vec3(factor2);
+        indirect_diffuse = max(indirect_diffuse, vec3(0.0));
+        indirect_diffuse *= albedo * 1.0;
+        vec3 indirect_specular = metallic * indirect_specular(WorldPos, R, roughness).rgb;
+        Lo += (kD * indirect_diffuse + indirect_specular) * ao;
+    }
 
     const float MAX_RELFECTION_LOD = 4.0;
     vec3 prefilteredColor = textureLod(prefilter_map, R, roughness * MAX_RELFECTION_LOD).rgb;
