@@ -46,6 +46,7 @@ layout (binding = 8) uniform sampler2D brdf;
 
 //voxel stuff
 layout (binding = 9) uniform sampler3D voxel_texture;
+layout (binding = 10) uniform sampler2D gNormalFlat;
 uniform int voxel_grid_size;
 uniform float voxel_size;
 uniform vec3 voxel_scale;
@@ -195,7 +196,7 @@ void main()
     float ao = orm.b + ao_strength;
 
     vec3 N = texture2D(gNormal, TexCoords).rgb;
-    WorldNormal = N;
+    WorldNormal = texture2D(gNormalFlat, TexCoords).rgb;
     vec3 V = normalize(camera_pos - FragPos);
     vec3 R = reflect(-V, N);
 
@@ -251,7 +252,7 @@ void main()
     vec3 diffuse = irradiance * albedo;
 
     float occ = 0.0f;
-    vec3 indirect = indirect_light(N, occ).rgb;
+    vec3 indirect = indirect_light(WorldNormal, occ).rgb;
     float factor = min(1, 1 - roughness * 1.0);
     float factor2 = min(1, 1 - metallic * 1.0);
     float factor3 = min (factor, factor2);

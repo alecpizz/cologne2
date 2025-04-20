@@ -53,6 +53,7 @@ namespace cologne
         uint32_t g_metallic_roughness_ao;
         uint32_t g_emission;
         uint32_t g_depth;
+        uint32_t g_normal_flat;
         uint32_t shadow_fbo = 0;
         uint32_t shadow_depth = 0;
         uint32_t shadow_cascade_ubo = 0;
@@ -65,7 +66,7 @@ namespace cologne
         uint32_t voxel_cube_back_fbo = 0;
         uint32_t voxel_cube_back = 0;
 
-        const int32_t voxel_dimensions = 128;
+        const int32_t voxel_dimensions = 64;
         glm::vec3 voxel_size = glm::vec3(0.0510635, 0.122118, 0.0830335);
         glm::vec3 voxel_debug_scale = glm::vec3(1.0f);
         float zMulti = 10.0f;
@@ -345,14 +346,24 @@ namespace cologne
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, g_depth, 0);
 
-            uint32_t attachments[5] = {
+            glGenTextures(1, &g_normal_flat);
+            glBindTexture(GL_TEXTURE_2D, g_normal_flat);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0,
+                         GL_RGBA, GL_FLOAT, nullptr);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, GL_TEXTURE_2D,
+                                   g_normal_flat, 0);
+
+            uint32_t attachments[6] = {
                 GL_COLOR_ATTACHMENT0,
                 GL_COLOR_ATTACHMENT1,
                 GL_COLOR_ATTACHMENT2,
                 GL_COLOR_ATTACHMENT3,
-                GL_COLOR_ATTACHMENT4
+                GL_COLOR_ATTACHMENT4,
+                GL_COLOR_ATTACHMENT5
             };
-            glDrawBuffers(5, attachments);
+            glDrawBuffers(6, attachments);
             if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             {
                 LOG_ERROR("Framebuffer is not complete! %s", glGetError());
@@ -360,6 +371,7 @@ namespace cologne
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             Engine::get_debug_ui()->add_image_entry("G_Normals", g_normal, glm::vec2(width, height));
+            Engine::get_debug_ui()->add_image_entry("G_Normals Flat", g_normal_flat, glm::vec2(width, height));
             Engine::get_debug_ui()->add_image_entry("G_Position", g_position, glm::vec2(width, height));
             Engine::get_debug_ui()->add_image_entry("G_Albedo", g_albedo, glm::vec2(width, height));
             Engine::get_debug_ui()->add_image_entry("G_ORM", g_metallic_roughness_ao, glm::vec2(width, height));
@@ -655,6 +667,7 @@ namespace cologne
             lit_shader->set_vec3(std::string("lights[" + std::to_string(light_idx) + "].direction").c_str(),
                                  glm::value_ptr(lights[light_idx].direction));
             lit_shader->set_int("num_lights", lights.size());
+            voxelize_scene();
         }
 
         void render_cube(int32_t count = 1)
@@ -859,6 +872,7 @@ namespace cologne
             glBindTextureUnit(4, g_emission);
             glBindTextureUnit(5, shadow_depth);
             glBindTextureUnit(9, voxel_texture);
+            glBindTextureUnit(10, g_normal_flat);
             render_quad();
             glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
@@ -1125,11 +1139,6 @@ namespace cologne
         }
 
         _impl->shadow_pass(scene);
-        _impl->voxelize_scene();
-        // if (_impl->voxel_debug_visuals)
-        // {
-            // _impl->voxelize_scene();
-        // }
         _impl->gbuffer_pass(scene);
         _impl->lit_pass();
         _impl->skybox_pass();
@@ -1183,6 +1192,7 @@ namespace cologne
         directional_light.direction = direction;
         _impl->bind_lights(*_impl->lit_shader);
         _impl->bind_lights(*_impl->voxelize_shader);
+        _impl->voxelize_scene();
     }
 
     Renderer::Renderer()

@@ -4,6 +4,7 @@ layout (location = 1) out vec4 gNormal;
 layout (location = 2) out vec4 gAlbedo;
 layout (location = 3) out vec3 gORM;
 layout (location = 4) out vec3 gEmission;
+layout (location = 5) out vec4 gNormalFlat;
 
 in vec3 FragPos;
 in vec2 TexCoords;
@@ -17,14 +18,21 @@ layout (binding = 3) uniform sampler2D texture_roughness;
 layout (binding = 4) uniform sampler2D texture_normal;
 layout (binding = 5) uniform sampler2D texture_emission;
 
+
 void main()
 {
     gPosition = vec4(FragPos, 1.0);
-//    vec3 N = texture2D(texture_normal, TexCoords).rgb;
-    vec3 N = Normal;
+    vec3 N = texture2D(texture_normal, TexCoords).rgb;
+
     N = N * 2.0 - 1.0;
     N = normalize(TBN * N);
     gNormal = vec4(N, 1.0);
+
+    N = Normal;
+    N = N * 2.0 - 1.0;
+    N = normalize(TBN * N);
+    gNormalFlat = vec4(N, 1.0);
+
     gEmission = texture(texture_emission, TexCoords).rgb;
     gl_FragDepth = gl_FragCoord.z;
     gORM.r = texture(texture_metallic, TexCoords).b;
