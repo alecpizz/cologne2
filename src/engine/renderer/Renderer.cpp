@@ -58,6 +58,8 @@ namespace cologne
         uint32_t shadow_cascade_ubo = 0;
         uint32_t rsm_size = 4096;
         uint32_t voxel_texture = 0;
+        uint32_t voxel_fbo = 0;
+        uint32_t voxel_fbo_tex = 0;
         uint32_t voxel_cube_front_fbo = 0;
         uint32_t voxel_cube_front = 0;
         uint32_t voxel_cube_back_fbo = 0;
@@ -73,26 +75,8 @@ namespace cologne
         bool voxel_debug_visuals = false;
 
 
-        void init()
+        void init_voxels()
         {
-            glEnable(GL_DEPTH_TEST);
-            glEnable(GL_CULL_FACE);
-            glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-            glEnable(GL_MULTISAMPLE);
-            debug_renderer = std::make_unique<DebugRenderer>();
-            text_renderer = std::unique_ptr<TextRenderer>(
-                new TextRenderer(RESOURCES_PATH "fonts/Montserrat-Regular.ttf"));
-            shadowCascadeLevels.push_back(shadow_far / 50.0f);
-            shadowCascadeLevels.push_back(shadow_far / 25.0f);
-            shadowCascadeLevels.push_back(shadow_far / 10.0f);
-            shadowCascadeLevels.push_back(shadow_far / 2.0f);
-            Engine::get_debug_ui()->add_float_entry("ZMulti", zMulti);
-            Engine::get_debug_ui()->add_float_entry("Shadow Far Plane", shadow_far);
-            Engine::get_debug_ui()->add_float_entry("Shadow near Plane", shadow_near);
-            Engine::get_debug_ui()->add_bool_entry("Voxel Debug Visuals", voxel_debug_visuals);
-            Engine::get_debug_ui()->add_vec3_entry("Voxel size", voxel_size);
-            Engine::get_debug_ui()->add_vec3_entry("Voxel Debug Scale", voxel_debug_scale);
-
             glGenTextures(1, &voxel_texture);
             glBindTexture(GL_TEXTURE_3D, voxel_texture);
             glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -124,7 +108,6 @@ namespace cologne
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, Engine::get_window()->get_width(),
                          Engine::get_window()->get_height(), 0, GL_RGBA, GL_FLOAT, nullptr);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, voxel_cube_back, 0);
-
 
             if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             {
@@ -160,15 +143,61 @@ namespace cologne
             {
                 voxelize_scene();
             });
+
+            glGenFramebuffers(1, &voxel_fbo);
+            glBindFramebuffer(GL_FRAMEBUFFER, voxel_fbo);
+            glDrawBuffer(GL_NONE);
+            glReadBuffer(GL_NONE);
+            glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_WIDTH, Engine::get_window()->get_width());
+            glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT, Engine::get_window()->get_height());
+            // glGenTextures(1, &voxel_fbo_tex);
+            // glBindTexture(GL_TEXTURE_2D, voxel_fbo_tex);
+            // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, Engine::get_window()->get_width(),
+            //              Engine::get_window()->get_height(), 0, GL_RGBA, GL_FLOAT, nullptr);
+            // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, voxel_cube_front, 0);
+
+            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            {
+                LOG_ERROR("FRAME BUFFER INCOMPLETE!");
+            }
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+
+        void init()
+        {
+            glEnable(GL_DEPTH_TEST);
+            glEnable(GL_CULL_FACE);
+            glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+            glEnable(GL_MULTISAMPLE);
+            debug_renderer = std::make_unique<DebugRenderer>();
+            text_renderer = std::unique_ptr<TextRenderer>(
+                new TextRenderer(RESOURCES_PATH "fonts/Montserrat-Regular.ttf"));
+            shadowCascadeLevels.push_back(shadow_far / 50.0f);
+            shadowCascadeLevels.push_back(shadow_far / 25.0f);
+            shadowCascadeLevels.push_back(shadow_far / 10.0f);
+            shadowCascadeLevels.push_back(shadow_far / 2.0f);
+            Engine::get_debug_ui()->add_float_entry("ZMulti", zMulti);
+            Engine::get_debug_ui()->add_float_entry("Shadow Far Plane", shadow_far);
+            Engine::get_debug_ui()->add_float_entry("Shadow near Plane", shadow_near);
+            Engine::get_debug_ui()->add_bool_entry("Voxel Debug Visuals", voxel_debug_visuals);
+            Engine::get_debug_ui()->add_vec3_entry("Voxel size", voxel_size);
+            Engine::get_debug_ui()->add_vec3_entry("Voxel Debug Scale", voxel_debug_scale);
+
+            init_voxels();
+
         }
 
         void voxelize_scene()
         {
-            LOG_INFO("VOXELIZING SCENE");
             auto scene = Engine::get_scene();
             glDisable(GL_CULL_FACE);
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_BLEND);
+            glBindFramebuffer(GL_FRAMEBUFFER, voxel_fbo);
             glViewport(0, 0, voxel_dimensions, voxel_dimensions);
             glClearTexImage(voxel_texture, 0, GL_RGBA, GL_FLOAT, glm::value_ptr(glm::vec4(0.0f)));
             glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -202,6 +231,7 @@ namespace cologne
             glEnable(GL_CULL_FACE);
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_BLEND);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
         void init_shaders()
@@ -810,7 +840,6 @@ namespace cologne
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             lit_shader->bind();
             lit_shader->set_vec3("camera_pos", glm::value_ptr(Engine::get_camera()->get_position()));
-            lit_shader->set_int("voxel_size", voxel_dimensions);
             env_irradiance.bind(IRRADIANCE_INDEX);
             env_prefilter.bind(PREFILTER_INDEX);
             env_brdf.bind(BRDF_INDEX);
@@ -832,7 +861,7 @@ namespace cologne
             glBindTextureUnit(3, g_metallic_roughness_ao);
             glBindTextureUnit(4, g_emission);
             glBindTextureUnit(5, shadow_depth);
-            glBindTextureUnit(6, voxel_texture);
+            glBindTextureUnit(9, voxel_texture);
             render_quad();
             glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
@@ -1099,6 +1128,11 @@ namespace cologne
         }
 
         _impl->shadow_pass(scene);
+        // _impl->voxelize_scene();
+        if (_impl->voxel_debug_visuals)
+        {
+            _impl->voxelize_scene();
+        }
         _impl->gbuffer_pass(scene);
         _impl->lit_pass();
         _impl->skybox_pass();
@@ -1149,7 +1183,8 @@ namespace cologne
         auto &directional_light = get_directional_light();
         directional_light.position = position;
         directional_light.direction = direction;
-        reload_shaders();
+        _impl->bind_lights(*_impl->lit_shader);
+        _impl->bind_lights(*_impl->voxelize_shader);
     }
 
     Renderer::Renderer()

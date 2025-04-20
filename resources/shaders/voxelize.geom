@@ -21,7 +21,7 @@ void main()
     const vec3 face_normal = abs(cross(edge1, edge2));
 
     if (face_normal.x >= face_normal.y && face_normal.x >= face_normal.z)
-    { // see: Introduction to Geometric Computing, page 33 (Ghali, 2008)
+    {
         swizzle_mat = mat3(
         vec3(0.0, 0.0, 1.0),
         vec3(0.0, 1.0, 0.0),
@@ -45,8 +45,6 @@ void main()
         gl_Position = vec4(gl_in[i].gl_Position.xyz * swizzle_mat, 1.0f);
 
         f_voxel_pos = gl_in[i].gl_Position.xyz;
-//        f_shadow_coords = u_shadowmap_mvp * g_world_pos[i];
-//        f_normal = g_normal[i];
         f_tex_coords = g_tex_coords[i];
         f_TBN = TBN[i];
         EmitVertex();
