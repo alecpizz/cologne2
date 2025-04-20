@@ -119,6 +119,30 @@ namespace cologne
         draw_line(p3, p1, color);
     }
 
+    void DebugRenderer::draw_aabb(glm::mat4 transform, glm::vec3 min, glm::vec3 max, glm::vec3 color)
+    {
+        glm::vec3 FrontTopLeft = transform * glm::vec4(min.x, max.y, max.z, 1.0f);
+        glm::vec3 FrontTopRight = transform * glm::vec4(max.x, max.y, max.z, 1.0f);
+        glm::vec3 FrontBottomLeft = transform * glm::vec4(min.x, min.y, max.z, 1.0f);
+        glm::vec3 FrontBottomRight = transform * glm::vec4(max.x, min.y, max.z, 1.0f);
+        glm::vec3 BackTopLeft = transform * glm::vec4(min.x, max.y, min.z, 1.0f);
+        glm::vec3 BackTopRight = transform * glm::vec4(max.x, max.y, min.z, 1.0f);
+        glm::vec3 BackBottomLeft = transform * glm::vec4(min.x, min.y, min.z, 1.0f);
+        glm::vec3 BackBottomRight = transform * glm::vec4(max.x, min.y, min.z, 1.0f);
+        draw_line(FrontTopLeft, FrontTopRight, color);
+        draw_line(FrontBottomLeft, FrontBottomRight, color);
+        draw_line(BackTopLeft, BackTopRight, color);
+        draw_line(BackBottomLeft, BackBottomRight, color);
+        draw_line(FrontTopLeft, FrontBottomLeft, color);
+        draw_line(FrontTopRight, FrontBottomRight, color);
+        draw_line(BackTopLeft, BackBottomLeft, color);
+        draw_line(BackTopRight, BackBottomRight, color);
+        draw_line(FrontTopLeft, BackTopLeft, color);
+        draw_line(FrontTopRight, BackTopRight, color);
+        draw_line(FrontBottomLeft, BackBottomLeft, color);
+        draw_line(FrontBottomRight, BackBottomRight, color);
+    }
+
 
     void DebugRenderer::present()
     {

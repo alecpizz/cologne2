@@ -48,15 +48,15 @@ layout (binding = 8) uniform sampler2D brdf;
 layout (binding = 9) uniform sampler3D voxel_texture;
 layout (binding = 10) uniform sampler2D gNormalFlat;
 uniform int voxel_grid_size;
-uniform float voxel_size;
-uniform vec3 voxel_scale;
-uniform float aperture;
+uniform float worldSizeHalf = 150.0f;
+uniform float voxel_size = 128;
+uniform vec3 world_center = vec3(0.0f);
 uniform float sampling_factor = 0.100f;
 uniform float distance_offset = 3.9f;
 uniform float max_distance = 2.0f;
 const int TOTAL_DIFFUSE_CONES = 6;
 const vec3 DIFFUSE_CONE_DIRECTIONS[TOTAL_DIFFUSE_CONES] = { vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.5f, 0.866025f), vec3(0.823639f, 0.5f, 0.267617f), vec3(0.509037f, 0.5f, -0.7006629f), vec3(-0.50937f, 0.5f, -0.7006629f), vec3(-0.823639f, 0.5f, 0.267617f) };
-const float DIFFUSE_CONE_WEIGHTS[TOTAL_DIFFUSE_CONES] = { 0.25, 0.15, 0.15, 0.15, 0.15, 0.15};
+const float DIFFUSE_CONE_WEIGHTS[TOTAL_DIFFUSE_CONES] = { 0.25, 0.15, 0.15, 0.15, 0.15, 0.15 };
 
 
 layout (std140) uniform LightSpaceMatrices
@@ -132,55 +132,53 @@ vec3 orthogonal(vec3 u)
 
 vec3 scale_and_bias(const vec3 p) { return 0.5f * p + vec3(0.5f); }
 
-vec4 sample_voxels(vec3 p, float lodLevel)
+vec4 cone_trace(vec3 from, vec3 direction, float aperture)
 {
-    vec3 offset = vec3(1.0 / voxel_grid_size, 1.0 / voxel_grid_size, 0);
-    vec3 textureUV = p / (voxel_size * 0.5);
-    textureUV = textureUV * 0.5 + 0.5 + offset;
-    return textureLod(voxel_texture, textureUV, lodLevel);
-}
-
-vec4 cone_trace(vec3 dir, float angle, out float occlusion)
-{
-    float lod = 0.0;
-    vec3 color = vec3(0.0);
-    occlusion = 0.0;
-    float alpha = 0.0f;
-
-    float voxelWorldSize = voxel_size / voxel_grid_size;
-    float dist = voxelWorldSize;
-    vec3 startPos = WorldPos + WorldNormal * voxelWorldSize;
-
-    while(dist < 100.0f && alpha < 0.95f)
+    float max_dist = 2.0 * worldSizeHalf;
+    vec4 accumulated = vec4(0.0);
+    float offset = 2.0 * voxel_size;
+    float dist = offset + voxel_size;
+    while (accumulated.a < 1.0 && dist < max_dist)
     {
-        float diameter = max(voxelWorldSize, 2.0 * angle * dist);
-        float lodLevel = log2(diameter / voxelWorldSize);
+        vec3 conePos = from + direction * dist;
+        float diameter = 2.0 * aperture * dist;
+        float mip = log2(diameter / voxel_size);
+        vec3 coords = (conePos - world_center) / worldSizeHalf;
+        coords = 0.5 * coords + 0.5;
 
-        vec4 voxelColor = sample_voxels(startPos + dist * dir, lodLevel);
-
-        float a = (1.0 - alpha);
-        color += a * voxelColor.rgb;
-        alpha += a * voxelColor.a;
-
-        occlusion += (a * voxelColor.a) / (1.0 + 0.03 * diameter);
-        dist += diameter * 0.5;
+        vec4 voxel = textureLod(voxel_texture, coords, mip);
+        accumulated += (1.0 - accumulated.a) * voxel;
+        dist += 0.5 * diameter;
     }
-
-    return vec4(color, alpha);
+    return accumulated;
 }
 
-vec4 indirect_light(vec3 n, out float occlusion)
+vec4 indirect_diffuse(vec3 position, vec3 N)
 {
+    const float aperture = 0.57735;
     vec4 color = vec4(0.0f);
-    occlusion = 0.0f;
-    for(int i = 0; i < TOTAL_DIFFUSE_CONES; i++)
+    vec3 up = vec3(0.0, 1.0, 0.0);
+    if (abs(dot(N, up)) > 0.999)
+    up = vec3(0.0, 0.0, 1.0);
+
+    vec3 T = normalize(up - dot(N, up) * N);
+    vec3 B = cross(T, N);
+
+    for (int i = 0; i < TOTAL_DIFFUSE_CONES; i++)
     {
-        float o = 0.0;
-        color += DIFFUSE_CONE_WEIGHTS[i] * cone_trace(n * DIFFUSE_CONE_DIRECTIONS[i], 0.577, o);
-        occlusion += DIFFUSE_CONE_WEIGHTS[i] * o;
+        vec3 direction = T * DIFFUSE_CONE_DIRECTIONS[i].x + B * DIFFUSE_CONE_DIRECTIONS[i].z + N;
+        direction = normalize(direction);
+        color += DIFFUSE_CONE_WEIGHTS[i] * cone_trace(position, direction, aperture);
     }
-    occlusion = 1.0 - occlusion;
     return color;
+}
+
+vec4 indirect_specular(vec3 pos, vec3 dir, float roughness)
+{
+    float aperture = 0.037533;
+    aperture = clamp(tan(0.5 * PI * roughness), aperture, 0.5 * PI);
+    vec4 specular = cone_trace(pos, dir, aperture);
+    return specular;
 }
 
 void main()
@@ -252,14 +250,15 @@ void main()
     vec3 diffuse = irradiance * albedo;
 
     float occ = 0.0f;
-    vec3 indirect = indirect_light(WorldNormal, occ).rgb;
+    vec3 indirect_diffuse = indirect_diffuse(WorldPos, WorldNormal).rgb * 8.0f;
     float factor = min(1, 1 - roughness * 1.0);
     float factor2 = min(1, 1 - metallic * 1.0);
-    float factor3 = min (factor, factor2);
-    indirect *= occ * vec3(factor2);
-    indirect = max(indirect, vec3(0.0));
-    indirect *= albedo * 1.0;
-//    indirect *= 0.1;
+    float factor3 = min(factor, factor2);
+    indirect_diffuse *= vec3(factor2);
+    indirect_diffuse = max(indirect_diffuse, vec3(0.0));
+    indirect_diffuse *= albedo * 1.0;
+    vec3 indirect_specular = metallic * indirect_specular(WorldPos, R, roughness).rgb;
+    Lo += (kD * indirect_diffuse + indirect_specular) * ao;
 
     const float MAX_RELFECTION_LOD = 4.0;
     vec3 prefilteredColor = textureLod(prefilter_map, R, roughness * MAX_RELFECTION_LOD).rgb;
@@ -273,7 +272,6 @@ void main()
     vec3 ambient = (kD * diffuse + specular) * ao;
     vec3 emission = texture2D(gEmission, TexCoords).rgb;
     vec3 color = Lo + emission;
-    color += indirect.rgb;
 
     color = mix(color, Tonemap_ACES(color), 1.0);
     color = color / (color + vec3(1.0));

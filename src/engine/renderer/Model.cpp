@@ -29,7 +29,7 @@ namespace cologne
             const aiScene *scene = importer.ReadFile(directory, aiProcess_Triangulate |
                                                                 aiProcess_FlipUVs | aiProcess_GenSmoothNormals |
                                                                 aiProcess_CalcTangentSpace |
-                                                                aiProcess_RemoveRedundantMaterials);
+                                                                aiProcess_RemoveRedundantMaterials | aiProcess_GenBoundingBoxes);
             if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
             {
                 LOG_ERROR("ASSIMP ERROR: %s", importer.GetErrorString());
@@ -190,6 +190,8 @@ namespace cologne
             }
             cologne::physics::create_mesh_collider(model,vertices.data(), static_cast<uint32_t>(vertices.size()), indices.data(),
                         static_cast<uint32_t>(indices.size()) );
+            model->_bounds.union_aabb(AABB(glm::vec3(mesh->mAABB.mMin.x, mesh->mAABB.mMin.y, mesh->mAABB.mMin.z),
+                glm::vec3(mesh->mAABB.mMax.x, mesh->mAABB.mMax.y, mesh->mAABB.mMax.z)));
             return Mesh(vertices.data(), static_cast<uint32_t>(vertices.size()), indices.data(),
                         static_cast<uint32_t>(indices.size()), mesh->mMaterialIndex);
         }
@@ -217,6 +219,11 @@ namespace cologne
     Transform *Model::get_transform() const
     {
         return _transform;
+    }
+
+    AABB Model::get_aabb() const
+    {
+        return _bounds;
     }
 
     const char *Model::get_path() const

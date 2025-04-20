@@ -20,6 +20,7 @@ namespace cologne
         void draw_sphere(glm::vec3 center, float radius, glm::vec3 color);
         void draw_point(glm::vec3 p, glm::vec3 color);
         void draw_triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 color);
+        void draw_aabb(glm::mat4 transform, glm::vec3 min, glm::vec3 max, glm::vec3 color);
         void present();
     private:
         struct Impl;

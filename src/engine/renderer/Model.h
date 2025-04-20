@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include "../Transform.h"
 #include "Material.h"
+#include "../AABB.h"
 
 namespace cologne
 {
@@ -16,6 +17,7 @@ namespace cologne
 
 
         Transform *get_transform() const;
+        AABB get_aabb() const;
 
         // Model(Model &&) = delete;
 
@@ -41,6 +43,7 @@ namespace cologne
     private:
         bool _active = true;
         Transform *_transform = nullptr;
+        AABB _bounds;
         struct Impl;
         Impl *_impl;
     };

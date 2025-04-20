@@ -196,10 +196,10 @@ vec4 pbr()
         kD *= 1.0 - metallic;
 
         float NDotL = max(dot(N, L), 0.0);
-        Lo += (kD * albedo / PI) * radiance * NDotL * shadow;
+        Lo += (kD * albedo / PI) * radiance * NDotL;
     }
     vec3 ambient = vec3(0.03) * albedo * ao;
-    vec3 color = ambient + Lo;
+    vec3 color = Lo;
     return vec4(color, 1.0);
 }
 

@@ -31,6 +31,8 @@ namespace cologne
 
         void draw_triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 color);
 
+        void draw_aabb(glm::mat4 transform, glm::vec3 min, glm::vec3 max, glm::vec3 color);
+
         void render_scene(Scene &scene);
 
         void window_resized(uint32_t width, uint32_t height);

@@ -66,9 +66,10 @@ namespace cologne
         uint32_t voxel_cube_back_fbo = 0;
         uint32_t voxel_cube_back = 0;
 
-        const int32_t voxel_dimensions = 64;
+        const int32_t voxel_dimensions = 256;
         glm::vec3 voxel_size = glm::vec3(0.0510635, 0.122118, 0.0830335);
-        glm::vec3 voxel_debug_scale = glm::vec3(1.0f);
+        float world_size_half = 100.0f;
+        glm::vec3 world_center = glm::vec3(0.0f);
         float zMulti = 10.0f;
         float shadow_near = 0.1f;
         float shadow_far = 1200.0f;
@@ -106,6 +107,8 @@ namespace cologne
                                                     voxel_cube_back,
                                                     glm::vec2(Engine::get_window()->get_width(),
                                                               Engine::get_window()->get_height()));
+            Engine::get_debug_ui()->add_float_entry("Voxel Half World Size", world_size_half);
+            Engine::get_debug_ui()->add_vec3_entry("World Center", world_center);
             Engine::get_debug_ui()->add_button("Voxelize Scene", [&]()
             {
                 voxelize_scene();
@@ -183,7 +186,6 @@ namespace cologne
             Engine::get_debug_ui()->add_float_entry("Shadow near Plane", shadow_near);
             Engine::get_debug_ui()->add_bool_entry("Voxel Debug Visuals", voxel_debug_visuals);
             Engine::get_debug_ui()->add_vec3_entry("Voxel size", voxel_size);
-            Engine::get_debug_ui()->add_vec3_entry("Voxel Debug Scale", voxel_debug_scale);
 
             init_voxels();
 
@@ -200,6 +202,7 @@ namespace cologne
             glClearTexImage(voxel_texture, 0, GL_RGBA, GL_FLOAT, glm::value_ptr(glm::vec4(0.0f)));
             glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
             voxelize_shader->bind();
             bind_lights(*voxelize_shader);
@@ -229,6 +232,7 @@ namespace cologne
             glEnable(GL_CULL_FACE);
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_BLEND);
+            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
@@ -857,11 +861,16 @@ namespace cologne
             lit_shader->set_mat4("view_inverse", glm::value_ptr(glm::inverse(Engine::get_camera()->get_view_matrix())));
             lit_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
             lit_shader->set_int("voxel_grid_size", voxel_dimensions);
-            lit_shader->set_float("voxel_size", 150.0f);
-            lit_shader->set_vec3("voxel_scale", glm::value_ptr(voxel_size));
-            float aperture = tanf(glm::radians(60.0f) * 0.5f);
+            auto bounds = Engine::get_scene()->get_model_by_index(0)->get_aabb();
+            const glm::vec3 center = bounds.center();
+            const glm::vec3 size = bounds.size();
+            const float world_size = glm::max(size.x, glm::max(size.y, size.z));
+            const float texelSize = 1.0f / voxel_dimensions;
+            const float voxel_size = world_size * texelSize;
+            lit_shader->set_float("voxel_size", voxel_size);
+            lit_shader->set_vec3("world_center", glm::value_ptr(center));
+            lit_shader->set_float("worldSizeHalf", 0.5f * world_size);
 
-            lit_shader->set_float("aperture", aperture);
             lit_shader->set_float("sampling_factor", 0.100f);
             lit_shader->set_float("distance_offset", 3.9f);
             lit_shader->set_float("max_distance", 2.0f);
@@ -1057,7 +1066,6 @@ namespace cologne
             world_pos_shader->set_mat4("projection", glm::value_ptr(Engine::get_camera()->get_projection_matrix()));
             world_pos_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
             glm::mat4 model = glm::mat4(1.0f);
-            model = glm::scale(model, voxel_debug_scale);
             world_pos_shader->set_mat4("model", glm::value_ptr(model));
             world_pos_shader->set_vec3("camera_position", glm::value_ptr(Engine::get_camera()->get_position()));
 
@@ -1121,6 +1129,11 @@ namespace cologne
         _impl->debug_renderer->draw_triangle(p1, p2, p3, color);
     }
 
+    void Renderer::draw_aabb(glm::mat4 transform, glm::vec3 min, glm::vec3 max, glm::vec3 color)
+    {
+        _impl->debug_renderer->draw_aabb(transform, min, max, color);
+    }
+
     void Renderer::render_scene(Scene &scene)
     {
         //indirect pass
@@ -1143,6 +1156,9 @@ namespace cologne
         _impl->lit_pass();
         _impl->skybox_pass();
         _impl->debug_voxel_pass();
+        auto model = Engine::get_scene()->get_model_by_index(0);
+
+        _impl->debug_renderer->draw_aabb(model->get_transform()->get_model_matrix(), model->get_aabb().min, model->get_aabb().max, glm::vec3(1.0f));
         _impl->debug_renderer->present();
         _impl->text_renderer->present();
     }
