@@ -65,7 +65,7 @@ namespace cologne
         uint32_t voxel_cube_back_fbo = 0;
         uint32_t voxel_cube_back = 0;
 
-        const int32_t voxel_dimensions = 256;
+        const int32_t voxel_dimensions = 128;
         glm::vec3 voxel_size = glm::vec3(0.0510635, 0.122118, 0.0830335);
         glm::vec3 voxel_debug_scale = glm::vec3(1.0f);
         float zMulti = 10.0f;
@@ -97,7 +97,25 @@ namespace cologne
             glBindTexture(GL_TEXTURE_3D, 0);
             delete[] data;
 
-            glGenFramebuffers(1, &voxel_cube_back_fbo);
+            init_voxel_fbo();
+            Engine::get_debug_ui()->add_image_entry("Voxel cube front", voxel_cube_front,
+                                                    glm::vec2(Engine::get_window()->get_width(),
+                                                              Engine::get_window()->get_height()));
+            Engine::get_debug_ui()->add_image_entry("Voxel cube back",
+                                                    voxel_cube_back,
+                                                    glm::vec2(Engine::get_window()->get_width(),
+                                                              Engine::get_window()->get_height()));
+            Engine::get_debug_ui()->add_button("Voxelize Scene", [&]()
+            {
+                voxelize_scene();
+            });
+
+
+        }
+
+        void init_voxel_fbo()
+        {
+             glGenFramebuffers(1, &voxel_cube_back_fbo);
             glBindFramebuffer(GL_FRAMEBUFFER, voxel_cube_back_fbo);
             glGenTextures(1, &voxel_cube_back);
             glBindTexture(GL_TEXTURE_2D, voxel_cube_back);
@@ -132,33 +150,12 @@ namespace cologne
             }
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glBindTexture(GL_TEXTURE_2D, 0);
-            Engine::get_debug_ui()->add_image_entry("Voxel cube front", voxel_cube_front,
-                                                    glm::vec2(Engine::get_window()->get_width(),
-                                                              Engine::get_window()->get_height()));
-            Engine::get_debug_ui()->add_image_entry("Voxel cube back",
-                                                    voxel_cube_back,
-                                                    glm::vec2(Engine::get_window()->get_width(),
-                                                              Engine::get_window()->get_height()));
-            Engine::get_debug_ui()->add_button("Voxelize Scene", [&]()
-            {
-                voxelize_scene();
-            });
-
             glGenFramebuffers(1, &voxel_fbo);
             glBindFramebuffer(GL_FRAMEBUFFER, voxel_fbo);
             glDrawBuffer(GL_NONE);
             glReadBuffer(GL_NONE);
-            glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_WIDTH, Engine::get_window()->get_width());
-            glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT, Engine::get_window()->get_height());
-            // glGenTextures(1, &voxel_fbo_tex);
-            // glBindTexture(GL_TEXTURE_2D, voxel_fbo_tex);
-            // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, Engine::get_window()->get_width(),
-            //              Engine::get_window()->get_height(), 0, GL_RGBA, GL_FLOAT, nullptr);
-            // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, voxel_cube_front, 0);
+            glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_WIDTH, 1280);
+            glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT, 720);
 
             if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             {
@@ -847,7 +844,7 @@ namespace cologne
             lit_shader->set_mat4("view_inverse", glm::value_ptr(glm::inverse(Engine::get_camera()->get_view_matrix())));
             lit_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
             lit_shader->set_int("voxel_grid_size", voxel_dimensions);
-            lit_shader->set_float("voxel_size", 1.0 / float(voxel_dimensions));
+            lit_shader->set_float("voxel_size", 150.0f);
             lit_shader->set_vec3("voxel_scale", glm::value_ptr(voxel_size));
             float aperture = tanf(glm::radians(60.0f) * 0.5f);
 
@@ -1128,11 +1125,11 @@ namespace cologne
         }
 
         _impl->shadow_pass(scene);
-        // _impl->voxelize_scene();
-        if (_impl->voxel_debug_visuals)
-        {
-            _impl->voxelize_scene();
-        }
+        _impl->voxelize_scene();
+        // if (_impl->voxel_debug_visuals)
+        // {
+            // _impl->voxelize_scene();
+        // }
         _impl->gbuffer_pass(scene);
         _impl->lit_pass();
         _impl->skybox_pass();
@@ -1145,6 +1142,7 @@ namespace cologne
     {
         //regen framebuffers here
         _impl->init_gbuffer(width, height);
+        _impl->init_voxel_fbo();
         render_scene(*Engine::get_scene());
     }
 

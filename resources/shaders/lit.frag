@@ -55,7 +55,7 @@ uniform float distance_offset = 3.9f;
 uniform float max_distance = 2.0f;
 const int TOTAL_DIFFUSE_CONES = 6;
 const vec3 DIFFUSE_CONE_DIRECTIONS[TOTAL_DIFFUSE_CONES] = { vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.5f, 0.866025f), vec3(0.823639f, 0.5f, 0.267617f), vec3(0.509037f, 0.5f, -0.7006629f), vec3(-0.50937f, 0.5f, -0.7006629f), vec3(-0.823639f, 0.5f, 0.267617f) };
-const float DIFFUSE_CONE_WEIGHTS[TOTAL_DIFFUSE_CONES] = { PI / 4.0f, 3.0f * PI / 20.0f, 3.0f * PI / 20.0f, 3.0f * PI / 20.0f, 3.0f * PI / 20.0f, 3.0f * PI / 20.0f };
+const float DIFFUSE_CONE_WEIGHTS[TOTAL_DIFFUSE_CONES] = { 0.25, 0.15, 0.15, 0.15, 0.15, 0.15};
 
 
 layout (std140) uniform LightSpaceMatrices
@@ -70,8 +70,8 @@ uniform float ao_strength = 0.2;
 uniform int has_ao_texture = 0;
 uniform float cascadePlaneDistances[4];
 uniform int cascadeCount;// number of frusta - 1
-
-
+vec3 WorldPos;
+vec3 WorldNormal;
 
 vec3 fresnelSchlick(float cosTheta, vec3 F0);
 vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness);
@@ -121,55 +121,6 @@ vec3 Tonemap_ACES(const vec3 x) { // Narkowicz 2015, "ACES Filmic Tone Mapping C
                                   return (x * (a * x + b)) / (x * (c * x + d) + e);
 }
 
-vec4 trace_cone(const vec3 start_pos, vec3 direction, float aperture, float distance_offset, float distance_max, float sampling_factor)
-{
-    aperture = max(0.1f, aperture);
-    direction = normalize(direction);
-    float distance = distance_offset;
-    vec3 color = vec3(0.0f);
-    float occlusion = 0.0f;
-
-    while (distance <= distance_max && occlusion <= 1.0f)
-    {
-        vec3 cone_clip_pos = start_pos + (direction * distance);
-        vec3 cone_voxelgrid_pos = 0.5f * cone_clip_pos + vec3(0.5f);
-
-        float diameter = 2.0f * aperture * distance;
-        float mipmap_level = log2(diameter * voxel_grid_size);
-        vec4 voxel_sample = textureLod(voxel_texture, cone_voxelgrid_pos, min(mipmap_level, log2(voxel_grid_size)));
-
-        color += (1.0f - occlusion) * voxel_sample.rgb;
-        occlusion += (1.0f - occlusion) * voxel_sample.a;
-
-        distance += diameter * sampling_factor;
-    }
-    occlusion = min(occlusion, 1.0f);
-    return vec4(color, occlusion);
-}
-
-vec4 calc_indirect_diffuse(vec3 n, vec3 p)
-{
-    vec4 color = vec4(0.0f);
-    vec3 guide = vec3(0.0f, 1.0f, 0.0f);
-    if (abs(dot(n, guide)) == 1.0f)
-    {
-        guide = vec3(0.0f, 0.0f, 1.0f);
-    }
-
-    vec3 right = normalize(guide - dot(n, guide) * n);
-    vec3 up = cross(right, n);
-
-    for (int i = 0; i < TOTAL_DIFFUSE_CONES; i++)
-    {
-        vec3 cone_dir = n;
-        cone_dir += DIFFUSE_CONE_DIRECTIONS[i].x * right + DIFFUSE_CONE_DIRECTIONS[i].z * up;
-        cone_dir = normalize(cone_dir);
-
-        vec3 start_clip_pos = p + (n * distance_offset);
-        color += trace_cone(start_clip_pos, cone_dir, aperture, distance_offset, max_distance, sampling_factor) * DIFFUSE_CONE_WEIGHTS[i];
-    }
-    return color;
-}
 
 vec3 orthogonal(vec3 u)
 {
@@ -180,73 +131,61 @@ vec3 orthogonal(vec3 u)
 
 vec3 scale_and_bias(const vec3 p) { return 0.5f * p + vec3(0.5f); }
 
-vec3 trace_cone_diffuse(const vec3 from, vec3 dir)
+vec4 sample_voxels(vec3 p, float lodLevel)
 {
-    dir = normalize(dir);
-    const float spread = 0.325;
-    vec4 acc = vec4(0.0f);
-
-    float dist = 0.1953125f;
-    while (dist < SQRT2 && acc.a < 1.0f)
-    {
-        vec3 c = scale_and_bias(from + dist * dir);
-        float l = (1 + spread * dist / voxel_size);
-        float level = log2(l);
-        float ll = (level + 1) * (level + 1);
-        vec4 voxel = textureLod(voxel_texture, c, min(MIPMAP_HARDCAP, level));
-        acc += 0.075 * ll * voxel * pow(1 - voxel.a, 2);
-        dist += ll * voxel_size * 2;
-    }
-    return pow(acc.rgb * 2.0, vec3(1.5));
+    vec3 offset = vec3(1.0 / voxel_grid_size, 1.0 / voxel_grid_size, 0);
+    vec3 textureUV = p / (voxel_size * 0.5);
+    textureUV = textureUV * 0.5 + 0.5 + offset;
+    return textureLod(voxel_texture, textureUV, lodLevel);
 }
 
-vec3 indirect_light(vec3 normal, vec3 world_position)
+vec4 cone_trace(vec3 dir, float angle, out float occlusion)
 {
-    const float ANGLE_MIX = 0.5f;
-    const float weights[3] = { 1.0f, 1.0f, 1.0f };
+    float lod = 0.0;
+    vec3 color = vec3(0.0);
+    occlusion = 0.0;
+    float alpha = 0.0f;
 
-    const vec3 ortho = normalize(orthogonal(normal));
-    const vec3 ortho2 = normalize(cross(ortho, normal));
+    float voxelWorldSize = voxel_size / voxel_grid_size;
+    float dist = voxelWorldSize;
+    vec3 startPos = WorldPos + WorldNormal * voxelWorldSize;
 
-    const vec3 corner = 0.5f * (ortho + ortho2);
-    const vec3 corner2 = 0.5f * (ortho - ortho2);
+    while(dist < 100.0f && alpha < 0.95f)
+    {
+        float diameter = max(voxelWorldSize, 2.0 * angle * dist);
+        float lodLevel = log2(diameter / voxelWorldSize);
 
-    const vec3 N_OFFSET = normal * (1 + 4 * ISQRT2) * voxel_size;
-    const vec3 C_ORIGIN = world_position + N_OFFSET;
+        vec4 voxelColor = sample_voxels(startPos + dist * dir, lodLevel);
 
-    vec3 accumulated = vec3(0.0f);
+        float a = (1.0 - alpha);
+        color += a * voxelColor.rgb;
+        alpha += a * voxelColor.a;
 
-    const float CONE_OFFSET = -0.01;
+        occlusion += (a * voxelColor.a) / (1.0 + 0.03 * diameter);
+        dist += diameter * 0.5;
+    }
 
-    accumulated += weights[0] * trace_cone_diffuse(C_ORIGIN + CONE_OFFSET * normal, normal);
+    return vec4(color, alpha);
+}
 
-    const vec3 s1 = mix(normal, ortho, ANGLE_MIX);
-    const vec3 s2 = mix(normal, -ortho, ANGLE_MIX);
-    const vec3 s3 = mix(normal, ortho2, ANGLE_MIX);
-    const vec3 s4 = mix(normal, -ortho, ANGLE_MIX);
-
-    accumulated += weights[1] * trace_cone_diffuse(C_ORIGIN + CONE_OFFSET * ortho, s1);
-    accumulated += weights[1] * trace_cone_diffuse(C_ORIGIN - CONE_OFFSET * ortho, s2);
-    accumulated += weights[1] * trace_cone_diffuse(C_ORIGIN + CONE_OFFSET * ortho2, s3);
-    accumulated += weights[1] * trace_cone_diffuse(C_ORIGIN - CONE_OFFSET * ortho2, s4);
-
-
-    const vec3 c1 = mix(normal, corner, ANGLE_MIX);
-    const vec3 c2 = mix(normal, -corner, ANGLE_MIX);
-    const vec3 c3 = mix(normal, corner2, ANGLE_MIX);
-    const vec3 c4 = mix(normal, -corner2, ANGLE_MIX);
-
-    accumulated += weights[2] * trace_cone_diffuse(C_ORIGIN + CONE_OFFSET * corner, c1);
-    accumulated += weights[2] * trace_cone_diffuse(C_ORIGIN - CONE_OFFSET * corner, c2);
-    accumulated += weights[2] * trace_cone_diffuse(C_ORIGIN + CONE_OFFSET * corner, c3);
-    accumulated += weights[2] * trace_cone_diffuse(C_ORIGIN - CONE_OFFSET * corner, c4);
-    return DIFFUSE_INDIRECT_FACTOR * accumulated;
+vec4 indirect_light(vec3 n, out float occlusion)
+{
+    vec4 color = vec4(0.0f);
+    occlusion = 0.0f;
+    for(int i = 0; i < TOTAL_DIFFUSE_CONES; i++)
+    {
+        float o = 0.0;
+        color += DIFFUSE_CONE_WEIGHTS[i] * cone_trace(n * DIFFUSE_CONE_DIRECTIONS[i], 0.577, o);
+        occlusion += DIFFUSE_CONE_WEIGHTS[i] * o;
+    }
+    occlusion = 1.0 - occlusion;
+    return color;
 }
 
 void main()
 {
     vec3 FragPos = texture(gPosition, TexCoords).rgb;
-
+    WorldPos = FragPos;
     vec4 albedo_texture = texture2D(gAlbedo, TexCoords).rgba;
 
     vec3 albedo = pow(albedo_texture.rgb, vec3(2.2));
@@ -256,7 +195,7 @@ void main()
     float ao = orm.b + ao_strength;
 
     vec3 N = texture2D(gNormal, TexCoords).rgb;
-
+    WorldNormal = N;
     vec3 V = normalize(camera_pos - FragPos);
     vec3 R = reflect(-V, N);
 
@@ -311,7 +250,15 @@ void main()
     vec3 irradiance = texture(irradiance_map, N).rgb;
     vec3 diffuse = irradiance * albedo;
 
-    vec3 indirect = indirect_light(N, FragPos) * albedo;
+    float occ = 0.0f;
+    vec3 indirect = indirect_light(N, occ).rgb;
+    float factor = min(1, 1 - roughness * 1.0);
+    float factor2 = min(1, 1 - metallic * 1.0);
+    float factor3 = min (factor, factor2);
+    indirect *= occ * vec3(factor2);
+    indirect = max(indirect, vec3(0.0));
+    indirect *= albedo * 1.0;
+//    indirect *= 0.1;
 
     const float MAX_RELFECTION_LOD = 4.0;
     vec3 prefilteredColor = textureLod(prefilter_map, R, roughness * MAX_RELFECTION_LOD).rgb;
@@ -324,7 +271,8 @@ void main()
 
     vec3 ambient = (kD * diffuse + specular) * ao;
     vec3 emission = texture2D(gEmission, TexCoords).rgb;
-    vec3 color = indirect.rgb + Lo + emission;
+    vec3 color = Lo + emission;
+    color += indirect.rgb;
 
     color = mix(color, Tonemap_ACES(color), 1.0);
     color = color / (color + vec3(1.0));
@@ -332,7 +280,7 @@ void main()
     color = mix(color, Tonemap_ACES(color), 0.35);
     float alpha = albedo_texture.a;
     color.rgb = color.rgb * alpha;
-    FragColor = vec4(color.rgb, alpha);
+    FragColor = vec4(color, alpha);
 }
 
 

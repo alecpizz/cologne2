@@ -20,7 +20,8 @@ layout (binding = 5) uniform sampler2D texture_emission;
 void main()
 {
     gPosition = vec4(FragPos, 1.0);
-    vec3 N = texture2D(texture_normal, TexCoords).rgb;
+//    vec3 N = texture2D(texture_normal, TexCoords).rgb;
+    vec3 N = Normal;
     N = N * 2.0 - 1.0;
     N = normalize(TBN * N);
     gNormal = vec4(N, 1.0);
