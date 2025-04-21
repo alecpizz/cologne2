@@ -67,7 +67,6 @@ namespace cologne
         uint32_t voxel_cube_back = 0;
         bool apply_indirect_lighting = true;
         const int32_t voxel_dimensions = 256;
-        glm::vec3 voxel_size = glm::vec3(0.0510635, 0.122118, 0.0830335);
         float world_size_half = 100.0f;
         glm::vec3 world_center = glm::vec3(0.0f);
         float zMulti = 10.0f;
@@ -185,7 +184,6 @@ namespace cologne
             Engine::get_debug_ui()->add_float_entry("Shadow Far Plane", shadow_far);
             Engine::get_debug_ui()->add_float_entry("Shadow near Plane", shadow_near);
             Engine::get_debug_ui()->add_bool_entry("Voxel Debug Visuals", voxel_debug_visuals);
-            Engine::get_debug_ui()->add_vec3_entry("Voxel size", voxel_size);
             Engine::get_debug_ui()->add_bool_entry("Indirect Lighting", apply_indirect_lighting);
             init_voxels();
 
@@ -208,7 +206,11 @@ namespace cologne
             bind_lights(*voxelize_shader);
             voxelize_shader->set_mat4("projection", glm::value_ptr(glm::ortho(-1.0f, 1.0f, -1.0f,
                                                                               1.0f, -1.0f, 1.0f)));
-            voxelize_shader->set_vec3("voxel_size", glm::value_ptr(voxel_size));
+            auto size = Engine::get_scene()->get_model_by_index(0)->get_aabb().size();
+            size *= 0.01f;
+            const float offset = 2.0f - 0.1f;
+            glm::vec3 scale = glm::vec3(offset / fabs(size.x), offset / fabs(size.y), offset / fabs(size.z));
+            voxelize_shader->set_vec3("voxel_size", glm::value_ptr(scale));
             glBindImageTexture(6, voxel_texture, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);
             glBindTextureUnit(7, shadow_depth);
             for (size_t i = 0; i < scene->get_model_count(); i++)
