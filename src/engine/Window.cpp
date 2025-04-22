@@ -9,14 +9,12 @@
 
 namespace cologne
 {
-
     struct Window::Impl
     {
         SDL_Window *window = nullptr;
         SDL_GLContext context = nullptr;
         uint32_t width = 0;
         uint32_t height = 0;
-
 
 
         void init(uint32_t w, uint32_t h)
@@ -66,7 +64,6 @@ namespace cologne
             const GLubyte *renderer = glGetString(GL_RENDERER); // Returns a hint to the model
             LOG_INFO("Created window for GPU: %s %s", vendor, renderer);
         }
-
     };
 
     uint32_t Window::get_width() const
@@ -91,6 +88,19 @@ namespace cologne
         SDL_GetWindowSize(_impl->window, &w, &h);
         _impl->width = w;
         _impl->height = h;
+    }
+
+    void Window::maximize() const
+    {
+        static bool maximized = false;
+        maximized = !maximized;
+        if (maximized)
+        {
+            SDL_MaximizeWindow(_impl->window);
+        } else
+        {
+            SDL_RestoreWindow(_impl->window);
+        }
     }
 
     void Window::present() const

@@ -24,6 +24,8 @@ namespace cologne
 
         void resize() const;
 
+        void maximize() const;
+
         void present() const;
 
         void minimize();

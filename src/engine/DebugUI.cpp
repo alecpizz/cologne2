@@ -255,13 +255,17 @@ namespace cologne
                     ImGui::ResetMouseDragDelta(0);
                 }
             }
-            auto posX = (ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize("- X").x
+            auto posX = (ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize("- X []   ").x
                          - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
             if (posX > ImGui::GetCursorPosX())
                 ImGui::SetCursorPosX(posX);
             if (ImGui::MenuItem("-"))
             {
                 Engine::get_window()->minimize();
+            }
+            if (ImGui::MenuItem("[]"))
+            {
+                Engine::get_window()->maximize();
             }
             if (ImGui::MenuItem("x"))
             {
