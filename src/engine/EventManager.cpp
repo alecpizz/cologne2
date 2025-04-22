@@ -49,6 +49,11 @@ namespace cologne
         }
     }
 
+    void EventManager::set_should_quit(bool b) const
+    {
+        _impl->should_quit = b;
+    }
+
     bool EventManager::should_quit() const
     {
         return _impl->should_quit;

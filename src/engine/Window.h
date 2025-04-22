@@ -26,6 +26,8 @@ namespace cologne
 
         void present() const;
 
+        void minimize();
+
         void hide_mouse() const;
         void show_mouse() const;
 

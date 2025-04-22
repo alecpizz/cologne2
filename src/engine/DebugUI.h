@@ -35,6 +35,7 @@ namespace cologne
 
     private:
         DebugUI();
+        void build();
 
         struct Impl;
         Impl *_impl;

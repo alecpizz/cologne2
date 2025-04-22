@@ -23,6 +23,8 @@ namespace cologne
 
         void poll_events();
 
+        void set_should_quit(bool b) const;
+
         bool should_quit() const;
 
         bool paused() const;

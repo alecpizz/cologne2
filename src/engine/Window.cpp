@@ -9,12 +9,15 @@
 
 namespace cologne
 {
+
     struct Window::Impl
     {
         SDL_Window *window = nullptr;
         SDL_GLContext context = nullptr;
         uint32_t width = 0;
         uint32_t height = 0;
+
+
 
         void init(uint32_t w, uint32_t h)
         {
@@ -36,8 +39,10 @@ namespace cologne
             {
                 SDL_Quit();
             }
-
+            SDL_SetWindowBordered(window, false);
+            SDL_RaiseWindow(window);
             context = SDL_GL_CreateContext(window);
+
             if (context == nullptr)
             {
                 LOG_ERROR("SDL_GL_CreateContext Error: %s", SDL_GetError());
@@ -61,6 +66,7 @@ namespace cologne
             const GLubyte *renderer = glGetString(GL_RENDERER); // Returns a hint to the model
             LOG_INFO("Created window for GPU: %s %s", vendor, renderer);
         }
+
     };
 
     uint32_t Window::get_width() const
@@ -90,6 +96,11 @@ namespace cologne
     void Window::present() const
     {
         SDL_GL_SwapWindow(_impl->window);
+    }
+
+    void Window::minimize()
+    {
+        SDL_MinimizeWindow(_impl->window);
     }
 
     void Window::hide_mouse() const
