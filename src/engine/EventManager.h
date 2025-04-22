@@ -25,6 +25,8 @@ namespace cologne
 
         bool should_quit() const;
 
+        bool paused() const;
+
     private:
         EventManager();
 

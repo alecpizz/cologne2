@@ -61,9 +61,9 @@ namespace cologne
         return _instance->_impl->window.get();
     }
 
-    EventManager *Engine::get_event_manager() const
+    EventManager *Engine::get_event_manager()
     {
-        return _impl->event_manager.get();
+        return  _instance->_impl->event_manager.get();
     }
 
     Camera *Engine::get_camera()

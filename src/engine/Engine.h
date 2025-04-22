@@ -31,8 +31,7 @@ namespace cologne
 
         static Window *get_window();
 
-        EventManager *get_event_manager() const;
-
+        static EventManager *get_event_manager();
 
         static Camera *get_camera();
 

@@ -12,6 +12,7 @@ namespace cologne
     struct EventManager::Impl
     {
         bool should_quit = false;
+        bool paused = false;
     };
 
     EventManager::~EventManager()
@@ -32,6 +33,10 @@ namespace cologne
             if (event.type == SDL_EVENT_KEY_DOWN)
             {
                 Input::update_key_down(static_cast<uint32_t>(event.key.scancode));
+                if (event.key.scancode == SDL_SCANCODE_ESCAPE)
+                {
+                    _impl->paused = !_impl->paused;
+                }
             }
             if (event.type == SDL_EVENT_KEY_UP)
             {
@@ -47,6 +52,11 @@ namespace cologne
     bool EventManager::should_quit() const
     {
         return _impl->should_quit;
+    }
+
+    bool EventManager::paused() const
+    {
+        return _impl->paused;
     }
 
     bool event_watch(void *data, SDL_Event *event)

@@ -1,4 +1,4 @@
-﻿//
+//
 // Created by alecpizz on 3/1/2025.
 //
 
@@ -100,142 +100,148 @@ namespace cologne
 
     void DebugUI::present()
     {
+        if (!Engine::get_event_manager()->paused())
+        {
+            return;
+        }
         ImGui::Begin("cologne window");
-        ImGui::Text("FPS %f", ImGui::GetIO().Framerate);
-        size_t model_count = Engine::get_scene()->get_model_count();
-        for (size_t i = 0; i < model_count; i++)
+        if (!Engine::get_event_manager()->paused())
         {
-            ImGui::PushID(i);
-            auto model = Engine::get_scene()->get_model_by_index(i);
-            glm::vec3 scale = model->get_transform()->scale;
-            glm::quat rotation = model->get_transform()->rotation;
-            glm::vec3 translation = model->get_transform()->translation;
-
-            glm::vec3 euler = glm::degrees(glm::eulerAngles(rotation));
-
-            ImGui::LabelText("%s", model->get_path());
-
-            if (ImGui::DragFloat3("Position", glm::value_ptr(translation)))
-            {
-                model->get_transform()->set_translation(translation);
-            }
-            if (ImGui::DragFloat3("Euler", glm::value_ptr(euler)))
-            {
-            }
-            if (ImGui::DragFloat3("Scale", glm::value_ptr(scale)))
-            {
-                model->get_transform()->set_scale(scale);
-            }
-
-            bool active = model->get_active();
-            if (ImGui::Checkbox("Active", &active))
-            {
-                model->set_active(active);
-            }
-            ImGui::PopID();
-        }
-
-        if (ImGui::Button("Hot reload shaders"))
-        {
-            Engine::get_renderer()->reload_shaders();
-        }
-
-        for (size_t i = 0; i < _impl->float_cmds.size(); ++i)
-        {
-            ImGui::PushID(i);
-            float value = _impl->float_cmds[i].ref;
-            if (ImGui::DragFloat(_impl->float_cmds[i].name.c_str(), &value, 0.005f))
-            {
-                _impl->float_cmds[i].ref = value;
-            }
-            ImGui::PopID();
-        }
-
-        for (size_t i = 0; i < _impl->int_cmds.size(); ++i)
-        {
-            ImGui::PushID(i);
-            int32_t value = _impl->int_cmds[i].ref;
-            if (ImGui::DragInt(_impl->int_cmds[i].name.c_str(), &value, 0.005f))
-            {
-                _impl->int_cmds[i].ref = value;
-            }
-            ImGui::PopID();
-        }
-
-        for (size_t i = 0; i < _impl->vec3_cmds.size(); i++)
-        {
-            ImGui::PushID(i);
-            glm::vec3 value = _impl->vec3_cmds[i].ref;
-            if (ImGui::DragFloat3(_impl->vec3_cmds[i].name.c_str(), &value[0], 0.005f))
-            {
-                _impl->vec3_cmds[i].ref = value;
-            }
-            ImGui::PopID();
-        }
-
-        for (size_t i = 0; i < _impl->bool_cmds.size(); i++)
-        {
-            ImGui::PushID(i);
-            bool value = _impl->bool_cmds[i].ref;
-            if (ImGui::Checkbox(_impl->bool_cmds[i].name.c_str(), &value))
-            {
-                _impl->bool_cmds[i].ref = value;
-            }
-            ImGui::PopID();
-        }
-
-        for (size_t i = 0; i < _impl->button_cmds.size(); i++)
-        {
-            ImGui::PushID(i);
-            if (ImGui::Button(_impl->button_cmds[i].name.c_str()))
-            {
-                _impl->button_cmds[i].action();
-            }
-            ImGui::PopID();
-        }
-
-        if (ImGui::CollapsingHeader("Images"))
-        {
-            ImGui::BeginChild("Images", ImVec2(0, 800));
-            for (size_t i = 0; i < _impl->image_cmds.size(); i++)
+            ImGui::Text("FPS %f", ImGui::GetIO().Framerate);
+            size_t model_count = Engine::get_scene()->get_model_count();
+            for (size_t i = 0; i < model_count; i++)
             {
                 ImGui::PushID(i);
-                ImGui::Text(_impl->image_cmds[i].name.c_str());
-                ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(_impl->image_cmds[i].id)),
-                             ImVec2(_impl->image_cmds[i].image_size.x / 4,
-                                 _impl->image_cmds[i].image_size.y / 4),
-                                 ImVec2(0, 1), ImVec2(1, 0));
+                auto model = Engine::get_scene()->get_model_by_index(i);
+                glm::vec3 scale = model->get_transform()->scale;
+                glm::quat rotation = model->get_transform()->rotation;
+                glm::vec3 translation = model->get_transform()->translation;
+
+                glm::vec3 euler = glm::degrees(glm::eulerAngles(rotation));
+
+                ImGui::LabelText("%s", model->get_path());
+
+                if (ImGui::DragFloat3("Position", glm::value_ptr(translation)))
+                {
+                    model->get_transform()->set_translation(translation);
+                }
+                if (ImGui::DragFloat3("Euler", glm::value_ptr(euler)))
+                {
+                }
+                if (ImGui::DragFloat3("Scale", glm::value_ptr(scale)))
+                {
+                    model->get_transform()->set_scale(scale);
+                }
+
+                bool active = model->get_active();
+                if (ImGui::Checkbox("Active", &active))
+                {
+                    model->set_active(active);
+                }
                 ImGui::PopID();
             }
-            ImGui::EndChild();
-        }
 
-        bool free_cam = Engine::get_camera()->is_free_cam();
-        if (ImGui::Checkbox("Free Cam", &free_cam))
-        {
-            Engine::get_camera()->set_free_cam(free_cam);
-        }
+            if (ImGui::Button("Hot reload shaders"))
+            {
+                Engine::get_renderer()->reload_shaders();
+            }
 
-        glm::vec3 dir_light = Engine::get_renderer()->get_directional_light().direction;
-        glm::vec3 dir_light_pos = Engine::get_renderer()->get_directional_light().position;;
-        if (ImGui::DragFloat3("Directional light direction", glm::value_ptr(dir_light), 0.01f))
-        {
-            Engine::get_renderer()->set_directional_light(dir_light_pos, dir_light);
-        }
-        if (ImGui::DragFloat3("Directional light position", glm::value_ptr(dir_light_pos), 0.01f))
-        {
-            Engine::get_renderer()->set_directional_light(dir_light_pos, dir_light);
-        }
-        glm::vec3 cam_pos = Engine::get_camera()->get_position();
-        glm::vec3 cam_fwd = Engine::get_camera()->get_forward();
-        if (ImGui::Button("Align dir light to camera"))
-        {
-            Engine::get_renderer()->set_directional_light(cam_pos, cam_fwd);
-        }
+            for (size_t i = 0; i < _impl->float_cmds.size(); ++i)
+            {
+                ImGui::PushID(i);
+                float value = _impl->float_cmds[i].ref;
+                if (ImGui::DragFloat(_impl->float_cmds[i].name.c_str(), &value, 0.005f))
+                {
+                    _impl->float_cmds[i].ref = value;
+                }
+                ImGui::PopID();
+            }
 
-        ImGui::InputFloat3("Camera Position", glm::value_ptr(cam_pos));
-        ImGui::InputFloat3("Camera Forward", glm::value_ptr(cam_fwd));
+            for (size_t i = 0; i < _impl->int_cmds.size(); ++i)
+            {
+                ImGui::PushID(i);
+                int32_t value = _impl->int_cmds[i].ref;
+                if (ImGui::DragInt(_impl->int_cmds[i].name.c_str(), &value, 0.005f))
+                {
+                    _impl->int_cmds[i].ref = value;
+                }
+                ImGui::PopID();
+            }
 
+            for (size_t i = 0; i < _impl->vec3_cmds.size(); i++)
+            {
+                ImGui::PushID(i);
+                glm::vec3 value = _impl->vec3_cmds[i].ref;
+                if (ImGui::DragFloat3(_impl->vec3_cmds[i].name.c_str(), &value[0], 0.005f))
+                {
+                    _impl->vec3_cmds[i].ref = value;
+                }
+                ImGui::PopID();
+            }
+
+            for (size_t i = 0; i < _impl->bool_cmds.size(); i++)
+            {
+                ImGui::PushID(i);
+                bool value = _impl->bool_cmds[i].ref;
+                if (ImGui::Checkbox(_impl->bool_cmds[i].name.c_str(), &value))
+                {
+                    _impl->bool_cmds[i].ref = value;
+                }
+                ImGui::PopID();
+            }
+
+            for (size_t i = 0; i < _impl->button_cmds.size(); i++)
+            {
+                ImGui::PushID(i);
+                if (ImGui::Button(_impl->button_cmds[i].name.c_str()))
+                {
+                    _impl->button_cmds[i].action();
+                }
+                ImGui::PopID();
+            }
+
+            if (ImGui::CollapsingHeader("Images"))
+            {
+                ImGui::BeginChild("Images", ImVec2(0, 800));
+                for (size_t i = 0; i < _impl->image_cmds.size(); i++)
+                {
+                    ImGui::PushID(i);
+                    ImGui::Text(_impl->image_cmds[i].name.c_str());
+                    ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(_impl->image_cmds[i].id)),
+                                 ImVec2(_impl->image_cmds[i].image_size.x / 4,
+                                        _impl->image_cmds[i].image_size.y / 4),
+                                 ImVec2(0, 1), ImVec2(1, 0));
+                    ImGui::PopID();
+                }
+                ImGui::EndChild();
+            }
+
+            bool free_cam = Engine::get_camera()->is_free_cam();
+            if (ImGui::Checkbox("Free Cam", &free_cam))
+            {
+                Engine::get_camera()->set_free_cam(free_cam);
+            }
+
+            glm::vec3 dir_light = Engine::get_renderer()->get_directional_light().direction;
+            glm::vec3 dir_light_pos = Engine::get_renderer()->get_directional_light().position;;
+            if (ImGui::DragFloat3("Directional light direction", glm::value_ptr(dir_light), 0.01f))
+            {
+                Engine::get_renderer()->set_directional_light(dir_light_pos, dir_light);
+            }
+            if (ImGui::DragFloat3("Directional light position", glm::value_ptr(dir_light_pos), 0.01f))
+            {
+                Engine::get_renderer()->set_directional_light(dir_light_pos, dir_light);
+            }
+            glm::vec3 cam_pos = Engine::get_camera()->get_position();
+            glm::vec3 cam_fwd = Engine::get_camera()->get_forward();
+            if (ImGui::Button("Align dir light to camera"))
+            {
+                Engine::get_renderer()->set_directional_light(cam_pos, cam_fwd);
+            }
+
+            ImGui::InputFloat3("Camera Position", glm::value_ptr(cam_pos));
+            ImGui::InputFloat3("Camera Forward", glm::value_ptr(cam_fwd));
+        }
         ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
