@@ -101,7 +101,7 @@ namespace cologne
     void DebugUI::present()
     {
         ImGui::Begin("cologne window");
-
+        ImGui::Text("FPS %f", ImGui::GetIO().Framerate);
         size_t model_count = Engine::get_scene()->get_model_count();
         for (size_t i = 0; i < model_count; i++)
         {
