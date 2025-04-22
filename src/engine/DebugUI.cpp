@@ -273,24 +273,6 @@ namespace cologne
             }
         }
         ImGui::EndMainMenuBar();
-        static bool dragging = false;
-        auto cursorPos = ImGui::GetIO().MousePos;
-        auto width = static_cast<float>(Engine::get_window()->get_width());
-        auto height = static_cast<float>(Engine::get_window()->get_height());
-        bool horizontal = cursorPos.x >= 10 && cursorPos.x <= width - 10;
-        bool vertical = cursorPos.y <= 10;
-        const ImGuiViewport *viewport = ImGui::GetMainViewport();
-
-        bool b = cursorPos.x >= 0 && cursorPos.x <= ((double) width - 170) &&
-                 cursorPos.y >= 0 && cursorPos.y <= 25;
-        if (b)
-        {
-            LOG_INFO("Draggin %f %f", cursorPos.x, cursorPos.y);
-            dragging = true;
-        } else
-        {
-            dragging = false;
-        }
     }
 
     void DebugUI::present()
