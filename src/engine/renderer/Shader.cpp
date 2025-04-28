@@ -12,6 +12,7 @@ namespace cologne
         uint32_t program = 0;
         std::string name;
         std::unordered_map<std::string, int32_t> uniforms;
+        bool linked = false;
 
         void compile(const char *vertex_path, const char *fragment_path, const char *geometry_path)
         {
@@ -50,6 +51,7 @@ namespace cologne
             glDeleteShader(vertex_shader);
             glDeleteShader(fragment_shader);
             glDeleteShader(geometry_shader);
+            linked = true;
         }
 
         void compile(const char *comp_path)
@@ -77,6 +79,7 @@ namespace cologne
                 LOG_ERROR("Failed to link program %s", infoLog);
             }
             glDeleteShader(comp_shader);
+            linked = true;
         }
 
         uint32_t add_shader(const char *shader_path, const GLenum shader_type) const
@@ -146,6 +149,7 @@ namespace cologne
 
     void Shader::bind() const
     {
+
         glUseProgram(_impl->program);
     }
 
@@ -156,11 +160,15 @@ namespace cologne
 
     void Shader::wait()
     {
-        glMemoryBarrier(GL_ALL_BARRIER_BITS);
+        glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
     }
 
     void Shader::set_bool(const char *name, const bool value) const
     {
+        if (!_impl->linked)
+        {
+            return;
+        }
         if (!_impl->uniforms.contains(name))
         {
             _impl->uniforms[name] = glGetUniformLocation(_impl->program, name);
@@ -170,6 +178,10 @@ namespace cologne
 
     void Shader::set_int(const char *name, int32_t value) const
     {
+        if (!_impl->linked)
+        {
+            return;
+        }
         if (!_impl->uniforms.contains(name))
         {
             _impl->uniforms[name] = glGetUniformLocation(_impl->program, name);
@@ -179,6 +191,10 @@ namespace cologne
 
     void Shader::set_vec3(const char *name, const float *value) const
     {
+        if (!_impl->linked)
+        {
+            return;
+        }
         if (!_impl->uniforms.contains(name))
         {
             _impl->uniforms[name] = glGetUniformLocation(_impl->program, name);
@@ -188,6 +204,10 @@ namespace cologne
 
     void Shader::set_vec2(const char *name, const float *value) const
     {
+        if (!_impl->linked)
+        {
+            return;
+        }
         if (!_impl->uniforms.contains(name))
         {
             _impl->uniforms[name] = glGetUniformLocation(_impl->program, name);
@@ -197,6 +217,10 @@ namespace cologne
 
     void Shader::set_vec4(const char *name, const float *value) const
     {
+        if (!_impl->linked)
+        {
+            return;
+        }
         if (!_impl->uniforms.contains(name))
         {
             _impl->uniforms[name] = glGetUniformLocation(_impl->program, name);
@@ -206,6 +230,10 @@ namespace cologne
 
     void Shader::set_mat4(const char *name, const float *value) const
     {
+        if (!_impl->linked)
+        {
+            return;
+        }
         if (!_impl->uniforms.contains(name))
         {
             _impl->uniforms[name] = glGetUniformLocation(_impl->program, name);
@@ -215,6 +243,10 @@ namespace cologne
 
     void Shader::set_float(const char *name, const float value) const
     {
+        if (!_impl->linked)
+        {
+            return;
+        }
         if (!_impl->uniforms.contains(name))
         {
             _impl->uniforms[name] = glGetUniformLocation(_impl->program, name);

@@ -36,6 +36,7 @@ namespace cologne
         std::shared_ptr<Shader> voxelize_shader = nullptr;
         std::shared_ptr<Shader> voxelize_debug_shader = nullptr;
         std::shared_ptr<Shader> world_pos_shader = nullptr;
+        std::shared_ptr<Shader> mipmap_shader = nullptr;
         std::shared_ptr<DebugRenderer> debug_renderer = nullptr;
         std::shared_ptr<TextRenderer> text_renderer = nullptr;
         std::unordered_map<std::string, std::shared_ptr<Shader> > shaders = std::unordered_map<std::string,
@@ -81,10 +82,10 @@ namespace cologne
             glGenTextures(1, &voxel_texture);
             glBindTexture(GL_TEXTURE_3D, voxel_texture);
             glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
             // glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA8, voxel_size, voxel_size, voxel_size);
             int numVoxels = voxel_dimensions * voxel_dimensions * voxel_dimensions;
             auto *data = new GLfloat[4 * numVoxels];
@@ -112,13 +113,11 @@ namespace cologne
             {
                 voxelize_scene();
             });
-
-
         }
 
         void init_voxel_fbo()
         {
-             glGenFramebuffers(1, &voxel_cube_back_fbo);
+            glGenFramebuffers(1, &voxel_cube_back_fbo);
             glBindFramebuffer(GL_FRAMEBUFFER, voxel_cube_back_fbo);
             glGenTextures(1, &voxel_cube_back);
             glBindTexture(GL_TEXTURE_2D, voxel_cube_back);
@@ -186,7 +185,6 @@ namespace cologne
             Engine::get_debug_ui()->add_bool_entry("Voxel Debug Visuals", voxel_debug_visuals);
             Engine::get_debug_ui()->add_bool_entry("Indirect Lighting", apply_indirect_lighting);
             init_voxels();
-
         }
 
         void voxelize_scene()
@@ -207,11 +205,17 @@ namespace cologne
             voxelize_shader->set_mat4("projection", glm::value_ptr(glm::ortho(-1.0f, 1.0f, -1.0f,
                                                                               1.0f, -1.0f, 1.0f)));
             auto size = Engine::get_scene()->get_model_by_index(0)->get_aabb().size();
-            size *= 0.01f;
+            size *= Engine::get_scene()->get_model_by_index(0)->get_transform()->scale;
             const float offset = 2.0f - 0.1f;
             glm::vec3 scale = glm::vec3(offset / fabs(size.x), offset / fabs(size.y), offset / fabs(size.z));
             voxelize_shader->set_vec3("voxel_size", glm::value_ptr(scale));
-            glBindImageTexture(6, voxel_texture, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);
+            auto bounds = Engine::get_scene()->get_model_by_index(0)->get_aabb();
+            scale = Engine::get_scene()->get_model_by_index(0)->get_transform()->scale;
+            auto min = bounds.min * scale;
+            auto max = bounds.max * scale;
+            voxelize_shader->set_vec3("grid_min", glm::value_ptr(min));
+            voxelize_shader->set_vec3("grid_max", glm::value_ptr(max));
+            glBindImageTexture(6, voxel_texture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
             glBindTextureUnit(7, shadow_depth);
             for (size_t i = 0; i < scene->get_model_count(); i++)
             {
@@ -226,15 +230,43 @@ namespace cologne
                     mesh.draw();
                 }
             }
-            glActiveTexture(GL_TEXTURE6);
-            glBindTexture(GL_TEXTURE_3D, voxel_texture);
-            glGenerateMipmap(GL_TEXTURE_3D);
-            glBindTexture(GL_TEXTURE_3D, 0);
+
+            mipmap_shader->bind();
+            int current_height = voxel_dimensions;
+            int current_width = voxel_dimensions;
+            int current_depth = voxel_dimensions;
+            for (int mip = 0; mip < 7; mip++)
+            {
+                int next = mip + 1;
+                int dest_width = glm::max(1, current_height >> 1);
+                int dest_height = glm::max(1, current_width >> 1);
+                int dest_depth = glm::max(1, current_depth >> 1);
+
+
+                glBindImageTexture(0,
+                                   voxel_texture,
+                                   next,
+                                   GL_TRUE,
+                                   0, GL_WRITE_ONLY, GL_RGBA16F);
+                glBindImageTexture(1, voxel_texture, mip, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA16F);
+                int localSize = 8;
+                uint32_t x = (dest_width + localSize - 1) / localSize;
+                uint32_t y = (dest_height + localSize - 1) / localSize;
+                uint32_t z = (dest_depth + localSize - 1) / localSize;
+                mipmap_shader->dispatch(x, y, z);
+                mipmap_shader->wait();
+                current_depth = dest_depth;
+                current_height = dest_height;
+                current_width = dest_width;
+            }
+
             glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
             glEnable(GL_CULL_FACE);
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_BLEND);
+
             glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
@@ -273,6 +305,7 @@ namespace cologne
 
             world_pos_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/world_pos.vert",
                                                         RESOURCES_PATH "shaders/world_pos.frag");
+            mipmap_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/mipmap.comp");
 
             shaders.clear();
             shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("lit", lit_shader));
@@ -803,7 +836,7 @@ namespace cologne
             for (size_t i = 0; i < shadowCascadeLevels.size(); i++)
             {
                 shader.set_float(std::string("cascadePlaneDistances[" + std::to_string(i) + "]").c_str(),
-                                      shadowCascadeLevels[i]);
+                                 shadowCascadeLevels[i]);
             }
             shader.set_float("far_plane", shadow_far);
             shader.set_int("cascadeCount", shadowCascadeLevels.size());
@@ -865,11 +898,16 @@ namespace cologne
             lit_shader->set_int("voxel_grid_size", voxel_dimensions);
             auto bounds = Engine::get_scene()->get_model_by_index(0)->get_aabb();
             const glm::vec3 center = bounds.center();
-            const glm::vec3 size = bounds.size();
+            auto scale = Engine::get_scene()->get_model_by_index(0)->get_transform()->scale;
+            const glm::vec3 size = bounds.size(); //THIS IS WRONG!
             const float world_size = glm::max(size.x, glm::max(size.y, size.z));
             const float texelSize = 1.0f / voxel_dimensions;
             const float voxel_size = world_size * texelSize;
             lit_shader->set_float("voxel_size", voxel_size);
+            auto min = bounds.min * scale;
+            auto max = bounds.max * scale;
+            lit_shader->set_vec3("grid_min", glm::value_ptr(min));
+            lit_shader->set_vec3("grid_max", glm::value_ptr(max));
             lit_shader->set_vec3("world_center", glm::value_ptr(center));
             lit_shader->set_float("worldSizeHalf", 0.5f * world_size);
 
@@ -1156,6 +1194,7 @@ namespace cologne
         }
 
         _impl->shadow_pass(scene);
+        _impl->voxelize_scene();
         _impl->gbuffer_pass(scene);
         _impl->lit_pass();
         _impl->skybox_pass();
