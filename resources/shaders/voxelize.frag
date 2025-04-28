@@ -1,5 +1,6 @@
 ﻿#version 460 core
-
+#extension GL_NV_shader_atomic_fp16_vector: require
+#extension GL_NV_gpu_shader5: require
 layout (binding = 0) uniform sampler2D texture_albedo;
 layout (binding = 1) uniform sampler2D texture_ao;
 layout (binding = 2) uniform sampler2D texture_metallic;
@@ -168,16 +169,16 @@ vec4 pbr()
 
     float shadow = 1.0 - shadow_calculation(FragPos, N, -lights[0].direction);
 
-    for(int i = 0; i < num_lights; i++)
+    for (int i = 0; i < num_lights; i++)
     {
         vec3 L = vec3(0.0);
         vec3 radiance = vec3(0.0);
-        if(lights[i].type == DIRECTIONAL)
+        if (lights[i].type == DIRECTIONAL)
         {
             L = normalize(-lights[i].direction);
             radiance = lights[i].color;
         }
-        else if(lights[i].type == POINT)
+        else if (lights[i].type == POINT)
         {
             vec3 light_position = lights[i].position;
             L = normalize(light_position - f_voxel_pos);
@@ -196,7 +197,7 @@ vec4 pbr()
         kD *= 1.0 - metallic;
 
         float NDotL = max(dot(N, L), 0.0);
-        Lo += (kD * albedo / PI) * radiance * NDotL * shadow;
+        Lo += (kD * albedo / PI) * radiance * NDotL;
     }
     vec3 ambient = vec3(0.03) * albedo * ao;
     vec3 color = Lo;
@@ -215,5 +216,6 @@ void main()
 
     vec3 voxelgrid_tex_pos = from_clipspace_to_texcoords(f_voxel_pos);
     ivec3 voxelgrid_resolution = imageSize(texture_voxel);
-    imageStore(texture_voxel, ivec3(voxelgrid_resolution * voxelgrid_tex_pos), color);
+//    imageStore(texture_voxel, ivec3(voxelgrid_resolution * voxelgrid_tex_pos), color);
+    imageAtomicMax(texture_voxel, ivec3(voxelgrid_resolution * voxelgrid_tex_pos), f16vec4(color));
 }

@@ -51,6 +51,7 @@ uniform int voxel_grid_size;
 uniform float worldSizeHalf = 150.0f;
 uniform float voxel_size = 128;
 uniform vec3 world_center = vec3(0.0f);
+uniform vec3 grid_max, grid_min;
 uniform float sampling_factor = 0.100f;
 uniform float distance_offset = 3.9f;
 uniform float max_distance = 2.0f;
@@ -115,12 +116,12 @@ float rand(vec2 v)
 }
 
 vec3 Tonemap_ACES(const vec3 x) { // Narkowicz 2015, "ACES Filmic Tone Mapping Curve"
-    const float a = 2.51;
-    const float b = 0.03;
-    const float c = 2.43;
-    const float d = 0.59;
-    const float e = 0.14;
-    return (x * (a * x + b)) / (x * (c * x + d) + e);
+                                  const float a = 2.51;
+                                  const float b = 0.03;
+                                  const float c = 2.43;
+                                  const float d = 0.59;
+                                  const float e = 0.14;
+                                  return (x * (a * x + b)) / (x * (c * x + d) + e);
 }
 
 
@@ -133,23 +134,60 @@ vec3 orthogonal(vec3 u)
 
 vec3 scale_and_bias(const vec3 p) { return 0.5f * p + vec3(0.5f); }
 
+vec3 MapRangeToAnOther(vec3 value, vec3 valueMin, vec3 valueMax, vec3 mapMin, vec3 mapMax)
+{
+    return (value - valueMin) / (valueMax - valueMin) * (mapMax - mapMin) + mapMin;
+}
+
+vec3 MapToZeroOne(vec3 value, vec3 rangeMin, vec3 rangeMax)
+{
+    return MapRangeToAnOther(value, rangeMin, rangeMax, vec3(0.0), vec3(1.0));
+}
+
+
 vec4 cone_trace(vec3 from, vec3 direction, float aperture)
 {
-    float max_dist = 2.0 * worldSizeHalf;
-    vec4 accumulated = vec4(0.0);
-    float offset = 2.0 * voxel_size;
-    float dist = offset + voxel_size;
-    while (accumulated.a < 1.0 && dist < max_dist)
+    //    float max_dist = 2.0 * worldSizeHalf;
+    //    vec4 accumulated = vec4(0.0);
+    //    float offset = 2.0 * voxel_size;
+    //    float dist = offset + voxel_size;
+    //    while (accumulated.a < 1.0 && dist < max_dist)
+    //    {
+    //        vec3 conePos = from + direction * dist;
+    //        float diameter = 2.0 * aperture * dist;
+    //        float mip = log2(diameter / voxel_size);
+    //        vec3 coords = (conePos - world_center) / worldSizeHalf;
+    //        coords = 0.5 * coords + 0.5;
+    //
+    //        vec4 voxel = textureLod(voxel_texture, coords, mip);
+    //        accumulated += (1.0 - accumulated.a) * voxel;
+    //        dist += 0.5 * diameter;
+    //    }
+    //    return accumulated;
+    vec3 voxelGridWorldSpaceSize = grid_max - grid_min;
+    vec3 voxelWorldSpaceSize = voxelGridWorldSpaceSize / textureSize(voxel_texture, 0);
+    float voxelMaxLength = max(voxelWorldSpaceSize.x, max(voxelWorldSpaceSize.y, voxelWorldSpaceSize.z));
+    float voxelMinLenght = min(voxelWorldSpaceSize.x, min(voxelWorldSpaceSize.y, voxelWorldSpaceSize.z));
+    uint maxLevel = textureQueryLevels(voxel_texture) - 1;
+    vec4 accumulated = vec4(0.0f);
+    from += direction * voxelMinLenght;
+    float distFromStart = voxelMaxLength;
+    while (accumulated.a < 0.99f)
     {
-        vec3 conePos = from + direction * dist;
-        float diameter = 2.0 * aperture * dist;
-        float mip = log2(diameter / voxel_size);
-        vec3 coords = (conePos - world_center) / worldSizeHalf;
-        coords = 0.5 * coords + 0.5;
+        float coneDiameter = 2.0f * aperture * distFromStart;
+        float sampleDiameter = max(voxelMinLenght, coneDiameter);
+        float sampleLod = log2(sampleDiameter / voxelMinLenght);
 
-        vec4 voxel = textureLod(voxel_texture, coords, mip);
-        accumulated += (1.0 - accumulated.a) * voxel;
-        dist += 0.5 * diameter;
+        vec3 worldPos = from + direction * distFromStart;
+        vec3 sampleUVW = MapToZeroOne(worldPos, grid_min, grid_max);
+        if (any(lessThan(sampleUVW, vec3(0.0))) || any(greaterThanEqual(sampleUVW, vec3(1.0))) || sampleLod > maxLevel)
+        {
+            break;
+        }
+        vec4 samplePremult = textureLod(voxel_texture, sampleUVW, sampleLod);
+        float weight = 1.0 - accumulated.a;
+        accumulated += weight * samplePremult;
+        distFromStart += sampleDiameter * 0.16f;
     }
     return accumulated;
 }
@@ -256,7 +294,7 @@ void main()
         float factor = min(1, 1 - roughness * 1.0);
         float factor2 = min(1, 1 - metallic * 1.0);
         float factor3 = min(factor, factor2);
-        indirect_diffuse *= vec3(factor2);
+        indirect_diffuse *= 0.35f * vec3(factor2);
         indirect_diffuse = max(indirect_diffuse, vec3(0.0));
         indirect_diffuse *= albedo * 1.0;
         vec3 indirect_specular = metallic * indirect_specular(WorldPos, R, roughness).rgb;
