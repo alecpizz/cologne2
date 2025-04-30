@@ -75,6 +75,7 @@ namespace cologne
         float shadow_far = 1200.0f;
         glm::mat4 projection_x, projection_y, projection_z;
         bool voxel_debug_visuals = false;
+        glm::vec3 voxel_offset = glm::vec3(0.015f, -0.345f, 0.030f);
 
 
         void init_voxels()
@@ -184,6 +185,7 @@ namespace cologne
             Engine::get_debug_ui()->add_float_entry("Shadow near Plane", shadow_near);
             Engine::get_debug_ui()->add_bool_entry("Voxel Debug Visuals", voxel_debug_visuals);
             Engine::get_debug_ui()->add_bool_entry("Indirect Lighting", apply_indirect_lighting);
+            Engine::get_debug_ui()->add_vec3_entry("Voxel Offset", voxel_offset);
             init_voxels();
         }
 
@@ -896,6 +898,7 @@ namespace cologne
             lit_shader->set_mat4("view_inverse", glm::value_ptr(glm::inverse(Engine::get_camera()->get_view_matrix())));
             lit_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
             lit_shader->set_int("voxel_grid_size", voxel_dimensions);
+            lit_shader->set_vec3("voxel_offset", glm::value_ptr(voxel_offset));
             auto bounds = Engine::get_scene()->get_model_by_index(0)->get_aabb();
             const glm::vec3 center = bounds.center();
             auto scale = Engine::get_scene()->get_model_by_index(0)->get_transform()->scale;

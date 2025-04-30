@@ -56,6 +56,7 @@ uniform float sampling_factor = 0.100f;
 uniform float distance_offset = 3.9f;
 uniform float max_distance = 2.0f;
 uniform bool indirect_lighting_active = true;
+uniform vec3 voxel_offset;
 const int TOTAL_DIFFUSE_CONES = 6;
 const vec3 DIFFUSE_CONE_DIRECTIONS[TOTAL_DIFFUSE_CONES] = { vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.5f, 0.866025f), vec3(0.823639f, 0.5f, 0.267617f), vec3(0.509037f, 0.5f, -0.7006629f), vec3(-0.50937f, 0.5f, -0.7006629f), vec3(-0.823639f, 0.5f, 0.267617f) };
 const float DIFFUSE_CONE_WEIGHTS[TOTAL_DIFFUSE_CONES] = { 0.25, 0.15, 0.15, 0.15, 0.15, 0.15 };
@@ -179,7 +180,7 @@ vec4 cone_trace(vec3 from, vec3 direction, float aperture)
         float sampleLod = log2(sampleDiameter / voxelMinLenght);
 
         vec3 worldPos = from + direction * distFromStart;
-        vec3 sampleUVW = MapToZeroOne(worldPos, grid_min, grid_max);
+        vec3 sampleUVW = MapToZeroOne(worldPos, grid_min, grid_max) - voxel_offset;
         if (any(lessThan(sampleUVW, vec3(0.0))) || any(greaterThanEqual(sampleUVW, vec3(1.0))) || sampleLod > maxLevel)
         {
             break;
@@ -198,7 +199,9 @@ vec4 cone_trace(vec3 from, vec3 direction, float aperture)
 
 vec4 indirect_diffuse(vec3 position, vec3 N)
 {
-    const float aperture = 0.57735;
+    float aperture =  0.57735;
+    //    float aperture = 0.037533;
+    //    aperture = clamp(tan(0.5 * PI * roughness), aperture, 0.5 * PI);
     vec4 color = vec4(0.0f);
     vec3 up = vec3(0.0, 1.0, 0.0);
     if (abs(dot(N, up)) > 0.999)
@@ -216,10 +219,11 @@ vec4 indirect_diffuse(vec3 position, vec3 N)
     return color;
 }
 
+
 vec4 indirect_specular(vec3 pos, vec3 dir, float roughness)
 {
     float aperture = 0.037533;
-    aperture = clamp(tan(0.5 * PI * roughness), aperture, 0.5 * PI);
+//    aperture = clamp(tan(0.5 * PI * roughness), aperture, 0.5 * PI);
     vec4 specular = cone_trace(pos, dir, aperture);
     return specular;
 }
@@ -289,28 +293,29 @@ void main()
     vec3 kS = F;
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
-    vec3 irradiance = texture(irradiance_map, N).rgb;
-    vec3 diffuse = irradiance * albedo;
-
+//    vec3 irradiance = texture(irradiance_map, N).rgb;
+//    vec3 diffuse = irradiance * albedo;
+    vec3 indirect_light = vec3(0.0f);
     if (indirect_lighting_active)
     {
-        vec3 indirect_diffuse = indirect_diffuse(WorldPos, WorldNormal).rgb;
+        indirect_light = indirect_diffuse(WorldPos, N).rgb;
         float factor = min(1, 1 - roughness * 1.0);
         float factor2 = min(1, 1 - metallic * 1.0);
         float factor3 = min(factor, factor2);
-        indirect_diffuse *= 0.35f * vec3(factor2);
-        indirect_diffuse = max(indirect_diffuse, vec3(0.0));
-        indirect_diffuse *= albedo * 1.0;
-        vec3 indirect_specular = metallic * indirect_specular(WorldPos, R, roughness).rgb;
-//        Lo += (kD * indirect_diffuse + indirect_specular) * ao;
+        indirect_light *= 0.05 * vec3(factor3);
+//        indirect_diffuse *= 0.15f * vec3(factor3);
+//        indirect_diffuse = max(indirect_diffuse, vec3(0.0));
+//        indirect_diffuse *= albedo * 1.0;
+//        indirect_specular *= 0.15f * vec3(factor3);
+//        Lo += (kD * indirect_diffuse + indirect_specular) * 0.002;
+//        Lo += indirect_diffuse;
 //        Lo += indirect_specular;
-        Lo += indirect_diffuse;
     }
 
-    const float MAX_RELFECTION_LOD = 4.0;
-    vec3 prefilteredColor = textureLod(prefilter_map, R, roughness * MAX_RELFECTION_LOD).rgb;
-    vec2 brdf = texture(brdf, vec2(max(dot(N, V), 0.0), roughness)).rg;
-    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+//    const float MAX_RELFECTION_LOD = 4.0;
+//    vec3 prefilteredColor = textureLod(prefilter_map, R, roughness * MAX_RELFECTION_LOD).rgb;
+//    vec2 brdf = texture(brdf, vec2(max(dot(N, V), 0.0), roughness)).rg;
+//    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 
 
     vec3 projCoords = FragPosLightSpace.xyz / FragPosLightSpace.w;
@@ -318,7 +323,7 @@ void main()
 
     vec3 ambient = vec3(0.02) * albedo;
     vec3 emission = texture2D(gEmission, TexCoords).rgb;
-    vec3 color = Lo + ambient + emission;
+    vec3 color = Lo + indirect_light + emission;
 
     color = mix(color, Tonemap_ACES(color), 1.0);
     color = color / (color + vec3(1.0));
