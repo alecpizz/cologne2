@@ -184,6 +184,10 @@ vec4 cone_trace(vec3 from, vec3 direction, float aperture)
         {
             break;
         }
+//        sampleUVW.x = 1.0 - sampleUVW.x;
+//        sampleUVW.y = 1.0 - sampleUVW.y;
+//        sampleUVW.z = 1.0 - sampleUVW.z;
+
         vec4 samplePremult = textureLod(voxel_texture, sampleUVW, sampleLod);
         float weight = 1.0 - accumulated.a;
         accumulated += weight * samplePremult;
@@ -290,7 +294,7 @@ void main()
 
     if (indirect_lighting_active)
     {
-        vec3 indirect_diffuse = indirect_diffuse(WorldPos, WorldNormal).rgb * 8.0f;
+        vec3 indirect_diffuse = indirect_diffuse(WorldPos, WorldNormal).rgb;
         float factor = min(1, 1 - roughness * 1.0);
         float factor2 = min(1, 1 - metallic * 1.0);
         float factor3 = min(factor, factor2);
@@ -298,7 +302,9 @@ void main()
         indirect_diffuse = max(indirect_diffuse, vec3(0.0));
         indirect_diffuse *= albedo * 1.0;
         vec3 indirect_specular = metallic * indirect_specular(WorldPos, R, roughness).rgb;
-        Lo += (kD * indirect_diffuse + indirect_specular) * ao;
+//        Lo += (kD * indirect_diffuse + indirect_specular) * ao;
+//        Lo += indirect_specular;
+        Lo += indirect_diffuse;
     }
 
     const float MAX_RELFECTION_LOD = 4.0;
@@ -310,9 +316,9 @@ void main()
     vec3 projCoords = FragPosLightSpace.xyz / FragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
 
-    vec3 ambient = (kD * diffuse + specular) * ao;
+    vec3 ambient = vec3(0.02) * albedo;
     vec3 emission = texture2D(gEmission, TexCoords).rgb;
-    vec3 color = Lo + emission;
+    vec3 color = Lo + ambient + emission;
 
     color = mix(color, Tonemap_ACES(color), 1.0);
     color = color / (color + vec3(1.0));

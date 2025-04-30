@@ -145,6 +145,28 @@ float shadow_calculation(vec3 p, vec3 n, vec3 l)
     return shadow;
 }
 
+vec3 diffuse(Light light, vec3 albedo, vec3 sampleToLight, vec3 N)
+{
+    float dist = length(sampleToLight);
+    if (light.type == DIRECTIONAL)
+    {
+        vec3 diffuse = light.color * dot(normalize(N), -light.direction) * albedo;
+        return diffuse;
+    }
+    else if (light.type == POINT)
+    {
+        sampleToLight = sampleToLight / dist;
+        float cosTheta = dot(normalize(N), (sampleToLight));
+        if (cosTheta > 0.0)
+        {
+            vec3 diffuse = light.color * cosTheta * albedo;
+            float radiance = 1.0 / (dist * dist);
+            return diffuse * radiance;
+        }
+    }
+    return vec3(0.0);
+}
+
 vec4 pbr()
 {
     vec3 FragPos = f_voxel_pos;
@@ -168,39 +190,15 @@ vec4 pbr()
     vec3 Lo = vec3(0.0);
 
     float shadow = 1.0 - shadow_calculation(FragPos, N, -lights[0].direction);
-
-    for (int i = 0; i < num_lights; i++)
+    vec3 color = vec3(0.0f);
+//    color += diffuse(lights[0], albedo, lights[0].position - FragPos, N) * shadow;
+    for (int i = 1; i < num_lights; i++)
     {
-        vec3 L = vec3(0.0);
-        vec3 radiance = vec3(0.0);
-        if (lights[i].type == DIRECTIONAL)
-        {
-            L = normalize(-lights[i].direction);
-            radiance = lights[i].color;
-        }
-        else if (lights[i].type == POINT)
-        {
-            vec3 light_position = lights[i].position;
-            L = normalize(light_position - f_voxel_pos);
-            float distance = length(light_position - f_voxel_pos);
-            float attenuation = 1.0 / (distance * distance);
-            radiance = lights[i].color * attenuation;
-        }
-
-        vec3 H = normalize(V + L);
-        float NDF = distributionGGX(N, H, roughness);
-        float G = geometrySmith(N, V, L, roughness);
-        vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
-
-        vec3 kS = F;
-        vec3 kD = vec3(1.0) - kS;
-        kD *= 1.0 - metallic;
-
-        float NDotL = max(dot(N, L), 0.0);
-        Lo += (kD * albedo / PI) * radiance * NDotL;
+        color += diffuse(lights[i], albedo, lights[i].position - FragPos, N);
     }
-    vec3 ambient = vec3(0.03) * albedo * ao;
-    vec3 color = Lo;
+
+    vec3 ambient = vec3(0.02) * albedo;
+    color += ambient;
     return vec4(color, 1.0);
 }
 
@@ -216,6 +214,6 @@ void main()
 
     vec3 voxelgrid_tex_pos = from_clipspace_to_texcoords(f_voxel_pos);
     ivec3 voxelgrid_resolution = imageSize(texture_voxel);
-//    imageStore(texture_voxel, ivec3(voxelgrid_resolution * voxelgrid_tex_pos), color);
+    //    imageStore(texture_voxel, ivec3(voxelgrid_resolution * voxelgrid_tex_pos), color);
     imageAtomicMax(texture_voxel, ivec3(voxelgrid_resolution * voxelgrid_tex_pos), f16vec4(color));
 }

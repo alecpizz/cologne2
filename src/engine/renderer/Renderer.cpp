@@ -1188,8 +1188,6 @@ namespace cologne
 
         if (cologne::Input::key_pressed(Input::Key::H))
         {
-            //hot reload shaders
-            _impl->voxelize_scene();
             reload_shaders();
         }
 
