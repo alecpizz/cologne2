@@ -75,7 +75,7 @@ namespace cologne
         float shadow_far = 1200.0f;
         glm::mat4 projection_x, projection_y, projection_z;
         bool voxel_debug_visuals = false;
-        glm::vec3 voxel_offset = glm::vec3(0.015f, -0.345f, 0.030f);
+        glm::vec3 voxel_offset = glm::vec3(0.015f, -0.425f, 0.030f);
 
 
         void init_voxels()

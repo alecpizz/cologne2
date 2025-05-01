@@ -299,10 +299,10 @@ void main()
     if (indirect_lighting_active)
     {
         indirect_light = indirect_diffuse(WorldPos, N).rgb;
-        float factor = min(1, 1 - roughness * 1.0);
-        float factor2 = min(1, 1 - metallic * 1.0);
-        float factor3 = min(factor, factor2);
-        indirect_light *= 0.05 * vec3(factor3);
+//        float factor = min(1, 1 - roughness * 1.0);
+//        float factor2 = min(1, 1 - metallic * 1.0);
+//        float factor3 = min(factor, factor2);
+//        indirect_light *= 0.05 * vec3(factor3);
 //        indirect_diffuse *= 0.15f * vec3(factor3);
 //        indirect_diffuse = max(indirect_diffuse, vec3(0.0));
 //        indirect_diffuse *= albedo * 1.0;
