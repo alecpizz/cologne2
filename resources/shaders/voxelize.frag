@@ -171,8 +171,8 @@ vec4 pbr()
 {
     vec3 FragPos = f_voxel_pos;
     vec4 albedo_texture = texture2D(texture_albedo, f_tex_coords);
-    vec3 albedo = albedo_texture.rgb;
-//    vec3 albedo = pow(albedo_texture.rgb, vec3(2.2));
+//    vec3 albedo = albedo_texture.rgb;
+    vec3 albedo = pow(albedo_texture.rgb, vec3(2.2));
     vec3 orm;
     float metallic = texture2D(texture_metallic, f_tex_coords).r;
     float roughness = texture2D(texture_roughness, f_tex_coords).g;
@@ -192,10 +192,9 @@ vec4 pbr()
 
     float shadow = 1.0 - shadow_calculation(FragPos, N, -lights[0].direction);
     vec3 color = vec3(0.0f);
-    color += diffuse(lights[0], albedo, lights[0].position - FragPos, N) * shadow;
-    for (int i = 1; i < num_lights; i++)
+    for (int i = 0; i < num_lights; i++)
     {
-//        color += diffuse(lights[i], albedo, lights[i].position - FragPos, N);
+        color += diffuse(lights[i], albedo, lights[i].position - FragPos, N);
     }
 
 //    vec3 ambient = vec3(0.02) * albedo;

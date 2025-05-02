@@ -5,7 +5,6 @@ in vec2 TexCoords;
 //in vec3 FragPos;
 //in vec3 WorldPos;
 //in mat3 TBN;
-//in vec4 FragPosLightSpace;
 
 struct Light
 {
@@ -59,7 +58,12 @@ uniform bool indirect_lighting_active = true;
 uniform vec3 voxel_offset;
 const int TOTAL_DIFFUSE_CONES = 6;
 const vec3 DIFFUSE_CONE_DIRECTIONS[TOTAL_DIFFUSE_CONES] = { vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.5f, 0.866025f), vec3(0.823639f, 0.5f, 0.267617f), vec3(0.509037f, 0.5f, -0.7006629f), vec3(-0.50937f, 0.5f, -0.7006629f), vec3(-0.823639f, 0.5f, 0.267617f) };
-const float DIFFUSE_CONE_WEIGHTS[TOTAL_DIFFUSE_CONES] = { 0.25, 0.15, 0.15, 0.15, 0.15, 0.15 };
+const float DIFFUSE_CONE_WEIGHTS[TOTAL_DIFFUSE_CONES] = { PI / 4.0f,
+3.0f * PI / 20.0f,
+3.0f * PI / 20.0f,
+3.0f * PI / 20.0f,
+3.0f * PI / 20.0f,
+3.0f * PI / 20.0f };
 
 
 layout (std140) uniform LightSpaceMatrices
@@ -251,17 +255,18 @@ void main()
     vec3 Lo = vec3(0.0);
     vec3 lightDirection = normalize(-lights[0].direction);
 
-    vec4 FragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0);
     float shadow = 1.0 - shadowCalculation(FragPos, N, lightDirection);
 
     for (int i = 0; i < num_lights; i++)
     {
+        float shadow = 0.0f;
         vec3 L = vec3(0.0);
         vec3 radiance = vec3(0.0);
         if (lights[i].type == DIRECTIONAL)
         {
             L = normalize(-lights[i].direction);
             radiance = lights[i].color;
+            shadow = 1.0 - shadowCalculation(FragPos, N, L);
         }
         else if (lights[i].type == POINT)
         {
@@ -299,8 +304,10 @@ void main()
     if (indirect_lighting_active)
     {
         indirect_light = indirect_diffuse(WorldPos, N).rgb;
-//        float factor = min(1, 1 - roughness * 1.0);
-//        float factor2 = min(1, 1 - metallic * 1.0);
+        float factor = min(1, roughness * 1.5);
+        indirect_light *= (0.3) * vec3(factor);
+        indirect_light = max(indirect_light, vec3(0));
+        indirect_light *= albedo;
 //        float factor3 = min(factor, factor2);
 //        indirect_light *= 0.05 * vec3(factor3);
 //        indirect_diffuse *= 0.15f * vec3(factor3);
@@ -318,8 +325,6 @@ void main()
 //    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 
 
-    vec3 projCoords = FragPosLightSpace.xyz / FragPosLightSpace.w;
-    projCoords = projCoords * 0.5 + 0.5;
 
     vec3 ambient = vec3(0.02) * albedo;
     vec3 emission = texture2D(gEmission, TexCoords).rgb;
