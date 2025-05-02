@@ -308,6 +308,7 @@ void main()
         indirect_light *= (0.3) * vec3(factor);
         indirect_light = max(indirect_light, vec3(0));
         indirect_light *= albedo;
+        indirect_light *= 0.65f;
 //        float factor3 = min(factor, factor2);
 //        indirect_light *= 0.05 * vec3(factor3);
 //        indirect_diffuse *= 0.15f * vec3(factor3);
