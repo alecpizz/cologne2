@@ -42,7 +42,7 @@ namespace cologne
         std::unordered_map<std::string, std::shared_ptr<Shader> > shaders = std::unordered_map<std::string,
             std::shared_ptr<Shader> >();
         std::vector<Light> lights;
-        std::vector<float> shadowCascadeLevels;
+
         Texture env_cubemap;
         Texture env_irradiance;
         Texture env_prefilter;
@@ -55,10 +55,8 @@ namespace cologne
         uint32_t g_emission;
         uint32_t g_depth;
         uint32_t g_normal_flat;
-        uint32_t shadow_fbo = 0;
-        uint32_t shadow_depth = 0;
-        uint32_t shadow_cascade_ubo = 0;
-        uint32_t rsm_size = 4096;
+
+
         uint32_t voxel_texture = 0;
         uint32_t voxel_fbo = 0;
         uint32_t voxel_fbo_tex = 0;
@@ -70,9 +68,7 @@ namespace cologne
         const int32_t voxel_dimensions = 256;
         float world_size_half = 100.0f;
         glm::vec3 world_center = glm::vec3(0.0f);
-        float zMulti = 10.0f;
-        float shadow_near = 0.1f;
-        float shadow_far = 1200.0f;
+
         glm::mat4 projection_x, projection_y, projection_z;
         bool voxel_debug_visuals = false;
         glm::vec3 voxel_offset = glm::vec3(0.035f, -0.425f, 0.015f);
@@ -176,13 +172,8 @@ namespace cologne
             debug_renderer = std::make_unique<DebugRenderer>();
             text_renderer = std::unique_ptr<TextRenderer>(
                 new TextRenderer(RESOURCES_PATH "fonts/Montserrat-Regular.ttf"));
-            shadowCascadeLevels.push_back(shadow_far / 50.0f);
-            shadowCascadeLevels.push_back(shadow_far / 25.0f);
-            shadowCascadeLevels.push_back(shadow_far / 10.0f);
-            shadowCascadeLevels.push_back(shadow_far / 2.0f);
-            Engine::get_debug_ui()->add_float_entry("ZMulti", zMulti);
-            Engine::get_debug_ui()->add_float_entry("Shadow Far Plane", shadow_far);
-            Engine::get_debug_ui()->add_float_entry("Shadow near Plane", shadow_near);
+
+
             Engine::get_debug_ui()->add_bool_entry("Voxel Debug Visuals", voxel_debug_visuals);
             Engine::get_debug_ui()->add_bool_entry("Indirect Lighting", apply_indirect_lighting);
             Engine::get_debug_ui()->add_vec3_entry("Voxel Offset", voxel_offset);
@@ -218,7 +209,7 @@ namespace cologne
             voxelize_shader->set_vec3("grid_min", glm::value_ptr(min));
             voxelize_shader->set_vec3("grid_max", glm::value_ptr(max));
             glBindImageTexture(6, voxel_texture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
-            glBindTextureUnit(7, shadow_depth);
+            // glBindTextureUnit(7, _shadow_depth);
             for (size_t i = 0; i < scene->get_model_count(); i++)
             {
                 auto model = scene->get_model_by_index(i);
@@ -276,14 +267,6 @@ namespace cologne
         {
             lit_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/lit.vert",
                                                   RESOURCES_PATH "shaders/lit.frag");
-            lit_shader->bind();
-            for (size_t i = 0; i < shadowCascadeLevels.size(); i++)
-            {
-                lit_shader->set_float(std::string("cascadePlaneDistances[" + std::to_string(i) + "]").c_str(),
-                                      shadowCascadeLevels[i]);
-            }
-            lit_shader->set_float("far_plane", shadow_far);
-            lit_shader->set_int("cascadeCount", shadowCascadeLevels.size());
 
             g_buffer_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/gbuffer.vert",
                                                        RESOURCES_PATH "shaders/gbuffer.frag");
@@ -418,47 +401,6 @@ namespace cologne
             Engine::get_debug_ui()->add_image_entry("G_ORM", g_metallic_roughness_ao, glm::vec2(width, height));
             Engine::get_debug_ui()->add_image_entry("G_Depth", g_depth, glm::vec2(width, height));
             Engine::get_debug_ui()->add_image_entry("G_Emission", g_emission, glm::vec2(width, height));
-        }
-
-
-        void init_shadow_map()
-        {
-            glGenFramebuffers(1, &shadow_fbo);
-            glGenTextures(1, &shadow_depth);
-            glBindTexture(GL_TEXTURE_2D_ARRAY, shadow_depth);
-
-            int32_t cascade_amount = static_cast<int32_t>(shadowCascadeLevels.size()) + 1;
-
-            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT32F, rsm_size, rsm_size,
-                         cascade_amount, 0,
-                         GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-            constexpr float white[] = {1.0f, 1.0f, 1.0f, 1.0f};
-
-            glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, white);
-
-
-            glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadow_depth, 0);
-            glDrawBuffer(GL_NONE);
-            glReadBuffer(GL_NONE);
-
-            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            {
-                LOG_ERROR("Framebuffer is not complete!");
-                return;
-            }
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-            glGenBuffers(1, &shadow_cascade_ubo);
-            glBindBuffer(GL_UNIFORM_BUFFER, shadow_cascade_ubo);
-            glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4x4) * 16, nullptr, GL_STATIC_DRAW);
-            glBindBufferBase(GL_UNIFORM_BUFFER, 0, shadow_cascade_ubo);
-            glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
         void gen_environment_map(const std::string &path)
@@ -711,109 +653,6 @@ namespace cologne
             voxelize_scene();
         }
 
-        void render_cube(int32_t count = 1)
-        {
-            static uint32_t cubeVAO = 0;
-            static uint32_t cubeVBO = 0;
-
-            if (cubeVAO == 0)
-            {
-                float vertices[] = {
-                    // back face
-                    -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-                    1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f, // top-right
-                    1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f, // bottom-right
-                    1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f, // top-right
-                    -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-                    -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, // top-left
-                    // front face
-                    -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom-left
-                    1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, // bottom-right
-                    1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // top-right
-                    1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // top-right
-                    -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, // top-left
-                    -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom-left
-                    // left face
-                    -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-right
-                    -1.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top-left
-                    -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-left
-                    -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-left
-                    -1.0f, -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-right
-                    -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-right
-                    // right face
-                    1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-left
-                    1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-right
-                    1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top-right
-                    1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-right
-                    1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-left
-                    1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-left
-                    // bottom face
-                    -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
-                    1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f, // top-left
-                    1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom-left
-                    1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom-left
-                    -1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom-right
-                    -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
-                    // top face
-                    -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
-                    1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom-right
-                    1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // top-right
-                    1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom-right
-                    -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
-                    -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f // bottom-left
-                };
-
-                glCreateBuffers(1, &cubeVBO);
-                glNamedBufferStorage(cubeVBO, sizeof(vertices), vertices, GL_MAP_READ_BIT);
-                glCreateVertexArrays(1, &cubeVAO);
-                glVertexArrayVertexBuffer(cubeVAO, 0, cubeVBO, 0, 8 * sizeof(float));
-
-                glEnableVertexArrayAttrib(cubeVAO, 0);
-                glEnableVertexArrayAttrib(cubeVAO, 1);
-                glEnableVertexArrayAttrib(cubeVAO, 2);
-
-                glVertexArrayAttribFormat(cubeVAO, 0, 3, GL_FLOAT, GL_FALSE, 0);
-                glVertexArrayAttribFormat(cubeVAO, 1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float));
-                glVertexArrayAttribFormat(cubeVAO, 2, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float));
-
-                glVertexArrayAttribBinding(cubeVAO, 0, 0);
-                glVertexArrayAttribBinding(cubeVAO, 1, 0);
-                glVertexArrayAttribBinding(cubeVAO, 2, 0);
-            }
-
-            glBindVertexArray(cubeVAO);
-            glDrawArraysInstanced(GL_TRIANGLES, 0, 36, count);
-            glBindVertexArray(0);
-        }
-
-        void render_quad()
-        {
-            static uint32_t quad_vao = 0;
-            static uint32_t quad_vbo = 0;
-            if (quad_vao == 0)
-            {
-                float quadVertices[] = {
-                    // positions        // texture Coords
-                    -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-                    -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-                    1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-                    1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-                };
-                // setup plane VAO
-                glGenVertexArrays(1, &quad_vao);
-                glGenBuffers(1, &quad_vbo);
-                glBindVertexArray(quad_vao);
-                glBindBuffer(GL_ARRAY_BUFFER, quad_vbo);
-                glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-                glEnableVertexAttribArray(0);
-                glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) 0);
-                glEnableVertexAttribArray(1);
-                glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
-            }
-            glBindVertexArray(quad_vao);
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-            glBindVertexArray(0);
-        }
 
         void bind_lights(const Shader &shader)
         {
@@ -834,14 +673,6 @@ namespace cologne
                                 glm::value_ptr(lights[i].direction));
             }
             shader.set_int("num_lights", lights.size());
-
-            for (size_t i = 0; i < shadowCascadeLevels.size(); i++)
-            {
-                shader.set_float(std::string("cascadePlaneDistances[" + std::to_string(i) + "]").c_str(),
-                                 shadowCascadeLevels[i]);
-            }
-            shader.set_float("far_plane", shadow_far);
-            shader.set_int("cascadeCount", shadowCascadeLevels.size());
         }
 
         void gbuffer_pass(Scene &scene)
@@ -894,7 +725,7 @@ namespace cologne
             env_irradiance.bind(IRRADIANCE_INDEX);
             env_prefilter.bind(PREFILTER_INDEX);
             env_brdf.bind(BRDF_INDEX);
-            lit_shader->set_float("far_plane", shadow_far);
+            update_shadow(*lit_shader);
             lit_shader->set_mat4("view_inverse", glm::value_ptr(glm::inverse(Engine::get_camera()->get_view_matrix())));
             lit_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
             lit_shader->set_int("voxel_grid_size", voxel_dimensions);
@@ -933,149 +764,6 @@ namespace cologne
                               Engine::get_window()->get_width(), Engine::get_window()->get_height(),
                               GL_DEPTH_BUFFER_BIT, GL_NEAREST);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        }
-
-        void shadow_pass(Scene &scene)
-        {
-            shadowCascadeLevels[0] = (shadow_far / 50.0f);
-            shadowCascadeLevels[1] = (shadow_far / 25.0f);
-            shadowCascadeLevels[2] = (shadow_far / 10.0f);
-            shadowCascadeLevels[3] = (shadow_far / 2.0f);
-            const auto light_matrices = get_light_space_matrices();
-            glBindBuffer(GL_UNIFORM_BUFFER, shadow_cascade_ubo);
-            for (size_t i = 0; i < light_matrices.size(); i++)
-            {
-                glBufferSubData(GL_UNIFORM_BUFFER, i * sizeof(glm::mat4x4), sizeof(glm::mat4x4), &light_matrices[i]);
-            }
-            glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-            shadowmap_shader->bind();
-            shadowmap_shader->set_vec3("light.direction", glm::value_ptr(lights[0].direction));
-            shadowmap_shader->set_vec3("light.color", glm::value_ptr(lights[0].color));
-            glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
-            glViewport(0, 0, rsm_size, rsm_size);
-            glClear(GL_DEPTH_BUFFER_BIT);
-            glCullFace(GL_FRONT);
-            glEnable(GL_DEPTH_CLAMP);
-
-            for (size_t i = 0; i < scene.get_model_count(); i++)
-            {
-                auto model = scene.get_model_by_index(i);
-                if (!model->get_active())
-                {
-                    continue;
-                }
-                shadowmap_shader->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
-                for (size_t j = 0; j < model->get_num_meshes(); j++)
-                {
-                    Mesh mesh = model->get_meshes()[j];
-                    Material mat = model->get_materials()[mesh.get_material_index()];
-                    mat.albedo.bind(ALBEDO_INDEX);
-                    mesh.draw();
-                }
-            }
-            glCullFace(GL_BACK);
-            glDisable(GL_DEPTH_CLAMP);
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
-        }
-
-        std::vector<glm::mat4> get_light_space_matrices()
-        {
-            std::vector<glm::mat4> ret;
-            for (size_t i = 0; i < shadowCascadeLevels.size() + 1; ++i)
-            {
-                if (i == 0)
-                {
-                    ret.push_back(get_light_space_matrix(shadow_near, shadowCascadeLevels[i]));
-                } else if (i < shadowCascadeLevels.size())
-                {
-                    ret.push_back(get_light_space_matrix(shadowCascadeLevels[i - 1], shadowCascadeLevels[i]));
-                } else
-                {
-                    ret.push_back(get_light_space_matrix(shadowCascadeLevels[i - 1], shadow_far));
-                }
-            }
-            return ret;
-        }
-
-        glm::mat4 get_light_space_matrix(const float near_plane, const float far_plane)
-        {
-            const auto proj = glm::perspective(
-                Engine::get_camera()->get_fov(),
-                (float) Engine::get_window()->get_width() / (float) Engine::get_window()->get_height(), near_plane,
-                far_plane);
-            const auto corners = get_frustum_corners_world_space(proj, Engine::get_camera()->get_view_matrix());
-
-            glm::vec3 center = glm::vec3(0, 0, 0);
-            for (const auto &v: corners)
-            {
-                center += glm::vec3(v);
-            }
-            center /= corners.size();
-            glm::vec3 lightDir = lights[0].direction;
-            const auto lightView = glm::lookAt(center - lightDir, center, glm::vec3(0.0f, 1.0f, 0.0f));
-
-            float minX = std::numeric_limits<float>::max();
-            float maxX = std::numeric_limits<float>::lowest();
-            float minY = std::numeric_limits<float>::max();
-            float maxY = std::numeric_limits<float>::lowest();
-            float minZ = std::numeric_limits<float>::max();
-            float maxZ = std::numeric_limits<float>::lowest();
-            for (const auto &v: corners)
-            {
-                const auto trf = lightView * v;
-                minX = std::min(minX, trf.x);
-                maxX = std::max(maxX, trf.x);
-                minY = std::min(minY, trf.y);
-                maxY = std::max(maxY, trf.y);
-                minZ = std::min(minZ, trf.z);
-                maxZ = std::max(maxZ, trf.z);
-            }
-
-            // Tune this parameter according to the scene
-            if (minZ < 0)
-            {
-                minZ *= zMulti;
-            } else
-            {
-                minZ /= zMulti;
-            }
-            if (maxZ < 0)
-            {
-                maxZ /= zMulti;
-            } else
-            {
-                maxZ *= zMulti;
-            }
-
-            const glm::mat4 lightProjection = glm::ortho(minX, maxX, minY, maxY, minZ, maxZ);
-            return lightProjection * lightView;
-        }
-
-        std::vector<glm::vec4> get_frustum_corners_world_space(const glm::mat4 &proj, const glm::mat4 &view)
-        {
-            return get_frustum_corners_world_space(proj * view);
-        }
-
-        std::vector<glm::vec4> get_frustum_corners_world_space(const glm::mat4 &proj_view)
-        {
-            const auto inv = glm::inverse(proj_view);
-
-            std::vector<glm::vec4> frustumCorners;
-            for (unsigned int x = 0; x < 2; ++x)
-            {
-                for (unsigned int y = 0; y < 2; ++y)
-                {
-                    for (unsigned int z = 0; z < 2; ++z)
-                    {
-                        const glm::vec4 pt = inv * glm::vec4(2.0f * x - 1.0f, 2.0f * y - 1.0f, 2.0f * z - 1.0f, 1.0f);
-                        frustumCorners.push_back(pt / pt.w);
-                    }
-                }
-            }
-
-            return frustumCorners;
         }
 
         void skybox_pass()
@@ -1193,7 +881,7 @@ namespace cologne
         {
             reload_shaders();
         }
-
+        shadow_pass(scene);
         _impl->shadow_pass(scene);
         _impl->voxelize_scene();
         _impl->gbuffer_pass(scene);
@@ -1216,6 +904,7 @@ namespace cologne
     {
         _impl->init_shaders();
         _impl->bind_lights(*_impl->lit_shader);
+        update_shadow(*_impl->lit_shader);
         LOG_INFO("RELOADED SHADERS");
     }
 
@@ -1248,6 +937,7 @@ namespace cologne
         directional_light.position = position;
         directional_light.direction = direction;
         _impl->bind_lights(*_impl->lit_shader);
+        update_shadow(*_impl->lit_shader);
         _impl->bind_lights(*_impl->voxelize_shader);
         _impl->voxelize_scene();
     }
@@ -1270,7 +960,7 @@ namespace cologne
         _impl->add_light(Light(glm::vec3(0.0f, 10.0f, 10.0f), glm::vec3(.0f),
                                glm::vec3(200.0f, 200.0f, 200.0f), 6.0f, 1.0f,
                                LightType::Point));
-        _impl->init_shadow_map();
+        init_shadow();
         _impl->voxelize_scene();
     }
 }

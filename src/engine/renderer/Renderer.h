@@ -46,7 +46,17 @@ namespace cologne
 
     private:
         Renderer();
-
+        void render_cube(int32_t count = 1);
+        void render_quad();
+        void init_shadow();
+        void shadow_pass(Scene &scene);
+        void update_shadow(const Shader &shader);
+        void init_gbuffer();
+        void gbuffer_pass(Scene &scene);
+        void init_lit();
+        void lit_pass(Scene &scene);
+        void init_skybox();
+        void skybox_pass(Scene &scene);
         struct Impl;
         Impl *_impl;
     };
