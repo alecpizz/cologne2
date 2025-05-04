@@ -216,8 +216,9 @@ namespace cologne
         glTextureStorage2D(_depth_attachment.handle, 1, internal_format, _width, _height);
         glTextureParameteri(_depth_attachment.handle, GL_TEXTURE_MIN_FILTER, min_filter);
         glTextureParameteri(_depth_attachment.handle, GL_TEXTURE_MAG_FILTER, mag_filter);
-        glTextureParameteri(_depth_attachment.handle, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTextureParameteri(_depth_attachment.handle, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(_depth_attachment.handle, GL_TEXTURE_WRAP_S, wrap);
+        glTextureParameteri(_depth_attachment.handle, GL_TEXTURE_WRAP_T, wrap);
+        glTextureParameterfv(_depth_attachment.handle, GL_TEXTURE_BORDER, glm::value_ptr(border_color));
         glNamedFramebufferTexture(_handle, GL_DEPTH_ATTACHMENT, _depth_attachment.handle, 0);
         std::string debugLabel = "Depth (FBO: " + std::string(_name) + "Tex: Depth)";
         glObjectLabel(GL_TEXTURE, _depth_attachment.handle, static_cast<GLsizei>(debugLabel.length()),
@@ -232,6 +233,11 @@ namespace cologne
     void FrameBuffer::bind()
     {
         glBindFramebuffer(GL_FRAMEBUFFER, _handle);
+    }
+
+    void FrameBuffer::release()
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     void FrameBuffer::set_viewport()
@@ -413,5 +419,10 @@ namespace cologne
         glReadBuffer(get_color_attachment_slot_by_name(srcName));
         glDrawBuffer(GL_BACK);
         glBlitFramebuffer(0, 0, _width, _height, dstX0, dstY0, dstX1, dstY1, mask, filter);
+    }
+
+    bool FrameBuffer::is_valid() const
+    {
+        return _handle != 0;
     }
 }

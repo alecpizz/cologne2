@@ -12,7 +12,6 @@ namespace cologne
     std::vector<float> shadowCascadeLevels;
     uint32_t shadow_fbo = 0;
     uint32_t shadow_cascade_ubo = 0;
-    uint32_t shadow_depth;
     uint32_t shadow_size = 4096;
     float zMulti = 10.0f;
     float shadow_near = 0.1f;
@@ -137,8 +136,8 @@ namespace cologne
 
 
         glGenFramebuffers(1, &shadow_fbo);
-        glGenTextures(1, &shadow_depth);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, shadow_depth);
+        glGenTextures(1, &_shadow_depth);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, _shadow_depth);
 
         int32_t cascade_amount = static_cast<int32_t>(shadowCascadeLevels.size()) + 1;
 
@@ -155,7 +154,7 @@ namespace cologne
 
 
         glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadow_depth, 0);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, _shadow_depth, 0);
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
 

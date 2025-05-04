@@ -47,14 +47,6 @@ namespace cologne
         Texture env_irradiance;
         Texture env_prefilter;
         Texture env_brdf;
-        uint32_t g_buffer = 0;
-        uint32_t g_position = 0;
-        uint32_t g_albedo;
-        uint32_t g_normal;
-        uint32_t g_metallic_roughness_ao;
-        uint32_t g_emission;
-        uint32_t g_depth;
-        uint32_t g_normal_flat;
 
 
         uint32_t voxel_texture = 0;
@@ -64,7 +56,6 @@ namespace cologne
         uint32_t voxel_cube_front = 0;
         uint32_t voxel_cube_back_fbo = 0;
         uint32_t voxel_cube_back = 0;
-        bool apply_indirect_lighting = true;
         const int32_t voxel_dimensions = 256;
         float world_size_half = 100.0f;
         glm::vec3 world_center = glm::vec3(0.0f);
@@ -172,7 +163,6 @@ namespace cologne
             debug_renderer = std::make_unique<DebugRenderer>();
             text_renderer = std::unique_ptr<TextRenderer>(
                 new TextRenderer(RESOURCES_PATH "fonts/Montserrat-Regular.ttf"));
-
 
             Engine::get_debug_ui()->add_bool_entry("Voxel Debug Visuals", voxel_debug_visuals);
             Engine::get_debug_ui()->add_bool_entry("Indirect Lighting", apply_indirect_lighting);
@@ -299,171 +289,6 @@ namespace cologne
             shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("shadowmap", shadowmap_shader));
             shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("probe_debug", probe_debug_shader));
             shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("probe_lit", probe_lit_shader));
-        }
-
-        void init_gbuffer(uint32_t width, uint32_t height)
-        {
-            if (g_buffer != 0)
-            {
-                glDeleteFramebuffers(1, &g_buffer);
-            }
-            glGenFramebuffers(1, &g_buffer);
-            glBindFramebuffer(GL_FRAMEBUFFER, g_buffer);
-
-            //position
-            glGenTextures(1, &g_position);
-            glBindTexture(GL_TEXTURE_2D, g_position);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0,
-                         GL_RGBA, GL_FLOAT, nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                                   g_position, 0);
-
-            //normal
-            glGenTextures(1, &g_normal);
-            glBindTexture(GL_TEXTURE_2D, g_normal);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0,
-                         GL_RGBA, GL_FLOAT, nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,
-                                   g_normal, 0);
-
-            //albedo
-            glGenTextures(1, &g_albedo);
-            glBindTexture(GL_TEXTURE_2D, g_albedo);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-                         GL_UNSIGNED_BYTE, nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D,
-                                   g_albedo, 0);
-
-            //orm
-            glGenTextures(1, &g_metallic_roughness_ao);
-            glBindTexture(GL_TEXTURE_2D, g_metallic_roughness_ao);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-                         GL_UNSIGNED_BYTE, nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D,
-                                   g_metallic_roughness_ao, 0);
-
-            //emission
-            glGenTextures(1, &g_emission);
-            glBindTexture(GL_TEXTURE_2D, g_emission);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-                         GL_UNSIGNED_BYTE, nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D,
-                                   g_emission, 0);
-
-            //depth
-
-            glGenTextures(1, &g_depth);
-            glBindTexture(GL_TEXTURE_2D, g_depth);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-                         width, height, 0,GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, g_depth, 0);
-
-            glGenTextures(1, &g_normal_flat);
-            glBindTexture(GL_TEXTURE_2D, g_normal_flat);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0,
-                         GL_RGBA, GL_FLOAT, nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, GL_TEXTURE_2D,
-                                   g_normal_flat, 0);
-
-            uint32_t attachments[6] = {
-                GL_COLOR_ATTACHMENT0,
-                GL_COLOR_ATTACHMENT1,
-                GL_COLOR_ATTACHMENT2,
-                GL_COLOR_ATTACHMENT3,
-                GL_COLOR_ATTACHMENT4,
-                GL_COLOR_ATTACHMENT5
-            };
-            glDrawBuffers(6, attachments);
-            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            {
-                LOG_ERROR("Framebuffer is not complete! %s", glGetError());
-            }
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-            Engine::get_debug_ui()->add_image_entry("G_Normals", g_normal, glm::vec2(width, height));
-            Engine::get_debug_ui()->add_image_entry("G_Normals Flat", g_normal_flat, glm::vec2(width, height));
-            Engine::get_debug_ui()->add_image_entry("G_Position", g_position, glm::vec2(width, height));
-            Engine::get_debug_ui()->add_image_entry("G_Albedo", g_albedo, glm::vec2(width, height));
-            Engine::get_debug_ui()->add_image_entry("G_ORM", g_metallic_roughness_ao, glm::vec2(width, height));
-            Engine::get_debug_ui()->add_image_entry("G_Depth", g_depth, glm::vec2(width, height));
-            Engine::get_debug_ui()->add_image_entry("G_Emission", g_emission, glm::vec2(width, height));
-        }
-
-        void gen_environment_map(const std::string &path)
-        {
-            auto hdr = HDRTexture(std::string(RESOURCES_PATH + path).c_str());
-
-            Shader environment(RESOURCES_PATH "shaders/environment.vert", RESOURCES_PATH "shaders/environment.frag");
-
-            uint32_t captureFBO, captureRBO;
-            glGenFramebuffers(1, &captureFBO);
-            glGenRenderbuffers(1, &captureRBO);
-
-            glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-            glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
-
-            uint32_t envCubemap;
-            glGenTextures(1, &envCubemap);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
-            for (uint32_t i = 0; i < 6; i++)
-            {
-                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 512, 512, 0, GL_RGB, GL_FLOAT, nullptr);
-            }
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-            glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
-            glm::mat4 captureViews[] =
-            {
-                glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
-                glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
-                glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
-                glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)),
-                glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
-                glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f))
-            };
-
-            environment.bind();
-            environment.set_int("equirectangular_map", 0);
-            environment.set_mat4("projection", &captureProjection[0][0]);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, hdr.get_handle());
-
-            glViewport(0, 0, 512, 512);
-            glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-            for (uint32_t i = 0; i < 6; i++)
-            {
-                environment.set_mat4("view", &captureViews[i][0][0]);
-                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                       GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, envCubemap, 0);
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                render_cube();
-            }
-            glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
-            glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            env_cubemap = Texture(envCubemap, 512, 512, 3);
-            glDeleteFramebuffers(1, &captureFBO);
-            glDeleteRenderbuffers(1, &captureRBO);
         }
 
         void gen_irradiance_map()
@@ -675,113 +500,6 @@ namespace cologne
             shader.set_int("num_lights", lights.size());
         }
 
-        void gbuffer_pass(Scene &scene)
-        {
-            glBindFramebuffer(GL_FRAMEBUFFER, g_buffer);
-            glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            g_buffer_shader->bind();
-            g_buffer_shader->set_mat4("projection", &Engine::get_camera()->get_projection_matrix()[0][0]);
-            g_buffer_shader->set_mat4("view", &Engine::get_camera()->get_view_matrix()[0][0]);
-
-            for (size_t i = 0; i < scene.get_model_count(); i++)
-            {
-                auto model = scene.get_model_by_index(i);
-                if (!model->get_active())
-                {
-                    continue;
-                }
-                g_buffer_shader->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
-                for (size_t j = 0; j < model->get_num_meshes(); j++)
-                {
-                    Mesh mesh = model->get_meshes()[j];
-                    Material mat = model->get_materials()[mesh.get_material_index()];
-                    mat.albedo.bind(ALBEDO_INDEX);
-                    mat.ao.bind(AO_INDEX);
-                    mat.metallic.bind(METALLIC_INDEX);
-                    mat.roughness.bind(ROUGHNESS_INDEX);
-                    mat.normal.bind(NORMAL_INDEX);
-                    mat.emission.bind(EMISSION_INDEX);
-                    mesh.draw();
-
-                    glBindTextureUnit(ALBEDO_INDEX, 0);
-                    glBindTextureUnit(AO_INDEX, 0);
-                    glBindTextureUnit(METALLIC_INDEX, 0);
-                    glBindTextureUnit(ROUGHNESS_INDEX, 0);
-                    glBindTextureUnit(NORMAL_INDEX, 0);
-                    glBindTextureUnit(EMISSION_INDEX, 0);
-                }
-            }
-
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        }
-
-        void lit_pass()
-        {
-            glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            lit_shader->bind();
-            lit_shader->set_vec3("camera_pos", glm::value_ptr(Engine::get_camera()->get_position()));
-            env_irradiance.bind(IRRADIANCE_INDEX);
-            env_prefilter.bind(PREFILTER_INDEX);
-            env_brdf.bind(BRDF_INDEX);
-            update_shadow(*lit_shader);
-            lit_shader->set_mat4("view_inverse", glm::value_ptr(glm::inverse(Engine::get_camera()->get_view_matrix())));
-            lit_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
-            lit_shader->set_int("voxel_grid_size", voxel_dimensions);
-            lit_shader->set_vec3("voxel_offset", glm::value_ptr(voxel_offset));
-            auto bounds = Engine::get_scene()->get_model_by_index(0)->get_aabb();
-            const glm::vec3 center = bounds.center();
-            auto scale = Engine::get_scene()->get_model_by_index(0)->get_transform()->scale;
-            const glm::vec3 size = bounds.size(); //THIS IS WRONG!
-            const float world_size = glm::max(size.x, glm::max(size.y, size.z));
-            const float texelSize = 1.0f / voxel_dimensions;
-            const float voxel_size = world_size * texelSize;
-            lit_shader->set_float("voxel_size", voxel_size);
-            auto min = bounds.min * scale;
-            auto max = bounds.max * scale;
-            lit_shader->set_vec3("grid_min", glm::value_ptr(min));
-            lit_shader->set_vec3("grid_max", glm::value_ptr(max));
-            lit_shader->set_vec3("world_center", glm::value_ptr(center));
-            lit_shader->set_float("worldSizeHalf", 0.5f * world_size);
-
-            lit_shader->set_float("sampling_factor", 0.100f);
-            lit_shader->set_float("distance_offset", 3.9f);
-            lit_shader->set_float("max_distance", 2.0f);
-            lit_shader->set_bool("indirect_lighting_active", apply_indirect_lighting);
-            glBindTextureUnit(0, g_position);
-            glBindTextureUnit(1, g_normal);
-            glBindTextureUnit(2, g_albedo);
-            glBindTextureUnit(3, g_metallic_roughness_ao);
-            glBindTextureUnit(4, g_emission);
-            glBindTextureUnit(5, shadow_depth);
-            glBindTextureUnit(9, voxel_texture);
-            glBindTextureUnit(10, g_normal_flat);
-            render_quad();
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer);
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
-            glBlitFramebuffer(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height(), 0, 0,
-                              Engine::get_window()->get_width(), Engine::get_window()->get_height(),
-                              GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        }
-
-        void skybox_pass()
-        {
-            glDisable(GL_CULL_FACE);
-            glDisable(GL_BLEND);
-            glDepthMask(GL_FALSE);
-            glDepthFunc(GL_LEQUAL);
-            skybox_shader->bind();
-            skybox_shader->set_mat4("projection", &Engine::get_camera()->get_projection_matrix()[0][0]);
-            skybox_shader->set_mat4("view", &Engine::get_camera()->get_view_matrix()[0][0]);
-            env_cubemap.bind(0);
-            render_cube();
-            glEnable(GL_CULL_FACE);
-            glEnable(GL_BLEND);
-            glDepthMask(GL_TRUE);
-            glDepthFunc(GL_LESS);
-        }
 
         void debug_voxel_pass()
         {
@@ -882,11 +600,10 @@ namespace cologne
             reload_shaders();
         }
         shadow_pass(scene);
-        _impl->shadow_pass(scene);
         _impl->voxelize_scene();
-        _impl->gbuffer_pass(scene);
-        _impl->lit_pass();
-        _impl->skybox_pass();
+        geometry_pass(scene);
+        lit_pass();
+        skybox_pass();
         _impl->debug_voxel_pass();
         _impl->debug_renderer->present();
         _impl->text_renderer->present();
@@ -895,7 +612,7 @@ namespace cologne
     void Renderer::window_resized(uint32_t width, uint32_t height)
     {
         //regen framebuffers here
-        _impl->init_gbuffer(width, height);
+        init_gbuffer();
         _impl->init_voxel_fbo();
         render_scene(*Engine::get_scene());
     }
@@ -946,10 +663,10 @@ namespace cologne
     {
         _impl = new Impl();
         _impl->init();
-        _impl->init_gbuffer(Engine::get_window()->get_width(), Engine::get_window()->get_height());
         _impl->init_shaders();
+        init_gbuffer();
         glDisable(GL_CULL_FACE);
-        _impl->gen_environment_map("HDR_blue_local_star.hdr");
+        init_skybox("HDR_blue_local_star.hdr");
         _impl->gen_irradiance_map();
         _impl->gen_prefilter_map();
         _impl->gen_brdf_map();

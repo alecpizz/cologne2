@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "FrameBuffer.h"
 #include "Light.h"
 #include "engine/Scene.h"
 
@@ -45,6 +46,11 @@ namespace cologne
         void set_directional_light(glm::vec3 position, glm::vec3 direction);
 
     private:
+        struct VoxelData
+        {
+            int32_t voxel_dimensions = 256;
+            glm::vec3 voxel_offset = glm::vec3(0.035f, -0.425f, 0.015f);
+        };
         Renderer();
         void render_cube(int32_t count = 1);
         void render_quad();
@@ -52,12 +58,17 @@ namespace cologne
         void shadow_pass(Scene &scene);
         void update_shadow(const Shader &shader);
         void init_gbuffer();
-        void gbuffer_pass(Scene &scene);
+        void geometry_pass(Scene &scene);
         void init_lit();
-        void lit_pass(Scene &scene);
-        void init_skybox();
-        void skybox_pass(Scene &scene);
+        void lit_pass();
+        void init_skybox(const char* hdr_path);
+        void skybox_pass();
         struct Impl;
         Impl *_impl;
+        uint32_t _shadow_depth;
+        uint32_t _voxel_texture;
+        bool _apply_indirect_lighting = true;
+        VoxelData _voxel_data;
+        FrameBuffer _gbuffer_fbo;
     };
 }

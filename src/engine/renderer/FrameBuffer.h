@@ -19,8 +19,6 @@ namespace cologne
 
     class FrameBuffer
     {
-
-
     public:
         FrameBuffer() = default;
 
@@ -38,6 +36,8 @@ namespace cologne
         void bind_depth_attachment(const FrameBuffer &src_frame_buffer);
 
         void bind();
+
+        void release();
 
         void set_viewport();
 
@@ -70,6 +70,7 @@ namespace cologne
 
         void blit_to_default_frame_buffer(const char *srcName, int32_t dstX0, int32_t dstY0, int32_t dstX1,
                                           int32_t dstY1, uint32_t mask, uint32_t filter);
+        bool is_valid() const;
 
     private:
         const char *_name = "undefined";
