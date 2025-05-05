@@ -39,6 +39,8 @@ namespace cologne
 
         void release();
 
+        void set_empty();
+
         void set_viewport();
 
         void draw_buffers(const char **attachment_names, uint32_t num_attachments);

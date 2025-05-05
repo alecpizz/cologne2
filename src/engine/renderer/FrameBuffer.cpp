@@ -240,6 +240,16 @@ namespace cologne
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
+    void FrameBuffer::set_empty()
+    {
+        bind();
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
+        glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_WIDTH, _width);
+        glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT, _height);
+        release();
+    }
+
     void FrameBuffer::set_viewport()
     {
         glViewport(0, 0, _width, _height);
@@ -352,7 +362,7 @@ namespace cologne
             glDeleteTextures(1, &_depth_attachment.handle);
             glCreateTextures(GL_TEXTURE_2D, 1, &_depth_attachment.handle);
             glTextureStorage2D(_depth_attachment.handle, 1,
-                _depth_attachment.internal_format, _width, _height);
+                               _depth_attachment.internal_format, _width, _height);
             glTextureParameteri(_depth_attachment.handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTextureParameteri(_depth_attachment.handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTextureParameteri(_depth_attachment.handle, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

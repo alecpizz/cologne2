@@ -52,6 +52,8 @@ namespace cologne
             glm::vec3 voxel_offset = glm::vec3(0.035f, -0.425f, 0.015f);
         };
         Renderer();
+        void init();
+        void init_shaders();
         void render_cube(int32_t count = 1);
         void render_quad();
         void init_shadow();
@@ -63,12 +65,20 @@ namespace cologne
         void lit_pass();
         void init_skybox(const char* hdr_path);
         void skybox_pass();
+        void init_voxels();
+        void voxelize_scene();
+        void debug_voxel_pass();
         struct Impl;
         Impl *_impl;
         uint32_t _shadow_depth;
         uint32_t _voxel_texture;
         bool _apply_indirect_lighting = true;
+        bool _voxel_debug_visuals = false;
         VoxelData _voxel_data;
         FrameBuffer _gbuffer_fbo;
+        FrameBuffer _voxel_front_fbo;
+        FrameBuffer _voxel_back_fbo;
+        FrameBuffer _voxel_fbo;
+
     };
 }
