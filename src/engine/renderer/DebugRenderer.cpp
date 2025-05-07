@@ -47,7 +47,7 @@ namespace cologne
             if (bufferSize > allocated_buffer_size)
             {
                 glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_DYNAMIC_DRAW);
-                allocated_buffer_size = bufferSize;
+                allocated_buffer_size = static_cast<uint32_t>(bufferSize);
             }
 
             glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSize, vertices.data());
@@ -59,7 +59,7 @@ namespace cologne
             glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void*)offsetof(DebugVertex, color));
             glBindVertexArray(0);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
-            vertex_count = vertices.size();
+            vertex_count = static_cast<uint32_t>(vertices.size());
         }
 
         void draw()

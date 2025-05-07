@@ -13,7 +13,9 @@ namespace cologne
     void Renderer::lit_pass()
     {
         auto shader = get_shader_by_name("lit");
-        glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
+        _output_fbo.bind();
+        _output_fbo.set_viewport();
+        // glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         shader->bind();
         shader->set_vec3("camera_pos", glm::value_ptr(Engine::get_camera()->get_position()));
@@ -54,7 +56,7 @@ namespace cologne
         glBindTextureUnit(9, _voxel_texture);
         render_quad();
         glBindFramebuffer(GL_READ_FRAMEBUFFER, _gbuffer_fbo.get_handle());
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _output_fbo.get_handle()); // write to output framebuffer
         glBlitFramebuffer(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height(), 0, 0,
                           Engine::get_window()->get_width(), Engine::get_window()->get_height(),
                           GL_DEPTH_BUFFER_BIT, GL_NEAREST);

@@ -26,10 +26,17 @@ namespace cologne
         _gbuffer_fbo.create_attachment("orm", GL_RGB8, GL_NEAREST, GL_NEAREST);
         _gbuffer_fbo.create_attachment("emission", GL_RGB8, GL_NEAREST, GL_NEAREST);
         _gbuffer_fbo.create_attachment("flat_normals", GL_RGB16F, GL_NEAREST, GL_NEAREST);
-        _gbuffer_fbo.create_depth_attachment(GL_DEPTH_COMPONENT, GL_NEAREST, GL_NEAREST, GL_REPEAT);
+
+        _gbuffer_fbo.create_depth_attachment(GL_DEPTH_COMPONENT32F, GL_NEAREST, GL_NEAREST, GL_REPEAT);
         std::vector attachments = {"position", "normal", "albedo", "orm", "emission", "flat_normals"};
-        _gbuffer_fbo.draw_buffers(attachments.data(), attachments.size());
+        _gbuffer_fbo.draw_buffers(attachments.data(), static_cast<uint32_t>(attachments.size()));
         _gbuffer_fbo.release();
+
+        _output_fbo.create("output", width, height);
+        _output_fbo.create_attachment("color", GL_RGBA16F, GL_LINEAR, GL_LINEAR);
+        _output_fbo.create_depth_attachment(GL_DEPTH_COMPONENT32F, GL_NEAREST, GL_NEAREST, GL_REPEAT);
+        _output_fbo.release();
+
         Engine::get_debug_ui()->add_image_entry("G_Normals", _gbuffer_fbo.get_color_attachment_handle_by_name("normal"),
             glm::vec2(width, height));
         Engine::get_debug_ui()->add_image_entry("G_Normals Flat",

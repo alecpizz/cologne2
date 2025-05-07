@@ -10,7 +10,7 @@
 
 namespace cologne
 {
-    uint32_t skybox_texture;
+
 
     void Renderer::init_skybox(const char *hdr_path)
     {
@@ -88,7 +88,7 @@ namespace cologne
         glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
         glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        skybox_texture = envCubemap;
+        _skybox_texture = envCubemap;
         glDeleteFramebuffers(1, &captureFBO);
         glDeleteRenderbuffers(1, &captureRBO);
         glDeleteTextures(1, &hdr_handle);
@@ -96,6 +96,7 @@ namespace cologne
 
     void Renderer::skybox_pass()
     {
+        _output_fbo.bind();
         glDisable(GL_CULL_FACE);
         glDisable(GL_BLEND);
         glDepthMask(GL_FALSE);
@@ -104,11 +105,12 @@ namespace cologne
         shader->bind();
         shader->set_mat4("projection", &Engine::get_camera()->get_projection_matrix()[0][0]);
         shader->set_mat4("view", &Engine::get_camera()->get_view_matrix()[0][0]);
-        glBindTextureUnit(0, skybox_texture);
+        glBindTextureUnit(0, _skybox_texture);
         render_cube();
         glEnable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
+        _output_fbo.release();
     }
 }

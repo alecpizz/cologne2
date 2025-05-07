@@ -38,6 +38,8 @@ namespace cologne
 
         void window_resized(uint32_t width, uint32_t height);
 
+        void add_light(Light light);
+
         void reload_shaders();
 
         Shader* get_shader_by_name(const char* name);
@@ -68,10 +70,16 @@ namespace cologne
         void init_voxels();
         void voxelize_scene();
         void debug_voxel_pass();
-        struct Impl;
-        Impl *_impl;
+        void init_radiance();
+        void init_prefilter();
+        void init_brdf();
+        void update_lights(const Shader& shader);
         uint32_t _shadow_depth;
         uint32_t _voxel_texture;
+        uint32_t _skybox_texture;
+        uint32_t _env_irradiance;
+        uint32_t _env_prefilter;
+        uint32_t _env_brdf;
         bool _apply_indirect_lighting = true;
         bool _voxel_debug_visuals = false;
         VoxelData _voxel_data;
@@ -79,6 +87,6 @@ namespace cologne
         FrameBuffer _voxel_front_fbo;
         FrameBuffer _voxel_back_fbo;
         FrameBuffer _voxel_fbo;
-
+        FrameBuffer _output_fbo;
     };
 }

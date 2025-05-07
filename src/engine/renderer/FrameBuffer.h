@@ -80,6 +80,7 @@ namespace cologne
         uint32_t _width = 0;
         uint32_t _height = 0;
         DepthAttachment _depth_attachment;
+        std::vector<ColorAttachment> _color_attachments;
         struct Impl;
         Impl *_impl = nullptr;
     };

@@ -54,6 +54,60 @@ namespace cologne
         });
     }
 
+    void Renderer::debug_voxel_pass()
+    {
+        if (!_voxel_debug_visuals)
+        {
+            return;
+        }
+
+        auto world_pos_shader = get_shader_by_name("world_pos_shader");
+        world_pos_shader->bind();
+        glClearColor(0.0, 0.0, 0.0, 1.0);
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_DEPTH_TEST);
+
+        world_pos_shader->set_mat4("projection", glm::value_ptr(Engine::get_camera()->get_projection_matrix()));
+        world_pos_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
+        glm::mat4 model = glm::mat4(1.0f);
+        world_pos_shader->set_mat4("model", glm::value_ptr(model));
+        world_pos_shader->set_vec3("camera_position", glm::value_ptr(Engine::get_camera()->get_position()));
+
+        glCullFace(GL_FRONT);
+        _voxel_back_fbo.bind();
+        _voxel_back_fbo.set_viewport();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        render_cube();
+
+        glCullFace(GL_BACK);
+        _voxel_front_fbo.bind();
+        _voxel_front_fbo.set_viewport();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        render_cube();
+
+        auto voxelize_debug_shader = get_shader_by_name("voxelize_debug");
+        voxelize_debug_shader->bind();
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+
+        voxelize_debug_shader->set_mat4("projection",
+                                        glm::value_ptr(Engine::get_camera()->get_projection_matrix()));
+        voxelize_debug_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
+        voxelize_debug_shader->set_vec3("camera_position", glm::value_ptr(Engine::get_camera()->get_position()));
+
+        glBindTextureUnit(0, _voxel_texture);
+        glBindTextureUnit(1, _voxel_back_fbo.get_color_attachment_handle_by_name("color"));
+        glBindTextureUnit(2, _voxel_front_fbo.get_color_attachment_handle_by_name("color"));
+        render_quad();
+
+        glEnable(GL_DEPTH_TEST);
+    }
+
+
     void Renderer::voxelize_scene()
     {
         auto scene = Engine::get_scene();
@@ -69,26 +123,26 @@ namespace cologne
 
         auto shader = get_shader_by_name("voxelize");
         shader->bind();
-        bind_lights(*voxelize_shader);
-        voxelize_shader->set_mat4("projection", glm::value_ptr(glm::ortho(-1.0f, 1.0f, -1.0f,
+        update_lights(*shader);
+        shader->set_mat4("projection", glm::value_ptr(glm::ortho(-1.0f, 1.0f, -1.0f,
                                                                           1.0f, -1.0f, 1.0f)));
         auto size = Engine::get_scene()->get_model_by_index(0)->get_aabb().size();
         size *= Engine::get_scene()->get_model_by_index(0)->get_transform()->scale;
         const float offset = 2.0f - 0.1f;
         glm::vec3 scale = glm::vec3(offset / fabs(size.x), offset / fabs(size.y), offset / fabs(size.z));
-        voxelize_shader->set_vec3("voxel_size", glm::value_ptr(scale));
+        shader->set_vec3("voxel_size", glm::value_ptr(scale));
         auto bounds = Engine::get_scene()->get_model_by_index(0)->get_aabb();
         scale = Engine::get_scene()->get_model_by_index(0)->get_transform()->scale;
         auto min = bounds.min * scale;
         auto max = bounds.max * scale;
-        voxelize_shader->set_vec3("grid_min", glm::value_ptr(min));
-        voxelize_shader->set_vec3("grid_max", glm::value_ptr(max));
-        glBindImageTexture(6, voxel_texture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
+        shader->set_vec3("grid_min", glm::value_ptr(min));
+        shader->set_vec3("grid_max", glm::value_ptr(max));
+        glBindImageTexture(6, _voxel_texture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
         // glBindTextureUnit(7, _shadow_depth);
         for (size_t i = 0; i < scene->get_model_count(); i++)
         {
             auto model = scene->get_model_by_index(i);
-            voxelize_shader->set_mat4("model",
+            shader->set_mat4("model",
                                       glm::value_ptr(
                                           model->get_transform()->get_model_matrix()));
             for (size_t j = 0; j < model->get_num_meshes(); j++)
@@ -99,10 +153,11 @@ namespace cologne
             }
         }
 
+        auto mipmap_shader = get_shader_by_name("mipmap");
         mipmap_shader->bind();
-        int current_height = voxel_dimensions;
-        int current_width = voxel_dimensions;
-        int current_depth = voxel_dimensions;
+        int current_height = _voxel_data.voxel_dimensions;
+        int current_width = _voxel_data.voxel_dimensions;
+        int current_depth = _voxel_data.voxel_dimensions;
         for (int mip = 0; mip < 7; mip++)
         {
             int next = mip + 1;
@@ -112,11 +167,11 @@ namespace cologne
 
 
             glBindImageTexture(0,
-                               voxel_texture,
+                               _voxel_texture,
                                next,
                                GL_TRUE,
                                0, GL_WRITE_ONLY, GL_RGBA16F);
-            glBindImageTexture(1, voxel_texture, mip, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA16F);
+            glBindImageTexture(1, _voxel_texture, mip, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA16F);
             int localSize = 8;
             uint32_t x = (dest_width + localSize - 1) / localSize;
             uint32_t y = (dest_height + localSize - 1) / localSize;
@@ -135,6 +190,6 @@ namespace cologne
 
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0)
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 }
