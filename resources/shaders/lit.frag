@@ -291,6 +291,9 @@ void main()
         kD *= 1.0 - metallic;
 
         float NdotL = max(dot(N, L), 0.0);
+        NdotL *= 0.5f;
+        NdotL += 0.5f;
+        NdotL = NdotL * NdotL;
         Lo += ((kD * albedo / PI + specular) * radiance * NdotL) * shadow;
     }
 
@@ -318,6 +321,10 @@ void main()
 //        Lo += (kD * indirect_diffuse + indirect_specular) * 0.002;
 //        Lo += indirect_diffuse;
 //        Lo += indirect_specular;
+    }
+    else
+    {
+        indirect_light = vec3(0.02) * albedo;
     }
 
 //    const float MAX_RELFECTION_LOD = 4.0;
