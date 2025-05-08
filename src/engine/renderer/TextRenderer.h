@@ -21,7 +21,5 @@ namespace cologne
         void present();
     private:
         explicit TextRenderer(const char* font_path);
-        struct Impl;
-        Impl* _impl;
     };
 }
