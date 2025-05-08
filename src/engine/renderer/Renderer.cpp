@@ -13,7 +13,6 @@
 #include "Light.h"
 #include "../Scene.h"
 #include "Shader.h"
-#include "HDRTexture.h"
 #include "TextRenderer.h"
 #include "Probe.h"
 
