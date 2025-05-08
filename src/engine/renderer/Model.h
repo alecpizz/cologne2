@@ -19,13 +19,6 @@ namespace cologne
         Transform *get_transform() const;
         AABB get_aabb() const;
 
-        // Model(Model &&) = delete;
-
-        // Model &operator=(Model &&) = delete;
-
-        // Model(const Model &) = delete;
-
-        // Model &operator=(const Model &) = delete;
         const char *get_path() const;
 
         Material *get_materials() const;
@@ -37,6 +30,8 @@ namespace cologne
         uint64_t get_num_meshes() const;
 
         void set_active(bool active);
+
+        void set_aabb(AABB aabb);
 
         bool get_active() const;
 

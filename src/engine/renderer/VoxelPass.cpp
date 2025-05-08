@@ -126,15 +126,13 @@ namespace cologne
         update_lights(*shader);
         shader->set_mat4("projection", glm::value_ptr(glm::ortho(-1.0f, 1.0f, -1.0f,
                                                                           1.0f, -1.0f, 1.0f)));
-        auto size = Engine::get_scene()->get_model_by_index(0)->get_aabb().size();
-        size *= Engine::get_scene()->get_model_by_index(0)->get_transform()->scale;
+        auto size = Engine::get_scene()->get_bounds().size();
         const float offset = 2.0f - 0.1f;
         glm::vec3 scale = glm::vec3(offset / fabs(size.x), offset / fabs(size.y), offset / fabs(size.z));
         shader->set_vec3("voxel_size", glm::value_ptr(scale));
-        auto bounds = Engine::get_scene()->get_model_by_index(0)->get_aabb();
-        scale = Engine::get_scene()->get_model_by_index(0)->get_transform()->scale;
-        auto min = bounds.min * scale;
-        auto max = bounds.max * scale;
+        auto bounds = Engine::get_scene()->get_bounds();
+        auto min = bounds.min;
+        auto max = bounds.max;
         shader->set_vec3("grid_min", glm::value_ptr(min));
         shader->set_vec3("grid_max", glm::value_ptr(max));
         glBindImageTexture(6, _voxel_texture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);

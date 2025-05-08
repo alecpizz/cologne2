@@ -253,6 +253,11 @@ namespace cologne
         _active = active;
     }
 
+    void Model::set_aabb(AABB aabb)
+    {
+        _bounds = aabb;
+    }
+
     bool Model::get_active() const
     {
         return _active;

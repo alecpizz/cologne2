@@ -14,7 +14,7 @@ namespace cologne
 
         uint64_t get_model_count() const;
 
-        Model& add_model(const char* path, bool flip_textures) const;
+        Model& add_model(const char* path, bool flip_textures) ;
 
         void update(float delta_time);
 
@@ -26,9 +26,13 @@ namespace cologne
 
         Scene &operator=(const Scene &) = delete;
 
-    private:
-        struct Impl;
-        Impl *_impl;
+        AABB re_calculate_bounds();
 
+        AABB get_bounds() const;
+
+    private:
+        //THIS IS fucking dumb
+        AABB _scene_bounds;
+        std::vector<std::unique_ptr<Model>> _models;
     };
 }

@@ -27,16 +27,15 @@ namespace cologne
         shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
         shader->set_int("voxel_grid_size", _voxel_data.voxel_dimensions);
         shader->set_vec3("voxel_offset", glm::value_ptr(_voxel_data.voxel_offset));
-        auto bounds = Engine::get_scene()->get_model_by_index(0)->get_aabb();
+        auto bounds = Engine::get_scene()->get_bounds();
         const glm::vec3 center = bounds.center();
-        auto scale = Engine::get_scene()->get_model_by_index(0)->get_transform()->scale;
         const glm::vec3 size = bounds.size(); //THIS IS WRONG!
         const float world_size = glm::max(size.x, glm::max(size.y, size.z));
         const float texelSize = 1.0f / _voxel_data.voxel_dimensions;
         const float voxel_size = world_size * texelSize;
         shader->set_float("voxel_size", voxel_size);
-        auto min = bounds.min * scale;
-        auto max = bounds.max * scale;
+        auto min = bounds.min;
+        auto max = bounds.max;
         shader->set_vec3("grid_min", glm::value_ptr(min));
         shader->set_vec3("grid_max", glm::value_ptr(max));
         shader->set_vec3("world_center", glm::value_ptr(center));
