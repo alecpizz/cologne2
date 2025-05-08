@@ -234,6 +234,8 @@ namespace cologne
     void FrameBuffer::release()
     {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     }
 
     void FrameBuffer::set_empty()

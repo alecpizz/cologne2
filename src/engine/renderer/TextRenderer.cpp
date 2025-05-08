@@ -45,9 +45,13 @@ namespace cologne
     void TextRenderer::present()
     {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        text_shader->bind();
+
         glEnable(GL_BLEND);
-        // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        GLint blendSrc, blendDst;
+        glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrc);
+        glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDst);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        text_shader->bind();
         glm::mat4 projection = glm::ortho(0.0f,
                                           static_cast<float>(Engine::get_window()->get_width()),
                                           0.0f, static_cast<float>(Engine::get_window()->get_height()));
@@ -84,8 +88,9 @@ namespace cologne
                 cmd.position.x += (ch.advance >> 6) * cmd.scale;
             }
         }
+        glBindTextureUnit(0, 0);
         glBindVertexArray(0);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glBlendFunc(blendSrc, blendDst);
         glDisable(GL_BLEND);
         draw_cmds.clear();
     }
@@ -108,12 +113,6 @@ namespace cologne
 
         FT_Set_Pixel_Sizes(face, 0, 48);
 
-        if (FT_Load_Char(face, 'X', FT_LOAD_RENDER))
-        {
-            LOG_ERROR("Failed to load glyph");
-            return;
-        }
-
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         for (unsigned char c = 0; c < 128; c++)
@@ -123,11 +122,11 @@ namespace cologne
                 LOG_ERROR("Failed to load glyph %c", c);
                 continue;
             }
-            if (face->glyph->bitmap.rows == 0 || face->glyph->bitmap.width == 0)
-            {
-                LOG_WARN("Character %c had a width/height of 0!", c);
-                continue;
-            }
+            // if (face->glyph->bitmap.rows == 0 || face->glyph->bitmap.width == 0)
+            // {
+            //     LOG_WARN("Character %c had a width/height of 0!", c);
+            //     continue;
+            // }
             uint32_t texture;
             glGenTextures(1, &texture);
             glBindTexture(GL_TEXTURE_2D, texture);
@@ -143,8 +142,8 @@ namespace cologne
                 face->glyph->bitmap.buffer
             );
             // set texture options
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             Character character = {
@@ -155,6 +154,7 @@ namespace cologne
             };
             characters.insert(std::pair<char, Character>(c, character));
         }
+        glBindTexture(GL_TEXTURE_2D, 0);
 
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
         FT_Done_Face(face);
