@@ -15,6 +15,7 @@
 #include "Shader.h"
 #include "TextRenderer.h"
 #include "Probe.h"
+#include "../Time.h"
 
 namespace cologne
 {
@@ -112,8 +113,26 @@ namespace cologne
         debug_renderer->draw_aabb(transform, min, max, color);
     }
 
-    glm::vec3 textPos = glm::vec3(500.0f, 500.0f, 0.0f);
-    float textScale = 1.0f;
+    void draw_fps()
+    {
+        int fps = 0;
+        static int index = 0;
+        static float history[30] = {0};
+        static float last = 0;
+        static float average = 0.0f;
+        float fpsFrame = Time::DeltaTime;
+
+        index = (index + 1) % 30;
+        average -= history[index];
+        history[index] = fpsFrame/30;
+        average += history[index];
+        fps = static_cast<int>(roundf(1.0f / average));
+
+        text_renderer->draw_text((std::string("FPS: ") +
+                                  std::to_string(fps)).c_str(),
+                                 glm::vec3(0.0f, 660.0f, 0.0f),
+                                 glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), .6f);
+    }
 
     void Renderer::render_scene(Scene &scene)
     {
@@ -136,11 +155,11 @@ namespace cologne
         lit_pass();
         skybox_pass();
         _output_fbo.blit_to_default_frame_buffer("color", 0, 0,
-            Engine::get_window()->get_width(), Engine::get_window()->get_height(),
-            GL_COLOR_BUFFER_BIT, GL_NEAREST);
+                                                 Engine::get_window()->get_width(), Engine::get_window()->get_height(),
+                                                 GL_COLOR_BUFFER_BIT, GL_NEAREST);
         _output_fbo.release();
+        draw_fps();
         debug_voxel_pass();
-        text_renderer->draw_text("fuck you", textPos, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), textScale);
         debug_renderer->present();
         text_renderer->present();
     }
@@ -252,8 +271,6 @@ namespace cologne
         Engine::get_debug_ui()->add_bool_entry("Voxel Debug Visuals", _voxel_debug_visuals);
         Engine::get_debug_ui()->add_bool_entry("Indirect Lighting", _apply_indirect_lighting);
         Engine::get_debug_ui()->add_vec3_entry("Voxel Offset", _voxel_data.voxel_offset);
-        Engine::get_debug_ui()->add_vec3_entry("TEXT POS", textPos);
-        Engine::get_debug_ui()->add_float_entry("TEXT SCALE", textScale);
     }
 
     Renderer::Renderer()
@@ -269,11 +286,11 @@ namespace cologne
         init_brdf();
         glEnable(GL_CULL_FACE);
         add_light(Light(glm::vec3(0.790f, -0.613f, 0.024f), glm::vec3(0.20f, -0.913f, 0.024f),
-                               glm::vec3(2.0f, 2.0f, 2.0f), 6.0f, 1.0f,
-                               LightType::Directional));
+                        glm::vec3(2.0f, 2.0f, 2.0f), 6.0f, 1.0f,
+                        LightType::Directional));
         add_light(Light(glm::vec3(0.0f, 10.0f, 10.0f), glm::vec3(.0f),
-                               glm::vec3(200.0f, 200.0f, 200.0f), 6.0f, 1.0f,
-                               LightType::Point));
+                        glm::vec3(200.0f, 200.0f, 200.0f), 6.0f, 1.0f,
+                        LightType::Point));
         init_shadow();
         voxelize_scene();
     }

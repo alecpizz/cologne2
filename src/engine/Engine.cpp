@@ -8,6 +8,7 @@
 #include "engine/renderer/DebugRenderer.h"
 #include "Input.h"
 #include "Audio.h"
+#include "Time.h"
 
 namespace cologne
 {
@@ -129,6 +130,7 @@ namespace cologne
             _impl->debug_ui->present();
             _impl->window->present();
             et.update();
+            Time::DeltaTime = et.elapsed;
         }
     }
 } // cologne
