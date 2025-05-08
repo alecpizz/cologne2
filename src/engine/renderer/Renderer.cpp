@@ -136,6 +136,7 @@ namespace cologne
             Engine::get_window()->get_width(), Engine::get_window()->get_height(),
             GL_COLOR_BUFFER_BIT, GL_NEAREST);
         debug_voxel_pass();
+        text_renderer->draw_text("fuck you", glm::vec3(200.0f, 200.0f, 200.0f), glm::vec4(1.0f), 1.0f);
         debug_renderer->present();
         text_renderer->present();
     }

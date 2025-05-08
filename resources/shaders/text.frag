@@ -1,13 +1,14 @@
 ﻿#version 460 core
 
-in vec4 Color;
-in vec2 TexCoord;
+in vec2 TexCoords;
+out vec4 color;
 
-layout (binding = 0) uniform sampler2D textureAtlas;
+layout (binding = 0) uniform sampler2D text;
+uniform vec4 textColor;
 
-out vec4 FragColor;
 
 void main()
 {
-    FragColor = vec4(texture(textureAtlas, TexCoord).r) * Color;
+    vec4 sampled = vec4(1.0, 1.0, 1.0, texture(text, TexCoords).r);
+    color = textColor * sampled;
 }
