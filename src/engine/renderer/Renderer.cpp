@@ -112,6 +112,8 @@ namespace cologne
         debug_renderer->draw_aabb(transform, min, max, color);
     }
 
+    glm::vec3 textPos = glm::vec3(500.0f, 500.0f, 0.0f);
+
     void Renderer::render_scene(Scene &scene)
     {
         //indirect pass
@@ -136,7 +138,7 @@ namespace cologne
             Engine::get_window()->get_width(), Engine::get_window()->get_height(),
             GL_COLOR_BUFFER_BIT, GL_NEAREST);
         debug_voxel_pass();
-        text_renderer->draw_text("fuck you", glm::vec3(200.0f, 200.0f, 200.0f), glm::vec4(1.0f), 1.0f);
+        text_renderer->draw_text("fuck you", textPos, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 1.0f);
         debug_renderer->present();
         text_renderer->present();
     }
@@ -248,6 +250,7 @@ namespace cologne
         Engine::get_debug_ui()->add_bool_entry("Voxel Debug Visuals", _voxel_debug_visuals);
         Engine::get_debug_ui()->add_bool_entry("Indirect Lighting", _apply_indirect_lighting);
         Engine::get_debug_ui()->add_vec3_entry("Voxel Offset", _voxel_data.voxel_offset);
+        Engine::get_debug_ui()->add_vec3_entry("TEXT POS", textPos);
     }
 
     Renderer::Renderer()

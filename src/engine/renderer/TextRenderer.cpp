@@ -35,7 +35,6 @@ namespace cologne
 
     TextRenderer::~TextRenderer()
     {
-
     }
 
     void TextRenderer::draw_text(const char *text, glm::vec3 position, glm::vec4 color, float size)
@@ -45,18 +44,19 @@ namespace cologne
 
     void TextRenderer::present()
     {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         text_shader->bind();
         glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glm::mat4 projection = glm::ortho(0.0f,
-            static_cast<float>(Engine::get_window()->get_width()),
-            0.0f, static_cast<float>(Engine::get_window()->get_height()));
+                                          static_cast<float>(Engine::get_window()->get_width()),
+                                          0.0f, static_cast<float>(Engine::get_window()->get_height()));
         text_shader->set_mat4("projection", glm::value_ptr(projection));
         glBindVertexArray(vao);
-        std::string::const_iterator c;
-        for (auto& cmd: draw_cmds)
+        for (auto &cmd: draw_cmds)
         {
-            for (c = cmd.text.begin(); c != cmd.text.end(); c++)
+            text_shader->set_vec4("textColor", glm::value_ptr(cmd.color));
+            for (std::string::const_iterator c = cmd.text.begin(); c != cmd.text.end(); ++c)
             {
                 Character ch = characters[*c];
 
@@ -67,13 +67,13 @@ namespace cologne
                 float h = ch.size.y * cmd.scale;
                 // update VBO for each character
                 float vertices[6][4] = {
-                    { xpos,     ypos + h,   0.0f, 0.0f },
-                    { xpos,     ypos,       0.0f, 1.0f },
-                    { xpos + w, ypos,       1.0f, 1.0f },
+                    {xpos, ypos + h, 0.0f, 0.0f},
+                    {xpos, ypos, 0.0f, 1.0f},
+                    {xpos + w, ypos, 1.0f, 1.0f},
 
-                    { xpos,     ypos + h,   0.0f, 0.0f },
-                    { xpos + w, ypos,       1.0f, 1.0f },
-                    { xpos + w, ypos + h,   1.0f, 0.0f }
+                    {xpos, ypos + h, 0.0f, 0.0f},
+                    {xpos + w, ypos, 1.0f, 1.0f},
+                    {xpos + w, ypos + h, 1.0f, 0.0f}
                 };
 
                 glBindTextureUnit(0, ch.texture_id);
@@ -84,9 +84,9 @@ namespace cologne
                 cmd.position.x += (ch.advance >> 6) * cmd.scale;
             }
         }
-        glBindVertexArray(vao);
+        glBindVertexArray(0);
         glBindTexture(GL_TEXTURE_2D, 0);
-
+        glDisable(GL_BLEND);
         draw_cmds.clear();
     }
 
@@ -129,13 +129,24 @@ namespace cologne
                 continue;
             }
             uint32_t texture;
-            glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-            glTextureStorage2D(texture, 1, GL_R8UI,
-                face->glyph->bitmap.width, face->glyph->bitmap.rows);
-            glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glGenTextures(1, &texture);
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glTexImage2D(
+                GL_TEXTURE_2D,
+                0,
+                GL_RED,
+                face->glyph->bitmap.width,
+                face->glyph->bitmap.rows,
+                0,
+                GL_RED,
+                GL_UNSIGNED_BYTE,
+                face->glyph->bitmap.buffer
+            );
+            // set texture options
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             Character character = {
                 texture,
                 glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
@@ -149,7 +160,7 @@ namespace cologne
         FT_Done_Face(face);
         FT_Done_FreeType(ft);
         text_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/text.vert",
-            RESOURCES_PATH "shaders/text.frag");
+                                               RESOURCES_PATH "shaders/text.frag");
 
         glGenVertexArrays(1, &vao);
         glGenBuffers(1, &vbo);
@@ -157,7 +168,7 @@ namespace cologne
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr, GL_DYNAMIC_DRAW);
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
