@@ -88,5 +88,7 @@ namespace cologne
         FrameBuffer _voxel_back_fbo;
         FrameBuffer _voxel_fbo;
         FrameBuffer _output_fbo;
+        FrameBuffer _dir_shadow_fbo;
+        glm::mat4 _dir_light_space;
     };
 }

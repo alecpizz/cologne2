@@ -35,11 +35,58 @@ namespace cologne
     std::shared_ptr<Shader> voxelize_debug_shader = nullptr;
     std::shared_ptr<Shader> world_pos_shader = nullptr;
     std::shared_ptr<Shader> mipmap_shader = nullptr;
+    std::shared_ptr<Shader> dir_light_shadow_shader = nullptr;
     std::shared_ptr<DebugRenderer> debug_renderer = nullptr;
     std::shared_ptr<TextRenderer> text_renderer = nullptr;
     std::unordered_map<std::string, std::shared_ptr<Shader> > shaders = std::unordered_map<std::string,
         std::shared_ptr<Shader> >();
     std::vector<Light> lights;
+
+        void Renderer::init_shaders()
+    {
+        lit_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/lit.vert",
+                                              RESOURCES_PATH "shaders/lit.frag");
+
+        g_buffer_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/gbuffer.vert",
+                                                   RESOURCES_PATH "shaders/gbuffer.frag");
+
+        skybox_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/skybox.vert",
+                                                 RESOURCES_PATH "shaders/skybox.frag");
+        fbo_debug_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/framebufferoutput.vert",
+                                                    RESOURCES_PATH "shaders/framebufferoutput.frag");
+        shadowmap_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/shadowmap2.vert",
+                                                    RESOURCES_PATH "shaders/shadowmap2.frag",
+                                                    RESOURCES_PATH "shaders/shadowmap2.geom");
+        probe_debug_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/probe_debug.vert",
+                                                      RESOURCES_PATH "shaders/probe_debug.frag");
+        probe_lit_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/probe_lit.comp");
+
+        voxelize_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/voxelize.vert",
+                                                   RESOURCES_PATH "shaders/voxelize.frag",
+                                                   RESOURCES_PATH "shaders/voxelize.geom");
+        voxelize_debug_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/voxel_visual.vert",
+                                                         RESOURCES_PATH "shaders/voxel_visual.frag");
+
+        world_pos_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/world_pos.vert",
+                                                    RESOURCES_PATH "shaders/world_pos.frag");
+        mipmap_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/mipmap.comp");
+        dir_light_shadow_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/dir_shadow.vert",
+            RESOURCES_PATH "shaders/dir_shadow.frag");
+
+
+        shaders.clear();
+        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("lit", lit_shader));
+        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("gbuffer", g_buffer_shader));
+        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("skybox", skybox_shader));
+        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("shadowmap", shadowmap_shader));
+        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("probe_debug", probe_debug_shader));
+        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("probe_lit", probe_lit_shader));
+        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("voxelize", voxelize_shader));
+        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("voxelize_debug", voxelize_debug_shader));
+        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("world_pos_shader", world_pos_shader));
+        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("mipmap", mipmap_shader));
+        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("dir_shadow", dir_light_shadow_shader));
+    }
 
     void Renderer::add_light(Light light)
     {
@@ -216,47 +263,7 @@ namespace cologne
         voxelize_scene();
     }
 
-    void Renderer::init_shaders()
-    {
-        lit_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/lit.vert",
-                                              RESOURCES_PATH "shaders/lit.frag");
 
-        g_buffer_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/gbuffer.vert",
-                                                   RESOURCES_PATH "shaders/gbuffer.frag");
-
-        skybox_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/skybox.vert",
-                                                 RESOURCES_PATH "shaders/skybox.frag");
-        fbo_debug_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/framebufferoutput.vert",
-                                                    RESOURCES_PATH "shaders/framebufferoutput.frag");
-        shadowmap_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/shadowmap2.vert",
-                                                    RESOURCES_PATH "shaders/shadowmap2.frag",
-                                                    RESOURCES_PATH "shaders/shadowmap2.geom");
-        probe_debug_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/probe_debug.vert",
-                                                      RESOURCES_PATH "shaders/probe_debug.frag");
-        probe_lit_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/probe_lit.comp");
-
-        voxelize_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/voxelize.vert",
-                                                   RESOURCES_PATH "shaders/voxelize.frag",
-                                                   RESOURCES_PATH "shaders/voxelize.geom");
-        voxelize_debug_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/voxel_visual.vert",
-                                                         RESOURCES_PATH "shaders/voxel_visual.frag");
-
-        world_pos_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/world_pos.vert",
-                                                    RESOURCES_PATH "shaders/world_pos.frag");
-        mipmap_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/mipmap.comp");
-
-        shaders.clear();
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("lit", lit_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("gbuffer", g_buffer_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("skybox", skybox_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("shadowmap", shadowmap_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("probe_debug", probe_debug_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("probe_lit", probe_lit_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("voxelize", voxelize_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("voxelize_debug", voxelize_debug_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("world_pos_shader", world_pos_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("mipmap", mipmap_shader));
-    }
 
     void Renderer::init()
     {

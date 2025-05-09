@@ -9,6 +9,7 @@ layout (binding = 4) uniform sampler2D texture_normal;
 layout (binding = 5) uniform sampler2D texture_emission;
 layout (RGBA16F, binding = 6) uniform image3D texture_voxel;
 layout (binding = 7) uniform sampler2DArray shadow_cascades;
+layout (binding = 8) uniform sampler2D dir_shadow;
 uniform vec3 voxel_size;
 
 layout (std140) uniform LightSpaceMatrices
@@ -44,6 +45,7 @@ in vec2 f_tex_coords;
 in vec3 f_voxel_pos;
 in vec4 f_shadow_coords;
 in mat3 f_TBN;
+in vec4 f_frag_pos_light_space;
 
 bool is_inside_clipspace(const vec3 p)
 {
@@ -91,6 +93,18 @@ float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+float shadow_calculation2(vec4 fragPosLightSpace)
+{
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+
+    projCoords = projCoords * 0.5 + 0.5;
+    projCoords = vec3(projCoords.x, projCoords.y, projCoords.z);
+    float closestDepth = texture(dir_shadow, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+    float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
+    return shadow;
 }
 
 float shadow_calculation(vec3 p, vec3 n, vec3 l)
@@ -190,15 +204,15 @@ vec4 pbr()
 
     vec3 Lo = vec3(0.0);
 
-    float shadow = 1.0 - shadow_calculation(FragPos, N, -lights[0].direction);
+    float shadow = 1.0 - shadow_calculation2(f_frag_pos_light_space);
     vec3 color = vec3(0.0f);
     for (int i = 0; i < num_lights; i++)
     {
-        color += diffuse(lights[i], albedo, lights[i].position - FragPos, N);
+        color += diffuse(lights[i], albedo, lights[i].position - FragPos, N) * shadow;
     }
 
-//    vec3 ambient = vec3(0.02) * albedo;
-//    color += ambient;
+    vec3 ambient = vec3(0.02) * albedo;
+    color += ambient;
     return vec4(color, 1.0);
 }
 
@@ -210,7 +224,7 @@ void main()
     }
 
 
-    vec4 color = pbr();
+    vec4 color = pbr() ;
 
     vec3 voxelgrid_tex_pos = from_clipspace_to_texcoords(f_voxel_pos);
     ivec3 voxelgrid_resolution = imageSize(texture_voxel);

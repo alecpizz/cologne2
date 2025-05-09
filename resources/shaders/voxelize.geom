@@ -3,6 +3,7 @@ layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
 in vec4 g_world_pos[];
+in vec4 FragPosLightSpace[];
 //in vec3 g_normal[];
 in vec2 g_tex_coords[];
 in mat3 TBN[];
@@ -11,6 +12,7 @@ out vec2 f_tex_coords;
 out vec3 f_voxel_pos;// world coordinates scaled to clip space (-1...1)
 out vec4 f_shadow_coords;
 out mat3 f_TBN;
+out vec4 f_frag_pos_light_space;
 
 void main()
 {
@@ -43,8 +45,8 @@ void main()
     for (int i=0; i < 3; i++)
     {
         gl_Position = vec4(gl_in[i].gl_Position.xyz * swizzle_mat, 1.0f);
-
         f_voxel_pos = gl_in[i].gl_Position.xyz;
+        f_frag_pos_light_space = FragPosLightSpace[i];
         f_tex_coords = g_tex_coords[i];
         f_TBN = TBN[i];
         EmitVertex();

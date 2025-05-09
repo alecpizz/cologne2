@@ -291,9 +291,9 @@ void main()
         kD *= 1.0 - metallic;
 
         float NdotL = max(dot(N, L), 0.0);
-        NdotL *= 0.5f;
-        NdotL += 0.5f;
-        NdotL = NdotL * NdotL;
+//        NdotL *= 0.5f;
+//        NdotL += 0.5f;
+//        NdotL = NdotL * NdotL;
         Lo += ((kD * albedo / PI + specular) * radiance * NdotL) * shadow;
     }
 

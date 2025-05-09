@@ -13,9 +13,11 @@ namespace cologne
     uint32_t shadow_fbo = 0;
     uint32_t shadow_cascade_ubo = 0;
     uint32_t shadow_size = 4096;
+    uint32_t dir_shadow_size = 1024;
     float zMulti = 10.0f;
     float shadow_near = 0.1f;
     float shadow_far = 1200.0f;
+    glm::vec3 _dir_shadow_offset = glm::vec3(0.0f);
 
     glm::mat4 get_light_space_matrix(const float near_plane, const float far_plane, glm::vec3 light_dir);
 
@@ -171,6 +173,12 @@ namespace cologne
         glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4x4) * 16, nullptr, GL_STATIC_DRAW);
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, shadow_cascade_ubo);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        _dir_shadow_fbo.create("dir_shadow_fbo", dir_shadow_size, dir_shadow_size);
+        _dir_shadow_fbo.create_depth_attachment(GL_DEPTH_COMPONENT16, GL_NEAREST, GL_NEAREST, GL_REPEAT);
+        _dir_shadow_fbo.set_empty();
+        Engine::get_debug_ui()->add_image_entry("dir_shadow", _dir_shadow_fbo.get_depth_attachment_handle(),
+                                                glm::vec2(dir_shadow_size));
     }
 
     void Renderer::update_shadow(const Shader &shader)
@@ -226,6 +234,39 @@ namespace cologne
                 mesh.draw();
             }
         }
+
+        _dir_shadow_fbo.bind();
+        _dir_shadow_fbo.set_viewport();
+        glClear(GL_DEPTH_BUFFER_BIT);
+        shader = get_shader_by_name("dir_shadow");
+        shader->bind();
+        glm::mat4 light_projection = glm::ortho(-25.0f, 25.0f, -25.0f, 25.0f, shadow_near, shadow_far);
+        auto dir_light = get_directional_light();
+        glm::vec3 center = scene.get_bounds().center();
+        glm::mat4 light_view = glm::lookAt(center, center + (dir_light.direction * 5.0f),
+            glm::vec3(0.0, 1.0, 0.0));
+        glm::mat4 light_space = light_projection * light_view;
+        _dir_light_space = light_space;
+        shader->set_mat4("lightSpaceMatrix", glm::value_ptr(_dir_light_space));
+
+        for (size_t i = 0; i < scene.get_model_count(); i++)
+        {
+            auto model = scene.get_model_by_index(i);
+            if (!model->get_active())
+            {
+                continue;
+            }
+            shader->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
+            for (size_t j = 0; j < model->get_num_meshes(); j++)
+            {
+                Mesh mesh = model->get_meshes()[j];
+                Material mat = model->get_materials()[mesh.get_material_index()];
+                mat.albedo.bind(ALBEDO_INDEX);
+                mesh.draw();
+            }
+        }
+
+
         glCullFace(GL_BACK);
         glDisable(GL_DEPTH_CLAMP);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);

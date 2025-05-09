@@ -124,6 +124,7 @@ namespace cologne
         auto shader = get_shader_by_name("voxelize");
         shader->bind();
         update_lights(*shader);
+        shader->set_mat4("lightSpaceMatrix", glm::value_ptr(_dir_light_space));
         shader->set_mat4("projection", glm::value_ptr(glm::ortho(-1.0f, 1.0f, -1.0f,
                                                                           1.0f, -1.0f, 1.0f)));
         auto size = Engine::get_scene()->get_bounds().size();
@@ -136,6 +137,7 @@ namespace cologne
         shader->set_vec3("grid_min", glm::value_ptr(min));
         shader->set_vec3("grid_max", glm::value_ptr(max));
         glBindImageTexture(6, _voxel_texture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
+        glBindTextureUnit(8, _dir_shadow_fbo.get_depth_attachment_handle());
         // glBindTextureUnit(7, _shadow_depth);
         for (size_t i = 0; i < scene->get_model_count(); i++)
         {
