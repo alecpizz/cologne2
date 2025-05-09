@@ -27,7 +27,9 @@ namespace cologne
             _width = width;
             _height = height;
             _channels = channels;
-            glTextureStorage2D(_handle, 1, GL_RGBA8, _width, _height);
+            int32_t mips = 1 + log2(std::max(_width, _height));
+            LOG_INFO("GENERATING MIPS %d", mips);
+            glTextureStorage2D(_handle, mips, GL_RGBA8, _width, _height);
             glTextureSubImage2D(_handle, 0, 0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, data);
             glGenerateTextureMipmap(_handle);
         }
@@ -35,15 +37,14 @@ namespace cologne
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    Texture::Texture( unsigned char* data, uint32_t width, uint32_t height)
+    Texture::Texture(unsigned char *data, uint32_t width, uint32_t height)
     {
         int new_width, new_height, new_channels;
-        stbi_uc* image_data;
+        stbi_uc *image_data;
         if (height == 0)
         {
             image_data = stbi_load_from_memory(data, width, &new_width, &new_height, &new_channels, 0);
-        }
-        else
+        } else
         {
             image_data = stbi_load_from_memory(data, width * height, &new_width, &new_height, &new_channels, 0);
         }
@@ -64,14 +65,23 @@ namespace cologne
             _width = new_width;
             _height = new_height;
             _channels = new_channels;
-            int32_t format;
+            int32_t format = GL_RGB;
+            int32_t format_internal = GL_RGBA8;
             if (new_channels == 1)
+            {
                 format = GL_RED;
-            else if (new_channels == 3)
+                format_internal = GL_R8UI;
+            } else if (new_channels == 3)
+            {
                 format = GL_RGB;
-            else if (new_channels == 4)
+                format_internal = GL_RGB8;
+            } else if (new_channels == 4)
+            {
                 format = GL_RGBA;
-            glTextureStorage2D(_handle, 1, GL_RGBA8, _width, _height);
+                format_internal = GL_RGBA8;
+            }
+            int32_t mips = ceil(log2(std::max(_width, _height))) + 1;
+            glTextureStorage2D(_handle, mips, format_internal, _width, _height);
             glTextureSubImage2D(_handle, 0, 0, 0, _width, _height, format, GL_UNSIGNED_BYTE, image_data);
             glGenerateTextureMipmap(_handle);
         }

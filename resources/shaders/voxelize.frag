@@ -98,9 +98,11 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 float shadow_calculation2(vec4 fragPosLightSpace)
 {
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-
     projCoords = projCoords * 0.5 + 0.5;
-    projCoords = vec3(projCoords.x, projCoords.y, projCoords.z);
+    if(projCoords.z > 1.0)
+    {
+        return 0.0;
+    }
     float closestDepth = texture(dir_shadow, projCoords.xy).r;
     float currentDepth = projCoords.z;
     float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
@@ -164,7 +166,7 @@ vec3 diffuse(Light light, vec3 albedo, vec3 sampleToLight, vec3 N)
     float dist = length(sampleToLight);
     if (light.type == DIRECTIONAL)
     {
-        vec3 diffuse = light.color * dot(normalize(N), -light.direction) * albedo;
+        vec3 diffuse = (light.color * 2) * dot(normalize(N), -light.direction) * albedo;
         return diffuse;
     }
     else if (light.type == POINT)
@@ -206,9 +208,10 @@ vec4 pbr()
 
     float shadow = 1.0 - shadow_calculation2(f_frag_pos_light_space);
     vec3 color = vec3(0.0f);
-    for (int i = 0; i < num_lights; i++)
+    color += diffuse(lights[0], albedo, lights[0].position - FragPos, N) * shadow;
+    for (int i = 1; i < num_lights; i++)
     {
-        color += diffuse(lights[i], albedo, lights[i].position - FragPos, N) * shadow;
+//        color += diffuse(lights[i], albedo, lights[i].position - FragPos, N);
     }
 
     vec3 ambient = vec3(0.02) * albedo;

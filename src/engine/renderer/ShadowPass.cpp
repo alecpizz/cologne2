@@ -175,7 +175,7 @@ namespace cologne
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         _dir_shadow_fbo.create("dir_shadow_fbo", dir_shadow_size, dir_shadow_size);
-        _dir_shadow_fbo.create_depth_attachment(GL_DEPTH_COMPONENT16, GL_NEAREST, GL_NEAREST, GL_REPEAT);
+        _dir_shadow_fbo.create_depth_attachment(GL_DEPTH_COMPONENT16, GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_BORDER);
         _dir_shadow_fbo.set_empty();
         Engine::get_debug_ui()->add_image_entry("dir_shadow", _dir_shadow_fbo.get_depth_attachment_handle(),
                                                 glm::vec2(dir_shadow_size));
