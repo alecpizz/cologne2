@@ -166,8 +166,8 @@ vec3 diffuse(Light light, vec3 albedo, vec3 sampleToLight, vec3 N)
     float dist = length(sampleToLight);
     if (light.type == DIRECTIONAL)
     {
-        vec3 diffuse = (light.color * 2) * dot(normalize(N), -light.direction) * albedo;
-        return diffuse;
+        vec3 diffuse = (light.color) * dot(normalize(N), -light.direction) * albedo;
+        return diffuse * 4.0f;
     }
     else if (light.type == POINT)
     {

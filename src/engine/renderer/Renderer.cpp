@@ -292,7 +292,7 @@ namespace cologne
         init_prefilter();
         init_brdf();
         glEnable(GL_CULL_FACE);
-        add_light(Light(glm::vec3(0.790f, -0.613f, 0.024f), glm::vec3(0.20f, -0.913f, 0.024f),
+        add_light(Light(glm::vec3(0.790f, 18.867f, 0.024f), glm::vec3(0.20f, -0.913f, 0.024f),
                         glm::vec3(2.0f, 2.0f, 2.0f), 6.0f, 1.0f,
                         LightType::Directional));
         add_light(Light(glm::vec3(0.0f, 10.0f, 10.0f), glm::vec3(.0f),
