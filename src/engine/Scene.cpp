@@ -14,8 +14,8 @@ namespace cologne
         // model.get_transform()->set_translation(glm::vec3(0.0f, 2.0f, 10.0f));
         // auto &model2 = add_model(RESOURCES_PATH "Lantern.glb", false);
         // model2.get_transform()->set_translation(glm::vec3(0.0f, 10.0f, -10.0f));
-        auto &model3 = add_model(RESOURCES_PATH "sponza/sponza2.glb", false);
-        model3.get_transform()->set_scale(glm::vec3(.01f));
+        auto &model3 = add_model(RESOURCES_PATH "Bistro.glb", false);
+        // model3.get_transform()->set_scale(glm::vec3(.01f));
         auto bounds = model3.get_aabb();
         bounds.min *= model3.get_transform()->scale;
         bounds.max *= model3.get_transform()->scale;
@@ -27,6 +27,7 @@ namespace cologne
         re_calculate_bounds();
         LOG_INFO("Scene bounds are min (%f, %f, %f), max (%f, %f, %f)", _scene_bounds.min.x, _scene_bounds.min.y,
                  _scene_bounds.min.z, _scene_bounds.max.z, _scene_bounds.max.y, _scene_bounds.max.z);
+        LOG_INFO("Scene size is (%f, %f, %f)", _scene_bounds.size().x, _scene_bounds.size().y, _scene_bounds.size().z);
     }
 
     Scene::~Scene()

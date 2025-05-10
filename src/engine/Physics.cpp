@@ -175,7 +175,7 @@ namespace cologne::physics
 
         temp_allocator = new TempAllocatorImpl(10 * 1024 * 1024);
         job_system = new JobSystemThreadPool(2048, 8, thread::hardware_concurrency() - 1);
-        const uint32_t max_bodies = 1024;
+        const uint32_t max_bodies = 65565;
         const uint32_t max_body_mutexes = 0;
         const uint32_t max_body_pairs = 1024;
         const uint32_t max_body_contact_constraints = 1024;

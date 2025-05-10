@@ -100,7 +100,7 @@ namespace cologne
         _impl->scene = std::make_unique<Scene>();
         _impl->renderer = std::unique_ptr<Renderer>(new Renderer());
         _impl->event_manager = std::unique_ptr<EventManager>(new EventManager());
-        _impl->camera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 1.0f),
+        _impl->camera = std::make_unique<Camera>(glm::vec3(-5.0f, 2.0f, 5.0f), glm::vec3(0.0f, 0.0f, 1.0f),
                                                  glm::vec3(0.0f, 1.0f, 0.0f));
         _impl->player = std::make_unique<Player>();
         if (_impl->window == nullptr || _impl->renderer == nullptr)

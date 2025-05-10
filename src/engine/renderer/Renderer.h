@@ -51,7 +51,7 @@ namespace cologne
         struct VoxelData
         {
             int32_t voxel_dimensions = 256;
-            glm::vec3 voxel_offset = glm::vec3(0.035f, -0.425f, 0.015f);
+            glm::vec3 voxel_offset = glm::vec3(0.0f, -0.425f, 0.0f);
         };
         Renderer();
         void init();

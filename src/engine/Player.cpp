@@ -48,8 +48,15 @@ namespace cologne
         JPH::Vec3 desired_velocity = JPH::Vec3::sZero();
         std::vector<std::string> footstep_sounds;
 
+        JPH::Vec3 glm_vec3_to_vec3(const glm::vec3 &v)
+        {
+            return JPH::Vec3(v.x, v.y, v.z);
+        }
+
         void init()
         {
+            auto cam_pos = glm_vec3_to_vec3(Engine::get_camera()->get_position());
+
             standing_shape = JPH::RotatedTranslatedShapeSettings(
                 JPH::Vec3(0, 0.5f * height_standing + radius_standing, 0), JPH::Quat::sIdentity(),
                 new JPH::CapsuleShape(0.5f * height_standing, radius_standing)).Create().Get();
@@ -71,7 +78,7 @@ namespace cologne
             settings->mInnerBodyShape = inner_standing_shape;
             settings->mInnerBodyLayer = cologne::physics::NON_MOVING;
 
-            character = new JPH::CharacterVirtual(settings, JPH::RVec3::sZero(), JPH::Quat::sIdentity(), 0,
+            character = new JPH::CharacterVirtual(settings, cam_pos, JPH::Quat::sIdentity(), 0,
                                                   cologne::physics::get_physics_system());
             footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_1.wav");
             footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_2.wav");

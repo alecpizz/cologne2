@@ -216,6 +216,7 @@ vec4 pbr()
 
     vec3 ambient = vec3(0.02) * albedo;
     color += ambient;
+    color += texture(texture_emission, f_tex_coords).rgb;
     return vec4(color, 1.0);
 }
 

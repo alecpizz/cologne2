@@ -70,7 +70,7 @@ namespace cologne
             if (new_channels == 1)
             {
                 format = GL_RED;
-                format_internal = GL_R8UI;
+                format_internal = GL_R8;
             } else if (new_channels == 3)
             {
                 format = GL_RGB;

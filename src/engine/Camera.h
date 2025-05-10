@@ -38,7 +38,7 @@ namespace cologne
         float get_near_plane() const;
 
     private:
-        bool _is_free_cam = false;
+        bool _is_free_cam = true;
         float fov = glm::radians(45.0f);
         glm::vec3 _position = {0.0f, 0.0f, 0.0f};
         glm::vec3 _forward = {0.0f, 0.0f, 1.0f};
