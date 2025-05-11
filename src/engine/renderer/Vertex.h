@@ -28,4 +28,9 @@ namespace cologne
               return position == other.position && normal == other.normal && uv == other.uv;
         }
     };
+
+    struct WeightedVertex
+    {
+
+    };
 }

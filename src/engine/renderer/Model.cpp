@@ -262,4 +262,14 @@ namespace cologne
     {
         return _active;
     }
+
+    bool Model::get_gi_only() const
+    {
+        return _gi_only;
+    }
+
+    void Model::set_gi_only(bool b)
+    {
+        _gi_only = b;
+    }
 }

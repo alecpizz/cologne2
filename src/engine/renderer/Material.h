@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Texture.h"
 namespace cologne
 {
     struct Material

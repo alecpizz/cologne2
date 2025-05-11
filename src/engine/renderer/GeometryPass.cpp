@@ -70,6 +70,10 @@ namespace cologne
             {
                 continue;
             }
+            if (model->get_gi_only())
+            {
+                continue;
+            }
             shader->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
             for (size_t j = 0; j < model->get_num_meshes(); j++)
             {

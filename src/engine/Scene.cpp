@@ -14,12 +14,14 @@ namespace cologne
         // model.get_transform()->set_translation(glm::vec3(0.0f, 2.0f, 10.0f));
         // auto &model2 = add_model(RESOURCES_PATH "Lantern.glb", false);
         // model2.get_transform()->set_translation(glm::vec3(0.0f, 10.0f, -10.0f));
-        auto &model3 = add_model(RESOURCES_PATH "Bistro.glb", false);
-        // model3.get_transform()->set_scale(glm::vec3(.01f));
+        auto &model3 = add_model(RESOURCES_PATH "sponza/sponza2.glb", false);
+        model3.get_transform()->set_scale(glm::vec3(.01f));
         auto bounds = model3.get_aabb();
         bounds.min *= model3.get_transform()->scale;
         bounds.max *= model3.get_transform()->scale;
         model3.set_aabb(bounds);
+        auto &model = add_model(RESOURCES_PATH "glowcube.glb", false);
+        model.set_gi_only(true);
         // model3.get_transform()->set_rotation(glm::rotate(glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
         // cologne::physics::update_mesh_collider(&model);
         // cologne::physics::update_mesh_collider(&model2);
@@ -37,6 +39,13 @@ namespace cologne
 
     void Scene::update(float delta_time)
     {
+        auto &model = _models[1];
+        static float time = 0.0f;
+        time += delta_time * 0.85;
+        // -11 1 4 init pos
+        // 13 1 4 final pos
+        glm::vec3 new_pos = glm::lerp(glm::vec3(-11.0f, 1.0f, 4.0f), glm::vec3(13.0f, 1.0f, 4.0f), glm::abs(glm::cos(time)));
+        model->get_transform()->set_translation(glm::vec3(new_pos));
     }
 
     AABB Scene::re_calculate_bounds()

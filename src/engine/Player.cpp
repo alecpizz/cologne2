@@ -228,6 +228,7 @@ namespace cologne
         {
             return;
         }
+        _impl->handle_input(dt);
         JPH::CharacterVirtual::ExtendedUpdateSettings update_settings;
         update_settings.mStickToFloorStepDown = -_impl->character->GetUp() * update_settings.mStickToFloorStepDown.
                                                 Length();
@@ -242,6 +243,5 @@ namespace cologne
 
         _impl->position = glm::vec3(_impl->character->GetPosition().GetX(), _impl->character->GetPosition().GetY(),
                                     _impl->character->GetPosition().GetZ());
-        _impl->handle_input(dt);
     }
 }

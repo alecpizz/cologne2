@@ -34,9 +34,12 @@ namespace cologne
         void set_aabb(AABB aabb);
 
         bool get_active() const;
+        bool get_gi_only() const;
+        void set_gi_only(bool b);
 
     private:
         bool _active = true;
+        bool _gi_only = false;
         Transform *_transform = nullptr;
         AABB _bounds;
         struct Impl;
