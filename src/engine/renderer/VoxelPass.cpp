@@ -38,8 +38,6 @@ namespace cologne
         _voxel_front_fbo.create("voxel cube front", Engine::get_window()->get_width(),
                                 Engine::get_window()->get_height());
         _voxel_front_fbo.create_attachment("color", GL_RGBA16F, GL_NEAREST, GL_NEAREST);
-        _voxel_fbo.create("voxel", _voxel_data.voxel_dimensions, _voxel_data.voxel_dimensions);
-        _voxel_fbo.set_empty();
         Engine::get_debug_ui()->add_image_entry("Voxel cube front",
                                                 _voxel_front_fbo.get_color_attachment_handle_by_name("color"),
                                                 glm::vec2(Engine::get_window()->get_width(),
@@ -114,19 +112,16 @@ namespace cologne
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
-        _voxel_fbo.bind();
-        _voxel_fbo.set_viewport();
+
+        glViewport(0, 0, _voxel_data.voxel_dimensions, _voxel_data.voxel_dimensions);
         glClearTexImage(_voxel_texture, 0, GL_RGBA, GL_FLOAT, glm::value_ptr(glm::vec4(0.0f)));
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
         auto shader = get_shader_by_name("voxelize");
         shader->bind();
         update_lights(*shader);
         shader->set_mat4("lightSpaceMatrix", glm::value_ptr(_dir_light_space));
         shader->set_mat4("projection", glm::value_ptr(glm::ortho(-1.0f, 1.0f, -1.0f,
-                                                                          1.0f, -1.0f, 1.0f)));
+                                                                 1.0f, -1.0f, 1.0f)));
         auto size = Engine::get_scene()->get_bounds().size();
         const float offset = 2.0f - 0.1f;
         glm::vec3 scale = glm::vec3(offset / fabs(size.x), offset / fabs(size.y), offset / fabs(size.z));
@@ -139,17 +134,21 @@ namespace cologne
         glBindImageTexture(6, _voxel_texture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
         glBindTextureUnit(8, _dir_shadow_fbo.get_depth_attachment_handle());
         // glBindTextureUnit(7, _shadow_depth);
-        for (size_t i = 0; i < scene->get_model_count(); i++)
+        for (int idx = 0; idx < 3; idx++)
         {
-            auto model = scene->get_model_by_index(i);
-            shader->set_mat4("model",
-                                      glm::value_ptr(
-                                          model->get_transform()->get_model_matrix()));
-            for (size_t j = 0; j < model->get_num_meshes(); j++)
+            shader->set_int("render_axis", idx);
+            for (size_t i = 0; i < scene->get_model_count(); i++)
             {
-                auto &mesh = scene->get_model_by_index(i)->get_meshes()[j];
-                model->get_materials()[mesh.get_material_index()].bind_all();
-                mesh.draw();
+                auto model = scene->get_model_by_index(i);
+                shader->set_mat4("model",
+                                 glm::value_ptr(
+                                     model->get_transform()->get_model_matrix()));
+                for (size_t j = 0; j < model->get_num_meshes(); j++)
+                {
+                    auto &mesh = scene->get_model_by_index(i)->get_meshes()[j];
+                    model->get_materials()[mesh.get_material_index()].bind_all();
+                    mesh.draw();
+                }
             }
         }
 
@@ -183,13 +182,13 @@ namespace cologne
             current_width = dest_width;
         }
 
-        glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
 
-        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        // glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
     }
 }

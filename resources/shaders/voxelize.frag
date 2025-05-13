@@ -41,11 +41,10 @@ uniform int num_lights = 0;
 uniform mat4 view;
 
 
-in vec2 f_tex_coords;
-in vec3 f_voxel_pos;
-in vec4 f_shadow_coords;
-in mat3 f_TBN;
-in vec4 f_frag_pos_light_space;
+in vec2 TexCoords;
+in vec4 FragPos;
+in mat3 TBN;
+in vec4 FragPosLightSpace;
 
 bool is_inside_clipspace(const vec3 p)
 {
@@ -185,20 +184,19 @@ vec3 diffuse(Light light, vec3 albedo, vec3 sampleToLight, vec3 N)
 
 vec4 pbr()
 {
-    vec3 FragPos = f_voxel_pos;
-    vec4 albedo_texture = texture2D(texture_albedo, f_tex_coords);
+    vec4 albedo_texture = texture2D(texture_albedo, TexCoords);
 //    vec3 albedo = albedo_texture.rgb;
     vec3 albedo = pow(albedo_texture.rgb, vec3(2.2));
     vec3 orm;
-    float metallic = texture2D(texture_metallic, f_tex_coords).r;
-    float roughness = texture2D(texture_roughness, f_tex_coords).g;
-    float ao = texture2D(texture_ao, f_tex_coords).b + 0.2;
+    float metallic = texture2D(texture_metallic, TexCoords).r;
+    float roughness = texture2D(texture_roughness, TexCoords).g;
+    float ao = texture2D(texture_ao, TexCoords).b + 0.2;
 
-    vec3 N = texture2D(texture_normal, f_tex_coords).rgb;
+    vec3 N = texture2D(texture_normal, TexCoords).rgb;
     N = N * 2.0 - 1.0;
-    N = normalize(f_TBN * N);
+    N = normalize(TBN * N);
 
-    vec3 V = normalize(-f_voxel_pos);
+    vec3 V = normalize(-FragPos.xyz);
     vec3 R = reflect(-V, N);
 
     vec3 F0 = vec3(0.04);
@@ -206,9 +204,9 @@ vec4 pbr()
 
     vec3 Lo = vec3(0.0);
 
-    float shadow = 1.0 - shadow_calculation2(f_frag_pos_light_space);
+    float shadow = 1.0 - shadow_calculation2(FragPosLightSpace);
     vec3 color = vec3(0.0f);
-    color += diffuse(lights[0], albedo, lights[0].position - FragPos, N) * shadow;
+    color += diffuse(lights[0], albedo, lights[0].position - FragPos.xyz, N) * shadow;
     for (int i = 1; i < num_lights; i++)
     {
 //        color += diffuse(lights[i], albedo, lights[i].position - FragPos, N);
@@ -216,13 +214,13 @@ vec4 pbr()
 
     vec3 ambient = vec3(0.02) * albedo;
     color += ambient;
-    color += texture(texture_emission, f_tex_coords).rgb;
+    color += texture(texture_emission, TexCoords).rgb;
     return vec4(color, 1.0);
 }
 
 void main()
 {
-    if (!is_inside_clipspace(f_voxel_pos))
+    if (!is_inside_clipspace(FragPos.xyz))
     {
         return;
     }
@@ -230,7 +228,7 @@ void main()
 
     vec4 color = pbr() ;
 
-    vec3 voxelgrid_tex_pos = from_clipspace_to_texcoords(f_voxel_pos);
+    vec3 voxelgrid_tex_pos = from_clipspace_to_texcoords(FragPos.xyz);
     ivec3 voxelgrid_resolution = imageSize(texture_voxel);
     //    imageStore(texture_voxel, ivec3(voxelgrid_resolution * voxelgrid_tex_pos), color);
     imageAtomicMax(texture_voxel, ivec3(voxelgrid_resolution * voxelgrid_tex_pos), f16vec4(color));

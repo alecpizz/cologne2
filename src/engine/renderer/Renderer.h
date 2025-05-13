@@ -48,9 +48,10 @@ namespace cologne
         void set_directional_light(glm::vec3 position, glm::vec3 direction);
 
     private:
+        //get me out of here!
         struct VoxelData
         {
-            int32_t voxel_dimensions = 256;
+            int32_t voxel_dimensions = 128;
             glm::vec3 voxel_offset = glm::vec3(0.0f, -0.425f, 0.0f);
         };
         Renderer();
@@ -86,7 +87,6 @@ namespace cologne
         FrameBuffer _gbuffer_fbo;
         FrameBuffer _voxel_front_fbo;
         FrameBuffer _voxel_back_fbo;
-        FrameBuffer _voxel_fbo;
         FrameBuffer _output_fbo;
         FrameBuffer _dir_shadow_fbo;
         glm::mat4 _dir_light_space;

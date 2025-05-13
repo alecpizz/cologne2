@@ -10,7 +10,6 @@ in mat3 TBN[];
 //out vec3 f_normal;
 out vec2 f_tex_coords;
 out vec3 f_voxel_pos;// world coordinates scaled to clip space (-1...1)
-out vec4 f_shadow_coords;
 out mat3 f_TBN;
 out vec4 f_frag_pos_light_space;
 

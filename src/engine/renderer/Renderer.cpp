@@ -42,7 +42,7 @@ namespace cologne
         std::shared_ptr<Shader> >();
     std::vector<Light> lights;
 
-        void Renderer::init_shaders()
+    void Renderer::init_shaders()
     {
         lit_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/lit.vert",
                                               RESOURCES_PATH "shaders/lit.frag");
@@ -62,8 +62,7 @@ namespace cologne
         probe_lit_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/probe_lit.comp");
 
         voxelize_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/voxelize.vert",
-                                                   RESOURCES_PATH "shaders/voxelize.frag",
-                                                   RESOURCES_PATH "shaders/voxelize.geom");
+                                                   RESOURCES_PATH "shaders/voxelize.frag");
         voxelize_debug_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/voxel_visual.vert",
                                                          RESOURCES_PATH "shaders/voxel_visual.frag");
 
