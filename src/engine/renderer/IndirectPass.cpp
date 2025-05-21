@@ -7,6 +7,7 @@
 #include "Shader.h"
 namespace cologne
 {
+    const uint32_t pixel_ratio = 2;
     void Renderer::init_indirect()
     {
         if (_indirect_texture != 0)
@@ -19,9 +20,9 @@ namespace cologne
         glTextureParameteri(_indirect_texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTextureParameteri(_indirect_texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTextureStorage2D(_indirect_texture, 1, GL_RGBA8,
-                           Engine::get_window()->get_width() / 2, Engine::get_window()->get_height() / 2);
+                           Engine::get_window()->get_width() / pixel_ratio, Engine::get_window()->get_height() / pixel_ratio);
         Engine::get_debug_ui()->add_image_entry("Indirect_Lighting", _indirect_texture,
-            {Engine::get_window()->get_width() / 2, Engine::get_window()->get_height() / 2});
+            {Engine::get_window()->get_width() / pixel_ratio, Engine::get_window()->get_height() / pixel_ratio});
     }
     void Renderer::indirect_pass()
     {
@@ -54,8 +55,8 @@ namespace cologne
         glBindTextureUnit(3, _gbuffer_fbo.get_color_attachment_handle_by_name("normal"));
 
         const uint32_t work_group_size = 16;
-        uint32_t width = Engine::get_window()->get_width() / 2;
-        uint32_t height = Engine::get_window()->get_height() / 2;
+        uint32_t width = Engine::get_window()->get_width() / pixel_ratio;
+        uint32_t height = Engine::get_window()->get_height() / pixel_ratio;
         uint32_t num_x = (width + work_group_size - 1) / work_group_size;
         uint32_t num_y = (height + work_group_size - 1) / work_group_size;
         shader->dispatch(num_x, num_y, 1);
