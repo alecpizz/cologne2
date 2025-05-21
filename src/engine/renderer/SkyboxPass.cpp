@@ -3,6 +3,7 @@
 //
 #include <engine/Engine.h>
 
+#include "DebugScope.h"
 #include "FrameBuffer.h"
 #include "Renderer.h"
 #include "Shader.h"
@@ -96,6 +97,7 @@ namespace cologne
 
     void Renderer::skybox_pass()
     {
+        DebugScope scope("Renderer::skybox_pass");
         _output_fbo.bind();
         glDisable(GL_CULL_FACE);
         glDisable(GL_BLEND);

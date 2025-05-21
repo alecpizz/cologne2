@@ -3,6 +3,7 @@
 //
 #include <engine/Engine.h>
 
+#include "DebugScope.h"
 #include "FrameBuffer.h"
 #include "Renderer.h"
 #include "Shader.h"
@@ -55,6 +56,7 @@ namespace cologne
 
     void Renderer::geometry_pass(Scene &scene)
     {
+        DebugScope scope("Renderer::geometry_pass");
         _gbuffer_fbo.bind();
         _gbuffer_fbo.set_viewport();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

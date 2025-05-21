@@ -3,6 +3,7 @@
 //
 #include <engine/Engine.h>
 
+#include "DebugScope.h"
 #include "Renderer.h"
 #include "Shader.h"
 #include "../Scene.h"
@@ -196,6 +197,7 @@ namespace cologne
 
     void Renderer::shadow_pass(Scene &scene)
     {
+        DebugScope scope("Renderer::shadow_pass");
         auto light = get_directional_light();
         shadowCascadeLevels[0] = (shadow_far / 50.0f);
         shadowCascadeLevels[1] = (shadow_far / 25.0f);

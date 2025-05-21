@@ -64,11 +64,12 @@ namespace cologne
         void update_shadow(const Shader &shader);
         void init_gbuffer();
         void geometry_pass(Scene &scene);
-        void init_lit();
         void lit_pass();
         void init_skybox(const char* hdr_path);
         void skybox_pass();
         void init_voxels();
+        void init_indirect();
+        void indirect_pass();
         void voxelize_scene();
         void debug_voxel_pass();
         void init_radiance();
@@ -77,6 +78,7 @@ namespace cologne
         void update_lights(const Shader& shader);
         uint32_t _shadow_depth;
         uint32_t _voxel_texture;
+        uint32_t _indirect_texture;
         uint32_t _skybox_texture;
         uint32_t _env_irradiance;
         uint32_t _env_prefilter;

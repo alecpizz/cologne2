@@ -2,6 +2,7 @@
 
 #include "Renderer.h"
 #include "Shader.h"
+#include "DebugScope.h"
 //
 // Created by alecpizz on 5/4/2025.
 //
@@ -59,6 +60,8 @@ namespace cologne
             return;
         }
 
+        DebugScope scope("Renderer::debug_voxel_pass");
+
         auto world_pos_shader = get_shader_by_name("world_pos_shader");
         world_pos_shader->bind();
         glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -108,6 +111,7 @@ namespace cologne
 
     void Renderer::voxelize_scene()
     {
+        DebugScope scope("Renderer::voxelize_scene");
         auto scene = Engine::get_scene();
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);

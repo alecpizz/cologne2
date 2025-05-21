@@ -3,6 +3,7 @@
 //
 #include <engine/Engine.h>
 
+#include "DebugScope.h"
 #include "FrameBuffer.h"
 #include "Renderer.h"
 #include "Shader.h"
@@ -12,6 +13,7 @@ namespace cologne
 {
     void Renderer::lit_pass()
     {
+        DebugScope scope("Renderer::lit_pass");
         auto shader = get_shader_by_name("lit");
         _output_fbo.bind();
         _output_fbo.set_viewport();
@@ -52,7 +54,7 @@ namespace cologne
         glBindTextureUnit(4, _gbuffer_fbo.get_color_attachment_handle_by_name("emission"));
         glBindTextureUnit(10, _gbuffer_fbo.get_color_attachment_handle_by_name("flat_normals"));
         glBindTextureUnit(5, _shadow_depth);
-        glBindTextureUnit(9, _voxel_texture);
+        glBindTextureUnit(9, _indirect_texture);
         render_quad();
         glBindFramebuffer(GL_READ_FRAMEBUFFER, _gbuffer_fbo.get_handle());
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _output_fbo.get_handle()); // write to output framebuffer

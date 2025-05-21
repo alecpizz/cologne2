@@ -15,6 +15,7 @@ void GLAPIENTRY glDebugOutput(GLenum source,
 		|| id == 131222
 		) return;
 	if (type == GL_DEBUG_TYPE_PERFORMANCE) return;
+	if (source == GL_DEBUG_SOURCE_THIRD_PARTY) return;
 	std::string msg_string = std::string(message);
 	// if (msg_string.find("has not been linked") != std::string::npos)
 	// {

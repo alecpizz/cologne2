@@ -6,6 +6,7 @@
 #include <ft2build.h>
 #include <engine/Engine.h>
 
+#include "DebugScope.h"
 #include "Shader.h"
 
 #include FT_FREETYPE_H
@@ -44,6 +45,7 @@ namespace cologne
 
     void TextRenderer::present()
     {
+        DebugScope scope("TextRenderer::present");
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         glEnable(GL_BLEND);

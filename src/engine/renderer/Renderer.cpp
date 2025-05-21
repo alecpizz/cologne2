@@ -8,6 +8,7 @@
 #include <engine/Input.h>
 
 #include "DebugRenderer.h"
+#include "DebugScope.h"
 #include "FrameBuffer.h"
 #include "Material.h"
 #include "Light.h"
@@ -33,6 +34,7 @@ namespace cologne
     std::shared_ptr<Shader> probe_lit_shader = nullptr;
     std::shared_ptr<Shader> voxelize_shader = nullptr;
     std::shared_ptr<Shader> voxelize_debug_shader = nullptr;
+    std::shared_ptr<Shader> indirect_shader = nullptr;
     std::shared_ptr<Shader> world_pos_shader = nullptr;
     std::shared_ptr<Shader> mipmap_shader = nullptr;
     std::shared_ptr<Shader> dir_light_shadow_shader = nullptr;
@@ -71,6 +73,7 @@ namespace cologne
         mipmap_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/mipmap.comp");
         dir_light_shadow_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/dir_shadow.vert",
             RESOURCES_PATH "shaders/dir_shadow.frag");
+        indirect_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/indirect.comp");
 
 
         shaders.clear();
@@ -85,6 +88,7 @@ namespace cologne
         shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("world_pos_shader", world_pos_shader));
         shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("mipmap", mipmap_shader));
         shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("dir_shadow", dir_light_shadow_shader));
+        shaders.insert(std::pair<std::string, std::shared_ptr<Shader>>("indirect", indirect_shader));
     }
 
     void Renderer::add_light(Light light)
@@ -198,6 +202,7 @@ namespace cologne
         shadow_pass(scene);
         voxelize_scene();
         geometry_pass(scene);
+        indirect_pass();
         lit_pass();
         skybox_pass();
         _output_fbo.blit_to_default_frame_buffer("color", 0, 0,
@@ -214,6 +219,7 @@ namespace cologne
     {
         //regen framebuffers here
         init_gbuffer();
+        init_indirect();
         _voxel_back_fbo.resize(width, height);
         _voxel_front_fbo.resize(width, height);
         _output_fbo.resize(width, height);
@@ -281,9 +287,11 @@ namespace cologne
 
     Renderer::Renderer()
     {
+        DebugScope scope ("initialization");
         init();
         init_shaders();
         init_voxels();
+        init_indirect();
         init_gbuffer();
         glDisable(GL_CULL_FACE);
         init_skybox(RESOURCES_PATH "HDR_blue_local_star.hdr");
