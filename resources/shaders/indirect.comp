@@ -8,7 +8,6 @@ layout (binding = 3) uniform sampler2D normal_texture;
 
 #define PI 3.1415926535897932384626433832795
 
-uniform bool indirect_lighting_active = true;
 uniform vec3 voxel_offset;
 const int TOTAL_DIFFUSE_CONES = 6;
 const vec3 DIFFUSE_CONE_DIRECTIONS[TOTAL_DIFFUSE_CONES] = { vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.5f, 0.866025f), vec3(0.823639f, 0.5f, 0.267617f), vec3(0.509037f, 0.5f, -0.7006629f), vec3(-0.50937f, 0.5f, -0.7006629f), vec3(-0.823639f, 0.5f, 0.267617f) };
@@ -100,7 +99,6 @@ void main()
     vec4 output_color = vec4(0.0);
 
     output_color = indirect_diffuse(position, normal);
-
 
     imageStore(output_image, pixel_coord, output_color);
 }

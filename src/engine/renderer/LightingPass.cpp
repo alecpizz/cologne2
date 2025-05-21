@@ -40,19 +40,13 @@ namespace cologne
         auto max = bounds.max;
         shader->set_vec3("grid_min", glm::value_ptr(min));
         shader->set_vec3("grid_max", glm::value_ptr(max));
-        shader->set_vec3("world_center", glm::value_ptr(center));
-        shader->set_float("worldSizeHalf", 0.5f * world_size);
 
-        shader->set_float("sampling_factor", 0.100f);
-        shader->set_float("distance_offset", 3.9f);
-        shader->set_float("max_distance", 2.0f);
         shader->set_bool("indirect_lighting_active", _apply_indirect_lighting);
         glBindTextureUnit(0, _gbuffer_fbo.get_color_attachment_handle_by_name("position"));
         glBindTextureUnit(1, _gbuffer_fbo.get_color_attachment_handle_by_name("normal"));
         glBindTextureUnit(2, _gbuffer_fbo.get_color_attachment_handle_by_name("albedo"));
         glBindTextureUnit(3, _gbuffer_fbo.get_color_attachment_handle_by_name("orm"));
         glBindTextureUnit(4, _gbuffer_fbo.get_color_attachment_handle_by_name("emission"));
-        glBindTextureUnit(10, _gbuffer_fbo.get_color_attachment_handle_by_name("flat_normals"));
         glBindTextureUnit(5, _shadow_depth);
         glBindTextureUnit(9, _indirect_texture);
         render_quad();

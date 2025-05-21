@@ -41,18 +41,12 @@ layout (binding = 5) uniform sampler2DArray shadow_cascades;
 layout (binding = 6) uniform samplerCube irradiance_map;
 layout (binding = 7) uniform samplerCube prefilter_map;
 layout (binding = 8) uniform sampler2D brdf;
-
-
 layout (binding = 9) uniform sampler2D indirect_texture;
-layout (binding = 10) uniform sampler2D gNormalFlat;
+
 uniform int voxel_grid_size;
-uniform float worldSizeHalf = 150.0f;
 uniform float voxel_size = 128;
 uniform vec3 world_center = vec3(0.0f);
 uniform vec3 grid_max, grid_min;
-uniform float sampling_factor = 0.100f;
-uniform float distance_offset = 3.9f;
-uniform float max_distance = 2.0f;
 uniform bool indirect_lighting_active = true;
 uniform vec3 voxel_offset;
 const int TOTAL_DIFFUSE_CONES = 6;
@@ -78,7 +72,6 @@ uniform int has_ao_texture = 0;
 uniform float cascadePlaneDistances[4];
 uniform int cascadeCount;// number of frusta - 1
 vec3 WorldPos;
-vec3 WorldNormal;
 
 vec3 fresnelSchlick(float cosTheta, vec3 F0);
 vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness);
@@ -149,88 +142,6 @@ vec3 MapToZeroOne(vec3 value, vec3 rangeMin, vec3 rangeMax)
 }
 
 
-//vec4 cone_trace(vec3 from, vec3 direction, float aperture)
-//{
-//    //    float max_dist = 2.0 * worldSizeHalf;
-//    //    vec4 accumulated = vec4(0.0);
-//    //    float offset = 2.0 * voxel_size;
-//    //    float dist = offset + voxel_size;
-//    //    while (accumulated.a < 1.0 && dist < max_dist)
-//    //    {
-//    //        vec3 conePos = from + direction * dist;
-//    //        float diameter = 2.0 * aperture * dist;
-//    //        float mip = log2(diameter / voxel_size);
-//    //        vec3 coords = (conePos - world_center) / worldSizeHalf;
-//    //        coords = 0.5 * coords + 0.5;
-//    //
-//    //        vec4 voxel = textureLod(voxel_texture, coords, mip);
-//    //        accumulated += (1.0 - accumulated.a) * voxel;
-//    //        dist += 0.5 * diameter;
-//    //    }
-//    //    return accumulated;
-//    vec3 voxelGridWorldSpaceSize = grid_max - grid_min;
-//    vec3 voxelWorldSpaceSize = voxelGridWorldSpaceSize / textureSize(voxel_texture, 0);
-//    float voxelMaxLength = max(voxelWorldSpaceSize.x, max(voxelWorldSpaceSize.y, voxelWorldSpaceSize.z));
-//    float voxelMinLenght = min(voxelWorldSpaceSize.x, min(voxelWorldSpaceSize.y, voxelWorldSpaceSize.z));
-//    uint maxLevel = textureQueryLevels(voxel_texture) - 1;
-//    vec4 accumulated = vec4(0.0f);
-//    from += direction * voxelMinLenght;
-//    float distFromStart = voxelMaxLength;
-//    while (accumulated.a < 0.99f)
-//    {
-//        float coneDiameter = 2.0f * aperture * distFromStart;
-//        float sampleDiameter = max(voxelMinLenght, coneDiameter);
-//        float sampleLod = log2(sampleDiameter / voxelMinLenght);
-//
-//        vec3 worldPos = from + direction * distFromStart;
-//        vec3 sampleUVW = MapToZeroOne(worldPos, grid_min, grid_max) - voxel_offset;
-//        if (any(lessThan(sampleUVW, vec3(0.0))) || any(greaterThanEqual(sampleUVW, vec3(1.0))) || sampleLod > maxLevel)
-//        {
-//            break;
-//        }
-////        sampleUVW.x = 1.0 - sampleUVW.x;
-////        sampleUVW.y = 1.0 - sampleUVW.y;
-////        sampleUVW.z = 1.0 - sampleUVW.z;
-//
-//        vec4 samplePremult = textureLod(voxel_texture, sampleUVW, sampleLod);
-//        float weight = 1.0 - accumulated.a;
-//        accumulated += weight * samplePremult;
-//        distFromStart += sampleDiameter * 0.16f;
-//    }
-//    return accumulated;
-//}
-//
-//vec4 indirect_diffuse(vec3 position, vec3 N)
-//{
-//    float aperture =  0.57735;
-//    //    float aperture = 0.037533;
-//    //    aperture = clamp(tan(0.5 * PI * roughness), aperture, 0.5 * PI);
-//    vec4 color = vec4(0.0f);
-//    vec3 up = vec3(0.0, 1.0, 0.0);
-//    if (abs(dot(N, up)) > 0.999)
-//    up = vec3(0.0, 0.0, 1.0);
-//
-//    vec3 T = normalize(up - dot(N, up) * N);
-//    vec3 B = cross(T, N);
-//
-//    for (int i = 0; i < TOTAL_DIFFUSE_CONES; i++)
-//    {
-//        vec3 direction = T * DIFFUSE_CONE_DIRECTIONS[i].x + B * DIFFUSE_CONE_DIRECTIONS[i].z + N;
-//        direction = normalize(direction);
-//        color += DIFFUSE_CONE_WEIGHTS[i] * cone_trace(position, direction, aperture);
-//    }
-//    return color;
-//}
-
-
-//vec4 indirect_specular(vec3 pos, vec3 dir, float roughness)
-//{
-//    float aperture = 0.037533;
-////    aperture = clamp(tan(0.5 * PI * roughness), aperture, 0.5 * PI);
-//    vec4 specular = cone_trace(pos, dir, aperture);
-//    return specular;
-//}
-
 void main()
 {
     vec3 FragPos = texture(gPosition, TexCoords).rgb;
@@ -244,7 +155,6 @@ void main()
     float ao = orm.b + ao_strength;
 
     vec3 N = texture2D(gNormal, TexCoords).rgb;
-    WorldNormal = texture2D(gNormalFlat, TexCoords).rgb;
     vec3 V = normalize(camera_pos - FragPos);
     vec3 R = reflect(-V, N);
 
@@ -290,9 +200,6 @@ void main()
         kD *= 1.0 - metallic;
 
         float NdotL = max(dot(N, L), 0.0);
-//        NdotL *= 0.5f;
-//        NdotL += 0.5f;
-//        NdotL = NdotL * NdotL;
         Lo += ((kD * albedo / PI + specular) * radiance * NdotL) * shadow;
     }
 
@@ -300,27 +207,15 @@ void main()
     vec3 kS = F;
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
-//    vec3 irradiance = texture(irradiance_map, N).rgb;
-//    vec3 diffuse = irradiance * albedo;
-//    vec3 indirect_light = vec3(0.0f);
-    vec3 indirect_light = texture(indirect_texture, TexCoords).rgb;
+    vec3 indirect_light = vec3(0.0);
     if (indirect_lighting_active)
     {
-//        indirect_light = indirect_diffuse(WorldPos, N).rgb;
+        indirect_light = texture(indirect_texture, TexCoords).rgb;
         float factor = min(1, roughness * 1.5);
         indirect_light *= (0.3) * vec3(factor);
         indirect_light = max(indirect_light, vec3(0));
         indirect_light *= albedo;
         indirect_light *= 0.65f;
-//        float factor3 = min(factor, factor2);
-//        indirect_light *= 0.05 * vec3(factor3);
-//        indirect_diffuse *= 0.15f * vec3(factor3);
-//        indirect_diffuse = max(indirect_diffuse, vec3(0.0));
-//        indirect_diffuse *= albedo * 1.0;
-//        indirect_specular *= 0.15f * vec3(factor3);
-//        Lo += (kD * indirect_diffuse + indirect_specular) * 0.002;
-//        Lo += indirect_diffuse;
-//        Lo += indirect_specular;
     }
     else
     {

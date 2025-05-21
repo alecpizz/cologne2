@@ -26,6 +26,10 @@ namespace cologne
     }
     void Renderer::indirect_pass()
     {
+        if (!_apply_indirect_lighting)
+        {
+            return;
+        }
         DebugScope scope("Renderer::indirect_pass");
         auto shader = get_shader_by_name("indirect");
         if (!shader)
