@@ -100,12 +100,17 @@ namespace cologne
         voxelize_debug_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
         voxelize_debug_shader->set_vec3("camera_position", glm::value_ptr(Engine::get_camera()->get_position()));
 
+        glBindTexture(GL_TEXTURE_3D, _voxel_texture);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glBindTextureUnit(0, _voxel_texture);
         glBindTextureUnit(1, _voxel_back_fbo.get_color_attachment_handle_by_name("color"));
         glBindTextureUnit(2, _voxel_front_fbo.get_color_attachment_handle_by_name("color"));
         render_quad();
 
         glEnable(GL_DEPTH_TEST);
+        glBindTexture(GL_TEXTURE_3D, _voxel_texture);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glBindTexture(GL_TEXTURE_3D, 0);
     }
 
 
