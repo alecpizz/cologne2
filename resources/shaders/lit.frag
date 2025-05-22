@@ -28,7 +28,6 @@ struct Light
 uniform vec3 camera_pos;
 uniform Light lights[MAX_LIGHTS];
 uniform int num_lights = 0;
-uniform mat4 lightSpaceMatrix;
 uniform mat4 view;
 
 layout (binding = 0) uniform sampler2D gPosition;

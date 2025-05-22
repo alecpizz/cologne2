@@ -108,57 +108,6 @@ float shadow_calculation2(vec4 fragPosLightSpace)
     return shadow;
 }
 
-float shadow_calculation(vec3 p, vec3 n, vec3 l)
-{
-    vec4 fragPosViewSpace = vec4(p, 1.0);
-    float depthValue = abs(fragPosViewSpace.z);
-
-    vec4 csmClipSpaceZFar = vec4(cascadePlaneDistances[0],
-    cascadePlaneDistances[1], cascadePlaneDistances[2], cascadePlaneDistances[3]);
-    vec4 res = step(csmClipSpaceZFar, vec4(depthValue));
-    int layer = int(res.x + res.y + res.z + res.w);
-
-    vec4 fragPosLightSpace = lightSpaceMatrices[layer] * vec4(p, 1.0);
-    // perform perspective divide
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    // transform to [0,1] range
-    projCoords = projCoords * 0.5 + 0.5;
-
-    float currentDepth = projCoords.z;
-
-    // keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
-    if (currentDepth > 1.0)
-    {
-        return 0.0;
-    }
-    // calculate bias (based on depth map resolution and slope)
-    vec3 normal = normalize(n);
-    float bias = max(0.05 * (1.0 - dot(normal, l)), 0.005);
-    const float biasModifier = 0.5f;
-    if (layer == cascadeCount)
-    {
-        bias *= 1 / (far_plane * biasModifier);
-    }
-    else
-    {
-        bias *= 1 / (cascadePlaneDistances[layer] * biasModifier);
-    }
-
-    float shadow = 0.0;
-    vec2 texture_size = vec2(textureSize(shadow_cascades, 0));
-    vec2 texelSize = 1.0 / texture_size;
-    for (int x = -2; x <= 2; ++x)
-    {
-        for (int y = -2; y <= 2; ++y)
-        {
-            float pcfDepth = texture(shadow_cascades, vec3(projCoords.xy + vec2(x, y) * texelSize, layer)).r;
-            shadow += (currentDepth - bias) > pcfDepth ? 1.0 : 0.0;
-        }
-    }
-    shadow /= 25.0;
-
-    return shadow;
-}
 
 vec3 diffuse(Light light, vec3 albedo, vec3 sampleToLight, vec3 N)
 {

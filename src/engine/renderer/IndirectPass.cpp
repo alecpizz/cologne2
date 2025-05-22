@@ -37,21 +37,19 @@ namespace cologne
             return;
         }
         shader->bind();
-        shader->set_int("voxel_grid_size", _voxel_data.voxel_dimensions);
-        shader->set_vec3("voxel_offset", glm::value_ptr(_voxel_data.voxel_offset));
         auto bounds = Engine::get_scene()->get_bounds();
-        const glm::vec3 center = bounds.center();
         const glm::vec3 size = bounds.size();
         const float world_size = glm::max(size.x, glm::max(size.y, size.z));
         const float texelSize = 1.0f / _voxel_data.voxel_dimensions;
         const float voxel_size = world_size * texelSize;
-        shader->set_float("voxel_size", voxel_size);
         auto min = bounds.min;
         auto max = bounds.max;
         shader->set_vec3("grid_min", glm::value_ptr(min));
         shader->set_vec3("grid_max", glm::value_ptr(max));
-
-        shader->set_bool("indirect_lighting_active", _apply_indirect_lighting);
+        shader->set_float("voxel_size", voxel_size);
+        shader->set_vec3("voxel_offset", glm::value_ptr(_voxel_data.voxel_offset));
+        shader->set_int("voxel_grid_size", _voxel_data.voxel_dimensions);
+        
         glBindImageTexture(0, _indirect_texture, 0, GL_FALSE, 0,
             GL_WRITE_ONLY, GL_RGBA8);
         glBindTextureUnit(1, _voxel_texture);
