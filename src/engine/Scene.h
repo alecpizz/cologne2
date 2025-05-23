@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "renderer/Model.h"
+#include "renderer/Particles.h"
 
 namespace cologne
 {
@@ -29,10 +30,12 @@ namespace cologne
         AABB re_calculate_bounds();
 
         AABB get_bounds() const;
+        std::vector<Particles>& get_particles();
 
     private:
         //THIS IS fucking dumb
         AABB _scene_bounds;
         std::vector<std::unique_ptr<Model>> _models;
+        std::vector<Particles> _particles;
     };
 }

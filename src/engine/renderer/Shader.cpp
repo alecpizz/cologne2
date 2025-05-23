@@ -163,6 +163,11 @@ namespace cologne
         glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
     }
 
+    void Shader::wait(uint32_t barriers)
+    {
+        glMemoryBarrier(barriers);
+    }
+
     void Shader::set_bool(const char *name, const bool value) const
     {
         if (!_impl->linked)

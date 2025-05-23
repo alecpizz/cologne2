@@ -1,0 +1,54 @@
+﻿#version 460 core
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+layout (std430, binding = 0) buffer position
+{
+    vec4 positions[];
+};
+
+layout (std430, binding = 1) buffer velocity
+{
+    vec4 velocities[];
+};
+
+float gravity = 1000.0f;
+vec3 black_hole = vec3(5, 0, 0);
+
+float gravity2 = 1000.0f;
+vec3 black_hole_2 = vec3(-5, 0, 0);
+
+const float particle_mass = 0.1;
+const float inv_particle_mass = 1.0 / particle_mass;
+
+float max_particle_dist = 45.0;
+
+const float dt = 0.0005;
+
+
+void main()
+{
+    uint idx = gl_GlobalInvocationID.x;
+
+    vec3 p = positions[idx].xyz;
+
+    vec3 d = black_hole - p;
+    float dist = length(d);
+
+    vec3 force = (gravity / dist) * normalize(d);
+
+    d = black_hole_2 - p;
+    dist = length(d);
+
+    force += (gravity2 / dist) * normalize(d);
+
+    if(dist > max_particle_dist)
+    {
+        positions[idx] = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+    else
+    {
+        vec3 a = force * inv_particle_mass;
+        positions[idx] = vec4(p + velocities[idx].xyz * dt + 0.5 * a * dt * dt, 1.0);
+        velocities[idx] = vec4(velocities[idx].xyz * a * dt, 0.0);
+    }
+}

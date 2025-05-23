@@ -38,6 +38,7 @@ namespace cologne
     std::shared_ptr<Shader> world_pos_shader = nullptr;
     std::shared_ptr<Shader> mipmap_shader = nullptr;
     std::shared_ptr<Shader> dir_light_shadow_shader = nullptr;
+    std::shared_ptr<Shader> particle_render_shader = nullptr;
     std::shared_ptr<DebugRenderer> debug_renderer = nullptr;
     std::shared_ptr<TextRenderer> text_renderer = nullptr;
     std::unordered_map<std::string, std::shared_ptr<Shader> > shaders = std::unordered_map<std::string,
@@ -74,7 +75,8 @@ namespace cologne
         dir_light_shadow_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/dir_shadow.vert",
             RESOURCES_PATH "shaders/dir_shadow.frag");
         indirect_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/indirect.comp");
-
+        particle_render_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/particle_render.vert",
+            RESOURCES_PATH "shaders/particle_render.frag");
 
         shaders.clear();
         shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("lit", lit_shader));
@@ -89,6 +91,7 @@ namespace cologne
         shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("mipmap", mipmap_shader));
         shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("dir_shadow", dir_light_shadow_shader));
         shaders.insert(std::pair<std::string, std::shared_ptr<Shader>>("indirect", indirect_shader));
+        shaders.insert(std::pair<std::string, std::shared_ptr<Shader>>("particle_render", particle_render_shader));
     }
 
     void Renderer::add_light(Light light)

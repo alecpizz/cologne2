@@ -55,6 +55,10 @@ namespace cologne
     void Renderer::geometry_pass(Scene &scene)
     {
         DebugScope scope("Renderer::geometry_pass");
+        for (auto& particle : scene.get_particles())
+        {
+            particle.simulate();
+        }
         _gbuffer_fbo.bind();
         _gbuffer_fbo.set_viewport();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -88,6 +92,16 @@ namespace cologne
                 glBindTextureUnit(NORMAL_INDEX, 0);
                 glBindTextureUnit(EMISSION_INDEX, 0);
             }
+        }
+
+        shader = get_shader_by_name("particle_render");
+        shader->bind();
+        shader->set_mat4("projection", &Engine::get_camera()->get_projection_matrix()[0][0]);
+        shader->set_mat4("view", &Engine::get_camera()->get_view_matrix()[0][0]);
+
+        for (auto& particle : scene.get_particles())
+        {
+            particle.render();
         }
 
         _gbuffer_fbo.release();

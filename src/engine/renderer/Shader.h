@@ -30,6 +30,7 @@ namespace cologne
         void bind() const;
         void dispatch(uint32_t work_size_x, uint32_t work_size_y, uint32_t work_size_z);
         void wait();
+        void wait(uint32_t barriers);
 
         void set_bool(const char *name, bool value) const;
 

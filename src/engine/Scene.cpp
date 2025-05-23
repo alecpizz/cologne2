@@ -30,6 +30,8 @@ namespace cologne
         LOG_INFO("Scene bounds are min (%f, %f, %f), max (%f, %f, %f)", _scene_bounds.min.x, _scene_bounds.min.y,
                  _scene_bounds.min.z, _scene_bounds.max.z, _scene_bounds.max.y, _scene_bounds.max.z);
         LOG_INFO("Scene size is (%f, %f, %f)", _scene_bounds.size().x, _scene_bounds.size().y, _scene_bounds.size().z);
+        _particles.emplace_back(Particles());
+        _particles[0].init(std::string(RESOURCES_PATH "shaders/particle_sim.comp"), 100);
     }
 
     Scene::~Scene()
@@ -62,6 +64,11 @@ namespace cologne
     AABB Scene::get_bounds() const
     {
         return _scene_bounds;
+    }
+
+    std::vector<Particles> & Scene::get_particles()
+    {
+        return _particles;
     }
 
 
