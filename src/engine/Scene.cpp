@@ -20,7 +20,7 @@ namespace cologne
         bounds.min *= model3.get_transform()->scale;
         bounds.max *= model3.get_transform()->scale;
         model3.set_aabb(bounds);
-        auto &model = add_model(RESOURCES_PATH "glowcube.glb", false);
+        auto &model = add_model(RESOURCES_PATH "glowCube.glb", false);
         model.set_gi_only(true);
         // model3.get_transform()->set_rotation(glm::rotate(glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
         // cologne::physics::update_mesh_collider(&model);

@@ -3,9 +3,10 @@
 //
 
 #include "FileUtil.h"
-#include <assimp/Importer.hpp>
-#include <assimp/Scene.h>
-#include <assimp/PostProcess.h>
+
+#include "assimp/scene.h"
+#include "assimp/postprocess.h"
+#include "assimp/Importer.hpp"
 #include "renderer/Material.h"
 #include "renderer/Texture.h"
 
