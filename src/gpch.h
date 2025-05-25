@@ -42,4 +42,5 @@
 #include "../vendor/glm/glm/gtx/rotate_vector.hpp"
 #include "../vendor/glm/glm/gtx/quaternion.hpp"
 #include "../vendor/glm/glm/gtx/euler_angles.hpp"
+#include "../../../vendor/glm/glm/gtc/random.hpp"
 #include <stb_image/stb_image.h>

@@ -48,6 +48,8 @@ uniform vec3 world_center = vec3(0.0f);
 uniform vec3 grid_max, grid_min;
 uniform bool indirect_lighting_active = true;
 uniform vec3 voxel_offset;
+uniform float fog_density = 0.0225;
+uniform vec3 fog_color = vec3(0.32, 0.29, 0.25);
 const int TOTAL_DIFFUSE_CONES = 6;
 const vec3 DIFFUSE_CONE_DIRECTIONS[TOTAL_DIFFUSE_CONES] = { vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.5f, 0.866025f), vec3(0.823639f, 0.5f, 0.267617f), vec3(0.509037f, 0.5f, -0.7006629f), vec3(-0.50937f, 0.5f, -0.7006629f), vec3(-0.823639f, 0.5f, 0.267617f) };
 const float DIFFUSE_CONE_WEIGHTS[TOTAL_DIFFUSE_CONES] = { PI / 4.0f,
@@ -231,6 +233,10 @@ void main()
     vec3 ambient = vec3(0.02) * albedo;
     vec3 emission = texture2D(gEmission, TexCoords).rgb;
     vec3 color = Lo + indirect_light + emission;
+
+    float dist = length(FragPos - camera_pos);
+    float fog_factor = 1.0 / exp((dist * fog_density) * (dist * fog_density));
+    color = mix(fog_color, color, fog_factor);
 
     color = mix(color, Tonemap_ACES(color), 1.0);
     color = color / (color + vec3(1.0));

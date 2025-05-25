@@ -149,6 +149,10 @@ namespace cologne
             for (size_t i = 0; i < scene->get_model_count(); i++)
             {
                 auto model = scene->get_model_by_index(i);
+                if (!model->get_active())
+                {
+                    continue;
+                }
                 shader->set_mat4("model",
                                  glm::value_ptr(
                                      model->get_transform()->get_model_matrix()));

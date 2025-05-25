@@ -21,7 +21,7 @@ void main()
 
     gl_Position = projection * view * particle_pos;
 
-    gl_PointSize = 5.0;
+    gl_PointSize = 3.5;
 
     FragPos = particle_pos.xyz;
 }

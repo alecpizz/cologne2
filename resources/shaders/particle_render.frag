@@ -27,7 +27,7 @@ void main()
 
     gPosition = vec4(FragPos, 1.0);
     gNormal = vec4(normal_world, 1.0);
-    gAlbedo = vec4(0.8, 0.8, 0.8, 1.0);
-    gORM = vec3(0.5, 0.5, 0.02);
+    gAlbedo = vec4(0.95, 0.9, 0.8, 1.0);
+    gORM = vec3(1.0, 1.0, 0.01);
     gEmission = vec3(0.0);
 }

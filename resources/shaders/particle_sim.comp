@@ -1,5 +1,5 @@
 ﻿#version 460 core
-layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout (local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
 
 layout (std430, binding = 0) buffer position
 {
@@ -11,44 +11,108 @@ layout (std430, binding = 1) buffer velocity
     vec4 velocities[];
 };
 
-float gravity = 1000.0f;
-vec3 black_hole = vec3(5, 0, 0);
+uniform vec3 bounds_min;
+uniform vec3 bounds_max;
+uniform float delta_time;
+uniform float time;
+uniform float noise_strength = 0.8f;
+uniform float drift_strength = 0.05f;
+uniform vec3 drift_direction = vec3(0.0, 0.1, 0.0);
+uniform float max_speed = 0.025f;
+uniform int total_particle_count;
+uniform float damping = 0.985f;
 
-float gravity2 = 1000.0f;
-vec3 black_hole_2 = vec3(-5, 0, 0);
+vec3 noise_3d(vec3 p, float t, uint particleID)
+{
+    //layer 1
+    float id = float(particleID);
 
-const float particle_mass = 0.1;
-const float inv_particle_mass = 1.0 / particle_mass;
+    float time_scaled_layer_1 = t * 0.05;
 
-float max_particle_dist = 45.0;
+    float id_offset_x_layer_1 = id * 0.0148f;
+    float id_offset_y_layer_1 = id * 0.0251f;
+    float id_offset_z_layer_1 = id * 0.0194f;
 
-const float dt = 0.0005;
+    float px_t_layer_1 = p.x * 0.1f + time_scaled_layer_1 + id_offset_x_layer_1;
+    float py_t_layer_1 = p.y * 0.1f + time_scaled_layer_1 * 1.1f + id_offset_y_layer_1;
+    float pz_t_layer_1 = p.z * 0.1f + time_scaled_layer_1 * 0.9f + id_offset_z_layer_1;
 
+    float x1 = sin(px_t_layer_1) * cos(py_t_layer_1 + id * 0.001f);
+    float y1 = sin(py_t_layer_1) * cos(pz_t_layer_1 + id * 0.002f);
+    float z1 = sin(pz_t_layer_1) * cos(px_t_layer_1 + id * 0.003f);
+
+    //layer 2
+    float time_scaled_layer_2 = t * 0.15f;
+
+    float id_offset_x_layer_2 = id * 0.0241f;
+    float id_offset_y_layer_2 = id * 0.0291f;
+    float id_offset_z_layer_2 = id * 0.0351f;
+
+    float px_t_layer_2 = p.x * 0.25f + time_scaled_layer_2 + id_offset_x_layer_2;
+    float py_t_layer_2 = p.y * 0.25f + time_scaled_layer_2 * 1.2f + id_offset_y_layer_2;
+    float pz_t_layer_2 = p.z * 0.25f + time_scaled_layer_2 * 0.8f + id_offset_z_layer_2;
+
+    float x2 = sin(px_t_layer_2) * cos(py_t_layer_2 * id * 0.004f);
+    float y2 = sin(py_t_layer_2) * cos(pz_t_layer_2 * id * 0.005f);
+    float z2 = sin(pz_t_layer_2) * cos(px_t_layer_2 * id * 0.006f);
+
+    vec3 combined = vec3(x1, y1, z1) + vec3(x2, y2, z2) * 0.45f;
+    return normalize(combined);
+}
 
 void main()
 {
     uint idx = gl_GlobalInvocationID.x;
 
-    vec3 p = positions[idx].xyz;
-
-    vec3 d = black_hole - p;
-    float dist = length(d);
-
-    vec3 force = (gravity / dist) * normalize(d);
-
-    d = black_hole_2 - p;
-    dist = length(d);
-
-    force += (gravity2 / dist) * normalize(d);
-
-    if(dist > max_particle_dist)
+    if(idx >= total_particle_count)
     {
-        positions[idx] = vec4(0.0, 0.0, 0.0, 1.0);
+        return;
     }
-    else
+
+    vec3 pos = positions[idx].xyz;
+    vec3 vel = velocities[idx].xyz;
+
+    vec3 noise_force = noise_3d(pos, time, idx) * noise_strength;
+
+    vec3 drift_force = normalize(drift_direction) * drift_strength;
+
+    vec3 accel = noise_force + drift_force;
+    vel += accel * delta_time;
+
+    vel *= damping;
+
+    if(length(vel) > max_speed)
     {
-        vec3 a = force * inv_particle_mass;
-        positions[idx] = vec4(p + velocities[idx].xyz * dt + 0.5 * a * dt * dt, 1.0);
-        velocities[idx] = vec4(velocities[idx].xyz * a * dt, 0.0);
+        vel = normalize(vel) * max_speed;
     }
+
+    pos += vel * delta_time;
+
+    if(pos.x < bounds_min.x)
+    {
+        pos.x += (bounds_max.x - bounds_min.x);
+    }
+    if(pos.x > bounds_max.x)
+    {
+        pos.x -= (bounds_max.x - bounds_min.x);
+    }
+    if(pos.y < bounds_min.y)
+    {
+        pos.y += (bounds_max.y - bounds_min.y);
+    }
+    if(pos.y > bounds_max.y)
+    {
+        pos.y -= (bounds_max.y - bounds_min.y);
+    }
+    if(pos.z < bounds_min.z)
+    {
+        pos.z += (bounds_max.z - bounds_min.z);
+    }
+    if(pos.z > bounds_max.z)
+    {
+        pos.z -= (bounds_max.z - bounds_min.z);
+    }
+
+    positions[idx] = vec4(pos, 1.0f);
+    velocities[idx] = vec4(vel, 0.0f);
 }
