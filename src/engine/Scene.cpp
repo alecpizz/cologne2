@@ -5,6 +5,8 @@
 #include "Scene.h"
 #include "Physics.h"
 #include "renderer/Model.h"
+#include "Animation.h"
+#include "renderer/AnimatedModel.h"
 
 namespace cologne
 {

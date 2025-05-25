@@ -31,35 +31,8 @@ namespace cologne
         glm::vec3 aabbMax = glm::vec3(std::numeric_limits<float>::min());
     };
 
-    struct SkinnedMeshData
-    {
-        std::string name;
-        std::vector<WeightedVertex> vertices;
-        std::vector<uint32_t> indices;
-        glm::vec3 aabbMin = glm::vec3(std::numeric_limits<float>::max());
-        glm::vec3 aabbMax = glm::vec3(std::numeric_limits<float>::min());
-        uint32_t vertex_count;
-        uint32_t index_count;
-        uint32_t base_vertex;
-    };
 
-    struct Node
-    {
-        std::string name;
-        int parent_index;
-        glm::mat4 inverse_bind_transform;
-    };
 
-    struct SkinnedModelData
-    {
-        std::string name;
-        std::vector<SkinnedMeshData> meshes;
-        std::vector<glm::mat4> boneOffsets;
-        std::vector<Node> nodes;
-        std::unordered_map<std::string, uint32_t> bone_map;
-        uint32_t vertex_count;
-        uint32_t index_count;
-    };
 
     struct MultiDrawElementsCommand
     {

@@ -25,12 +25,22 @@ namespace cologne
         }
         bool operator==(const Vertex& other) const
         {
-              return position == other.position && normal == other.normal && uv == other.uv;
+            return position == other.position && normal == other.normal && uv == other.uv;
         }
     };
 
     struct WeightedVertex
     {
+        glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3 normal = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec2 uv = glm::vec2(0.0f, 0.0f);
+        glm::vec3 tangent = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::ivec4 boneID = glm::ivec4(0);
+        glm::vec4 weight = glm::vec4(0);
 
+        bool operator==(const WeightedVertex& other) const
+        {
+            return position == other.position && normal == other.normal && uv == other.uv;
+        }
     };
 }
