@@ -1,5 +1,4 @@
 #pragma once
-#include "../gpch.h"
 #include "renderer/Material.h"
 #include "renderer/Vertex.h"
 
