@@ -28,6 +28,7 @@ struct Light
 uniform vec3 camera_pos;
 uniform Light lights[MAX_LIGHTS];
 uniform int num_lights = 0;
+uniform float time = 0.0f;
 uniform mat4 view;
 
 layout (binding = 0) uniform sampler2D gPosition;
@@ -142,6 +143,12 @@ vec3 MapToZeroOne(vec3 value, vec3 rangeMin, vec3 rangeMax)
     return MapRangeToAnOther(value, rangeMin, rangeMax, vec3(0.0), vec3(1.0));
 }
 
+vec3 noise(vec2 uv, float time)
+{
+    mat2x3 uvs = mat2x3(uv.xxx, uv.yyy) + mat2x3(vec3(0.0, 0.1, 0.2), vec3(0.0, 0.3, 0.4));
+    return fract(sin(uvs * vec2(12.98989, 78.233) * time) * 43856.4533);
+}
+
 
 void main()
 {
@@ -242,6 +249,22 @@ void main()
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0 / 2.2));
     color = mix(color, Tonemap_ACES(color), 0.35);
+
+    vec2 uv = TexCoords;
+    vec2 coord = gl_FragCoord.xy;
+    vec2 output_size = vec2(textureSize(gAlbedo, 0));
+    vec2 outside = modf(uv * output_size, coord);
+    vec3 noise00 = noise(coord / output_size, time);
+    vec3 noise01 = noise((coord + vec2(0, 1)) / output_size, time);
+    vec3 noise10 = noise((coord + vec2(1, 0)) / output_size, time);
+    vec3 noise11 = noise((coord + vec2(1, 1)) / output_size, time);
+    vec3 noise = mix(mix(noise00, noise01, outside.y),
+                     mix(noise10, noise11, outside.y), outside.x) * vec3(0.7, 0.6, 0.8);
+    float speed = 15.0f;
+    float x = rand(uv + rand(vec2(int(time * speed), int(-time * speed))));
+    float noise_fact = 0.035;
+    color = color + (x * -noise_fact) + (noise_fact / 2);
+
     float alpha = albedo_texture.a;
     color.rgb = color.rgb * alpha;
     FragColor = vec4(color, alpha);

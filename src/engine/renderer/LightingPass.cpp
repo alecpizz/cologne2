@@ -2,6 +2,7 @@
 // Created by alecpizz on 5/3/2025.
 //
 #include <engine/Engine.h>
+#include <engine/Time.h>
 
 #include "DebugScope.h"
 #include "FrameBuffer.h"
@@ -40,7 +41,9 @@ namespace cologne
         auto max = bounds.max;
         shader->set_vec3("grid_min", glm::value_ptr(min));
         shader->set_vec3("grid_max", glm::value_ptr(max));
-
+        static float time = 0.0f;
+        time += Time::DeltaTime;
+        shader->set_float("time", time);
         shader->set_bool("indirect_lighting_active", _apply_indirect_lighting);
         glBindTextureUnit(0, _gbuffer_fbo.get_color_attachment_handle_by_name("position"));
         glBindTextureUnit(1, _gbuffer_fbo.get_color_attachment_handle_by_name("normal"));
