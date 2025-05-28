@@ -3,8 +3,15 @@
 //
 
 #pragma once
+#include "assimp/quaternion.h"
+#include "assimp/vector3.h"
+#include "assimp/vector2.h"
 
 
-namespace cologne
+namespace cologne::Util
 {
+    glm::vec3 ai_vec3_to_glm_vec3(aiVector3t<ai_real> vector);
+    glm::vec2 ai_vec2_to_glm_vec2(aiVector2t<ai_real> vector);
+    glm::mat4 ai_mat4_to_glm_mat4(const aiMatrix4x4t<ai_real> &matrix);
+    glm::quat ai_quat_to_glm_quat(aiQuaterniont<ai_real> quat);
 }

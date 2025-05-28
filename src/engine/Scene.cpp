@@ -6,7 +6,7 @@
 #include "Physics.h"
 #include "renderer/Model.h"
 #include "Animation.h"
-#include "renderer/AnimatedModel.h"
+#include "renderer/SkinnedModel.h"
 
 namespace cologne
 {
@@ -24,6 +24,7 @@ namespace cologne
         model3.set_aabb(bounds);
         auto &model = add_model(RESOURCES_PATH "glowCube.glb", false);
         model.set_gi_only(true);
+        add_skinned_model(RESOURCES_PATH "man.glb");
         // model3.get_transform()->set_rotation(glm::rotate(glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
         // cologne::physics::update_mesh_collider(&model);
         // cologne::physics::update_mesh_collider(&model2);
@@ -34,6 +35,7 @@ namespace cologne
         LOG_INFO("Scene size is (%f, %f, %f)", _scene_bounds.size().x, _scene_bounds.size().y, _scene_bounds.size().z);
         _particles.emplace_back(Particles());
         _particles[0].init(_scene_bounds, 20);
+
     }
 
     Scene::~Scene()
@@ -87,5 +89,10 @@ namespace cologne
     Model &Scene::add_model(const char *path, bool flip_textures)
     {
         return *_models.emplace_back(std::make_unique<Model>(path, flip_textures));
+    }
+
+    SkinnedModel & Scene::add_skinned_model(const char *path)
+    {
+        return _skinned_models.emplace_back(path);
     }
 }

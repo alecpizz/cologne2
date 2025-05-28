@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "renderer/Model.h"
 #include "renderer/Particles.h"
+#include "renderer/SkinnedModel.h"
 
 namespace cologne
 {
@@ -11,11 +12,13 @@ namespace cologne
 
         ~Scene();
 
-        Model* get_model_by_index(size_t idx) const;
+        Model *get_model_by_index(size_t idx) const;
 
         uint64_t get_model_count() const;
 
-        Model& add_model(const char* path, bool flip_textures) ;
+        Model &add_model(const char *path, bool flip_textures);
+
+        SkinnedModel &add_skinned_model(const char* path);
 
         void update(float delta_time);
 
@@ -30,12 +33,14 @@ namespace cologne
         AABB re_calculate_bounds();
 
         AABB get_bounds() const;
-        std::vector<Particles>& get_particles();
+
+        std::vector<Particles> &get_particles();
 
     private:
         //THIS IS fucking dumb
         AABB _scene_bounds;
-        std::vector<std::unique_ptr<Model>> _models;
+        std::vector<std::unique_ptr<Model> > _models;
+        std::vector<SkinnedModel> _skinned_models;
         std::vector<Particles> _particles;
     };
 }

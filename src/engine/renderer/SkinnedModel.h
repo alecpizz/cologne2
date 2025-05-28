@@ -7,16 +7,22 @@
 #include <engine/Transform.h>
 
 #include "Material.h"
-#include "Mesh.h"
+#include "SkinnedMesh.h"
 
 namespace cologne
 {
-    class AnimatedModel
+    struct BoneInfo
     {
+        int id;
+        glm::mat4 offset;
+    };
+    class SkinnedModel
+    {
+        friend class Animation;
     public:
-        explicit AnimatedModel(const char *path);
+        explicit SkinnedModel(const char *path);
 
-        ~AnimatedModel();
+        ~SkinnedModel();
 
         Transform &get_transform();
 
@@ -26,7 +32,7 @@ namespace cologne
 
         uint64_t get_num_materials() const;
 
-        Mesh *get_meshes();
+        SkinnedMesh *get_meshes();
 
         uint64_t get_num_meshes() const;
 
@@ -37,8 +43,10 @@ namespace cologne
         bool get_active() const;
 
     private:
+        std::unordered_map<std::string, BoneInfo> _bone_info_map;
+        int _bone_count = 0;
         std::vector<Material> _materials;
-        std::vector<Mesh> _meshes;
+        std::vector<SkinnedMesh> _meshes;
         bool _active = true;
         Transform _transform;
         AABB _bounds;

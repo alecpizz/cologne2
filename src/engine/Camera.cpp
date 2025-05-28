@@ -91,8 +91,8 @@ namespace cologne
 
         glm::vec2 mouse = Input::get_relative_mouse();
 
-        _yaw += mouse.x * dt * 10.0f;
-        _pitch -= mouse.y * dt * 10.0f;
+        _yaw += mouse.x * dt * 15.0f;
+        _pitch -= mouse.y * dt * 15.0f;
         if (_pitch > 89.0f)
         {
             _pitch = 89.0f;

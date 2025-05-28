@@ -1,49 +1,38 @@
 ﻿#pragma once
-#include "gpch.h"
-#include "assimp/matrix4x4.h"
-#include "renderer/Vertex.h"
 
-namespace cologne::Animation
+struct aiNode;
+struct aiAnimation;
+
+namespace cologne
 {
-    struct Bone
+    struct Node
     {
-        uint32_t id = 0;
-        std::string name = "";
-        glm::mat4 offset = glm::mat4(1.0f);
+        glm::mat4 transform;
+        std::string name;
+        std::vector<Node> children;
     };
 
-    struct BoneTransformTrack
-    {
-        std::vector<float> position_times = {};
-        std::vector<float> rotation_times = {};
-        std::vector<float> scale_times = {};
+    class SkinnedModel;
+    class BoneAnimationData;
+    struct BoneInfo;
 
-        std::vector<glm::vec3> positions = {};
-        std::vector<glm::vec3> scales = {};
-        std::vector<glm::quat> rotations = {};
+    class Animation
+    {
+    public:
+        Animation(const std::string& path, SkinnedModel& model);
+        BoneAnimationData* find_bone(const std::string& name);
+        float get_ticks_per_second() const;
+        float get_duration() const;
+        Node& get_root();
+    private:
+        void read_missing_bones(const aiAnimation* animation, SkinnedModel& model);
+        void read_bone_hierarchy(Node& dest, const aiNode* src);
+        std::unordered_map<std::string, BoneAnimationData> _bone_data_map;
+        std::unordered_map<std::string, BoneInfo> _bone_info_map;
+        float _duration;
+        int _ticks_per_second;
+        Node _root_node;
     };
 
-    struct Animation
-    {
-        float duration = 0.0f;
-        float ticks_per_second = 1.0f;
-        std::unordered_map<std::string, BoneTransformTrack> bone_transforms = {};
-    };
-
-    struct SkinnedMeshData
-    {
-        std::vector<WeightedVertex> vertices = {};
-        std::vector<uint32_t> indices = {};
-    };
-
-    struct SkinnedModelData
-    {
-        glm::mat4 global_inverse_transform;
-        std::vector<SkinnedMeshData> meshes;
-        std::vector<Bone> bones;
-    };
-
-    SkinnedModelData load_model(const std::string &path);
-
-    glm::mat4 assimp_to_glm_matrix(const aiMatrix4x4 &from);
+    std::vector<Animation> get_animations(const std::string& path, SkinnedModel& model);
 }
