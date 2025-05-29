@@ -6,6 +6,7 @@
 #include "Physics.h"
 #include "renderer/Model.h"
 #include "Animation.h"
+#include "Animator.h"
 #include "renderer/SkinnedModel.h"
 
 namespace cologne
@@ -24,7 +25,9 @@ namespace cologne
         model3.set_aabb(bounds);
         auto &model = add_model(RESOURCES_PATH "glowCube.glb", false);
         model.set_gi_only(true);
-        add_skinned_model(RESOURCES_PATH "man.glb");
+        auto& skinned_model = add_skinned_model(RESOURCES_PATH "man.glb", "man");
+        _animations.emplace_back(Animation(RESOURCES_PATH "man.glb", skinned_model));
+        _animators.insert(std::make_pair("man", Animator(_animations[0])));
         // model3.get_transform()->set_rotation(glm::rotate(glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
         // cologne::physics::update_mesh_collider(&model);
         // cologne::physics::update_mesh_collider(&model2);
@@ -50,8 +53,13 @@ namespace cologne
         time += delta_time * 0.85;
         // -11 1 4 init pos
         // 13 1 4 final pos
-        glm::vec3 new_pos = glm::lerp(glm::vec3(-11.0f, 1.0f, 4.0f), glm::vec3(13.0f, 1.0f, 4.0f), glm::abs(glm::cos(time)));
+        glm::vec3 new_pos = glm::lerp(glm::vec3(-11.0f, 1.0f, 4.0f),
+            glm::vec3(13.0f, 1.0f, 4.0f), glm::abs(glm::cos(time)));
         model->get_transform()->set_translation(glm::vec3(new_pos));
+        for (auto& anim : _animators)
+        {
+            anim.second.update_animation(delta_time);
+        }
     }
 
     AABB Scene::re_calculate_bounds()
@@ -91,8 +99,20 @@ namespace cologne
         return *_models.emplace_back(std::make_unique<Model>(path, flip_textures));
     }
 
-    SkinnedModel & Scene::add_skinned_model(const char *path)
+    SkinnedModel & Scene::add_skinned_model(const char *path, const char* name)
     {
-        return _skinned_models.emplace_back(path);
+        return _skinned_models.emplace_back(path, name);
+    }
+
+
+    std::vector<SkinnedModel> & Scene::get_skinned_models()
+    {
+        return _skinned_models;
+    }
+
+
+    std::unordered_map<std::string, Animator>& Scene::get_animators()
+    {
+        return _animators;
     }
 }

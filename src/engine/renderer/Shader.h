@@ -42,6 +42,7 @@ namespace cologne
         void set_vec4(const char *name, const float *value) const;
 
         void set_mat4(const char *name, const float *value) const;
+        void set_mat4(const char* name, const float * value, size_t count) const;
 
         void set_float(const char *name, float value) const;
 

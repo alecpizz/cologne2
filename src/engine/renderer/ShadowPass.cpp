@@ -213,7 +213,6 @@ namespace cologne
         auto shader = get_shader_by_name("shadowmap");
         shader->bind();
         shader->set_vec3("light.direction", glm::value_ptr(light.direction));
-        shader->set_vec3("light.color", glm::value_ptr(light.color));
         glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
         glViewport(0, 0, shadow_size, shadow_size);
         glClear(GL_DEPTH_BUFFER_BIT);
@@ -237,6 +236,36 @@ namespace cologne
             }
         }
 
+        shader = get_shader_by_name("shadowmap_skinned");
+        shader->bind();
+        shader->set_vec3("light.direction", glm::value_ptr(light.direction));
+
+        for (size_t i = 0; i < scene.get_skinned_models().size(); i++)
+        {
+            auto& model = scene.get_skinned_models().at(i);
+            if (!model.get_active())
+            {
+                continue;
+            }
+            shader->set_mat4("model", glm::value_ptr(model.get_transform().get_model_matrix()));
+            if (scene.get_animators().contains(model.get_name()))
+            {
+                auto& animator = scene.get_animators().at(model.get_name());
+                auto& bones = animator.get_bones();
+                shader->set_mat4("bone_matrices", glm::value_ptr(bones[0]), bones.size());
+            }
+
+            for (size_t j = 0; j < model.get_num_meshes(); j++)
+            {
+                auto& mesh = model.get_meshes()[j];
+                Material& mat = model.get_materials()[mesh.get_material_index()];
+                mat.albedo.bind(ALBEDO_INDEX);
+                mesh.draw();
+            }
+        }
+
+
+        //voxel shadow
         _dir_shadow_fbo.bind();
         _dir_shadow_fbo.set_viewport();
         glClear(GL_DEPTH_BUFFER_BIT);

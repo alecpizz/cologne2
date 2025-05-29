@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Animator.h"
 #include "renderer/Model.h"
 #include "renderer/Particles.h"
 #include "renderer/SkinnedModel.h"
@@ -18,7 +19,10 @@ namespace cologne
 
         Model &add_model(const char *path, bool flip_textures);
 
-        SkinnedModel &add_skinned_model(const char* path);
+        SkinnedModel &add_skinned_model(const char* path, const char* name);
+
+        std::vector<SkinnedModel>& get_skinned_models();
+        std::unordered_map<std::string, Animator>& get_animators();
 
         void update(float delta_time);
 
@@ -41,6 +45,8 @@ namespace cologne
         AABB _scene_bounds;
         std::vector<std::unique_ptr<Model> > _models;
         std::vector<SkinnedModel> _skinned_models;
+        std::unordered_map<std::string, Animator> _animators;
+        std::vector<Animation> _animations;
         std::vector<Particles> _particles;
     };
 }

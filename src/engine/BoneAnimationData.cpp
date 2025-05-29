@@ -85,7 +85,7 @@ namespace cologne
     {
         for (int i = 0; i < _scales.size() - 1; i++)
         {
-            if (time < _rotations[i + 1].time_stamp)
+            if (time < _scales[i + 1].time_stamp)
             {
                 return i;
             }

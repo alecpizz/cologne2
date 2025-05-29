@@ -27,8 +27,10 @@ namespace cologne
 
     std::shared_ptr<Shader> lit_shader = nullptr;
     std::shared_ptr<Shader> g_buffer_shader = nullptr;
+    std::shared_ptr<Shader> g_buffer_skinned_shader = nullptr;
     std::shared_ptr<Shader> skybox_shader = nullptr;
     std::shared_ptr<Shader> shadowmap_shader = nullptr;
+    std::shared_ptr<Shader> shadowmap_skinned_shader = nullptr;
     std::shared_ptr<Shader> fbo_debug_shader = nullptr;
     std::shared_ptr<Shader> probe_debug_shader = nullptr;
     std::shared_ptr<Shader> probe_lit_shader = nullptr;
@@ -53,7 +55,8 @@ namespace cologne
 
         g_buffer_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/gbuffer.vert",
                                                    RESOURCES_PATH "shaders/gbuffer.frag");
-
+        g_buffer_skinned_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/skinned_gbuffer.vert",
+                                                          RESOURCES_PATH "shaders/gbuffer.frag");
         skybox_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/skybox.vert",
                                                  RESOURCES_PATH "shaders/skybox.frag");
         fbo_debug_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/framebufferoutput.vert",
@@ -61,6 +64,9 @@ namespace cologne
         shadowmap_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/shadowmap2.vert",
                                                     RESOURCES_PATH "shaders/shadowmap2.frag",
                                                     RESOURCES_PATH "shaders/shadowmap2.geom");
+        shadowmap_skinned_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/shadowmap_skinned.vert",
+                                              RESOURCES_PATH "shaders/shadowmap2.frag",
+                                              RESOURCES_PATH "shaders/shadowmap2.geom");
         probe_debug_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/probe_debug.vert",
                                                       RESOURCES_PATH "shaders/probe_debug.frag");
         probe_lit_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/probe_lit.comp");
@@ -85,6 +91,7 @@ namespace cologne
         shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("gbuffer", g_buffer_shader));
         shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("skybox", skybox_shader));
         shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("shadowmap", shadowmap_shader));
+        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("shadowmap_skinned", shadowmap_skinned_shader));
         shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("probe_debug", probe_debug_shader));
         shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("probe_lit", probe_lit_shader));
         shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("voxelize", voxelize_shader));
@@ -95,6 +102,7 @@ namespace cologne
         shaders.insert(std::pair<std::string, std::shared_ptr<Shader>>("indirect", indirect_shader));
         shaders.insert(std::pair<std::string, std::shared_ptr<Shader>>("particle_render", particle_render_shader));
         shaders.insert(std::pair<std::string, std::shared_ptr<Shader>>("particle_sim", particle_sim_shader));
+        shaders.insert(std::pair<std::string, std::shared_ptr<Shader>>("skinned_gbuffer", g_buffer_skinned_shader));
     }
 
     void Renderer::add_light(Light light)

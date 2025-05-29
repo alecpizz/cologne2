@@ -246,6 +246,19 @@ namespace cologne
         glUniformMatrix4fv(_impl->uniforms[name], 1, GL_FALSE, value);
     }
 
+    void Shader::set_mat4(const char *name, const float *value, size_t count) const
+    {
+        if (!_impl->linked)
+        {
+            return;
+        }
+        if (!_impl->uniforms.contains(name))
+        {
+            _impl->uniforms[name] = glGetUniformLocation(_impl->program, name);
+        }
+        glUniformMatrix4fv(_impl->uniforms[name], count, GL_FALSE, value);
+    }
+
     void Shader::set_float(const char *name, const float value) const
     {
         if (!_impl->linked)

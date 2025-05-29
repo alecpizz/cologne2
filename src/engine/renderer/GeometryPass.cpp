@@ -94,6 +94,41 @@ namespace cologne
             }
         }
 
+        shader = get_shader_by_name("skinned_gbuffer");
+        shader->bind();
+        shader->set_mat4("projection", &Engine::get_camera()->get_projection_matrix()[0][0]);
+        shader->set_mat4("view", &Engine::get_camera()->get_view_matrix()[0][0]);
+
+        for (size_t i = 0; i < scene.get_skinned_models().size(); i++)
+        {
+            auto& model = scene.get_skinned_models().at(i);
+            if (!model.get_active())
+            {
+                continue;
+            }
+            shader->set_mat4("model", glm::value_ptr(model.get_transform().get_model_matrix()));
+            if (scene.get_animators().contains(model.get_name()))
+            {
+                auto& animator = scene.get_animators().at(model.get_name());
+                auto& bones = animator.get_bones();
+                shader->set_mat4("bone_matrices", glm::value_ptr(bones[0]), bones.size());
+            }
+
+            for (size_t j = 0; j < model.get_num_meshes(); j++)
+            {
+                auto& mesh = model.get_meshes()[j];
+                Material& mat = model.get_materials()[mesh.get_material_index()];
+                mat.bind_all();
+                mesh.draw();
+                glBindTextureUnit(ALBEDO_INDEX, 0);
+                glBindTextureUnit(AO_INDEX, 0);
+                glBindTextureUnit(METALLIC_INDEX, 0);
+                glBindTextureUnit(ROUGHNESS_INDEX, 0);
+                glBindTextureUnit(NORMAL_INDEX, 0);
+                glBindTextureUnit(EMISSION_INDEX, 0);
+            }
+        }
+
         shader = get_shader_by_name("particle_render");
         shader->bind();
         shader->set_mat4("projection", &Engine::get_camera()->get_projection_matrix()[0][0]);

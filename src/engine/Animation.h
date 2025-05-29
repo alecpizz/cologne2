@@ -1,5 +1,8 @@
 ﻿#pragma once
+#include "BoneAnimationData.h"
+#include "renderer/SkinnedModel.h"
 
+struct aiScene;
 struct aiNode;
 struct aiAnimation;
 
@@ -13,17 +16,19 @@ namespace cologne
     };
 
     class SkinnedModel;
-    class BoneAnimationData;
     struct BoneInfo;
 
     class Animation
     {
+        friend class Animator;
     public:
         Animation(const std::string& path, SkinnedModel& model);
+        Animation(aiAnimation* animation, const aiScene* scene, SkinnedModel& model);
         BoneAnimationData* find_bone(const std::string& name);
         float get_ticks_per_second() const;
         float get_duration() const;
         Node& get_root();
+        static std::vector<Animation> get_animations(const std::string& path, SkinnedModel& model);
     private:
         void read_missing_bones(const aiAnimation* animation, SkinnedModel& model);
         void read_bone_hierarchy(Node& dest, const aiNode* src);
@@ -34,5 +39,4 @@ namespace cologne
         Node _root_node;
     };
 
-    std::vector<Animation> get_animations(const std::string& path, SkinnedModel& model);
 }

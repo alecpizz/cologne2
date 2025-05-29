@@ -20,7 +20,7 @@ namespace cologne
     {
         friend class Animation;
     public:
-        explicit SkinnedModel(const char *path);
+        SkinnedModel(const char *path, const char* name);
 
         ~SkinnedModel();
 
@@ -40,6 +40,8 @@ namespace cologne
 
         void set_aabb(AABB aabb);
 
+        std::string& get_name();
+
         bool get_active() const;
 
     private:
@@ -50,5 +52,6 @@ namespace cologne
         bool _active = true;
         Transform _transform;
         AABB _bounds;
+        std::string _name;
     };
 }

@@ -28,8 +28,6 @@ namespace cologne
                                           const aiMesh *mesh);
     void load_materials(const aiScene* scene, std::vector<Material>& materials);
 
-    void load_animations(const aiScene* scene);
-
     SkinnedMesh process_skinned_mesh(std::unordered_map<std::string, BoneInfo> &bone_map, int &bone_counter,
                                      aiMesh *mesh)
     {
@@ -85,14 +83,9 @@ namespace cologne
         }
     }
 
-    void load_animations(const aiScene *scene)
+    SkinnedModel::SkinnedModel(const char *path, const char* name)
     {
-
-    }
-
-
-    SkinnedModel::SkinnedModel(const char *path)
-    {
+        _name = name;
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(
             path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals |
@@ -150,6 +143,11 @@ namespace cologne
     void SkinnedModel::set_aabb(AABB aabb)
     {
         _bounds = aabb;
+    }
+
+    std::string & SkinnedModel::get_name()
+    {
+        return _name;
     }
 
     bool SkinnedModel::get_active() const

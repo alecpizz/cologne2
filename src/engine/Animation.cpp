@@ -11,6 +11,24 @@
 //
 namespace cologne
 {
+    std::vector<Animation> get_animations(const std::string &path, SkinnedModel &model)
+    {
+        Assimp::Importer importer;
+        const aiScene* scene = importer.ReadFile(path, 0);
+        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+        {
+            LOG_ERROR("ASSIMP ERROR: %s", importer.GetErrorString());
+            return std::vector<Animation>();
+        }
+
+        std::vector<Animation> result;
+        for (size_t i = 0; i < scene->mNumAnimations; i++)
+        {
+            result.emplace_back(Animation(scene->mAnimations[i], scene, model));
+        }
+        return result;
+    }
+
     Animation::Animation(const std::string &path, SkinnedModel &model)
     {
         Assimp::Importer importer;
@@ -26,14 +44,23 @@ namespace cologne
         _ticks_per_second = animation->mTicksPerSecond;
         read_bone_hierarchy(_root_node, scene->mRootNode);
         read_missing_bones(animation, model);
+        LOG_INFO("Created an animation with %f duration %d tps", _duration, _ticks_per_second);
+    }
+
+    Animation::Animation(aiAnimation *animation, const aiScene* scene, SkinnedModel &model)
+    {
+        _duration = animation->mDuration;
+        _ticks_per_second = animation->mTicksPerSecond;
+        read_bone_hierarchy(_root_node, scene->mRootNode);
+        read_missing_bones(animation, model);
     }
 
     BoneAnimationData * Animation::find_bone(const std::string &name)
     {
-        // if (_bone_data_map.contains(name))
-        // {
-        //     return &_bone_data_map[name];
-        // }
+        if (_bone_data_map.contains(name))
+        {
+            return &_bone_data_map.find(name)->second;
+        }
         return nullptr;
     }
 
@@ -93,4 +120,6 @@ namespace cologne
             dest.children.push_back(node);
         }
     }
+
+
 }
