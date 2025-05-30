@@ -26,7 +26,8 @@ namespace cologne
     void extract_bone_weight_for_vertices(std::vector<WeightedVertex> &vertices,
                                           std::unordered_map<std::string, BoneInfo> &bone_map, int &bone_counter,
                                           const aiMesh *mesh);
-    void load_materials(const aiScene* scene, std::vector<Material>& materials);
+
+    void load_materials(const aiScene *scene, std::vector<Material> &materials);
 
     SkinnedMesh process_skinned_mesh(std::unordered_map<std::string, BoneInfo> &bone_map, int &bone_counter,
                                      aiMesh *mesh)
@@ -56,8 +57,6 @@ namespace cologne
             vertices.push_back(vertex);
         }
 
-        extract_bone_weight_for_vertices(vertices, bone_map, bone_counter, mesh);
-
         for (size_t i = 0; i < mesh->mNumFaces; i++)
         {
             aiFace face = mesh->mFaces[i];
@@ -66,7 +65,10 @@ namespace cologne
                 indices.push_back(face.mIndices[j]);
             }
         }
-        return SkinnedMesh(vertices, indices, mesh->mMaterialIndex);
+
+        extract_bone_weight_for_vertices(vertices, bone_map, bone_counter, mesh);
+
+        return {vertices, indices, mesh->mMaterialIndex};
     }
 
     void process_skinned_node(std::vector<SkinnedMesh> &meshes, std::unordered_map<std::string, BoneInfo> &bone_map,
@@ -83,13 +85,13 @@ namespace cologne
         }
     }
 
-    SkinnedModel::SkinnedModel(const char *path, const char* name)
+    SkinnedModel::SkinnedModel(const char *path, const char *name)
     {
         _name = name;
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(
             path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals |
-                  aiProcess_RemoveRedundantMaterials);
+                  aiProcess_RemoveRedundantMaterials | aiProcess_LimitBoneWeights);
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
         {
             LOG_ERROR("ASSIMP ERROR: %s", importer.GetErrorString());
@@ -98,7 +100,7 @@ namespace cologne
         process_skinned_node(_meshes, _bone_info_map, _bone_count, scene->mRootNode, scene);
         load_materials(scene, _materials);
         importer.FreeScene();
-        LOG_INFO("Loaded skinned model with %d meshes:", _meshes.size());
+        LOG_INFO("Loaded skinned model with %d meshes:  %d bones", _meshes.size(), _bone_count);
     }
 
     SkinnedModel::~SkinnedModel()
@@ -145,7 +147,7 @@ namespace cologne
         _bounds = aabb;
     }
 
-    std::string & SkinnedModel::get_name()
+    std::string &SkinnedModel::get_name()
     {
         return _name;
     }
@@ -157,8 +159,11 @@ namespace cologne
 
     void reset_vertex(WeightedVertex &vertex)
     {
-        vertex.boneID = glm::ivec4(-1);
-        vertex.weight = glm::vec4(0.0f);
+        for (int i = 0; i < 4; i++)
+        {
+            vertex.boneID[i] = -1;
+            vertex.weight[i] = 0.0f;
+        }
     }
 
     void set_vertex_data(WeightedVertex &vertex, int boneID, float weight)
@@ -180,111 +185,117 @@ namespace cologne
     {
         for (size_t bone_idx = 0; bone_idx < mesh->mNumBones; bone_idx++)
         {
-            int bone_id;
+            int bone_id = -1;
             std::string bone_name = mesh->mBones[bone_idx]->mName.C_Str();
             if (!bone_map.contains(bone_name))
             {
-                BoneInfo info;
+                BoneInfo info{};
                 info.id = bone_counter;
                 info.offset = Util::ai_mat4_to_glm_mat4(mesh->mBones[bone_idx]->mOffsetMatrix);
-                bone_map[bone_name] = info;
+                bone_map.insert(std::make_pair(bone_name, info));
                 bone_id = bone_counter;
                 bone_counter++;
             } else
             {
                 bone_id = bone_map[bone_name].id;
             }
-            auto weights = mesh->mBones[bone_idx]->mWeights;
+            assert(bone_id != -1);
+            const auto weights = mesh->mBones[bone_idx]->mWeights;
             const int num_weights = mesh->mBones[bone_idx]->mNumWeights;
+
             for (size_t weight_idx = 0; weight_idx < num_weights; weight_idx++)
             {
                 int vertex_id = weights[weight_idx].mVertexId;
                 float weight = weights[weight_idx].mWeight;
+                if (weight > 1.0f)
+                {
+                    LOG_INFO("FAT %f", weight);
+                }
                 set_vertex_data(vertices[vertex_id], bone_id, weight);
             }
         }
     }
 
-    void load_materials(const aiScene *scene, std::vector<Material>& materials)
+    void load_materials(const aiScene *scene, std::vector<Material> &materials)
     {
         for (size_t i = 0; i < scene->mNumMaterials; i++)
+        {
+            Material mat;
+            auto material = scene->mMaterials[i];
+
+            aiString diffuse_path;
+            if (material->GetTexture(aiTextureType_BASE_COLOR, 0, &diffuse_path) == aiReturn_SUCCESS)
             {
-                Material mat;
-                auto material = scene->mMaterials[i];
-
-                aiString diffuse_path;
-                if (material->GetTexture(aiTextureType_BASE_COLOR, 0, &diffuse_path) == aiReturn_SUCCESS)
+                if (auto texture = scene->GetEmbeddedTexture(diffuse_path.C_Str()); texture != nullptr)
                 {
-                    if (auto texture = scene->GetEmbeddedTexture(diffuse_path.C_Str()); texture != nullptr)
-                    {
-                        mat.albedo = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
-                                             texture->mHeight);
-                    }
-                }
-
-                aiString normalPath;
-                if (material->GetTexture(aiTextureType_NORMAL_CAMERA, 0, &normalPath) == aiReturn_SUCCESS || material->
-                    GetTexture(aiTextureType_NORMALS, 0, &normalPath) == aiReturn_SUCCESS)
-                {
-                    if (auto texture = scene->GetEmbeddedTexture(normalPath.C_Str()); texture != nullptr)
-                    {
-                        mat.normal = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
-                                             texture->mHeight);
-                    }
-                }
-
-                aiString ambient_path;
-                if (material->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &ambient_path) == aiReturn_SUCCESS ||
-                    material->GetTexture(aiTextureType_AMBIENT, 0, &ambient_path) == aiReturn_SUCCESS)
-                {
-                    if (auto texture = scene->GetEmbeddedTexture(ambient_path.C_Str()); texture != nullptr)
-                    {
-                        mat.ao = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
+                    mat.albedo = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
                                          texture->mHeight);
-                    }
                 }
-
-                aiString roughness_path;
-                if (material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &roughness_path) == aiReturn_SUCCESS)
-                {
-                    if (auto texture = scene->GetEmbeddedTexture(roughness_path.C_Str()); texture != nullptr)
-                    {
-                        mat.roughness = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
-                                                texture->mHeight);
-                    }
-                }
-
-                aiString metallic_path;
-                if (material->GetTexture(aiTextureType_METALNESS, 0, &metallic_path) == aiReturn_SUCCESS)
-                {
-                    if (auto texture = scene->GetEmbeddedTexture(metallic_path.C_Str()); texture != nullptr)
-                    {
-                        mat.metallic = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
-                                               texture->mHeight);
-                    }
-                }
-
-                aiString emission_path;
-                if (material->GetTexture(aiTextureType_EMISSION_COLOR, 0, &emission_path) == aiReturn_SUCCESS ||
-                    material->GetTexture(aiTextureType_EMISSIVE, 0, &emission_path) == aiReturn_SUCCESS)
-                {
-                    if (auto texture = scene->GetEmbeddedTexture(emission_path.C_Str()); texture != nullptr)
-                    {
-                        mat.emission = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
-                                               texture->mHeight);
-                    }
-                }
-
-                aiString misc_path;
-                if (material->GetTexture(aiTextureType_UNKNOWN, 0, &misc_path) == aiReturn_SUCCESS)
-                {
-                    if (auto texture = scene->GetEmbeddedTexture(misc_path.C_Str()); texture != nullptr)
-                    {
-                        LOG_INFO("FOUND MISC TEXTURE AT: %s", texture->mFilename.C_Str());
-                    }
-                }
-
-                materials.push_back(mat);
             }
+
+            aiString normalPath;
+            if (material->GetTexture(aiTextureType_NORMAL_CAMERA, 0, &normalPath) == aiReturn_SUCCESS || material->
+                GetTexture(aiTextureType_NORMALS, 0, &normalPath) == aiReturn_SUCCESS)
+            {
+                if (auto texture = scene->GetEmbeddedTexture(normalPath.C_Str()); texture != nullptr)
+                {
+                    mat.normal = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
+                                         texture->mHeight);
+                }
+            }
+
+            aiString ambient_path;
+            if (material->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &ambient_path) == aiReturn_SUCCESS ||
+                material->GetTexture(aiTextureType_AMBIENT, 0, &ambient_path) == aiReturn_SUCCESS)
+            {
+                if (auto texture = scene->GetEmbeddedTexture(ambient_path.C_Str()); texture != nullptr)
+                {
+                    mat.ao = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
+                                     texture->mHeight);
+                }
+            }
+
+            aiString roughness_path;
+            if (material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &roughness_path) == aiReturn_SUCCESS)
+            {
+                if (auto texture = scene->GetEmbeddedTexture(roughness_path.C_Str()); texture != nullptr)
+                {
+                    mat.roughness = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
+                                            texture->mHeight);
+                }
+            }
+
+            aiString metallic_path;
+            if (material->GetTexture(aiTextureType_METALNESS, 0, &metallic_path) == aiReturn_SUCCESS)
+            {
+                if (auto texture = scene->GetEmbeddedTexture(metallic_path.C_Str()); texture != nullptr)
+                {
+                    mat.metallic = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
+                                           texture->mHeight);
+                }
+            }
+
+            aiString emission_path;
+            if (material->GetTexture(aiTextureType_EMISSION_COLOR, 0, &emission_path) == aiReturn_SUCCESS ||
+                material->GetTexture(aiTextureType_EMISSIVE, 0, &emission_path) == aiReturn_SUCCESS)
+            {
+                if (auto texture = scene->GetEmbeddedTexture(emission_path.C_Str()); texture != nullptr)
+                {
+                    mat.emission = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
+                                           texture->mHeight);
+                }
+            }
+
+            aiString misc_path;
+            if (material->GetTexture(aiTextureType_UNKNOWN, 0, &misc_path) == aiReturn_SUCCESS)
+            {
+                if (auto texture = scene->GetEmbeddedTexture(misc_path.C_Str()); texture != nullptr)
+                {
+                    LOG_INFO("FOUND MISC TEXTURE AT: %s", texture->mFilename.C_Str());
+                }
+            }
+
+            materials.push_back(mat);
+        }
     }
 }

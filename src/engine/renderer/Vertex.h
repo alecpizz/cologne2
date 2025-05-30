@@ -36,7 +36,7 @@ namespace cologne
         glm::vec2 uv = glm::vec2(0.0f, 0.0f);
         glm::vec3 tangent = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::ivec4 boneID = glm::ivec4(0);
-        glm::vec4 weight = glm::vec4(0);
+        glm::vec4 weight = glm::vec4(0.0f);
 
         bool operator==(const WeightedVertex& other) const
         {

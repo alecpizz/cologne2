@@ -25,9 +25,9 @@ namespace cologne
         model3.set_aabb(bounds);
         auto &model = add_model(RESOURCES_PATH "glowCube.glb", false);
         model.set_gi_only(true);
-        auto& skinned_model = add_skinned_model(RESOURCES_PATH "man.glb", "man");
-        _animations.emplace_back(Animation(RESOURCES_PATH "man.glb", skinned_model));
-        _animators.insert(std::make_pair("man", Animator(_animations[0])));
+        auto& skinned_model = add_skinned_model(RESOURCES_PATH "python/deagle.glb", "deagle");
+        _animations = Animation::get_animations(RESOURCES_PATH "python/deagle.glb", skinned_model);
+        _animators.insert(std::make_pair("deagle", Animator(_animations[2])));
         // model3.get_transform()->set_rotation(glm::rotate(glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
         // cologne::physics::update_mesh_collider(&model);
         // cologne::physics::update_mesh_collider(&model2);

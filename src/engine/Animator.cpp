@@ -11,7 +11,11 @@ namespace cologne
     Animator::Animator(Animation &anim) : _current_animation(anim)
     {
         _current_time = 0.0f;
-        _bone_mats.resize(100, glm::mat4(1.0f));
+        _bone_mats.reserve(100);
+        for (int i = 0; i < 100; i++)
+        {
+            _bone_mats.emplace_back(1.0f);
+        }
     }
 
     void Animator::update_animation(float dt)

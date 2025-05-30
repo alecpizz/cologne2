@@ -11,7 +11,7 @@
 //
 namespace cologne
 {
-    std::vector<Animation> get_animations(const std::string &path, SkinnedModel &model)
+    std::vector<Animation> Animation::get_animations(const std::string &path, SkinnedModel &model)
     {
         Assimp::Importer importer;
         const aiScene* scene = importer.ReadFile(path, 0);
@@ -33,7 +33,7 @@ namespace cologne
     {
         Assimp::Importer importer;
         const aiScene* scene = importer.ReadFile(path, 0);
-        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+        if (!scene || !scene->mRootNode)
         {
             LOG_ERROR("ASSIMP ERROR: %s", importer.GetErrorString());
             return;
@@ -93,7 +93,9 @@ namespace cologne
 
             if (!model_bone_info.contains(bone_name))
             {
+                LOG_INFO("MISSING BONE %s", channel->mNodeName.data);
                 model_bone_info[bone_name].id = count;
+                model_bone_info[bone_name].offset = glm::mat4(1.0f);
                 count++;
             }
             _bone_data_map.insert(std::make_pair(bone_name,
@@ -108,11 +110,14 @@ namespace cologne
         if (!src)
         {
             LOG_ERROR("NO BONE SOURCE!");
+            dest.name = "empty_node_null";
+            dest.transform = glm::mat4(1.0f);
+            dest.children.clear();
             return;
         }
         dest.name = src->mName.data;
         dest.transform = Util::ai_mat4_to_glm_mat4(src->mTransformation);
-        dest.children.resize(src->mNumChildren);
+        dest.children.clear();
         for (size_t i = 0; i < src->mNumChildren; i++)
         {
             Node node;

@@ -16,6 +16,7 @@ namespace cologne
         int id;
         glm::mat4 offset;
     };
+
     class SkinnedModel
     {
         friend class Animation;

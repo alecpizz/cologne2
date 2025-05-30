@@ -24,15 +24,15 @@ void main()
     vec4 totalPosition = vec4(0.0f);
     for(int i = 0 ; i < MAX_BONE_INFLUENCE ; i++)
     {
-        if(boneID[i] == -1)
-        continue;
-        if(boneID[i] >=MAX_BONES)
+        if(boneID[i] < 0)
+            continue;
+        if(boneID[i] >= MAX_BONES)
         {
             totalPosition = vec4(position,1.0f);
             break;
         }
         vec4 localPosition = bone_matrices[boneID[i]] * vec4(position,1.0f);
-        totalPosition += localPosition * weight[i];
+        totalPosition += localPosition * max(weight[i], 0.0f);
     }
 
 
