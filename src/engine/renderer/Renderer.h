@@ -1,7 +1,7 @@
 ﻿#pragma once
-#include "FrameBuffer.h"
-#include "Light.h"
-#include "engine/Scene.h"
+#include "engine/renderer/types/Light.h"
+#include "engine/scene/Scene.h"
+#include "types/FrameBuffer.h"
 
 
 namespace cologne

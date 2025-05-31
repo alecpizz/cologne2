@@ -21,7 +21,7 @@
 #include <unordered_set>
 #include <glad/glad.h>
 
-#include "engine/Log.h"
+#include "engine/core/Log.h"
 
 
 #define SDL_MAIN_HANDLED

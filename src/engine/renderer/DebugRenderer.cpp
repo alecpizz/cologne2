@@ -1,10 +1,10 @@
 #include "DebugRenderer.h"
 
-#include <engine/Engine.h>
+#include <engine/core/Engine.h>
 
 #include "DebugScope.h"
-#include "engine/Input.h"
-#include "Shader.h"
+#include "engine/core/Input.h"
+#include "../renderer/types/Shader.h"
 
 namespace cologne
 {

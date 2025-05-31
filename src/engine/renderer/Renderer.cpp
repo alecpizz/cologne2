@@ -4,19 +4,21 @@
 
 #include "Renderer.h"
 
-#include <engine/Engine.h>
-#include <engine/Input.h>
-
 #include "DebugRenderer.h"
+#include "engine/core/Engine.h"
+#include "engine/core/Input.h"
+
+#include "engine/editor/DebugUI.h"
 #include "DebugScope.h"
-#include "FrameBuffer.h"
-#include "Material.h"
-#include "Light.h"
-#include "../Scene.h"
-#include "Shader.h"
+#include "../renderer/types/FrameBuffer.h"
+#include "../renderer/types/Material.h"
+#include "../renderer/types/Light.h"
+#include "openglErrorReporting.h"
+#include "../scene/Scene.h"
+#include "../renderer/types/Shader.h"
 #include "TextRenderer.h"
-#include "Probe.h"
-#include "../Time.h"
+#include "../renderer/types/Probe.h"
+#include "../core/Time.h"
 
 namespace cologne
 {
@@ -286,6 +288,7 @@ namespace cologne
 
     void Renderer::init()
     {
+        enableReportGlErrors();
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);

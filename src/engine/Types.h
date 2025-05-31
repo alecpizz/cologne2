@@ -1,6 +1,6 @@
 #pragma once
-#include "renderer/Material.h"
-#include "renderer/Vertex.h"
+#include "renderer/types/Material.h"
+#include "renderer/types/Vertex.h"
 
 namespace cologne
 {

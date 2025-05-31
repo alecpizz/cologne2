@@ -4,10 +4,10 @@
 
 #include "TextRenderer.h"
 #include <ft2build.h>
-#include <engine/Engine.h>
+#include <engine/core/Engine.h>
 
 #include "DebugScope.h"
-#include "Shader.h"
+#include "types/Shader.h"
 
 #include FT_FREETYPE_H
 
