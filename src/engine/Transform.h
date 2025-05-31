@@ -10,31 +10,35 @@ namespace cologne
         glm::mat4 model_matrix = glm::mat4(1.0f);
         bool dirty = false;
 
-        void set_rotation(glm::quat new_rotation)
+        Transform set_rotation(glm::quat new_rotation)
         {
             rotation = new_rotation;
             dirty = true;
+            return *this;
         }
 
-        void set_rotation(glm::vec3 euler)
+        Transform set_rotation(glm::vec3 euler)
         {
             rotation = (glm::quat(euler));
             dirty = true;
+            return *this;
         }
 
-        void set_scale(glm::vec3 new_scale)
+        Transform set_scale(glm::vec3 new_scale)
         {
             scale = new_scale;
             dirty = true;
+            return *this;
         }
 
-        void set_translation(glm::vec3 new_translation)
+        Transform set_translation(glm::vec3 new_translation)
         {
             translation = new_translation;
             dirty = true;
+            return *this;
         }
 
-        void set_model_matrix(glm::mat4 model_mat)
+        Transform set_model_matrix(glm::mat4 model_mat)
         {
             glm::vec3 scale;
             glm::vec3 translation;
@@ -47,6 +51,7 @@ namespace cologne
             set_scale(scale);
             model_matrix = model_mat;
             dirty = false;
+            return *this;
         }
 
         glm::mat4 get_model_matrix()

@@ -35,10 +35,13 @@ namespace cologne
 
         bool get_active() const;
         bool get_gi_only() const;
+        bool get_cast_shadows() const;
+        void set_cast_shadows(bool b);
         void set_gi_only(bool b);
 
     private:
         bool _active = true;
+        bool _cast_shadows = true;
         bool _gi_only = false;
         Transform *_transform = nullptr;
         AABB _bounds;

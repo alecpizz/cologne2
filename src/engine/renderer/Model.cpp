@@ -268,6 +268,16 @@ namespace cologne
         return _gi_only;
     }
 
+    bool Model::get_cast_shadows() const
+    {
+        return _cast_shadows;
+    }
+
+    void Model::set_cast_shadows(bool b)
+    {
+        _cast_shadows = b;
+    }
+
     void Model::set_gi_only(bool b)
     {
         _gi_only = b;

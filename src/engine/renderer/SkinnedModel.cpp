@@ -157,6 +157,16 @@ namespace cologne
         return _active;
     }
 
+    bool SkinnedModel::get_cast_shadows() const
+    {
+        return _cast_shadows;
+    }
+
+    void SkinnedModel::set_cast_shadows(bool b)
+    {
+        _cast_shadows = b;
+    }
+
     void reset_vertex(WeightedVertex &vertex)
     {
         for (int i = 0; i < 4; i++)

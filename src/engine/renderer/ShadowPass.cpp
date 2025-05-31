@@ -226,6 +226,11 @@ namespace cologne
             {
                 continue;
             }
+
+            if (!model->get_cast_shadows())
+            {
+                continue;
+            }
             shader->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
             for (size_t j = 0; j < model->get_num_meshes(); j++)
             {
@@ -244,6 +249,11 @@ namespace cologne
         {
             auto& model = scene.get_skinned_models().at(i);
             if (!model.get_active())
+            {
+                continue;
+            }
+
+            if (!model.get_cast_shadows())
             {
                 continue;
             }
