@@ -17,3 +17,6 @@
 [submodule "vendor/SDL_mixer"]
 	path = vendor/SDL_mixer
 	url = https://github.com/libsdl-org/SDL_mixer.git
+[submodule "vendor/entt"]
+	path = vendor/entt
+	url = https://github.com/skypjack/entt.git

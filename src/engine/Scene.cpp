@@ -9,6 +9,7 @@
 #include "Animator.h"
 #include "Engine.h"
 #include "renderer/SkinnedModel.h"
+#include <entt/entt.hpp>
 
 namespace cologne
 {

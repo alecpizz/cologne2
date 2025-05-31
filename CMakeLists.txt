@@ -39,6 +39,7 @@ add_subdirectory(vendor/assimp)
 add_subdirectory(vendor/spdlog)
 add_subdirectory(vendor/freetype)
 
+
 FetchContent_Declare(
         JoltPhysics
         GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
@@ -114,6 +115,7 @@ if (MSVC) # If using the VS compiler...
 
 endif ()
 
+target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/vendor/entt/single_include")
 target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/")
 target_precompile_headers("${CMAKE_PROJECT_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/gpch.h")
 target_include_directories(${CMAKE_PROJECT_NAME}  PUBLIC ${JoltPhysics_SOURCE_DIR})
