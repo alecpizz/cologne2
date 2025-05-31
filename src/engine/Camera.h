@@ -25,6 +25,8 @@ namespace cologne
 
         glm::mat4 get_view_matrix() const;
 
+        glm::vec2 get_euler() const;
+
         glm::mat4 get_projection_matrix() const;
 
         void set_free_cam(bool on);

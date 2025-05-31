@@ -7,10 +7,14 @@
 #include "renderer/Model.h"
 #include "Animation.h"
 #include "Animator.h"
+#include "Engine.h"
 #include "renderer/SkinnedModel.h"
 
 namespace cologne
 {
+    glm::vec3 gun_offset_temp = glm::vec3(0.165f, -0.145f, -0.065f);
+    glm::vec3 gun_offset_euler_temp = glm::vec3(0.0f, 90.0f, 0.0f);
+    glm::vec3 gun_offset_scale_temp = glm::vec3(1.0f);
     Scene::Scene()
     {
         // auto &model = add_model(RESOURCES_PATH "backpack/backpack.glb", true);
@@ -27,7 +31,7 @@ namespace cologne
         model.set_gi_only(true);
         auto& skinned_model = add_skinned_model(RESOURCES_PATH "python/deagle.glb", "deagle");
         _animations = Animation::get_animations(RESOURCES_PATH "python/deagle.glb", skinned_model);
-        _animators.insert(std::make_pair("deagle", Animator(_animations[2])));
+        _animators.insert(std::make_pair("deagle", Animator(_animations[1])));
         // model3.get_transform()->set_rotation(glm::rotate(glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
         // cologne::physics::update_mesh_collider(&model);
         // cologne::physics::update_mesh_collider(&model2);
@@ -38,13 +42,15 @@ namespace cologne
         LOG_INFO("Scene size is (%f, %f, %f)", _scene_bounds.size().x, _scene_bounds.size().y, _scene_bounds.size().z);
         _particles.emplace_back(Particles());
         _particles[0].init(_scene_bounds, 20);
-
+        Engine::get_debug_ui()->add_vec3_entry("gun position", gun_offset_temp);
+        Engine::get_debug_ui()->add_vec3_entry("gun euler", gun_offset_euler_temp);
     }
 
     Scene::~Scene()
     {
         _models.clear();
     }
+
 
     void Scene::update(float delta_time)
     {
@@ -60,6 +66,13 @@ namespace cologne
         {
             anim.second.update_animation(delta_time);
         }
+
+        glm::mat4 gun_mat = glm::mat4(1.0f);
+        gun_mat = glm::translate(gun_mat, gun_offset_temp);
+        gun_mat *= glm::toMat4(glm::quat(glm::radians(glm::vec3(gun_offset_euler_temp))));
+        gun_mat *= glm::scale(gun_mat, gun_offset_scale_temp);
+        gun_mat = glm::inverse(Engine::get_camera()->get_view_matrix()) * gun_mat;
+        _skinned_models[0].get_transform().set_model_matrix(gun_mat);
     }
 
     AABB Scene::re_calculate_bounds()

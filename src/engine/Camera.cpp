@@ -41,6 +41,11 @@ namespace cologne
         return glm::lookAt(_position, _position + _forward, _up);
     }
 
+    glm::vec2 Camera::get_euler() const
+    {
+        return glm::vec2(_pitch, _yaw);
+    }
+
     glm::mat4 Camera::get_projection_matrix() const
     {
         return glm::perspective(fov,
