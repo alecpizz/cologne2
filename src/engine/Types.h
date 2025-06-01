@@ -4,33 +4,48 @@
 
 namespace cologne
 {
+    struct BoneInfo;
+
     struct MeshData
     {
         std::string name;
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
-        glm::vec3 aabbMin = glm::vec3(std::numeric_limits<float>::max());
-        glm::vec3 aabbMax = glm::vec3(std::numeric_limits<float>::min());
-        uint32_t vertex_count = 0;
-        uint32_t index_count = 0;
-        uint32_t parent_index = -1;
-        uint32_t material_index = 0;
-        glm::mat4 local_transform = glm::mat4(1.0f);
-        glm::mat4 inverse_bind_transform = glm::mat4(1.0f);
+        glm::vec3 aabb_min = glm::vec3(std::numeric_limits<float>::max());
+        glm::vec3 aabb_max = glm::vec3(std::numeric_limits<float>::min());
+        uint32_t material_index;
+    };
+
+    struct SkinnedMeshData
+    {
+        std::string name;
+        std::vector<WeightedVertex> vertices;
+        std::vector<uint32_t> indices;
+        glm::vec3 aabb_min = glm::vec3(std::numeric_limits<float>::max());
+        glm::vec3 aabb_max = glm::vec3(std::numeric_limits<float>::min());
+        uint32_t material_index;
     };
 
     struct ModelData
     {
         std::string name;
-        uint32_t mesh_count;
-        uint32_t material_count = 0;
         std::vector<MeshData> meshes;
         std::vector<Material> materials;
-        glm::vec3 aabbMin = glm::vec3(std::numeric_limits<float>::max());
-        glm::vec3 aabbMax = glm::vec3(std::numeric_limits<float>::min());
+        glm::vec3 aabb_min = glm::vec3(std::numeric_limits<float>::max());
+        glm::vec3 aabb_max = glm::vec3(std::numeric_limits<float>::min());
     };
 
-
+    struct SkinnedModelData
+    {
+        std::string name;
+        std::vector<SkinnedMeshData> meshes;
+        std::vector<Material> materials;
+        glm::vec3 aabb_min = glm::vec3(std::numeric_limits<float>::max());
+        glm::vec3 aabb_max = glm::vec3(std::numeric_limits<float>::min());
+        std::unordered_map<std::string, BoneInfo> bone_map;
+        int bone_count = 0;
+        uint32_t material_index;
+    };
 
 
     struct MultiDrawElementsCommand

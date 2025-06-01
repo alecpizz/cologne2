@@ -145,20 +145,19 @@ namespace cologne
         for (int idx = 0; idx < 3; idx++)
         {
             shader->set_int("render_axis", idx);
-            for (size_t i = 0; i < scene->get_model_count(); i++)
+            for (auto & model : scene->get_models())
             {
-                auto model = scene->get_model_by_index(i);
-                if (!model->get_active())
+                if (!model.get_active())
                 {
                     continue;
                 }
                 shader->set_mat4("model",
                                  (
-                                     model->get_transform().get_model_matrix()));
-                for (size_t j = 0; j < model->get_num_meshes(); j++)
+                                     model.get_transform().get_model_matrix()));
+                for (size_t j = 0; j < model.get_num_meshes(); j++)
                 {
-                    auto &mesh = scene->get_model_by_index(i)->get_meshes()[j];
-                    model->get_materials()[mesh.get_material_index()].bind_all();
+                    auto &mesh = model.get_meshes()[j];
+                    model.get_materials()[mesh.get_material_index()].bind_all();
                     mesh.draw();
                 }
             }

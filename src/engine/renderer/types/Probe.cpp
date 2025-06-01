@@ -161,18 +161,17 @@ namespace cologne
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             auto scene = Engine::get_scene();
             shader.set_mat4("view", (capture_views[face]));
-            for (size_t i = 0; i < scene->get_model_count(); i++)
+            for (auto& model : scene->get_models())
             {
-                auto model = scene->get_model_by_index(i);
-                if (!model->get_active())
+                if (!model.get_active())
                 {
                     continue;
                 }
-                shader.set_mat4("model", (model->get_transform().get_model_matrix()));
-                for (size_t j = 0; j < model->get_num_meshes(); j++)
+                shader.set_mat4("model", (model.get_transform().get_model_matrix()));
+                for (size_t j = 0; j < model.get_num_meshes(); j++)
                 {
-                    auto mesh = model->get_meshes()[j];
-                    auto mat = model->get_materials()[mesh.get_material_index()];
+                    auto mesh = model.get_meshes()[j];
+                    auto mat = model.get_materials()[mesh.get_material_index()];
                     mat.bind_all();
                     mesh.draw();
                 }

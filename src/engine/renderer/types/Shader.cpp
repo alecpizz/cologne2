@@ -14,7 +14,7 @@ namespace cologne
 
     Shader::Shader(const std::string&vert_path, const std::string&frag_path)
     {
-        compile(vert_path, frag_path, nullptr);
+        compile(vert_path, frag_path, std::string());
     }
 
     Shader::Shader(const std::string&vert_path, const std::string&frag_path, const std::string&geom_path)
@@ -24,10 +24,11 @@ namespace cologne
 
     Shader::~Shader()
     {
-        if (_program != 0)
-        {
-            glDeleteProgram(_program);
-        }
+        // if (_program != 0)
+        // {
+        //     LOG_INFO("DELETING SHADER %s", _name.c_str());
+        //     glDeleteProgram(_program);
+        // }
     }
 
     uint32_t Shader::get_handle() const
@@ -37,7 +38,6 @@ namespace cologne
 
     void Shader::bind() const
     {
-
         glUseProgram(_program);
     }
 

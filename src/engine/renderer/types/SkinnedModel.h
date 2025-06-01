@@ -5,6 +5,7 @@
 #pragma once
 #include <engine/AABB.h>
 #include <engine/Transform.h>
+#include <engine/Types.h>
 
 #include "Material.h"
 #include "SkinnedMesh.h"
@@ -21,7 +22,7 @@ namespace cologne
     {
         friend class Animation;
     public:
-        SkinnedModel(const char *path, const char* name);
+        SkinnedModel(const SkinnedModelData& data);
 
         ~SkinnedModel();
 

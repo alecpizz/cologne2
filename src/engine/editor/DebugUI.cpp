@@ -105,36 +105,36 @@ namespace cologne
         ImGui::Begin("cologne window");
 
         ImGui::Text("FPS %f", ImGui::GetIO().Framerate);
-        size_t model_count = Engine::get_scene()->get_model_count();
+        size_t model_count = Engine::get_scene()->get_models().size();
         size_t counter = 0;
         for (size_t i = 0; i < model_count; i++)
         {
             ImGui::PushID(counter++);
-            auto model = Engine::get_scene()->get_model_by_index(i);
-            glm::vec3 scale = model->get_transform().scale;
-            glm::quat rotation = model->get_transform().rotation;
-            glm::vec3 translation = model->get_transform().translation;
+            auto& model = Engine::get_scene()->get_models().at(i);
+            glm::vec3 scale = model.get_transform().scale;
+            glm::quat rotation = model.get_transform().rotation;
+            glm::vec3 translation = model.get_transform().translation;
 
             glm::vec3 euler = glm::degrees(glm::eulerAngles(rotation));
 
-            ImGui::LabelText("%s", model->get_path());
+            ImGui::LabelText("%s", model.get_path());
 
             if (ImGui::DragFloat3("Position", glm::value_ptr(translation)))
             {
-                model->get_transform().set_translation(translation);
+                model.get_transform().set_translation(translation);
             }
             if (ImGui::DragFloat3("Euler", glm::value_ptr(euler)))
             {
             }
             if (ImGui::DragFloat3("Scale", glm::value_ptr(scale)))
             {
-                model->get_transform().set_scale(scale);
+                model.get_transform().set_scale(scale);
             }
 
-            bool active = model->get_active();
+            bool active = model.get_active();
             if (ImGui::Checkbox("Active", &active))
             {
-                model->set_active(active);
+                model.set_active(active);
             }
             ImGui::PopID();
         }

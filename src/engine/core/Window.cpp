@@ -127,7 +127,7 @@ namespace cologne
     {
         _impl = new Impl();
         _impl->init(width, height);
-        hide_mouse();
+        // hide_mouse();
     }
 
     Window::~Window()

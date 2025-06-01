@@ -215,23 +215,22 @@ namespace cologne
         glCullFace(GL_FRONT);
         glEnable(GL_DEPTH_CLAMP);
 
-        for (size_t i = 0; i < scene.get_model_count(); i++)
+        for (auto& model : scene.get_models())
         {
-            auto model = scene.get_model_by_index(i);
-            if (!model->get_active())
+            if (!model.get_active())
             {
                 continue;
             }
 
-            if (!model->get_cast_shadows())
+            if (!model.get_cast_shadows())
             {
                 continue;
             }
-            shader->set_mat4("model", (model->get_transform().get_model_matrix()));
-            for (size_t j = 0; j < model->get_num_meshes(); j++)
+            shader->set_mat4("model", (model.get_transform().get_model_matrix()));
+            for (size_t j = 0; j < model.get_num_meshes(); j++)
             {
-                Mesh mesh = model->get_meshes()[j];
-                Material mat = model->get_materials()[mesh.get_material_index()];
+                Mesh mesh = model.get_meshes()[j];
+                Material mat = model.get_materials()[mesh.get_material_index()];
                 mat.albedo.bind(ALBEDO_INDEX);
                 mesh.draw();
             }
@@ -287,18 +286,17 @@ namespace cologne
         _dir_light_space = light_space;
         shader->set_mat4("lightSpaceMatrix", (_dir_light_space));
 
-        for (size_t i = 0; i < scene.get_model_count(); i++)
+        for (auto& model : scene.get_models())
         {
-            auto model = scene.get_model_by_index(i);
-            if (!model->get_active())
+            if (!model.get_active())
             {
                 continue;
             }
-            shader->set_mat4("model", (model->get_transform().get_model_matrix()));
-            for (size_t j = 0; j < model->get_num_meshes(); j++)
+            shader->set_mat4("model", (model.get_transform().get_model_matrix()));
+            for (size_t j = 0; j < model.get_num_meshes(); j++)
             {
-                Mesh mesh = model->get_meshes()[j];
-                Material mat = model->get_materials()[mesh.get_material_index()];
+                Mesh mesh = model.get_meshes()[j];
+                Material mat = model.get_materials()[mesh.get_material_index()];
                 mat.albedo.bind(ALBEDO_INDEX);
                 mesh.draw();
             }

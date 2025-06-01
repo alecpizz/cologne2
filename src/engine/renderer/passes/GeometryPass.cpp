@@ -67,22 +67,21 @@ namespace cologne
         shader->set_mat4("projection", Engine::get_camera()->get_projection_matrix());
         shader->set_mat4("view", Engine::get_camera()->get_view_matrix());
 
-        for (size_t i = 0; i < scene.get_model_count(); i++)
+        for (auto & model : scene.get_models())
         {
-            auto model = scene.get_model_by_index(i);
-            if (!model->get_active())
+            if (!model.get_active())
             {
                 continue;
             }
-            if (model->get_gi_only())
+            if (model.get_gi_only())
             {
                 continue;
             }
-            shader->set_mat4("model", (model->get_transform().get_model_matrix()));
-            for (size_t j = 0; j < model->get_num_meshes(); j++)
+            shader->set_mat4("model", (model.get_transform().get_model_matrix()));
+            for (size_t j = 0; j < model.get_num_meshes(); j++)
             {
-                Mesh mesh = model->get_meshes()[j];
-                Material mat = model->get_materials()[mesh.get_material_index()];
+                Mesh mesh = model.get_meshes()[j];
+                Material mat = model.get_materials()[mesh.get_material_index()];
                 mat.bind_all();
                 mesh.draw();
                 glBindTextureUnit(ALBEDO_INDEX, 0);

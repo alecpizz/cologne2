@@ -1,14 +1,13 @@
 #pragma once
 
+#include <engine/Types.h>
+
 #include "Texture.h"
 #include "Mesh.h"
 #include "engine/Transform.h"
 #include "Material.h"
 #include "engine/AABB.h"
 
-struct aiMesh;
-struct aiNode;
-struct aiScene;
 
 namespace cologne
 {
@@ -17,7 +16,7 @@ namespace cologne
     public:
         Model() = default;
 
-        Model(const char *path, bool flip_textures);
+        Model(const ModelData& data);
 
         ~Model();
 
@@ -52,15 +51,6 @@ namespace cologne
     private:
         std::vector<Mesh> _meshes = std::vector<Mesh>();
         std::vector<Material> _materials = std::vector<Material>();
-
-        void load_model();
-
-        void load_materials(const aiScene *scene);
-
-        void process_node(const aiNode *node, const aiScene *scene);
-
-        Mesh process_mesh(aiMesh *mesh);
-
         bool _active = true;
         bool _cast_shadows = true;
         bool _gi_only = false;
