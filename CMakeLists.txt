@@ -14,9 +14,13 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE) #link time optimization
-
+set(CMAKE_LINKER "mold")
+set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=mold")
+set(CMAKE_SHARED_LINKER_FLAGS "-fuse-ld=mold")
+set(CMAKE_MODULE_LINKER_FLAGS "-fuse-ld=mold")
 if (MSVC)
     add_compile_options(/arch:AVX2) #make sure SIMD optimizations take place
+else()
 endif ()
 
 project(cologne)

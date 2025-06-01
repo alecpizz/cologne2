@@ -2,10 +2,11 @@
 
 #include "BoneAnimationData.h"
 #include "../util/Util.h"
-#include "assimp/Importer.hpp"
+
 #include "assimp/postprocess.h"
 #include "assimp/scene.h"
 #include "../renderer/types/SkinnedModel.h"
+#include "assimp/Importer.hpp"
 //
 // Created by alecpizz on 5/25/2025.
 //

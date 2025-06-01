@@ -5,6 +5,7 @@
 #include "Window.h"
 
 #include "../editor/DebugUI.h"
+#include <SDL3/SDL.h>
 
 namespace cologne
 {

@@ -14,11 +14,15 @@
 namespace cologne::FileUtil
 {
     void process_node(std::vector<MeshData> &meshes, const aiNode *node, const aiScene *scene);
+
     void process_skinned_node(std::vector<SkinnedMeshData> &meshes, std::unordered_map<std::string, BoneInfo> &bone_map,
                               int &bone_counter, const aiNode *node, const aiScene *scene);
+
     SkinnedMeshData process_skinned_mesh(std::unordered_map<std::string, BoneInfo> &bone_map, int &bone_counter,
-                                     aiMesh *mesh);
-    MeshData process_mesh(aiMesh* mesh);
+                                         aiMesh *mesh);
+
+    MeshData process_mesh(aiMesh *mesh);
+
     void reset_vertex(WeightedVertex &vertex);
 
     void set_vertex_data(WeightedVertex &vertex, int boneID, float weight);
@@ -26,7 +30,9 @@ namespace cologne::FileUtil
     void extract_bone_weight_for_vertices(std::vector<WeightedVertex> &vertices,
                                           std::unordered_map<std::string, BoneInfo> &bone_map, int &bone_counter,
                                           const aiMesh *mesh);
-    void process_materials(std::vector<Material>& mats, const aiScene* scene);
+
+    void process_materials(std::vector<Material> &mats, const aiScene *scene);
+
     void process_node(std::vector<MeshData> &meshes, const aiNode *node, const aiScene *scene)
     {
         for (unsigned int i = 0; i < node->mNumMeshes; i++)
@@ -158,7 +164,7 @@ namespace cologne::FileUtil
 
     void process_materials(std::vector<Material> &mats, const aiScene *scene)
     {
-         for (size_t i = 0; i < scene->mNumMaterials; i++)
+        for (size_t i = 0; i < scene->mNumMaterials; i++)
         {
             Material mat;
             auto material = scene->mMaterials[i];
@@ -255,12 +261,12 @@ namespace cologne::FileUtil
         ModelData result_data;
         process_node(result_data.meshes, scene->mRootNode, scene);
         process_materials(result_data.materials, scene);
-        for (auto& mesh : result_data.meshes)
+        for (auto &mesh: result_data.meshes)
         {
             result_data.aabb_max = glm::max(result_data.aabb_max, mesh.aabb_max);
             result_data.aabb_min = glm::min(result_data.aabb_min, mesh.aabb_min);
         }
-        result_data.name = scene->mName.C_Str();
+        result_data.name = get_file_name(path);
         return result_data;
     }
 
@@ -278,8 +284,8 @@ namespace cologne::FileUtil
         }
         process_skinned_node(result_data.meshes, result_data.bone_map, result_data.bone_count, scene->mRootNode, scene);
         process_materials(result_data.materials, scene);
-        result_data.name = scene->mName.C_Str();
-        for (auto& mesh : result_data.meshes)
+        result_data.name = get_file_name(path);
+        for (auto &mesh: result_data.meshes)
         {
             result_data.aabb_max = glm::max(result_data.aabb_max, mesh.aabb_max);
             result_data.aabb_min = glm::min(result_data.aabb_min, mesh.aabb_min);
@@ -298,7 +304,7 @@ namespace cologne::FileUtil
     }
 
     void process_skinned_node(std::vector<SkinnedMeshData> &meshes, std::unordered_map<std::string, BoneInfo> &bone_map,
-        int &bone_counter, const aiNode *node, const aiScene *scene)
+                              int &bone_counter, const aiNode *node, const aiScene *scene)
     {
         for (size_t i = 0; i < node->mNumMeshes; i++)
         {
@@ -312,7 +318,7 @@ namespace cologne::FileUtil
     }
 
     SkinnedMeshData process_skinned_mesh(std::unordered_map<std::string, BoneInfo> &bone_map, int &bone_counter,
-        aiMesh *mesh)
+                                         aiMesh *mesh)
     {
         SkinnedMeshData result_data;
         for (size_t i = 0; i < mesh->mNumVertices; i++)
