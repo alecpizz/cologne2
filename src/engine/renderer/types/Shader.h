@@ -11,12 +11,6 @@ namespace cologne
     public:
         Shader() = default;
 
-        Shader(Shader &&) = delete;
-
-        Shader(const Shader &) = delete;
-
-
-
         explicit Shader(const std::string &comp_path);
 
         Shader(const std::string &vert_path, const std::string &frag_path);

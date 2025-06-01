@@ -42,7 +42,8 @@ namespace cologne
 
         void reload_shaders();
 
-        Shader* get_shader_by_name(const char* name);
+        Shader *get_shader_by_name(const char *name);
+
         Light &get_directional_light() const;
 
         void set_directional_light(glm::vec3 position, glm::vec3 direction);
@@ -54,28 +55,51 @@ namespace cologne
             int32_t voxel_dimensions = 256;
             glm::vec3 voxel_offset = glm::vec3(0.0f, -0.425f, 0.0f);
         };
+
         Renderer();
+
         void init();
+
         void init_shaders();
+
         void render_cube(int32_t count = 1);
+
         void render_quad();
+
         void init_shadow();
+
         void shadow_pass(Scene &scene);
+
         void update_shadow(Shader &shader);
+
         void init_gbuffer();
+
         void geometry_pass(Scene &scene);
+
         void lit_pass();
-        void init_skybox(const char* hdr_path);
+
+        void init_skybox(const char *hdr_path);
+
         void skybox_pass();
+
         void init_voxels();
+
         void init_indirect();
+
         void indirect_pass();
+
         void voxelize_scene();
+
         void debug_voxel_pass();
+
         void init_radiance();
+
         void init_prefilter();
+
         void init_brdf();
-        void update_lights(Shader& shader);
+
+        void update_lights(Shader &shader);
+
         uint32_t _shadow_depth;
         uint32_t _voxel_texture;
         uint32_t _indirect_texture;

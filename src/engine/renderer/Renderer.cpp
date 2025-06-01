@@ -89,42 +89,42 @@ namespace cologne
         particle_sim_shader = Shader(RESOURCES_PATH "shaders/particle_sim.comp");
 
         shaders.clear();
-        shaders.insert(std::pair<std::string, Shader>("lit", lit_shader));
-        shaders.insert(std::pair<std::string, Shader>("gbuffer", g_buffer_shader));
-        shaders.insert(std::pair<std::string, Shader>("skybox", skybox_shader));
-        shaders.insert(std::pair<std::string, Shader>("shadowmap", shadowmap_shader));
-        shaders.insert(std::pair<std::string, Shader>("shadowmap_skinned", shadowmap_skinned_shader));
-        shaders.insert(std::pair<std::string, Shader>("probe_debug", probe_debug_shader));
-        shaders.insert(std::pair<std::string, Shader>("probe_lit", probe_lit_shader));
-        shaders.insert(std::pair<std::string, Shader>("voxelize", voxelize_shader));
-        shaders.insert(std::pair<std::string, Shader>("voxelize_debug", voxelize_debug_shader));
-        shaders.insert(std::pair<std::string, Shader>("world_pos_shader", world_pos_shader));
-        shaders.insert(std::pair<std::string, Shader>("mipmap", mipmap_shader));
-        shaders.insert(std::pair<std::string, Shader>("dir_shadow", dir_light_shadow_shader));
-        shaders.insert(std::pair<std::string, Shader>("indirect", indirect_shader));
-        shaders.insert(std::pair<std::string, Shader>("particle_render", particle_render_shader));
-        shaders.insert(std::pair<std::string, Shader>("particle_sim", particle_sim_shader));
-        shaders.insert(std::pair<std::string, Shader>("skinned_gbuffer", g_buffer_skinned_shader));
+        shaders["lit"] = lit_shader;
+        shaders["gbuffer"] = g_buffer_shader;
+        shaders["skybox"] = skybox_shader;
+        shaders["shadowmap"]= shadowmap_shader;
+        shaders["shadowmap_skinned"]= shadowmap_skinned_shader;
+        shaders["probe_debug"]= probe_debug_shader;
+        shaders["probe_lit"]= probe_lit_shader;
+        shaders["voxelize"]= voxelize_shader;
+        shaders["voxelize_debug"]= voxelize_debug_shader;
+        shaders["world_pos_shader"]= world_pos_shader;
+        shaders["mipmap"]= mipmap_shader;
+        shaders["dir_shadow"]= dir_light_shadow_shader;
+        shaders["indirect"]= indirect_shader;
+        shaders["particle_render"]= particle_render_shader;
+        shaders["particle_sim"]= particle_sim_shader;
+        shaders["skinned_gbuffer"]= g_buffer_skinned_shader;
     }
 
     void Renderer::add_light(Light light)
     {
         lights.emplace_back(light);
         size_t light_idx = lights.size() - 1;
-        lit_shader->bind();
-        lit_shader->set_vec3(std::string("lights[" + std::to_string(light_idx) + "].position").c_str(),
-                             (lights[light_idx].position));
-        lit_shader->set_vec3(std::string("lights[" + std::to_string(light_idx) + "].color").c_str(),
-                             (lights[light_idx].color));
-        lit_shader->set_float(std::string("lights[" + std::to_string(light_idx) + "].radius").c_str(),
-                              lights[light_idx].radius);
-        lit_shader->set_int(std::string("lights[" + std::to_string(light_idx) + "].type").c_str(),
-                            lights[light_idx].type);
-        lit_shader->set_float(std::string("lights[" + std::to_string(light_idx) + "].strength").c_str(),
-                              lights[light_idx].strength);
-        lit_shader->set_vec3(std::string("lights[" + std::to_string(light_idx) + "].direction").c_str(),
-                             (lights[light_idx].direction));
-        lit_shader->set_int("num_lights", lights.size());
+        lit_shader.bind();
+        lit_shader.set_vec3(std::string("lights[" + std::to_string(light_idx) + "].position").c_str(),
+                          (lights[light_idx].position));
+        lit_shader.set_vec3(std::string("lights[" + std::to_string(light_idx) + "].color").c_str(),
+                           (lights[light_idx].color));
+        lit_shader.set_float(std::string("lights[" + std::to_string(light_idx) + "].radius").c_str(),
+                            lights[light_idx].radius);
+        lit_shader.set_int(std::string("lights[" + std::to_string(light_idx) + "].type").c_str(),
+                          lights[light_idx].type);
+        lit_shader.set_float(std::string("lights[" + std::to_string(light_idx) + "].strength").c_str(),
+                            lights[light_idx].strength);
+        lit_shader.set_vec3(std::string("lights[" + std::to_string(light_idx) + "].direction").c_str(),
+                           (lights[light_idx].direction));
+        lit_shader.set_int("num_lights", lights.size());
         voxelize_scene();
     }
 
@@ -245,8 +245,8 @@ namespace cologne
     void Renderer::reload_shaders()
     {
         init_shaders();
-        update_lights(*lit_shader);
-        update_shadow(*lit_shader);
+        update_lights(lit_shader);
+        update_shadow(lit_shader);
         LOG_INFO("RELOADED SHADERS");
     }
 
@@ -258,7 +258,7 @@ namespace cologne
             LOG_ERROR("Shader %s not found!", name);
             return nullptr;
         }
-        return shaders[n].get();
+        return &shaders[n];
     }
 
     Light &Renderer::get_directional_light() const
@@ -278,9 +278,9 @@ namespace cologne
         auto &directional_light = get_directional_light();
         directional_light.position = position;
         directional_light.direction = direction;
-        update_lights(*lit_shader);
-        update_shadow(*lit_shader);
-        update_lights(*voxelize_shader);
+        update_lights(lit_shader);
+        update_shadow(lit_shader);
+        update_lights(voxelize_shader);
         voxelize_scene();
     }
 
