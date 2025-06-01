@@ -232,7 +232,7 @@ namespace cologne::Physics
     }
 
 
-    void create_mesh_collider(Transform transform, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
+    void create_static_mesh_collider(Transform transform, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
     {
         JPH::TriangleList triangle_list;
         for (int i = 0; i * 3 < indices.size(); i++)
@@ -261,6 +261,19 @@ namespace cologne::Physics
         LOG_INFO("Created id %d", id);
         colliders_static.push_back(id);
         physics_system.OptimizeBroadPhase();
+    }
+
+    void create_static_mesh_collider(Model &model)
+    {
+        const Transform tr = model.get_transform();
+        LOG_INFO("CREATING MESH COLLDIER WITH SCALE %f %f %f", tr.scale.x, tr.scale.y, tr.scale.z);
+        for (size_t i = 0; i < model.get_num_meshes(); i++)
+        {
+            auto& mesh = model.get_meshes()[i];
+            auto vertices = mesh.get_vertices();
+            auto indices = mesh.get_indices();
+            Physics::create_static_mesh_collider(tr, vertices, indices);
+        }
     }
 
     void destroy()

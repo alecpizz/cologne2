@@ -39,22 +39,12 @@ namespace cologne
         skinned_model2.get_transform().set_scale(glm::vec3(0.9f));
         _animations.emplace_back(RESOURCES_PATH "man.glb", skinned_model2);
         _animators.insert(std::make_pair(skinned_model2.get_name(), Animator(_animations.back())));
-        // model3.get_transform()->set_rotation(glm::rotate(glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
-        // cologne::physics::update_mesh_collider(&model);
-        // cologne::physics::update_mesh_collider(&model2);
-        // cologne::physics::update_mesh_collider(&model3);
+
         for (auto & static_model : _models)
         {
-            const Transform tr = static_model.get_transform();
-            LOG_INFO("CREATING MESH COLLDIER WITH SCALE %f %f %f", tr.scale.x, tr.scale.y, tr.scale.z);
-            for (size_t i = 0; i < static_model.get_num_meshes(); i++)
-            {
-                auto& mesh = static_model.get_meshes()[i];
-                auto vertices = mesh.get_vertices();
-                auto indices = mesh.get_indices();
-                Physics::create_mesh_collider(tr, vertices, indices);
-            }
+            Physics::create_static_mesh_collider(static_model);
         }
+
         re_calculate_bounds();
         LOG_INFO("Scene bounds are min (%f, %f, %f), max (%f, %f, %f)", _scene_bounds.min.x, _scene_bounds.min.y,
                  _scene_bounds.min.z, _scene_bounds.max.z, _scene_bounds.max.y, _scene_bounds.max.z);

@@ -16,8 +16,7 @@ namespace cologne::Physics
     //TODO: Get these out!
     JPH::PhysicsSystem* get_physics_system();
     JPH::TempAllocator* get_temp_allocator();
-    void create_mesh_collider(Transform transform, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
-    void update_mesh_collider(Model* model);
-
+    void create_static_mesh_collider(Transform transform, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
+    void create_static_mesh_collider(Model& model);
     void destroy();
 }
