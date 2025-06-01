@@ -28,7 +28,7 @@ using namespace JPH;
 using namespace JPH::literals;
 
 
-namespace cologne::physics
+namespace cologne::Physics
 {
     void TraceImpl(const char *inFMT, ...)
     {
@@ -161,7 +161,7 @@ namespace cologne::physics
     ObjectLayerPairFilterImpl object_vs_object_filter;
     PhysicsSystem physics_system;
     PhysDebugRenderer *debug_renderer = nullptr;
-    std::unordered_map<Model *, std::vector<JPH::BodyID> > colliders;
+    std::vector<JPH::BodyID> colliders_static;
     bool drawing = false;
 
     void init()
@@ -221,22 +221,21 @@ namespace cologne::physics
         return JPH::Float3(v.x, v.y, v.z);
     }
 
-    JPH::Vec3 glm_vec3_to_vec3(const glm::vec3 &v)
+    JPH::Vec3 glm_vec3_to_jph_vec3(const glm::vec3 &v)
     {
         return JPH::Vec3(v.x, v.y, v.z);
     }
 
-    JPH::Quat glm_quat_to_quat(const glm::quat &q)
+    JPH::Quat glm_quat_to_jph_quat(const glm::quat &q)
     {
         return JPH::Quat(q.x, q.y, q.z, q.w).Normalized();
     }
 
 
-    void create_mesh_collider(Model *model, const Vertex *vertices, size_t num_vertices, const uint32_t *indices,
-                              size_t num_indices)
+    void create_mesh_collider(Transform transform, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
     {
         JPH::TriangleList triangle_list;
-        for (int i = 0; i * 3 < num_indices; i++)
+        for (int i = 0; i * 3 < indices.size(); i++)
         {
             Triangle triangle =
             {
@@ -248,42 +247,26 @@ namespace cologne::physics
         }
         JPH::MeshShapeSettings mesh_settings(triangle_list);
         mesh_settings.SetEmbedded();
-        JPH::BodyCreationSettings settings(&mesh_settings, JPH::Vec3::sZero(), JPH::Quat::sIdentity(),
-                                           JPH::EMotionType::Static, cologne::physics::NON_MOVING);
-        auto id = physics_system.GetBodyInterface().CreateAndAddBody(
+        JPH::BodyCreationSettings settings(&mesh_settings, JPH::Vec3::sZero(),
+            JPH::Quat::sIdentity(), JPH::EMotionType::Static, cologne::Physics::NON_MOVING);
+        auto& body_interface = physics_system.GetBodyInterface();
+        auto id = body_interface.CreateAndAddBody(
             settings, JPH::EActivation::DontActivate);
+        const auto shape = body_interface.GetShape(id);
+        const auto new_shape = shape->ScaleShape(glm_vec3_to_jph_vec3(transform.scale)).Get();
+        body_interface.SetShape(id, new_shape, true, EActivation::DontActivate);
+        body_interface.SetPositionAndRotation(id, glm_vec3_to_jph_vec3(transform.translation),
+                                              glm_quat_to_jph_quat(transform.rotation),
+                                              EActivation::DontActivate);
         LOG_INFO("Created id %d", id);
-        if (!colliders.contains(model))
-        {
-            colliders[model] = std::vector<JPH::BodyID>();
-        }
-        colliders[model].push_back(id);
-        physics_system.OptimizeBroadPhase();
-    }
-
-    void update_mesh_collider(Model *model)
-    {
-        if (!colliders.contains(model))
-        {
-            LOG_ERROR("Collider does not exist");
-        }
-        LOG_INFO("Updating mesh collider, model has %d colliders", colliders[model].size());
-        auto &body_interface = physics_system.GetBodyInterface();
-        for (size_t i = 0; i < colliders[model].size(); i++)
-        {
-            auto id = colliders[model][i];
-            const auto shape = body_interface.GetShape(id);
-            const auto new_shape = shape->ScaleShape(glm_vec3_to_vec3(model->get_transform().scale)).Get();
-            body_interface.SetShape(id, new_shape, true, EActivation::DontActivate);
-            body_interface.SetPositionAndRotation(id, glm_vec3_to_vec3(model->get_transform().translation),
-                                                  glm_quat_to_quat(model->get_transform().rotation),
-                                                  EActivation::DontActivate);
-        }
+        colliders_static.push_back(id);
         physics_system.OptimizeBroadPhase();
     }
 
     void destroy()
     {
+        physics_system.GetBodyInterface().RemoveBodies(colliders_static.data(), colliders_static.size());
+        physics_system.GetBodyInterface().DestroyBodies(colliders_static.data(), colliders_static.size());
         UnregisterTypes();
         delete temp_allocator;
         delete debug_renderer;

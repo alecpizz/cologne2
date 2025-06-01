@@ -16,6 +16,9 @@ namespace cologne
 
         void draw() const;
 
+        std::vector<Vertex> get_vertices() const;
+        std::vector<uint32_t> get_indices() const;
+
     private:
         std::vector<Vertex> _vertices;
         std::vector<uint32_t> _indices;

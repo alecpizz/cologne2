@@ -76,10 +76,10 @@ namespace cologne
             settings->mSupportingVolume = JPH::Plane(JPH::Vec3::sAxisY(), -radius_standing);
             settings->mEnhancedInternalEdgeRemoval = false;
             settings->mInnerBodyShape = inner_standing_shape;
-            settings->mInnerBodyLayer = cologne::physics::NON_MOVING;
+            settings->mInnerBodyLayer = cologne::Physics::NON_MOVING;
 
             character = new JPH::CharacterVirtual(settings, cam_pos, JPH::Quat::sIdentity(), 0,
-                                                  cologne::physics::get_physics_system());
+                                                  cologne::Physics::get_physics_system());
             footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_1.wav");
             footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_2.wav");
             footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_3.wav");
@@ -159,7 +159,7 @@ namespace cologne
                 new_velocity = current_vertical_velocity;
             }
 
-            new_velocity += (char_up_rotation * physics::get_physics_system()->GetGravity() * dt);
+            new_velocity += (char_up_rotation * Physics::get_physics_system()->GetGravity() * dt);
             new_velocity += (char_up_rotation * desired_velocity);
 
             character->SetLinearVelocity(new_velocity);
@@ -234,12 +234,12 @@ namespace cologne
                                                 Length();
         update_settings.mWalkStairsStepUp = _impl->character->GetUp() * update_settings.mWalkStairsStepUp.Length();
         _impl->character->ExtendedUpdate(
-            dt, _impl->character->GetUp() * physics::get_physics_system()->GetGravity().Length(), update_settings,
-            physics::get_physics_system()->GetDefaultBroadPhaseLayerFilter(1),
-            physics::get_physics_system()->GetDefaultLayerFilter(1),
+            dt, _impl->character->GetUp() * Physics::get_physics_system()->GetGravity().Length(), update_settings,
+            Physics::get_physics_system()->GetDefaultBroadPhaseLayerFilter(1),
+            Physics::get_physics_system()->GetDefaultLayerFilter(1),
             {},
             {},
-            *physics::get_temp_allocator());
+            *Physics::get_temp_allocator());
 
         _impl->position = glm::vec3(_impl->character->GetPosition().GetX(), _impl->character->GetPosition().GetY(),
                                     _impl->character->GetPosition().GetZ());

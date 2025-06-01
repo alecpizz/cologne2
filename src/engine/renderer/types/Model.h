@@ -16,7 +16,7 @@ namespace cologne
     public:
         Model() = default;
 
-        Model(const ModelData& data);
+        explicit Model(const ModelData& data);
 
         ~Model();
 

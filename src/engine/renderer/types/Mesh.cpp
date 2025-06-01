@@ -59,4 +59,14 @@ namespace cologne
         glDrawElements(GL_TRIANGLES, _indices_count, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     }
+
+    std::vector<Vertex> Mesh::get_vertices() const
+    {
+        return _vertices;
+    }
+
+    std::vector<uint32_t> Mesh::get_indices() const
+    {
+        return _indices;
+    }
 }

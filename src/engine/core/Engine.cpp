@@ -47,7 +47,7 @@ namespace cologne
 
     Engine::~Engine()
     {
-        cologne::physics::destroy();
+        cologne::Physics::destroy();
         cologne::Audio::destroy();
         delete _impl;
     }
@@ -92,7 +92,7 @@ namespace cologne
     {
         _impl->debug_ui = std::unique_ptr<DebugUI>(new DebugUI());
         _impl->window = std::unique_ptr<Window>(new Window(width, height));
-        physics::init();
+        Physics::init();
         Audio::init();
         // Audio::add_music(RESOURCES_PATH "sounds/music2.mp3");
         // Audio::play_music(RESOURCES_PATH "sounds/music2.mp3");
@@ -123,7 +123,7 @@ namespace cologne
             _impl->camera->update(et.elapsed);
             _impl->scene->update(et.elapsed);
             _impl->player->update(et.elapsed);
-            physics::update(et.elapsed);
+            Physics::update(et.elapsed);
             _impl->debug_ui->clear();
             _impl->window->clear();
             _impl->renderer->render_scene(*_impl->scene);
