@@ -8,6 +8,7 @@
 
 namespace cologne
 {
+    class Entity;
     class Scene
     {
     public:
@@ -21,10 +22,11 @@ namespace cologne
 
         Model &add_model(const char *path, bool flip_textures);
 
-        SkinnedModel &add_skinned_model(const char* path, const char* name);
+        SkinnedModel &add_skinned_model(const char *path, const char *name);
 
-        std::vector<SkinnedModel>& get_skinned_models();
-        std::unordered_map<std::string, Animator>& get_animators();
+        std::vector<SkinnedModel> &get_skinned_models();
+
+        std::unordered_map<std::string, Animator> &get_animators();
 
         void update(float delta_time);
 
@@ -42,6 +44,8 @@ namespace cologne
 
         std::vector<Particles> &get_particles();
 
+        Entity create_entity(const std::string& name = std::string());
+
     private:
         //THIS IS fucking dumb
         AABB _scene_bounds;
@@ -51,5 +55,6 @@ namespace cologne
         std::vector<Animation> _animations;
         std::vector<Particles> _particles;
         entt::registry _registry;
+        friend class Entity;
     };
 }

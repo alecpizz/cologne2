@@ -43,10 +43,10 @@ namespace cologne
         const float voxel_size = world_size * texelSize;
         auto min = bounds.min;
         auto max = bounds.max;
-        shader->set_vec3("grid_min", glm::value_ptr(min));
-        shader->set_vec3("grid_max", glm::value_ptr(max));
+        shader->set_vec3("grid_min", min);
+        shader->set_vec3("grid_max", max);
         shader->set_float("voxel_size", voxel_size);
-        shader->set_vec3("voxel_offset", glm::value_ptr(_voxel_data.voxel_offset));
+        shader->set_vec3("voxel_offset", _voxel_data.voxel_offset);
         shader->set_int("voxel_grid_size", _voxel_data.voxel_dimensions);
         
         glBindImageTexture(0, _indirect_texture, 0, GL_FALSE, 0,

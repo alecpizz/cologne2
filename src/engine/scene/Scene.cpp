@@ -7,7 +7,8 @@
 #include <engine/animation/Animation.h>
 #include <engine/core/Engine.h>
 #include <engine/physics/Physics.h>
-
+#include "Components.h"
+#include "Entity.h"
 
 namespace cologne
 {
@@ -21,10 +22,10 @@ namespace cologne
         // auto &model2 = add_model(RESOURCES_PATH "Lantern.glb", false);
         // model2.get_transform()->set_translation(glm::vec3(0.0f, 10.0f, -10.0f));
         auto &model3 = add_model(RESOURCES_PATH "sponza/sponza2.glb", false);
-        model3.get_transform()->set_scale(glm::vec3(.01f));
+        model3.get_transform().set_scale(glm::vec3(.01f));
         auto bounds = model3.get_aabb();
-        bounds.min *= model3.get_transform()->scale;
-        bounds.max *= model3.get_transform()->scale;
+        bounds.min *= model3.get_transform().scale;
+        bounds.max *= model3.get_transform().scale;
         model3.set_aabb(bounds);
         auto &model = add_model(RESOURCES_PATH "glowCube.glb", false);
         model.set_gi_only(true);
@@ -54,6 +55,9 @@ namespace cologne
     Scene::~Scene()
     {
         _models.clear();
+        _skinned_models.clear();
+        _particles.clear();
+        _registry.clear();
     }
 
 
@@ -66,7 +70,7 @@ namespace cologne
         // 13 1 4 final pos
         glm::vec3 new_pos = glm::lerp(glm::vec3(-11.0f, 1.0f, 4.0f),
             glm::vec3(13.0f, 1.0f, 4.0f), glm::abs(glm::cos(time)));
-        model->get_transform()->set_translation(glm::vec3(new_pos));
+        model->get_transform().set_translation(glm::vec3(new_pos));
         for (auto& anim : _animators)
         {
             anim.second.update_animation(delta_time);
@@ -99,6 +103,14 @@ namespace cologne
     std::vector<Particles> & Scene::get_particles()
     {
         return _particles;
+    }
+
+    Entity Scene::create_entity(const std::string& name)
+    {
+        Entity entity =  {_registry.create(), this};
+        entity.add_component<TransformComponent>();
+        entity.add_component<TagComponent>(name.empty() ? "Entity" : name);
+        return entity;
     }
 
 

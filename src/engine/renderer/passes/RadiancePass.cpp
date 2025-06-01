@@ -51,14 +51,14 @@ namespace cologne
         Shader irradianceShader(RESOURCES_PATH "shaders/environment.vert",
                                 RESOURCES_PATH "shaders/irradiance.frag");
         irradianceShader.bind();
-        irradianceShader.set_mat4("projection", &captureProjection[0][0]);
+        irradianceShader.set_mat4("projection", captureProjection);
         glBindTextureUnit(0, _skybox_texture);
         glViewport(0, 0, 32, 32);
         glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 
         for (uint32_t i = 0; i < 6; i++)
         {
-            irradianceShader.set_mat4("view", &captureViews[i][0][0]);
+            irradianceShader.set_mat4("view", captureViews[i]);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                    GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradianceMap, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -109,7 +109,7 @@ namespace cologne
         };
         prefilter.bind();
         prefilter.set_int("environmentMap", 0);
-        prefilter.set_mat4("projection", &captureProjection[0][0]);
+        prefilter.set_mat4("projection", captureProjection);
         glBindTextureUnit(0, _skybox_texture);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
@@ -129,7 +129,7 @@ namespace cologne
 
             for (uint32_t i = 0; i < 6; i++)
             {
-                prefilter.set_mat4("view", &captureViews[i][0][0]);
+                prefilter.set_mat4("view", captureViews[i]);
                 glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                        GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilterMap, mip);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

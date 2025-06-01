@@ -57,11 +57,11 @@ namespace cologne
         glm::mat4 projection = glm::ortho(0.0f,
                                           static_cast<float>(Engine::get_window()->get_width()),
                                           0.0f, static_cast<float>(Engine::get_window()->get_height()));
-        text_shader->set_mat4("projection", glm::value_ptr(projection));
+        text_shader->set_mat4("projection", (projection));
         glBindVertexArray(vao);
         for (auto &cmd: draw_cmds)
         {
-            text_shader->set_vec4("textColor", glm::value_ptr(cmd.color));
+            text_shader->set_vec4("textColor", (cmd.color));
             for (std::string::const_iterator c = cmd.text.begin(); c != cmd.text.end(); ++c)
             {
                 Character ch = characters[*c];

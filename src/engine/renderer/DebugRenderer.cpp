@@ -83,8 +83,8 @@ namespace cologne
 
             cmds.clear();
 
-            shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
-            shader->set_mat4("projection", glm::value_ptr(Engine::get_camera()->get_projection_matrix()));
+            shader->set_mat4("view", (Engine::get_camera()->get_view_matrix()));
+            shader->set_mat4("projection", (Engine::get_camera()->get_projection_matrix()));
             glBindVertexArray(VAO);
             glDrawArrays(GL_LINES, 0, vertex_count);
 

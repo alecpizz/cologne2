@@ -273,10 +273,10 @@ namespace cologne::physics
         {
             auto id = colliders[model][i];
             const auto shape = body_interface.GetShape(id);
-            const auto new_shape = shape->ScaleShape(glm_vec3_to_vec3(model->get_transform()->scale)).Get();
+            const auto new_shape = shape->ScaleShape(glm_vec3_to_vec3(model->get_transform().scale)).Get();
             body_interface.SetShape(id, new_shape, true, EActivation::DontActivate);
-            body_interface.SetPositionAndRotation(id, glm_vec3_to_vec3(model->get_transform()->translation),
-                                                  glm_quat_to_quat(model->get_transform()->rotation),
+            body_interface.SetPositionAndRotation(id, glm_vec3_to_vec3(model->get_transform().translation),
+                                                  glm_quat_to_quat(model->get_transform().rotation),
                                                   EActivation::DontActivate);
         }
         physics_system.OptimizeBroadPhase();

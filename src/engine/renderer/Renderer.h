@@ -61,7 +61,7 @@ namespace cologne
         void render_quad();
         void init_shadow();
         void shadow_pass(Scene &scene);
-        void update_shadow(const Shader &shader);
+        void update_shadow(Shader &shader);
         void init_gbuffer();
         void geometry_pass(Scene &scene);
         void lit_pass();
@@ -75,7 +75,7 @@ namespace cologne
         void init_radiance();
         void init_prefilter();
         void init_brdf();
-        void update_lights(const Shader& shader);
+        void update_lights(Shader& shader);
         uint32_t _shadow_depth;
         uint32_t _voxel_texture;
         uint32_t _indirect_texture;

@@ -4,16 +4,17 @@
 namespace cologne
 {
 
-    Mesh::Mesh(const Vertex *vertices, size_t num_vertices,
-               const uint32_t *indices, size_t num_indices, uint32_t material)
+    Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t material)
     {
-        _indices_count = static_cast<uint32_t>(num_indices);
+        _vertices.insert(_vertices.end(), vertices.begin(), vertices.end());
+        _indices.insert(_indices.end(), indices.begin(), indices.end());
+        _indices_count = _indices.size();
 
         glCreateBuffers(1, &_vbo);
-        glNamedBufferStorage(_vbo, sizeof(Vertex) * num_vertices, vertices, GL_MAP_READ_BIT);
+        glNamedBufferStorage(_vbo, sizeof(Vertex) * _vertices.size(), _vertices.data(), GL_MAP_READ_BIT);
 
         glCreateBuffers(1, &_ibo);
-        glNamedBufferStorage(_ibo, sizeof(uint32_t) * num_indices, indices, GL_MAP_READ_BIT);
+        glNamedBufferStorage(_ibo, sizeof(uint32_t) * _indices.size(), _indices.data(), GL_MAP_READ_BIT);
 
         glCreateVertexArrays(1, &_vao);
 

@@ -64,8 +64,8 @@ namespace cologne
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         auto shader = get_shader_by_name("gbuffer");
         shader->bind();
-        shader->set_mat4("projection", &Engine::get_camera()->get_projection_matrix()[0][0]);
-        shader->set_mat4("view", &Engine::get_camera()->get_view_matrix()[0][0]);
+        shader->set_mat4("projection", Engine::get_camera()->get_projection_matrix());
+        shader->set_mat4("view", Engine::get_camera()->get_view_matrix());
 
         for (size_t i = 0; i < scene.get_model_count(); i++)
         {
@@ -78,7 +78,7 @@ namespace cologne
             {
                 continue;
             }
-            shader->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
+            shader->set_mat4("model", (model->get_transform().get_model_matrix()));
             for (size_t j = 0; j < model->get_num_meshes(); j++)
             {
                 Mesh mesh = model->get_meshes()[j];
@@ -96,8 +96,8 @@ namespace cologne
 
         shader = get_shader_by_name("skinned_gbuffer");
         shader->bind();
-        shader->set_mat4("projection", &Engine::get_camera()->get_projection_matrix()[0][0]);
-        shader->set_mat4("view", &Engine::get_camera()->get_view_matrix()[0][0]);
+        shader->set_mat4("projection", Engine::get_camera()->get_projection_matrix());
+        shader->set_mat4("view", Engine::get_camera()->get_view_matrix());
 
         for (size_t i = 0; i < scene.get_skinned_models().size(); i++)
         {
@@ -106,12 +106,12 @@ namespace cologne
             {
                 continue;
             }
-            shader->set_mat4("model", glm::value_ptr(model.get_transform().get_model_matrix()));
+            shader->set_mat4("model", (model.get_transform().get_model_matrix()));
             if (scene.get_animators().contains(model.get_name()))
             {
                 auto& animator = scene.get_animators().at(model.get_name());
                 auto& bones = animator.get_bones();
-                shader->set_mat4("bone_matrices", glm::value_ptr(bones[0]), bones.size());
+                shader->set_mat4("bone_matrices", bones);
             }
 
             for (size_t j = 0; j < model.get_num_meshes(); j++)
@@ -131,8 +131,8 @@ namespace cologne
 
         shader = get_shader_by_name("particle_render");
         shader->bind();
-        shader->set_mat4("projection", &Engine::get_camera()->get_projection_matrix()[0][0]);
-        shader->set_mat4("view", &Engine::get_camera()->get_view_matrix()[0][0]);
+        shader->set_mat4("projection", Engine::get_camera()->get_projection_matrix());
+        shader->set_mat4("view", Engine::get_camera()->get_view_matrix());
 
         for (auto& particle : scene.get_particles())
         {

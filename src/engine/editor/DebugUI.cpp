@@ -111,9 +111,9 @@ namespace cologne
         {
             ImGui::PushID(counter++);
             auto model = Engine::get_scene()->get_model_by_index(i);
-            glm::vec3 scale = model->get_transform()->scale;
-            glm::quat rotation = model->get_transform()->rotation;
-            glm::vec3 translation = model->get_transform()->translation;
+            glm::vec3 scale = model->get_transform().scale;
+            glm::quat rotation = model->get_transform().rotation;
+            glm::vec3 translation = model->get_transform().translation;
 
             glm::vec3 euler = glm::degrees(glm::eulerAngles(rotation));
 
@@ -121,14 +121,14 @@ namespace cologne
 
             if (ImGui::DragFloat3("Position", glm::value_ptr(translation)))
             {
-                model->get_transform()->set_translation(translation);
+                model->get_transform().set_translation(translation);
             }
             if (ImGui::DragFloat3("Euler", glm::value_ptr(euler)))
             {
             }
             if (ImGui::DragFloat3("Scale", glm::value_ptr(scale)))
             {
-                model->get_transform()->set_scale(scale);
+                model->get_transform().set_scale(scale);
             }
 
             bool active = model->get_active();

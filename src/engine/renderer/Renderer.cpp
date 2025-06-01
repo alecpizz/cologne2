@@ -27,84 +27,84 @@ namespace cologne
 #define BRDF_INDEX 8
 
 
-    std::shared_ptr<Shader> lit_shader = nullptr;
-    std::shared_ptr<Shader> g_buffer_shader = nullptr;
-    std::shared_ptr<Shader> g_buffer_skinned_shader = nullptr;
-    std::shared_ptr<Shader> skybox_shader = nullptr;
-    std::shared_ptr<Shader> shadowmap_shader = nullptr;
-    std::shared_ptr<Shader> shadowmap_skinned_shader = nullptr;
-    std::shared_ptr<Shader> fbo_debug_shader = nullptr;
-    std::shared_ptr<Shader> probe_debug_shader = nullptr;
-    std::shared_ptr<Shader> probe_lit_shader = nullptr;
-    std::shared_ptr<Shader> voxelize_shader = nullptr;
-    std::shared_ptr<Shader> voxelize_debug_shader = nullptr;
-    std::shared_ptr<Shader> indirect_shader = nullptr;
-    std::shared_ptr<Shader> world_pos_shader = nullptr;
-    std::shared_ptr<Shader> mipmap_shader = nullptr;
-    std::shared_ptr<Shader> dir_light_shadow_shader = nullptr;
-    std::shared_ptr<Shader> particle_render_shader = nullptr;
-    std::shared_ptr<Shader> particle_sim_shader = nullptr;
+    Shader lit_shader;
+    Shader g_buffer_shader;
+    Shader g_buffer_skinned_shader;
+    Shader skybox_shader;
+    Shader shadowmap_shader;
+    Shader shadowmap_skinned_shader;
+    Shader fbo_debug_shader;
+    Shader probe_debug_shader;
+    Shader probe_lit_shader;
+    Shader voxelize_shader;
+    Shader voxelize_debug_shader;
+    Shader indirect_shader;
+    Shader world_pos_shader;
+    Shader mipmap_shader;
+    Shader dir_light_shadow_shader;
+    Shader particle_render_shader;
+    Shader particle_sim_shader;
     std::shared_ptr<DebugRenderer> debug_renderer = nullptr;
     std::shared_ptr<TextRenderer> text_renderer = nullptr;
-    std::unordered_map<std::string, std::shared_ptr<Shader> > shaders = std::unordered_map<std::string,
-        std::shared_ptr<Shader> >();
+    std::unordered_map<std::string, Shader> shaders = std::unordered_map<std::string,
+        Shader>();
     std::vector<Light> lights;
 
     void Renderer::init_shaders()
     {
-        lit_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/lit.vert",
-                                              RESOURCES_PATH "shaders/lit.frag");
+        lit_shader = Shader(RESOURCES_PATH "shaders/lit.vert",
+                            RESOURCES_PATH "shaders/lit.frag");
 
-        g_buffer_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/gbuffer.vert",
-                                                   RESOURCES_PATH "shaders/gbuffer.frag");
-        g_buffer_skinned_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/skinned_gbuffer.vert",
-                                                          RESOURCES_PATH "shaders/gbuffer.frag");
-        skybox_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/skybox.vert",
-                                                 RESOURCES_PATH "shaders/skybox.frag");
-        fbo_debug_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/framebufferoutput.vert",
-                                                    RESOURCES_PATH "shaders/framebufferoutput.frag");
-        shadowmap_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/shadowmap2.vert",
-                                                    RESOURCES_PATH "shaders/shadowmap2.frag",
-                                                    RESOURCES_PATH "shaders/shadowmap2.geom");
-        shadowmap_skinned_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/shadowmap_skinned.vert",
-                                              RESOURCES_PATH "shaders/shadowmap2.frag",
-                                              RESOURCES_PATH "shaders/shadowmap2.geom");
-        probe_debug_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/probe_debug.vert",
-                                                      RESOURCES_PATH "shaders/probe_debug.frag");
-        probe_lit_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/probe_lit.comp");
+        g_buffer_shader = Shader(RESOURCES_PATH "shaders/gbuffer.vert",
+                                 RESOURCES_PATH "shaders/gbuffer.frag");
+        g_buffer_skinned_shader = Shader(RESOURCES_PATH "shaders/skinned_gbuffer.vert",
+                                         RESOURCES_PATH "shaders/gbuffer.frag");
+        skybox_shader = Shader(RESOURCES_PATH "shaders/skybox.vert",
+                               RESOURCES_PATH "shaders/skybox.frag");
+        fbo_debug_shader = Shader(RESOURCES_PATH "shaders/framebufferoutput.vert",
+                                  RESOURCES_PATH "shaders/framebufferoutput.frag");
+        shadowmap_shader = Shader(RESOURCES_PATH "shaders/shadowmap2.vert",
+                                  RESOURCES_PATH "shaders/shadowmap2.frag",
+                                  RESOURCES_PATH "shaders/shadowmap2.geom");
+        shadowmap_skinned_shader = Shader(RESOURCES_PATH "shaders/shadowmap_skinned.vert",
+                                          RESOURCES_PATH "shaders/shadowmap2.frag",
+                                          RESOURCES_PATH "shaders/shadowmap2.geom");
+        probe_debug_shader = Shader(RESOURCES_PATH "shaders/probe_debug.vert",
+                                    RESOURCES_PATH "shaders/probe_debug.frag");
+        probe_lit_shader = Shader(RESOURCES_PATH "shaders/probe_lit.comp");
 
-        voxelize_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/voxelize.vert",
-                                                   RESOURCES_PATH "shaders/voxelize.frag");
-        voxelize_debug_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/voxel_visual.vert",
-                                                         RESOURCES_PATH "shaders/voxel_visual.frag");
+        voxelize_shader = Shader(RESOURCES_PATH "shaders/voxelize.vert",
+                                 RESOURCES_PATH "shaders/voxelize.frag");
+        voxelize_debug_shader = Shader(RESOURCES_PATH "shaders/voxel_visual.vert",
+                                       RESOURCES_PATH "shaders/voxel_visual.frag");
 
-        world_pos_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/world_pos.vert",
-                                                    RESOURCES_PATH "shaders/world_pos.frag");
-        mipmap_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/mipmap.comp");
-        dir_light_shadow_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/dir_shadow.vert",
-            RESOURCES_PATH "shaders/dir_shadow.frag");
-        indirect_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/indirect.comp");
-        particle_render_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/particle_render.vert",
-            RESOURCES_PATH "shaders/particle_render.frag");
-        particle_sim_shader = std::make_shared<Shader>(RESOURCES_PATH "shaders/particle_sim.comp");
+        world_pos_shader = Shader(RESOURCES_PATH "shaders/world_pos.vert",
+                                  RESOURCES_PATH "shaders/world_pos.frag");
+        mipmap_shader = Shader(RESOURCES_PATH "shaders/mipmap.comp");
+        dir_light_shadow_shader = Shader(RESOURCES_PATH "shaders/dir_shadow.vert",
+                                         RESOURCES_PATH "shaders/dir_shadow.frag");
+        indirect_shader = Shader(RESOURCES_PATH "shaders/indirect.comp");
+        particle_render_shader = Shader(RESOURCES_PATH "shaders/particle_render.vert",
+                                        RESOURCES_PATH "shaders/particle_render.frag");
+        particle_sim_shader = Shader(RESOURCES_PATH "shaders/particle_sim.comp");
 
         shaders.clear();
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("lit", lit_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("gbuffer", g_buffer_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("skybox", skybox_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("shadowmap", shadowmap_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("shadowmap_skinned", shadowmap_skinned_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("probe_debug", probe_debug_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("probe_lit", probe_lit_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("voxelize", voxelize_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("voxelize_debug", voxelize_debug_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("world_pos_shader", world_pos_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("mipmap", mipmap_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader> >("dir_shadow", dir_light_shadow_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader>>("indirect", indirect_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader>>("particle_render", particle_render_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader>>("particle_sim", particle_sim_shader));
-        shaders.insert(std::pair<std::string, std::shared_ptr<Shader>>("skinned_gbuffer", g_buffer_skinned_shader));
+        shaders.insert(std::pair<std::string, Shader>("lit", lit_shader));
+        shaders.insert(std::pair<std::string, Shader>("gbuffer", g_buffer_shader));
+        shaders.insert(std::pair<std::string, Shader>("skybox", skybox_shader));
+        shaders.insert(std::pair<std::string, Shader>("shadowmap", shadowmap_shader));
+        shaders.insert(std::pair<std::string, Shader>("shadowmap_skinned", shadowmap_skinned_shader));
+        shaders.insert(std::pair<std::string, Shader>("probe_debug", probe_debug_shader));
+        shaders.insert(std::pair<std::string, Shader>("probe_lit", probe_lit_shader));
+        shaders.insert(std::pair<std::string, Shader>("voxelize", voxelize_shader));
+        shaders.insert(std::pair<std::string, Shader>("voxelize_debug", voxelize_debug_shader));
+        shaders.insert(std::pair<std::string, Shader>("world_pos_shader", world_pos_shader));
+        shaders.insert(std::pair<std::string, Shader>("mipmap", mipmap_shader));
+        shaders.insert(std::pair<std::string, Shader>("dir_shadow", dir_light_shadow_shader));
+        shaders.insert(std::pair<std::string, Shader>("indirect", indirect_shader));
+        shaders.insert(std::pair<std::string, Shader>("particle_render", particle_render_shader));
+        shaders.insert(std::pair<std::string, Shader>("particle_sim", particle_sim_shader));
+        shaders.insert(std::pair<std::string, Shader>("skinned_gbuffer", g_buffer_skinned_shader));
     }
 
     void Renderer::add_light(Light light)
@@ -113,9 +113,9 @@ namespace cologne
         size_t light_idx = lights.size() - 1;
         lit_shader->bind();
         lit_shader->set_vec3(std::string("lights[" + std::to_string(light_idx) + "].position").c_str(),
-                             glm::value_ptr(lights[light_idx].position));
+                             (lights[light_idx].position));
         lit_shader->set_vec3(std::string("lights[" + std::to_string(light_idx) + "].color").c_str(),
-                             glm::value_ptr(lights[light_idx].color));
+                             (lights[light_idx].color));
         lit_shader->set_float(std::string("lights[" + std::to_string(light_idx) + "].radius").c_str(),
                               lights[light_idx].radius);
         lit_shader->set_int(std::string("lights[" + std::to_string(light_idx) + "].type").c_str(),
@@ -123,20 +123,20 @@ namespace cologne
         lit_shader->set_float(std::string("lights[" + std::to_string(light_idx) + "].strength").c_str(),
                               lights[light_idx].strength);
         lit_shader->set_vec3(std::string("lights[" + std::to_string(light_idx) + "].direction").c_str(),
-                             glm::value_ptr(lights[light_idx].direction));
+                             (lights[light_idx].direction));
         lit_shader->set_int("num_lights", lights.size());
         voxelize_scene();
     }
 
-    void Renderer::update_lights(const Shader &shader)
+    void Renderer::update_lights(Shader &shader)
     {
         shader.bind();
         for (size_t i = 0; i < lights.size(); i++)
         {
             shader.set_vec3(std::string("lights[" + std::to_string(i) + "].position").c_str(),
-                            glm::value_ptr(lights[i].position));
+                            (lights[i].position));
             shader.set_vec3(std::string("lights[" + std::to_string(i) + "].color").c_str(),
-                            glm::value_ptr(lights[i].color));
+                            (lights[i].color));
             shader.set_float(std::string("lights[" + std::to_string(i) + "].radius").c_str(),
                              lights[i].radius);
             shader.set_int(std::string("lights[" + std::to_string(i) + "].type").c_str(),
@@ -144,7 +144,7 @@ namespace cologne
             shader.set_float(std::string("lights[" + std::to_string(i) + "].strength").c_str(),
                              lights[i].strength);
             shader.set_vec3(std::string("lights[" + std::to_string(i) + "].direction").c_str(),
-                            glm::value_ptr(lights[i].direction));
+                            (lights[i].direction));
         }
         shader.set_int("num_lights", lights.size());
     }
@@ -190,7 +190,7 @@ namespace cologne
 
         index = (index + 1) % 30;
         average -= history[index];
-        history[index] = fpsFrame/30;
+        history[index] = fpsFrame / 30;
         average += history[index];
         fps = static_cast<int>(roundf(1.0f / average));
 
@@ -285,7 +285,6 @@ namespace cologne
     }
 
 
-
     void Renderer::init()
     {
         enableReportGlErrors();
@@ -304,7 +303,7 @@ namespace cologne
 
     Renderer::Renderer()
     {
-        DebugScope scope ("initialization");
+        DebugScope scope("initialization");
         init();
         init_shaders();
         init_voxels();

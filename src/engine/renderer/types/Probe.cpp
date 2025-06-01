@@ -145,7 +145,7 @@ namespace cologne
         };
 
         shader.bind();
-        shader.set_mat4("projection", glm::value_ptr(capture_proj));
+        shader.set_mat4("projection", (capture_proj));
         for (uint32_t face = 0; face < 6; face++)
         {
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
@@ -160,7 +160,7 @@ namespace cologne
                                    _depth_handle, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             auto scene = Engine::get_scene();
-            shader.set_mat4("view", glm::value_ptr(capture_views[face]));
+            shader.set_mat4("view", (capture_views[face]));
             for (size_t i = 0; i < scene->get_model_count(); i++)
             {
                 auto model = scene->get_model_by_index(i);
@@ -168,7 +168,7 @@ namespace cologne
                 {
                     continue;
                 }
-                shader.set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
+                shader.set_mat4("model", (model->get_transform().get_model_matrix()));
                 for (size_t j = 0; j < model->get_num_meshes(); j++)
                 {
                     auto mesh = model->get_meshes()[j];

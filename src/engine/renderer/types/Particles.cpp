@@ -98,8 +98,8 @@ namespace cologne
         shader->bind();
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, _position_buffer);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, _velocity_buffer);
-        shader->set_vec3("bounds_min", glm::value_ptr(_bounds.min));
-        shader->set_vec3("bounds_max", glm::value_ptr(_bounds.max));
+        shader->set_vec3("bounds_min", (_bounds.min));
+        shader->set_vec3("bounds_max", (_bounds.max));
         shader->set_int("total_particle_count", _total_particle_count);
         static float time = 0.0f;
         time += Time::DeltaTime;

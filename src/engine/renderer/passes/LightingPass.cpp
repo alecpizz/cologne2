@@ -19,15 +19,15 @@ namespace cologne
         // glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         shader->bind();
-        shader->set_vec3("camera_pos", glm::value_ptr(Engine::get_camera()->get_position()));
+        shader->set_vec3("camera_pos", (Engine::get_camera()->get_position()));
         // env_irradiance.bind(IRRADIANCE_INDEX);
         // env_prefilter.bind(PREFILTER_INDEX);
         // env_brdf.bind(BRDF_INDEX);
         update_shadow(*shader);
-        shader->set_mat4("view_inverse", glm::value_ptr(glm::inverse(Engine::get_camera()->get_view_matrix())));
-        shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
+        shader->set_mat4("view_inverse", (glm::inverse(Engine::get_camera()->get_view_matrix())));
+        shader->set_mat4("view", (Engine::get_camera()->get_view_matrix()));
         shader->set_int("voxel_grid_size", _voxel_data.voxel_dimensions);
-        shader->set_vec3("voxel_offset", glm::value_ptr(_voxel_data.voxel_offset));
+        shader->set_vec3("voxel_offset", (_voxel_data.voxel_offset));
         auto bounds = Engine::get_scene()->get_bounds();
         const glm::vec3 center = bounds.center();
         const glm::vec3 size = bounds.size(); //THIS IS WRONG!
@@ -37,8 +37,8 @@ namespace cologne
         shader->set_float("voxel_size", voxel_size);
         auto min = bounds.min;
         auto max = bounds.max;
-        shader->set_vec3("grid_min", glm::value_ptr(min));
-        shader->set_vec3("grid_max", glm::value_ptr(max));
+        shader->set_vec3("grid_min", (min));
+        shader->set_vec3("grid_max", (max));
         static float time = 0.0f;
         time += Time::DeltaTime;
         shader->set_float("time", time);

@@ -7,150 +7,38 @@
 
 namespace cologne
 {
-    struct Shader::Impl
+    Shader::Shader(const std::string&comp_path)
     {
-        uint32_t program = 0;
-        std::string name;
-        std::unordered_map<std::string, int32_t> uniforms;
-        bool linked = false;
-
-        void compile(const char *vertex_path, const char *fragment_path, const char *geometry_path)
-        {
-            program = glCreateProgram();
-
-            if (program == 0)
-            {
-                LOG_ERROR("Failed to create program");
-                return;
-            }
-            uint32_t vertex_shader = add_shader(vertex_path, GL_VERTEX_SHADER);
-            uint32_t fragment_shader = add_shader(fragment_path, GL_FRAGMENT_SHADER);
-            uint32_t geometry_shader = add_shader(geometry_path, GL_GEOMETRY_SHADER);
-            if (vertex_shader != 0)
-            {
-                glAttachShader(program, vertex_shader);
-            }
-            if (fragment_shader != 0)
-            {
-                glAttachShader(program, fragment_shader);
-            }
-            if (geometry_shader != 0)
-            {
-                glAttachShader(program, geometry_shader);
-            }
-
-            glLinkProgram(program);
-            int32_t success;
-            glGetProgramiv(program, GL_LINK_STATUS, &success);
-            if (!success)
-            {
-                char infoLog[512];
-                glGetProgramInfoLog(program, 512, nullptr, infoLog);
-                LOG_ERROR("Failed to link program %s", infoLog);
-            }
-            glDeleteShader(vertex_shader);
-            glDeleteShader(fragment_shader);
-            glDeleteShader(geometry_shader);
-            linked = true;
-        }
-
-        void compile(const char *comp_path)
-        {
-            program = glCreateProgram();
-
-            if (program == 0)
-            {
-                LOG_ERROR("Failed to create program");
-                return;
-            }
-            uint32_t comp_shader = add_shader(comp_path, GL_COMPUTE_SHADER);
-            if (comp_shader != 0)
-            {
-                glAttachShader(program, comp_shader);
-            }
-
-            glLinkProgram(program);
-            int32_t success;
-            glGetProgramiv(program, GL_LINK_STATUS, &success);
-            if (!success)
-            {
-                char infoLog[512];
-                glGetProgramInfoLog(program, 512, nullptr, infoLog);
-                LOG_ERROR("Failed to link program %s", infoLog);
-            }
-            glDeleteShader(comp_shader);
-            linked = true;
-        }
-
-        uint32_t add_shader(const char *shader_path, const GLenum shader_type) const
-        {
-            if (shader_path == nullptr)
-            {
-                return 0;
-            }
-            std::string code;
-            std::ifstream file;
-            file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-            try
-            {
-                file.open(shader_path);
-                std::stringstream ss;
-                ss << file.rdbuf();
-                file.close();
-                code = ss.str();
-            } catch (const std::ifstream::failure &e)
-            {
-                LOG_ERROR("Failed to read file %s %s", shader_path, e.what());
-            }
-            uint32_t shader = glCreateShader(shader_type);
-            const char *shader_code = code.c_str();
-            glShaderSource(shader, 1, &shader_code, nullptr);
-            glCompileShader(shader);
-            int32_t success;
-            glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-            if (!success)
-            {
-                char info_log[512];
-                glGetShaderInfoLog(shader, 512, nullptr, info_log);
-                LOG_ERROR("Failed to compile shader %s with reason: %s", shader_path, info_log);
-            }
-            return shader;
-        }
-    };
-
-    Shader::Shader(const char *comp_path)
-    {
-        _impl = new Impl();
-        _impl->compile(comp_path);
+        compile(comp_path);
     }
 
-    Shader::Shader(const char *vert_path, const char *frag_path)
+    Shader::Shader(const std::string&vert_path, const std::string&frag_path)
     {
-        _impl = new Impl();
-        _impl->compile(vert_path, frag_path, nullptr);
+        compile(vert_path, frag_path, nullptr);
     }
 
-    Shader::Shader(const char *vert_path, const char *frag_path, const char *geom_path)
+    Shader::Shader(const std::string&vert_path, const std::string&frag_path, const std::string&geom_path)
     {
-        _impl = new Impl();
-        _impl->compile(vert_path, frag_path, geom_path);
+        compile(vert_path, frag_path, geom_path);
     }
 
     Shader::~Shader()
     {
-        glDeleteProgram(_impl->program);
-        delete _impl;
+        if (_program != 0)
+        {
+            glDeleteProgram(_program);
+        }
     }
 
     uint32_t Shader::get_handle() const
     {
-        return _impl->program;
+        return _program;
     }
 
     void Shader::bind() const
     {
 
-        glUseProgram(_impl->program);
+        glUseProgram(_program);
     }
 
     void Shader::dispatch(uint32_t work_size_x, uint32_t work_size_y, uint32_t work_size_z)
@@ -168,107 +56,210 @@ namespace cologne
         glMemoryBarrier(barriers);
     }
 
-    void Shader::set_bool(const char *name, const bool value) const
+    void Shader::set_bool(const std::string&name, const bool value)
     {
-        if (!_impl->linked)
+        if (!_linked)
         {
             return;
         }
-        if (!_impl->uniforms.contains(name))
+        if (!_uniforms.contains(name))
         {
-            _impl->uniforms[name] = glGetUniformLocation(_impl->program, name);
+            _uniforms[name] = glGetUniformLocation(_program, name.c_str());
         }
-        glUniform1i(_impl->uniforms[name], static_cast<int>(value));
+        glUniform1i(_uniforms[name], static_cast<int>(value));
     }
 
-    void Shader::set_int(const char *name, int32_t value) const
+    void Shader::set_int(const std::string&name, int32_t value)
     {
-        if (!_impl->linked)
+        if (!_linked)
         {
             return;
         }
-        if (!_impl->uniforms.contains(name))
+        if (!_uniforms.contains(name))
         {
-            _impl->uniforms[name] = glGetUniformLocation(_impl->program, name);
+            _uniforms[name] = glGetUniformLocation(_program, name.c_str());
         }
-        glUniform1i(_impl->uniforms[name], value);
+        glUniform1i(_uniforms[name], value);
     }
 
-    void Shader::set_vec3(const char *name, const float *value) const
+    void Shader::set_vec3(const std::string &name, glm::vec3 value)
     {
-        if (!_impl->linked)
+        if (!_linked)
         {
             return;
         }
-        if (!_impl->uniforms.contains(name))
+        if (!_uniforms.contains(name))
         {
-            _impl->uniforms[name] = glGetUniformLocation(_impl->program, name);
+            _uniforms[name] = glGetUniformLocation(_program, name.c_str());
         }
-        glUniform3fv(_impl->uniforms[name], 1, value);
+        glUniform3fv(_uniforms[name], 1, glm::value_ptr(value));
     }
 
-    void Shader::set_vec2(const char *name, const float *value) const
+    void Shader::set_vec2(const std::string &name, glm::vec2 value)
     {
-        if (!_impl->linked)
+        if (!_linked)
         {
             return;
         }
-        if (!_impl->uniforms.contains(name))
+        if (!_uniforms.contains(name))
         {
-            _impl->uniforms[name] = glGetUniformLocation(_impl->program, name);
+            _uniforms[name] = glGetUniformLocation(_program, name.c_str());
         }
-        glUniform2fv(_impl->uniforms[name], 1, value);
+        glUniform2fv(_uniforms[name], 1, glm::value_ptr(value));
     }
 
-    void Shader::set_vec4(const char *name, const float *value) const
+    void Shader::set_vec4(const std::string&name, glm::vec4 value)
     {
-        if (!_impl->linked)
+        if (!_linked)
         {
             return;
         }
-        if (!_impl->uniforms.contains(name))
+        if (!_uniforms.contains(name))
         {
-            _impl->uniforms[name] = glGetUniformLocation(_impl->program, name);
+            _uniforms[name] = glGetUniformLocation(_program, name.c_str());
         }
-        glUniform4fv(_impl->uniforms[name], 1, value);
+        glUniform4fv(_uniforms[name], 1, glm::value_ptr(value));
     }
 
-    void Shader::set_mat4(const char *name, const float *value) const
+    void Shader::set_mat4(const std::string& name, glm::mat4 value)
     {
-        if (!_impl->linked)
+        if (!_linked)
         {
             return;
         }
-        if (!_impl->uniforms.contains(name))
+        if (!_uniforms.contains(name))
         {
-            _impl->uniforms[name] = glGetUniformLocation(_impl->program, name);
+            _uniforms[name] = glGetUniformLocation(_program, name.c_str());
         }
-        glUniformMatrix4fv(_impl->uniforms[name], 1, GL_FALSE, value);
+        glUniformMatrix4fv(_uniforms[name], 1, GL_FALSE, glm::value_ptr(value));
     }
 
-    void Shader::set_mat4(const char *name, const float *value, size_t count) const
+    void Shader::set_mat4(const std::string &name, const std::vector<glm::mat4> &value)
     {
-        if (!_impl->linked)
+        if (!_linked)
         {
             return;
         }
-        if (!_impl->uniforms.contains(name))
+        if (!_uniforms.contains(name))
         {
-            _impl->uniforms[name] = glGetUniformLocation(_impl->program, name);
+            _uniforms[name] = glGetUniformLocation(_program, name.c_str());
         }
-        glUniformMatrix4fv(_impl->uniforms[name], count, GL_FALSE, value);
+        glUniformMatrix4fv(_uniforms[name], value.size(), GL_FALSE, glm::value_ptr(value[0]));
     }
 
-    void Shader::set_float(const char *name, const float value) const
+    void Shader::set_float(const std::string&name, const float value)
     {
-        if (!_impl->linked)
+        if (!_linked)
         {
             return;
         }
-        if (!_impl->uniforms.contains(name))
+        if (!_uniforms.contains(name))
         {
-            _impl->uniforms[name] = glGetUniformLocation(_impl->program, name);
+            _uniforms[name] = glGetUniformLocation(_program, name.c_str());
         }
-        glUniform1f(_impl->uniforms[name], value);
+        glUniform1f(_uniforms[name], value);
+    }
+
+    void Shader::compile(const std::string &comp_path)
+    {
+        _program = glCreateProgram();
+
+        if (_program == 0)
+        {
+            LOG_ERROR("Failed to create program");
+            return;
+        }
+        uint32_t comp_shader = add_shader(comp_path, GL_COMPUTE_SHADER);
+        if (comp_shader != 0)
+        {
+            glAttachShader(_program, comp_shader);
+        }
+
+        glLinkProgram(_program);
+        int32_t success;
+        glGetProgramiv(_program, GL_LINK_STATUS, &success);
+        if (!success)
+        {
+            char infoLog[512];
+            glGetProgramInfoLog(_program, 512, nullptr, infoLog);
+            LOG_ERROR("Failed to link program %s", infoLog);
+        }
+        glDeleteShader(comp_shader);
+        _linked = true;
+    }
+
+    void Shader::compile(const std::string &vert_path, const std::string &frag_path, const std::string &geo_path)
+    {
+        _program = glCreateProgram();
+
+        if (_program == 0)
+        {
+            LOG_ERROR("Failed to create program");
+            return;
+        }
+        const uint32_t vertex_shader = add_shader(vert_path, GL_VERTEX_SHADER);
+        const uint32_t fragment_shader = add_shader(frag_path, GL_FRAGMENT_SHADER);
+        const uint32_t geometry_shader = add_shader(geo_path, GL_GEOMETRY_SHADER);
+        if (vertex_shader != 0)
+        {
+            glAttachShader(_program, vertex_shader);
+        }
+        if (fragment_shader != 0)
+        {
+            glAttachShader(_program, fragment_shader);
+        }
+        if (geometry_shader != 0)
+        {
+            glAttachShader(_program, geometry_shader);
+        }
+
+        glLinkProgram(_program);
+        int32_t success;
+        glGetProgramiv(_program, GL_LINK_STATUS, &success);
+        if (!success)
+        {
+            char infoLog[512];
+            glGetProgramInfoLog(_program, 512, nullptr, infoLog);
+            LOG_ERROR("Failed to link program %s", infoLog);
+        }
+        glDeleteShader(vertex_shader);
+        glDeleteShader(fragment_shader);
+        glDeleteShader(geometry_shader);
+        _linked = true;
+    }
+
+    uint32_t Shader::add_shader(const std::string &shader_path, const GLenum shader_type) const
+    {
+        if (shader_path.empty())
+        {
+            return 0;
+        }
+        std::string code;
+        std::ifstream file;
+        file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        try
+        {
+            file.open(shader_path);
+            std::stringstream ss;
+            ss << file.rdbuf();
+            file.close();
+            code = ss.str();
+        } catch (const std::ifstream::failure &e)
+        {
+            LOG_ERROR("Failed to read file %s %s", shader_path, e.what());
+        }
+        uint32_t shader = glCreateShader(shader_type);
+        const char* shader_code = code.c_str();
+        glShaderSource(shader, 1, &shader_code, nullptr);
+        glCompileShader(shader);
+        int32_t success;
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+        if (!success)
+        {
+            char info_log[512];
+            glGetShaderInfoLog(shader, 512, nullptr, info_log);
+            LOG_ERROR("Failed to compile shader %s with reason: %s", shader_path, info_log);
+        }
+        return shader;
     }
 }

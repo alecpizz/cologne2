@@ -178,7 +178,7 @@ namespace cologne
                                                 glm::vec2(dir_shadow_size));
     }
 
-    void Renderer::update_shadow(const Shader &shader)
+    void Renderer::update_shadow(Shader &shader)
     {
         shader.bind();
         for (size_t i = 0; i < shadowCascadeLevels.size(); i++)
@@ -208,7 +208,7 @@ namespace cologne
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
         auto shader = get_shader_by_name("shadowmap");
         shader->bind();
-        shader->set_vec3("light.direction", glm::value_ptr(light.direction));
+        shader->set_vec3("light.direction", (light.direction));
         glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
         glViewport(0, 0, shadow_size, shadow_size);
         glClear(GL_DEPTH_BUFFER_BIT);
@@ -227,7 +227,7 @@ namespace cologne
             {
                 continue;
             }
-            shader->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
+            shader->set_mat4("model", (model->get_transform().get_model_matrix()));
             for (size_t j = 0; j < model->get_num_meshes(); j++)
             {
                 Mesh mesh = model->get_meshes()[j];
@@ -239,7 +239,7 @@ namespace cologne
 
         shader = get_shader_by_name("shadowmap_skinned");
         shader->bind();
-        shader->set_vec3("light.direction", glm::value_ptr(light.direction));
+        shader->set_vec3("light.direction", (light.direction));
 
         for (size_t i = 0; i < scene.get_skinned_models().size(); i++)
         {
@@ -253,12 +253,12 @@ namespace cologne
             {
                 continue;
             }
-            shader->set_mat4("model", glm::value_ptr(model.get_transform().get_model_matrix()));
+            shader->set_mat4("model", (model.get_transform().get_model_matrix()));
             if (scene.get_animators().contains(model.get_name()))
             {
                 auto& animator = scene.get_animators().at(model.get_name());
                 auto& bones = animator.get_bones();
-                shader->set_mat4("bone_matrices", glm::value_ptr(bones[0]), bones.size());
+                shader->set_mat4("bone_matrices", bones);
             }
 
             for (size_t j = 0; j < model.get_num_meshes(); j++)
@@ -285,7 +285,7 @@ namespace cologne
         draw_line(center, (center + (dir_light.direction * 5.0f)), glm::vec3(1.0, 0.0, 0.0));
         glm::mat4 light_space = light_projection * light_view;
         _dir_light_space = light_space;
-        shader->set_mat4("lightSpaceMatrix", glm::value_ptr(_dir_light_space));
+        shader->set_mat4("lightSpaceMatrix", (_dir_light_space));
 
         for (size_t i = 0; i < scene.get_model_count(); i++)
         {
@@ -294,7 +294,7 @@ namespace cologne
             {
                 continue;
             }
-            shader->set_mat4("model", glm::value_ptr(model->get_transform()->get_model_matrix()));
+            shader->set_mat4("model", (model->get_transform().get_model_matrix()));
             for (size_t j = 0; j < model->get_num_meshes(); j++)
             {
                 Mesh mesh = model->get_meshes()[j];

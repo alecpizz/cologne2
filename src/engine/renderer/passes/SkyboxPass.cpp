@@ -70,7 +70,7 @@ namespace cologne
 
         environment.bind();
         environment.set_int("equirectangular_map", 0);
-        environment.set_mat4("projection", &captureProjection[0][0]);
+        environment.set_mat4("projection", captureProjection);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, hdr_handle);
 
@@ -78,7 +78,7 @@ namespace cologne
         glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
         for (uint32_t i = 0; i < 6; i++)
         {
-            environment.set_mat4("view", &captureViews[i][0][0]);
+            environment.set_mat4("view", captureViews[i]);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                    GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, envCubemap, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -103,8 +103,8 @@ namespace cologne
         glDepthFunc(GL_LEQUAL);
         auto shader = get_shader_by_name("skybox");
         shader->bind();
-        shader->set_mat4("projection", &Engine::get_camera()->get_projection_matrix()[0][0]);
-        shader->set_mat4("view", &Engine::get_camera()->get_view_matrix()[0][0]);
+        shader->set_mat4("projection", Engine::get_camera()->get_projection_matrix());
+        shader->set_mat4("view", Engine::get_camera()->get_view_matrix());
         glBindTextureUnit(0, _skybox_texture);
         render_cube();
         glEnable(GL_CULL_FACE);

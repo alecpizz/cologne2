@@ -1,5 +1,4 @@
-﻿
-#include <engine/core/Engine.h>
+﻿#include <engine/core/Engine.h>
 #include <engine/renderer/DebugScope.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Shader.h>
@@ -62,17 +61,17 @@ namespace cologne
 
         DebugScope scope("Renderer::debug_voxel_pass");
 
-        const Shader* world_pos_shader = get_shader_by_name("world_pos_shader");
+        Shader *world_pos_shader = get_shader_by_name("world_pos_shader");
         world_pos_shader->bind();
         glClearColor(0.0, 0.0, 0.0, 1.0);
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
 
-        world_pos_shader->set_mat4("projection", glm::value_ptr(Engine::get_camera()->get_projection_matrix()));
-        world_pos_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
+        world_pos_shader->set_mat4("projection", Engine::get_camera()->get_projection_matrix());
+        world_pos_shader->set_mat4("view", Engine::get_camera()->get_view_matrix());
         glm::mat4 model = glm::mat4(1.0f);
-        world_pos_shader->set_mat4("model", glm::value_ptr(model));
-        world_pos_shader->set_vec3("camera_position", glm::value_ptr(Engine::get_camera()->get_position()));
+        world_pos_shader->set_mat4("model", (model));
+        world_pos_shader->set_vec3("camera_position", (Engine::get_camera()->get_position()));
 
         glCullFace(GL_FRONT);
         _voxel_back_fbo.bind();
@@ -96,9 +95,9 @@ namespace cologne
         glEnable(GL_CULL_FACE);
 
         voxelize_debug_shader->set_mat4("projection",
-                                        glm::value_ptr(Engine::get_camera()->get_projection_matrix()));
-        voxelize_debug_shader->set_mat4("view", glm::value_ptr(Engine::get_camera()->get_view_matrix()));
-        voxelize_debug_shader->set_vec3("camera_position", glm::value_ptr(Engine::get_camera()->get_position()));
+                                        (Engine::get_camera()->get_projection_matrix()));
+        voxelize_debug_shader->set_mat4("view", (Engine::get_camera()->get_view_matrix()));
+        voxelize_debug_shader->set_vec3("camera_position", (Engine::get_camera()->get_position()));
 
         glBindTexture(GL_TEXTURE_3D, _voxel_texture);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -128,18 +127,18 @@ namespace cologne
         auto shader = get_shader_by_name("voxelize");
         shader->bind();
         update_lights(*shader);
-        shader->set_mat4("lightSpaceMatrix", glm::value_ptr(_dir_light_space));
-        shader->set_mat4("projection", glm::value_ptr(glm::ortho(-1.0f, 1.0f, -1.0f,
+        shader->set_mat4("lightSpaceMatrix", (_dir_light_space));
+        shader->set_mat4("projection", (glm::ortho(-1.0f, 1.0f, -1.0f,
                                                                  1.0f, -1.0f, 1.0f)));
         auto size = Engine::get_scene()->get_bounds().size();
         const float offset = 2.0f - 0.1f;
         glm::vec3 scale = glm::vec3(offset / fabs(size.x), offset / fabs(size.y), offset / fabs(size.z));
-        shader->set_vec3("voxel_size", glm::value_ptr(scale));
+        shader->set_vec3("voxel_size", (scale));
         auto bounds = Engine::get_scene()->get_bounds();
         auto min = bounds.min;
         auto max = bounds.max;
-        shader->set_vec3("grid_min", glm::value_ptr(min));
-        shader->set_vec3("grid_max", glm::value_ptr(max));
+        shader->set_vec3("grid_min", (min));
+        shader->set_vec3("grid_max", (max));
         glBindImageTexture(6, _voxel_texture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
         glBindTextureUnit(8, _dir_shadow_fbo.get_depth_attachment_handle());
         // glBindTextureUnit(7, _shadow_depth);
@@ -154,8 +153,8 @@ namespace cologne
                     continue;
                 }
                 shader->set_mat4("model",
-                                 glm::value_ptr(
-                                     model->get_transform()->get_model_matrix()));
+                                 (
+                                     model->get_transform().get_model_matrix()));
                 for (size_t j = 0; j < model->get_num_meshes(); j++)
                 {
                     auto &mesh = scene->get_model_by_index(i)->get_meshes()[j];
