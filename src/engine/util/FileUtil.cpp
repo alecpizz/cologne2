@@ -31,6 +31,8 @@ namespace cologne::FileUtil
                                           std::unordered_map<std::string, BoneInfo> &bone_map, int &bone_counter,
                                           const aiMesh *mesh);
 
+    Animation import_animation(SkinnedModel& model);
+
     void process_materials(std::vector<Material> &mats, const aiScene *scene);
 
     void process_node(std::vector<MeshData> &meshes, const aiNode *node, const aiScene *scene)
@@ -162,6 +164,7 @@ namespace cologne::FileUtil
         }
     }
 
+
     void process_materials(std::vector<Material> &mats, const aiScene *scene)
     {
         for (size_t i = 0; i < scene->mNumMaterials; i++)
@@ -268,6 +271,25 @@ namespace cologne::FileUtil
         }
         result_data.name = get_file_name(path);
         return result_data;
+    }
+
+
+    std::vector<Animation> import_animations(const std::string &path, SkinnedModel& model)
+    {
+        std::vector<Animation> result;
+        Assimp::Importer importer;
+        const aiScene* scene = importer.ReadFile(path, 0);
+        if (!scene || !scene->mRootNode)
+        {
+            LOG_ERROR("ASSIMP ERROR: %s", importer.GetErrorString());
+            return result;
+        }
+
+        for (size_t i = 0; i < scene->mNumAnimations; i++)
+        {
+            result.emplace_back(scene->mAnimations[i], scene, model);
+        }
+        return result;
     }
 
     SkinnedModelData import_skinned_model(const std::string &path)

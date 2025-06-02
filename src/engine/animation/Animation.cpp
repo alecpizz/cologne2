@@ -6,52 +6,16 @@
 #include "assimp/postprocess.h"
 #include "assimp/scene.h"
 #include "../renderer/types/SkinnedModel.h"
-#include "assimp/Importer.hpp"
 //
 // Created by alecpizz on 5/25/2025.
 //
 namespace cologne
 {
-    std::vector<Animation> Animation::get_animations(const std::string &path, SkinnedModel &model)
+
+    Animation::Animation(const aiAnimation *animation, const aiScene* scene, SkinnedModel &model)
     {
-        Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(path, 0);
-        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-        {
-            LOG_ERROR("ASSIMP ERROR: %s", importer.GetErrorString());
-            return std::vector<Animation>();
-        }
-
-        std::vector<Animation> result;
-        for (size_t i = 0; i < scene->mNumAnimations; i++)
-        {
-            result.emplace_back(Animation(scene->mAnimations[i], scene, model));
-        }
-        return result;
-    }
-
-    Animation::Animation(const std::string &path, SkinnedModel &model)
-    {
-        Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(path, 0);
-        if (!scene || !scene->mRootNode)
-        {
-            LOG_ERROR("ASSIMP ERROR: %s", importer.GetErrorString());
-            return;
-        }
-
-        auto animation = scene->mAnimations[0];
-        _duration = animation->mDuration;
-        _ticks_per_second = animation->mTicksPerSecond;
-        read_bone_hierarchy(_root_node, scene->mRootNode);
-        read_missing_bones(animation, model);
-        LOG_INFO("Created an animation with %f duration %d tps", _duration, _ticks_per_second);
-    }
-
-    Animation::Animation(aiAnimation *animation, const aiScene* scene, SkinnedModel &model)
-    {
-        _duration = animation->mDuration;
-        _ticks_per_second = animation->mTicksPerSecond;
+        _duration = static_cast<float>(animation->mDuration);
+        _ticks_per_second = static_cast<int>(animation->mTicksPerSecond);
         read_bone_hierarchy(_root_node, scene->mRootNode);
         read_missing_bones(animation, model);
     }
