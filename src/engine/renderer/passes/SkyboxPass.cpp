@@ -96,7 +96,8 @@ namespace cologne
     void Renderer::skybox_pass()
     {
         DebugScope scope("Renderer::skybox_pass");
-        _output_fbo.bind();
+        auto fbo = get_framebuffer_by_name("output");
+        fbo->bind();
         glDisable(GL_CULL_FACE);
         glDisable(GL_BLEND);
         glDepthMask(GL_FALSE);
@@ -111,6 +112,7 @@ namespace cologne
         glEnable(GL_BLEND);
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
-        _output_fbo.release();
+        fbo->release();
     }
+
 }

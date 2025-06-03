@@ -52,8 +52,9 @@ namespace cologne
         glBindImageTexture(0, _indirect_texture, 0, GL_FALSE, 0,
             GL_WRITE_ONLY, GL_RGBA8);
         glBindTextureUnit(1, _voxel_texture);
-        glBindTextureUnit(2, _gbuffer_fbo.get_color_attachment_handle_by_name("position"));
-        glBindTextureUnit(3, _gbuffer_fbo.get_color_attachment_handle_by_name("normal"));
+        auto gbuffer = get_framebuffer_by_name("gbuffer");
+        glBindTextureUnit(2, gbuffer->get_color_attachment_handle_by_name("position"));
+        glBindTextureUnit(3, gbuffer->get_color_attachment_handle_by_name("normal"));
 
         const uint32_t work_group_size = 16;
         uint32_t width = Engine::get_window()->get_width() / pixel_ratio;

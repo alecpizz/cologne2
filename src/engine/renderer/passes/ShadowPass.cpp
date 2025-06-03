@@ -171,10 +171,11 @@ namespace cologne
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, shadow_cascade_ubo);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        _dir_shadow_fbo.create("dir_shadow_fbo", dir_shadow_size, dir_shadow_size);
-        _dir_shadow_fbo.create_depth_attachment(GL_DEPTH_COMPONENT16, GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_BORDER);
-        _dir_shadow_fbo.set_empty();
-        Engine::get_debug_ui()->add_image_entry("dir_shadow", _dir_shadow_fbo.get_depth_attachment_handle(),
+        auto dir_shadow_fbo = get_framebuffer_by_name("dir_shadow");
+        dir_shadow_fbo->create("dir_shadow_fbo", dir_shadow_size, dir_shadow_size);
+        dir_shadow_fbo->create_depth_attachment(GL_DEPTH_COMPONENT16, GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_BORDER);
+        dir_shadow_fbo->set_empty();
+        Engine::get_debug_ui()->add_image_entry("dir_shadow", dir_shadow_fbo->get_depth_attachment_handle(),
                                                 glm::vec2(dir_shadow_size));
     }
 
@@ -271,8 +272,9 @@ namespace cologne
 
 
         //voxel shadow
-        _dir_shadow_fbo.bind();
-        _dir_shadow_fbo.set_viewport();
+        auto dir_shadow_fbo = get_framebuffer_by_name("dir_shadow");
+        dir_shadow_fbo->bind();
+        dir_shadow_fbo->set_viewport();
         glClear(GL_DEPTH_BUFFER_BIT);
         shader = get_shader_by_name("dir_shadow");
         shader->bind();

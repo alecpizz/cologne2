@@ -117,7 +117,7 @@ namespace cologne
 
             glm::vec3 euler = glm::degrees(glm::eulerAngles(rotation));
 
-            ImGui::LabelText("%s", model.get_path());
+            ImGui::LabelText("%s", model.get_name());
 
             if (ImGui::DragFloat3("Position", glm::value_ptr(translation)))
             {

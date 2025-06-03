@@ -37,7 +37,7 @@ namespace cologne
         return _bounds;
     }
 
-    const char *Model::get_path() const
+    const char *Model::get_name() const
     {
         return _path.c_str();
     }

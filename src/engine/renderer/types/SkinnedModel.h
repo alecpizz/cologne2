@@ -22,7 +22,7 @@ namespace cologne
     {
         friend class Animation;
     public:
-        SkinnedModel(const SkinnedModelData& data);
+        explicit SkinnedModel(const SkinnedModelData& data);
 
         ~SkinnedModel();
 

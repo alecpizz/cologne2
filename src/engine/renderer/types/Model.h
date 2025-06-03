@@ -24,7 +24,7 @@ namespace cologne
 
         AABB get_aabb() const;
 
-        const char *get_path() const;
+        const char *get_name() const;
 
         Material *get_materials();
 

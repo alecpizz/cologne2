@@ -14,8 +14,10 @@ namespace cologne
     {
         DebugScope scope("Renderer::lit_pass");
         auto shader = get_shader_by_name("lit");
-        _output_fbo.bind();
-        _output_fbo.set_viewport();
+        auto output_fbo = get_framebuffer_by_name("output");
+        auto gbuffer_fbo = get_framebuffer_by_name("gbuffer");
+        output_fbo->bind();
+        output_fbo->set_viewport();
         // glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         shader->bind();
@@ -43,16 +45,16 @@ namespace cologne
         time += Time::DeltaTime;
         shader->set_float("time", time);
         shader->set_bool("indirect_lighting_active", _apply_indirect_lighting);
-        glBindTextureUnit(0, _gbuffer_fbo.get_color_attachment_handle_by_name("position"));
-        glBindTextureUnit(1, _gbuffer_fbo.get_color_attachment_handle_by_name("normal"));
-        glBindTextureUnit(2, _gbuffer_fbo.get_color_attachment_handle_by_name("albedo"));
-        glBindTextureUnit(3, _gbuffer_fbo.get_color_attachment_handle_by_name("orm"));
-        glBindTextureUnit(4, _gbuffer_fbo.get_color_attachment_handle_by_name("emission"));
+        glBindTextureUnit(0, gbuffer_fbo->get_color_attachment_handle_by_name("position"));
+        glBindTextureUnit(1, gbuffer_fbo->get_color_attachment_handle_by_name("normal"));
+        glBindTextureUnit(2, gbuffer_fbo->get_color_attachment_handle_by_name("albedo"));
+        glBindTextureUnit(3, gbuffer_fbo->get_color_attachment_handle_by_name("orm"));
+        glBindTextureUnit(4, gbuffer_fbo->get_color_attachment_handle_by_name("emission"));
         glBindTextureUnit(5, _shadow_depth);
         glBindTextureUnit(9, _indirect_texture);
         render_quad();
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, _gbuffer_fbo.get_handle());
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _output_fbo.get_handle()); // write to output framebuffer
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer_fbo->get_handle());
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, output_fbo->get_handle()); // write to output framebuffer
         glBlitFramebuffer(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height(), 0, 0,
                           Engine::get_window()->get_width(), Engine::get_window()->get_height(),
                           GL_DEPTH_BUFFER_BIT, GL_NEAREST);

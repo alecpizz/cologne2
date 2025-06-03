@@ -1,11 +1,30 @@
 #pragma once
 #include <engine/Types.h>
 #include <engine/animation/Animation.h>
+#include <filesystem>
 
 namespace cologne::FileUtil
 {
-    ModelData import_model(const std::string& path);
-    std::vector<Animation> import_animations(const std::string& path, SkinnedModel& model);
-    SkinnedModelData import_skinned_model(const std::string& path);
-    std::string get_file_name(const std::string& path);
+    struct FileInfo
+    {
+        std::string path;
+        std::string name;
+        std::string ext;
+        std::string dir;
+    };
+
+    ModelData import_model(const std::string &path);
+
+    SkinnedModelData import_skinned_model(const std::string &path);
+
+    std::string get_file_name(const std::string &path);
+
+    std::string get_full_path(const std::filesystem::directory_entry &entry);
+
+    std::string get_file_extension(const std::filesystem::directory_entry &entry);
+
+    std::string get_file_name_without_extension(const std::filesystem::directory_entry &entry);
+
+    std::vector<FileInfo> iterate_directory(const std::string &directory,
+                                            const std::vector<std::string> &extensions = {});
 }

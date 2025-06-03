@@ -31,16 +31,20 @@ namespace cologne
         model3.set_aabb(bounds);
         auto &model = add_model(RESOURCES_PATH "glowCube.glb");
         model.set_gi_only(true);
-        auto& skinned_model = add_skinned_model(RESOURCES_PATH "python/deagle.glb");
-        skinned_model.set_cast_shadows(false);
-        _animations = FileUtil::import_animations(RESOURCES_PATH "python/deagle.glb", skinned_model);
-        _animators.insert(std::make_pair(skinned_model.get_name(), Animator(_animations[1])));
-        auto& skinned_model2 = add_skinned_model(RESOURCES_PATH "man.glb");
-        skinned_model2.get_transform().set_scale(glm::vec3(0.9f));
-        //where the fuck should animations live lol
-        std::vector<Animation> animations2 = FileUtil::import_animations(RESOURCES_PATH "man.glb", skinned_model2);
-        _animations.insert(_animations.end(), animations2.begin(), animations2.end());
-        _animators.insert(std::make_pair(skinned_model2.get_name(), Animator(_animations.back())));
+        // auto& skinned_model = add_skinned_model(RESOURCES_PATH "python/deagle.glb");
+        // skinned_model.set_cast_shadows(false);
+        // _animations = FileUtil::import_animations(RESOURCES_PATH "python/deagle.glb");
+        // for (auto & animation : _animations)
+        // {
+        //     animation.read_missing_bones(skinned_model)
+        // }
+        // _animators.insert(std::make_pair(skinned_model.get_name(), Animator(_animations[1])));
+        // auto& skinned_model2 = add_skinned_model(RESOURCES_PATH "man.glb");
+        // skinned_model2.get_transform().set_scale(glm::vec3(0.9f));
+        // //where the fuck should animations live lol
+        // std::vector<Animation> animations2 = FileUtil::import_animations(RESOURCES_PATH "man.glb", skinned_model2);
+        // _animations.insert(_animations.end(), animations2.begin(), animations2.end());
+        // _animators.insert(std::make_pair(skinned_model2.get_name(), Animator(_animations.back())));
 
         for (auto & static_model : _models)
         {
@@ -86,7 +90,7 @@ namespace cologne
         gun_mat *= glm::toMat4(glm::quat(glm::radians(glm::vec3(gun_offset_euler_temp))));
         gun_mat *= glm::scale(gun_mat, gun_offset_scale_temp);
         gun_mat = glm::inverse(Engine::get_camera()->get_view_matrix()) * gun_mat;
-        _skinned_models[0].get_transform().set_model_matrix(gun_mat);
+        // _skinned_models[0].get_transform().set_model_matrix(gun_mat);
     }
 
     AABB Scene::re_calculate_bounds()

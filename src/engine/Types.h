@@ -4,8 +4,6 @@
 
 namespace cologne
 {
-    struct BoneInfo;
-
     struct MeshData
     {
         std::string name;
@@ -35,6 +33,9 @@ namespace cologne
         glm::vec3 aabb_max = glm::vec3(std::numeric_limits<float>::min());
     };
 
+    struct BoneInfo;
+    class Animation;
+
     struct SkinnedModelData
     {
         std::string name;
@@ -43,6 +44,7 @@ namespace cologne
         glm::vec3 aabb_min = glm::vec3(std::numeric_limits<float>::max());
         glm::vec3 aabb_max = glm::vec3(std::numeric_limits<float>::min());
         std::unordered_map<std::string, BoneInfo> bone_map;
+        std::vector<Animation> animations;
         int bone_count = 0;
         uint32_t material_index;
     };

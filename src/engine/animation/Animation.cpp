@@ -3,7 +3,6 @@
 #include "BoneAnimationData.h"
 #include "../util/Util.h"
 
-#include "assimp/postprocess.h"
 #include "assimp/scene.h"
 #include "../renderer/types/SkinnedModel.h"
 //
@@ -11,16 +10,17 @@
 //
 namespace cologne
 {
-
-    Animation::Animation(const aiAnimation *animation, const aiScene* scene, SkinnedModel &model)
+    Animation::Animation(const aiAnimation *animation, const aiScene *scene,
+                         std::unordered_map<std::string, BoneInfo> &bone_map, int &bone_count)
     {
+        _name = animation->mName.C_Str();
         _duration = static_cast<float>(animation->mDuration);
         _ticks_per_second = static_cast<int>(animation->mTicksPerSecond);
         read_bone_hierarchy(_root_node, scene->mRootNode);
-        read_missing_bones(animation, model);
+        read_missing_bones(animation, bone_map, bone_count);
     }
 
-    BoneAnimationData * Animation::find_bone(const std::string &name)
+    BoneAnimationData *Animation::find_bone(const std::string &name)
     {
         if (_bone_data_map.contains(name))
         {
@@ -39,17 +39,23 @@ namespace cologne
         return _duration;
     }
 
-    Node & Animation::get_root()
+    Node &Animation::get_root()
     {
         return _root_node;
     }
 
-    void Animation::read_missing_bones(const aiAnimation *animation, SkinnedModel &model)
+    std::string &Animation::get_name()
+    {
+        return _name;
+    }
+
+    void Animation::read_missing_bones(const aiAnimation *animation,
+                                       std::unordered_map<std::string, BoneInfo> &bone_map, int &bone_count)
     {
         int size = animation->mNumChannels;
 
-        auto& model_bone_info = model._bone_info_map;
-        auto& count = model._bone_count;
+        auto &model_bone_info = bone_map;
+        auto &count = bone_count;
 
         for (int i = 0; i < size; i++)
         {
@@ -64,7 +70,7 @@ namespace cologne
                 count++;
             }
             _bone_data_map.insert(std::make_pair(bone_name,
-                BoneAnimationData(bone_name, model_bone_info[bone_name].id, channel)));
+                                                 BoneAnimationData(bone_name, model_bone_info[bone_name].id, channel)));
         }
 
         _bone_info_map = model_bone_info;
@@ -90,6 +96,4 @@ namespace cologne
             dest.children.push_back(node);
         }
     }
-
-
 }

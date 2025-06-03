@@ -10,6 +10,7 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 #include "assimp/Importer.hpp"
+#include <filesystem>
 
 namespace cologne::FileUtil
 {
@@ -31,7 +32,7 @@ namespace cologne::FileUtil
                                           std::unordered_map<std::string, BoneInfo> &bone_map, int &bone_counter,
                                           const aiMesh *mesh);
 
-    Animation import_animation(SkinnedModel& model);
+    Animation import_animation(SkinnedModel &model);
 
     void process_materials(std::vector<Material> &mats, const aiScene *scene);
 
@@ -274,24 +275,6 @@ namespace cologne::FileUtil
     }
 
 
-    std::vector<Animation> import_animations(const std::string &path, SkinnedModel& model)
-    {
-        std::vector<Animation> result;
-        Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(path, 0);
-        if (!scene || !scene->mRootNode)
-        {
-            LOG_ERROR("ASSIMP ERROR: %s", importer.GetErrorString());
-            return result;
-        }
-
-        for (size_t i = 0; i < scene->mNumAnimations; i++)
-        {
-            result.emplace_back(scene->mAnimations[i], scene, model);
-        }
-        return result;
-    }
-
     SkinnedModelData import_skinned_model(const std::string &path)
     {
         SkinnedModelData result_data;
@@ -312,6 +295,12 @@ namespace cologne::FileUtil
             result_data.aabb_max = glm::max(result_data.aabb_max, mesh.aabb_max);
             result_data.aabb_min = glm::min(result_data.aabb_min, mesh.aabb_min);
         }
+
+        for (size_t i = 0; i < scene->mNumAnimations; i++)
+        {
+            result_data.animations.emplace_back(scene->mAnimations[i], scene,
+                result_data.bone_map, result_data.bone_count);
+        }
         importer.FreeScene();
         LOG_INFO("Loaded skinned model with %d meshes:  %d bones", result_data.meshes.size(), result_data.bone_count);
         return result_data;
@@ -323,6 +312,46 @@ namespace cologne::FileUtil
         std::string filename = (pos == std::string::npos) ? path : path.substr(pos + 1);
         pos = filename.find_last_of('.');
         return (pos != std::string::npos) ? filename.substr(0, pos) : filename;
+    }
+
+    std::string get_full_path(const std::filesystem::directory_entry &entry)
+    {
+        return entry.path().string();
+    }
+
+    std::string get_file_extension(const std::filesystem::directory_entry &entry)
+    {
+        return entry.path().extension().string().substr(1);
+    }
+
+    std::string get_file_name_without_extension(const std::filesystem::directory_entry &entry)
+    {
+        return entry.path().stem().string();
+    }
+
+    std::vector<FileInfo> iterate_directory(const std::string &directory, const std::vector<std::string> &extensions)
+    {
+        std::vector<FileInfo> result;
+        if (!std::filesystem::exists(directory))
+        {
+            return result;
+        }
+
+        auto iter = std::filesystem::directory_iterator(directory);
+        for (const auto &entry: iter)
+        {
+            if (!std::filesystem::is_regular_file(entry)) continue;
+
+            FileInfo info = {
+                get_full_path(entry), get_file_name_without_extension(entry), get_file_extension(entry), directory
+            };
+
+            if (extensions.empty() || std::find(extensions.begin(), extensions.end(), info.ext) != extensions.end())
+            {
+                result.push_back(info);
+            }
+        }
+        return result;
     }
 
     void process_skinned_node(std::vector<SkinnedMeshData> &meshes, std::unordered_map<std::string, BoneInfo> &bone_map,

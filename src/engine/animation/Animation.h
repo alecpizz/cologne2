@@ -21,21 +21,34 @@ namespace cologne
     class Animation
     {
         friend class Animator;
+
     public:
         Animation() = default;
-        Animation(const aiAnimation* animation, const aiScene* scene, SkinnedModel& model);
-        BoneAnimationData* find_bone(const std::string& name);
+
+        Animation(const aiAnimation *animation, const aiScene *scene,
+                  std::unordered_map<std::string, BoneInfo> &bone_map, int &bone_count);
+
+        BoneAnimationData *find_bone(const std::string &name);
+
         float get_ticks_per_second() const;
+
         float get_duration() const;
-        Node& get_root();
+
+        Node &get_root();
+
+        std::string &get_name();
+
+        void read_missing_bones(const aiAnimation *animation, std::unordered_map<std::string, BoneInfo> &bone_map,
+                                int &bone_count);
+
     private:
-        void read_missing_bones(const aiAnimation* animation, SkinnedModel& model);
-        void read_bone_hierarchy(Node& dest, const aiNode* src);
+        void read_bone_hierarchy(Node &dest, const aiNode *src);
+
         std::unordered_map<std::string, BoneAnimationData> _bone_data_map;
         std::unordered_map<std::string, BoneInfo> _bone_info_map;
+        std::string _name;
         float _duration = 0.0f;
         int _ticks_per_second = 0;
         Node _root_node;
     };
-
 }

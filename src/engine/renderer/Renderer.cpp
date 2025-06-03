@@ -26,8 +26,8 @@ namespace cologne
 
     std::shared_ptr<DebugRenderer> debug_renderer = nullptr;
     std::shared_ptr<TextRenderer> text_renderer = nullptr;
-    std::unordered_map<std::string, Shader> shaders = std::unordered_map<std::string,
-        Shader>();
+    std::unordered_map<std::string, Shader> shaders = std::unordered_map<std::string,Shader>();
+    std::unordered_map<std::string, FrameBuffer> framebuffers = std::unordered_map<std::string, FrameBuffer>();
     std::vector<Light> lights;
 
     void Renderer::init_shaders()
@@ -66,8 +66,17 @@ namespace cologne
         shaders["particle_render"] = Shader(RESOURCES_PATH "shaders/particle_render.vert",
                                             RESOURCES_PATH "shaders/particle_render.frag");
         shaders["particle_sim"] = Shader(RESOURCES_PATH "shaders/particle_sim.comp");
+    }
 
 
+    void Renderer::init_framebuffers()
+    {
+        framebuffers["gbuffer"] = FrameBuffer();
+        framebuffers["voxel_front"] = FrameBuffer();
+        framebuffers["voxel_back"] = FrameBuffer();
+        framebuffers["output"] = FrameBuffer();
+        framebuffers["dir_shadow"] = FrameBuffer();
+        framebuffers["output"] = FrameBuffer();
     }
 
     void Renderer::add_light(Light light)
@@ -76,20 +85,25 @@ namespace cologne
         size_t light_idx = lights.size() - 1;
         const auto lit_shader = get_shader_by_name("lit");
         lit_shader->bind();
-        lit_shader->set_vec3(std::string("lights[" + std::to_string(light_idx) + "].position").c_str(),
+        lit_shader->set_vec3(std::string("lights[" + std::to_string(light_idx) + "].position"),
                             (lights[light_idx].position));
-        lit_shader->set_vec3(std::string("lights[" + std::to_string(light_idx) + "].color").c_str(),
+        lit_shader->set_vec3(std::string("lights[" + std::to_string(light_idx) + "].color"),
                             (lights[light_idx].color));
-        lit_shader->set_float(std::string("lights[" + std::to_string(light_idx) + "].radius").c_str(),
+        lit_shader->set_float(std::string("lights[" + std::to_string(light_idx) + "].radius"),
                              lights[light_idx].radius);
-        lit_shader->set_int(std::string("lights[" + std::to_string(light_idx) + "].type").c_str(),
+        lit_shader->set_int(std::string("lights[" + std::to_string(light_idx) + "].type"),
                            lights[light_idx].type);
-        lit_shader->set_float(std::string("lights[" + std::to_string(light_idx) + "].strength").c_str(),
+        lit_shader->set_float(std::string("lights[" + std::to_string(light_idx) + "].strength"),
                              lights[light_idx].strength);
-        lit_shader->set_vec3(std::string("lights[" + std::to_string(light_idx) + "].direction").c_str(),
+        lit_shader->set_vec3(std::string("lights[" + std::to_string(light_idx) + "].direction"),
                             (lights[light_idx].direction));
         lit_shader->set_int("num_lights", lights.size());
         voxelize_scene();
+    }
+
+    void Renderer::submit_render_item(RenderItem item)
+    {
+        _render_items.emplace_back(item);
     }
 
     void Renderer::update_lights(Shader &shader)
@@ -111,6 +125,17 @@ namespace cologne
                             (lights[i].direction));
         }
         shader.set_int("num_lights", lights.size());
+    }
+
+    FrameBuffer * Renderer::get_framebuffer_by_name(const char *name)
+    {
+        const auto n = std::string(name);
+        if (!framebuffers.contains(n))
+        {
+            LOG_ERROR("Framebuffer %s not found!", name);
+            return nullptr;
+        }
+        return &framebuffers[n];
     }
 
     Renderer::~Renderer()
@@ -185,10 +210,11 @@ namespace cologne
         indirect_pass();
         lit_pass();
         skybox_pass();
-        _output_fbo.blit_to_default_frame_buffer("color", 0, 0,
+        auto fbo = get_framebuffer_by_name("output");
+        fbo->blit_to_default_frame_buffer("color", 0, 0,
                                                  Engine::get_window()->get_width(), Engine::get_window()->get_height(),
                                                  GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        _output_fbo.release();
+        fbo->release();
         draw_fps();
         debug_voxel_pass();
         debug_renderer->present();
@@ -200,9 +226,9 @@ namespace cologne
         //regen framebuffers here
         init_gbuffer();
         init_indirect();
-        _voxel_back_fbo.resize(width, height);
-        _voxel_front_fbo.resize(width, height);
-        _output_fbo.resize(width, height);
+        get_framebuffer_by_name("output")->resize(width, height);
+        get_framebuffer_by_name("voxel_back")->resize(width, height);
+        get_framebuffer_by_name("voxel_front")->resize(width, height);
         render_scene(*Engine::get_scene());
     }
 
@@ -263,13 +289,8 @@ namespace cologne
         Engine::get_debug_ui()->add_bool_entry("Voxel Debug Visuals", _voxel_debug_visuals);
         Engine::get_debug_ui()->add_bool_entry("Indirect Lighting", _apply_indirect_lighting);
         Engine::get_debug_ui()->add_vec3_entry("Voxel Offset", _voxel_data.voxel_offset);
-    }
-
-    Renderer::Renderer()
-    {
-        DebugScope scope("initialization");
-        init();
         init_shaders();
+        init_framebuffers();
         init_voxels();
         init_indirect();
         init_gbuffer();
@@ -287,5 +308,11 @@ namespace cologne
                         LightType::Point));
         init_shadow();
         voxelize_scene();
+    }
+
+    Renderer::Renderer()
+    {
+        DebugScope scope("initialization");
+        init();
     }
 }

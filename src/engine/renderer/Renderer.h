@@ -2,6 +2,7 @@
 #include "engine/renderer/types/Light.h"
 #include "engine/scene/Scene.h"
 #include "types/FrameBuffer.h"
+#include "engine/renderer/types/RenderItem.h"
 
 
 namespace cologne
@@ -39,6 +40,8 @@ namespace cologne
         void window_resized(uint32_t width, uint32_t height);
 
         void add_light(Light light);
+
+        void submit_render_item(RenderItem item);
 
         void reload_shaders();
 
@@ -82,6 +85,8 @@ namespace cologne
 
         void skybox_pass();
 
+        void init_framebuffers();
+
         void init_voxels();
 
         void init_indirect();
@@ -100,6 +105,11 @@ namespace cologne
 
         void update_lights(Shader &shader);
 
+        FrameBuffer* get_framebuffer_by_name(const char* name);
+
+        std::vector<RenderItem> _render_items;
+
+        //Textures
         uint32_t _shadow_depth;
         uint32_t _voxel_texture;
         uint32_t _indirect_texture;
@@ -107,14 +117,11 @@ namespace cologne
         uint32_t _env_irradiance;
         uint32_t _env_prefilter;
         uint32_t _env_brdf;
+        //state
         bool _apply_indirect_lighting = true;
         bool _voxel_debug_visuals = false;
-        VoxelData _voxel_data;
-        FrameBuffer _gbuffer_fbo;
-        FrameBuffer _voxel_front_fbo;
-        FrameBuffer _voxel_back_fbo;
-        FrameBuffer _output_fbo;
-        FrameBuffer _dir_shadow_fbo;
+        //misc
         glm::mat4 _dir_light_space;
+        VoxelData _voxel_data;
     };
 }

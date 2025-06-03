@@ -32,18 +32,20 @@ namespace cologne
         glBindTexture(GL_TEXTURE_3D, 0);
         delete[] data;
 
-        _voxel_back_fbo.create("voxel cube back", Engine::get_window()->get_width(),
+        auto voxel_back_fbo = get_framebuffer_by_name("voxel_back");
+        auto voxel_front_fbo = get_framebuffer_by_name("voxel_back");
+        voxel_back_fbo->create("voxel cube back", Engine::get_window()->get_width(),
                                Engine::get_window()->get_height());
-        _voxel_back_fbo.create_attachment("color", GL_RGBA16F, GL_NEAREST, GL_NEAREST);
-        _voxel_front_fbo.create("voxel cube front", Engine::get_window()->get_width(),
+        voxel_back_fbo->create_attachment("color", GL_RGBA16F, GL_NEAREST, GL_NEAREST);
+        voxel_front_fbo->create("voxel cube front", Engine::get_window()->get_width(),
                                 Engine::get_window()->get_height());
-        _voxel_front_fbo.create_attachment("color", GL_RGBA16F, GL_NEAREST, GL_NEAREST);
+        voxel_front_fbo->create_attachment("color", GL_RGBA16F, GL_NEAREST, GL_NEAREST);
         Engine::get_debug_ui()->add_image_entry("Voxel cube front",
-                                                _voxel_front_fbo.get_color_attachment_handle_by_name("color"),
+                                                voxel_front_fbo->get_color_attachment_handle_by_name("color"),
                                                 glm::vec2(Engine::get_window()->get_width(),
                                                           Engine::get_window()->get_height()));
         Engine::get_debug_ui()->add_image_entry("Voxel cube back",
-                                                _voxel_back_fbo.get_color_attachment_handle_by_name("color"),
+                                                voxel_back_fbo->get_color_attachment_handle_by_name("color"),
                                                 glm::vec2(Engine::get_window()->get_width(),
                                                           Engine::get_window()->get_height()));
         Engine::get_debug_ui()->add_button("Voxelize Scene", [&]()
@@ -73,15 +75,17 @@ namespace cologne
         world_pos_shader->set_mat4("model", (model));
         world_pos_shader->set_vec3("camera_position", (Engine::get_camera()->get_position()));
 
+        auto voxel_back_fbo = get_framebuffer_by_name("voxel_back");
+        auto voxel_front_fbo = get_framebuffer_by_name("voxel_front");
         glCullFace(GL_FRONT);
-        _voxel_back_fbo.bind();
-        _voxel_back_fbo.set_viewport();
+        voxel_back_fbo->bind();
+        voxel_back_fbo->set_viewport();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         render_cube();
 
         glCullFace(GL_BACK);
-        _voxel_front_fbo.bind();
-        _voxel_front_fbo.set_viewport();
+        voxel_front_fbo->bind();
+        voxel_front_fbo->set_viewport();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         render_cube();
 
@@ -102,8 +106,8 @@ namespace cologne
         glBindTexture(GL_TEXTURE_3D, _voxel_texture);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glBindTextureUnit(0, _voxel_texture);
-        glBindTextureUnit(1, _voxel_back_fbo.get_color_attachment_handle_by_name("color"));
-        glBindTextureUnit(2, _voxel_front_fbo.get_color_attachment_handle_by_name("color"));
+        glBindTextureUnit(1, voxel_back_fbo->get_color_attachment_handle_by_name("color"));
+        glBindTextureUnit(2, voxel_front_fbo->get_color_attachment_handle_by_name("color"));
         render_quad();
 
         glEnable(GL_DEPTH_TEST);
@@ -129,7 +133,7 @@ namespace cologne
         update_lights(*shader);
         shader->set_mat4("lightSpaceMatrix", (_dir_light_space));
         shader->set_mat4("projection", (glm::ortho(-1.0f, 1.0f, -1.0f,
-                                                                 1.0f, -1.0f, 1.0f)));
+                                                   1.0f, -1.0f, 1.0f)));
         auto size = Engine::get_scene()->get_bounds().size();
         const float offset = 2.0f - 0.1f;
         glm::vec3 scale = glm::vec3(offset / fabs(size.x), offset / fabs(size.y), offset / fabs(size.z));
@@ -140,12 +144,12 @@ namespace cologne
         shader->set_vec3("grid_min", (min));
         shader->set_vec3("grid_max", (max));
         glBindImageTexture(6, _voxel_texture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
-        glBindTextureUnit(8, _dir_shadow_fbo.get_depth_attachment_handle());
+        glBindTextureUnit(8, get_framebuffer_by_name("dir_shadow")->get_depth_attachment_handle());
         // glBindTextureUnit(7, _shadow_depth);
         for (int idx = 0; idx < 3; idx++)
         {
             shader->set_int("render_axis", idx);
-            for (auto & model : scene->get_models())
+            for (auto &model: scene->get_models())
             {
                 if (!model.get_active())
                 {
