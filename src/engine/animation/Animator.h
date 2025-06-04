@@ -8,12 +8,14 @@ namespace cologne
 {
     struct Node;
     class Animation;
-    class Animator
+    class AnimatorComponent
     {
     public:
-        explicit Animator(Animation& anim);
+        explicit AnimatorComponent(Animation& anim);
+        explicit AnimatorComponent(size_t idx);
         void update_animation(float dt);
         void play_animation(Animation& anim);
+        void play_animation(size_t idx);
         void calculate_bone_transform( Node& node, glm::mat4 parent_transform);
         std::vector<glm::mat4>& get_bones();
     private:

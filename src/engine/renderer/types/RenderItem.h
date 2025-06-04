@@ -14,6 +14,7 @@ namespace cologne
         Model *model = nullptr;
         TransformComponent transform = {};
         bool gi_only = true;
+        RenderItem() = default;
         RenderItem(Model *m, TransformComponent tr, bool gi)
             : model(m), transform(tr), gi_only(gi)
         {

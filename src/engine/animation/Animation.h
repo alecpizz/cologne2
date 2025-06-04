@@ -20,7 +20,7 @@ namespace cologne
 
     class Animation
     {
-        friend class Animator;
+        friend class AnimatorComponent;
 
     public:
         Animation() = default;

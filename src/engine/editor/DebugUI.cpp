@@ -100,7 +100,6 @@ namespace cologne
         size_t counter = 0;
         if (ImGui::CollapsingHeader("Entities"))
         {
-            ImGui::BeginChild("Entities", ImVec2(0, 800));
             for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
             {
                 Entity e = {entity, Engine::get_scene()};
@@ -129,7 +128,6 @@ namespace cologne
                 // }
                 ImGui::PopID();
             }
-            ImGui::EndChild();
         }
 
         if (ImGui::Button("Hot reload shaders"))

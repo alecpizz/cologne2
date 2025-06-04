@@ -42,7 +42,7 @@ namespace cologne
 
         Entity man = create_entity("man");
         man.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("man"));
-
+        man.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("Idle"));
         re_calculate_bounds();
         // auto& skinned_model = add_skinned_model(RESOURCES_PATH "python/deagle.glb");
         // skinned_model.set_cast_shadows(false);
@@ -89,7 +89,12 @@ namespace cologne
         }
 
         //game logic here
-
+        auto animators = _registry.view<AnimatorComponent>();
+        for (auto entity : animators)
+        {
+            auto& animator = _registry.get<AnimatorComponent>(entity);
+            animator.update_animation(delta_time);
+        }
         //submit draw calls
         auto view = _registry.view<ModelComponent, TransformComponent, ActiveComponent>();
         for (auto entity: view)
@@ -115,8 +120,16 @@ namespace cologne
             {
                 continue;
             }
+            SkinnedRenderItem item;
+            if (_registry.all_of<AnimatorComponent>(entity))
+            {
+                auto& animator = _registry.get<AnimatorComponent>(entity);
+                item.bones = animator.get_bones();
+            }
             SkinnedModel *skinned_model = AssetManager::get_skinned_model_by_index(m.id);
-            Engine::get_renderer()->submit_skinned_render_item(SkinnedRenderItem(skinned_model, tr));
+            item.skinned_model = skinned_model;
+            item.transform = tr;
+            Engine::get_renderer()->submit_skinned_render_item(item);
         }
         //update logic
 

@@ -3,22 +3,34 @@
 //
 
 #include "Animator.h"
+
+#include <engine/asset_manager/AssetManager.h>
+
 #include "Animation.h"
 #include "BoneAnimationData.h"
 
 namespace cologne
 {
-    Animator::Animator(Animation &anim) : _current_animation(anim)
+    AnimatorComponent::AnimatorComponent(Animation &anim) : _current_animation(anim)
     {
         _current_time = 0.0f;
-        _bone_mats.reserve(100);
-        for (int i = 0; i < 100; i++)
+        _bone_mats.reserve(200);
+        for (int i = 0; i < 200; i++)
         {
             _bone_mats.emplace_back(1.0f);
         }
     }
 
-    void Animator::update_animation(float dt)
+    AnimatorComponent::AnimatorComponent(size_t idx) : _current_animation(*AssetManager::get_animation_by_index(idx))
+    {
+        _bone_mats.reserve(200);
+        for (int i = 0; i < 200; i++)
+        {
+            _bone_mats.emplace_back(1.0f);
+        }
+    }
+
+    void AnimatorComponent::update_animation(float dt)
     {
         if (&_current_animation)
         {
@@ -28,13 +40,19 @@ namespace cologne
         }
     }
 
-    void Animator::play_animation(Animation &anim)
+    void AnimatorComponent::play_animation(Animation &anim)
     {
         _current_animation = anim;
         _current_time = 0.0f;
     }
 
-    void Animator::calculate_bone_transform(Node &node, glm::mat4 parent_transform)
+    void AnimatorComponent::play_animation(size_t idx)
+    {
+        _current_animation = *AssetManager::get_animation_by_index(idx);
+        _current_time = 0.0f;
+    }
+
+    void AnimatorComponent::calculate_bone_transform(Node &node, glm::mat4 parent_transform)
     {
         std::string node_name = node.name;
         glm::mat4 node_transform = node.transform;
@@ -61,7 +79,7 @@ namespace cologne
         }
     }
 
-    std::vector<glm::mat4> &Animator::get_bones()
+    std::vector<glm::mat4> &AnimatorComponent::get_bones()
     {
         return _bone_mats;
     }
