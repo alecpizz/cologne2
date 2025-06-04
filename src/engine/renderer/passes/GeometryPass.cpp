@@ -56,7 +56,7 @@ namespace cologne
         fbo->release();
     }
 
-    void Renderer::geometry_pass(Scene &scene)
+    void Renderer::geometry_pass()
     {
         DebugScope scope("Renderer::geometry_pass");
 
@@ -95,14 +95,17 @@ namespace cologne
         shader->set_mat4("projection", Engine::get_camera()->get_projection_matrix());
         shader->set_mat4("view", Engine::get_camera()->get_view_matrix());
 
-        for (auto &[skinned_model, tr]: _skinned_render_items)
+        for (auto &[skinned_model, tr, bones]: _skinned_render_items)
         {
             shader->set_mat4("model", tr.get_mat4());
-            if (scene->get_animator_by_name(skinned_model->get_name()) != nullptr)
+            if (!bones.empty())
             {
-                auto &animator = scene->get_animator_by_name(skinned_model->get_name());
-                auto &bones = animator.get_bones();
                 shader->set_mat4("bone_matrices", bones);
+            }
+            else
+            {
+                static std::vector<glm::mat4> empty_bones (200, glm::mat4(1.0f));
+                shader->set_mat4("bone_matrices", empty_bones);
             }
             for (size_t j = 0; j < skinned_model->get_num_meshes(); j++)
             {
@@ -124,7 +127,8 @@ namespace cologne
         shader->set_mat4("projection", Engine::get_camera()->get_projection_matrix());
         shader->set_mat4("view", Engine::get_camera()->get_view_matrix());
 
-        for (auto &particle: scene.get_particles())
+        //GET ME OUTTA HERE!
+        for (auto &particle: Engine::get_scene()->get_particles())
         {
             particle.render();
         }

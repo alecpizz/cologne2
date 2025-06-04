@@ -129,10 +129,6 @@ namespace cologne
         shadowCascadeLevels.push_back(shadow_far / 25.0f);
         shadowCascadeLevels.push_back(shadow_far / 10.0f);
         shadowCascadeLevels.push_back(shadow_far / 2.0f);
-        Engine::get_debug_ui()->add_float_entry("ZMulti", zMulti);
-        Engine::get_debug_ui()->add_float_entry("Shadow Far Plane", shadow_far);
-        Engine::get_debug_ui()->add_float_entry("Shadow near Plane", shadow_near);
-
 
         glGenFramebuffers(1, &shadow_fbo);
         glGenTextures(1, &_shadow_depth);
@@ -192,7 +188,7 @@ namespace cologne
     }
 
 
-    void Renderer::shadow_pass(Scene &scene)
+    void Renderer::shadow_pass()
     {
         DebugScope scope("Renderer::shadow_pass");
         auto light = get_directional_light();
@@ -216,22 +212,16 @@ namespace cologne
         glCullFace(GL_FRONT);
         glEnable(GL_DEPTH_CLAMP);
 
-        for (auto& model : scene.get_models())
+        for (auto& item : _render_items)
         {
-            if (!model.get_active())
+            if (!item.model->get_cast_shadows())
             {
                 continue;
             }
-
-            if (!model.get_cast_shadows())
+            shader->set_mat4("model", item.transform.get_mat4());
+            for (auto& mesh : item.model->get_meshes())
             {
-                continue;
-            }
-            shader->set_mat4("model", (model.get_transform().get_model_matrix()));
-            for (size_t j = 0; j < model.get_num_meshes(); j++)
-            {
-                Mesh mesh = model.get_meshes()[j];
-                Material mat = model.get_materials()[mesh.get_material_index()];
+                Material mat = item.model->get_materials()[mesh.get_material_index()];
                 mat.albedo.bind(ALBEDO_INDEX);
                 mesh.draw();
             }
@@ -241,30 +231,27 @@ namespace cologne
         shader->bind();
         shader->set_vec3("light.direction", (light.direction));
 
-        for (size_t i = 0; i < scene.get_skinned_models().size(); i++)
+        for (auto& item : _skinned_render_items)
         {
-            auto& model = scene.get_skinned_models().at(i);
-            if (!model.get_active())
+            if (!item.skinned_model->get_cast_shadows())
             {
                 continue;
             }
-
-            if (!model.get_cast_shadows())
+            shader->set_mat4("model", item.transform.get_mat4());
+            if (!item.bones.empty())
             {
-                continue;
+                shader->set_mat4("bone_matrices", item.bones);
             }
-            shader->set_mat4("model", (model.get_transform().get_model_matrix()));
-            if (scene.get_animators().contains(model.get_name()))
+            else
             {
-                auto& animator = scene.get_animators().at(model.get_name());
-                auto& bones = animator.get_bones();
-                shader->set_mat4("bone_matrices", bones);
+                static std::vector<glm::mat4> empty_bones (200, glm::mat4(1.0f));
+                shader->set_mat4("bone_matrices", empty_bones);
             }
 
-            for (size_t j = 0; j < model.get_num_meshes(); j++)
+            for (size_t j = 0; j < item.skinned_model->get_num_meshes(); j++)
             {
-                auto& mesh = model.get_meshes()[j];
-                Material& mat = model.get_materials()[mesh.get_material_index()];
+                auto& mesh = item.skinned_model->get_meshes()[j];
+                Material& mat = item.skinned_model->get_materials()[mesh.get_material_index()];
                 mat.albedo.bind(ALBEDO_INDEX);
                 mesh.draw();
             }
@@ -288,17 +275,12 @@ namespace cologne
         _dir_light_space = light_space;
         shader->set_mat4("lightSpaceMatrix", (_dir_light_space));
 
-        for (auto& model : scene.get_models())
+        for (auto& item : _render_items)
         {
-            if (!model.get_active())
+            shader->set_mat4("model", item.transform.get_mat4());
+            for (auto& mesh : item.model->get_meshes())
             {
-                continue;
-            }
-            shader->set_mat4("model", (model.get_transform().get_model_matrix()));
-            for (size_t j = 0; j < model.get_num_meshes(); j++)
-            {
-                Mesh mesh = model.get_meshes()[j];
-                Material mat = model.get_materials()[mesh.get_material_index()];
+                Material mat = item.model->get_materials()[mesh.get_material_index()];
                 mat.albedo.bind(ALBEDO_INDEX);
                 mesh.draw();
             }

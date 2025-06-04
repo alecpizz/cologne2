@@ -5,6 +5,7 @@
 #include "DebugUI.h"
 
 #include <engine/core/Engine.h>
+#include <engine/scene/Entity.h>
 
 #include "engine/imguiThemes.h"
 
@@ -48,40 +49,32 @@ namespace cologne
         std::string name;
     };
 
-    struct DebugUI::Impl
-    {
-        std::vector<FloatCmd> float_cmds;
-        std::vector<IntCmd> int_cmds;
-        std::vector<Vec3Cmd> vec3_cmds;
-        std::vector<ImageCmd> image_cmds;
-        std::vector<BoolCmd> bool_cmds;
-        std::vector<ButtonCmd> button_cmds;
+    std::vector<FloatCmd> float_cmds;
+    std::vector<IntCmd> int_cmds;
+    std::vector<Vec3Cmd> vec3_cmds;
+    std::vector<ImageCmd> image_cmds;
+    std::vector<BoolCmd> bool_cmds;
+    std::vector<ButtonCmd> button_cmds;
 
-        void init()
-        {
-            ImGui::CreateContext();
-            imguiThemes::green();
-            ImGuiIO &io = ImGui::GetIO();
-            (void) io;
-            io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-            io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
-            io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
-
-
-            ImGuiStyle &style = ImGui::GetStyle();
-            if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-            {
-                //style.WindowRounding = 0.0f;
-                style.Colors[ImGuiCol_WindowBg].w = 0.f;
-                style.Colors[ImGuiCol_DockingEmptyBg].w = 0.f;
-            }
-        }
-    };
 
     DebugUI::DebugUI()
     {
-        _impl = new Impl();
-        _impl->init();
+        ImGui::CreateContext();
+        imguiThemes::green();
+        ImGuiIO &io = ImGui::GetIO();
+        (void) io;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
+
+
+        ImGuiStyle &style = ImGui::GetStyle();
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            //style.WindowRounding = 0.0f;
+            style.Colors[ImGuiCol_WindowBg].w = 0.f;
+            style.Colors[ImGuiCol_DockingEmptyBg].w = 0.f;
+        }
     }
 
     DebugUI::~DebugUI()
@@ -89,7 +82,6 @@ namespace cologne
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplSDL3_Shutdown();
         ImGui::DestroyContext();
-        delete _impl;
     }
 
     void DebugUI::clear()
@@ -105,70 +97,39 @@ namespace cologne
         ImGui::Begin("cologne window");
 
         ImGui::Text("FPS %f", ImGui::GetIO().Framerate);
-        size_t model_count = Engine::get_scene()->get_models().size();
         size_t counter = 0;
-        for (size_t i = 0; i < model_count; i++)
+        if (ImGui::CollapsingHeader("Entities"))
         {
-            ImGui::PushID(counter++);
-            auto& model = Engine::get_scene()->get_models().at(i);
-            glm::vec3 scale = model.get_transform().scale;
-            glm::quat rotation = model.get_transform().rotation;
-            glm::vec3 translation = model.get_transform().translation;
-
-            glm::vec3 euler = glm::degrees(glm::eulerAngles(rotation));
-
-            ImGui::LabelText("%s", model.get_name());
-
-            if (ImGui::DragFloat3("Position", glm::value_ptr(translation)))
+            ImGui::BeginChild("Entities", ImVec2(0, 800));
+            for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
             {
-                model.get_transform().set_translation(translation);
-            }
-            if (ImGui::DragFloat3("Euler", glm::value_ptr(euler)))
-            {
-            }
-            if (ImGui::DragFloat3("Scale", glm::value_ptr(scale)))
-            {
-                model.get_transform().set_scale(scale);
-            }
+                Entity e = {entity, Engine::get_scene()};
+                if (e.has_component<StaticColliderComponent>())
+                {
+                    continue;
+                }
+                ImGui::PushID(counter++);
+                auto &tr = e.get_component<TransformComponent>();
+                auto &tag = e.get_component<TagComponent>();
+                auto &active = e.get_component<ActiveComponent>();
 
-            bool active = model.get_active();
-            if (ImGui::Checkbox("Active", &active))
-            {
-                model.set_active(active);
-            }
-            ImGui::PopID();
-        }
+                ImGui::Text("%s", tag.tag.c_str());
+                ImGui::Checkbox("Active", &active.active);
 
-        for (size_t i = 0; i < Engine::get_scene()->get_skinned_models().size(); i++)
-        {
-            ImGui::PushID(counter++);
-            auto& model = Engine::get_scene()->get_skinned_models().at(i);
-            glm::vec3 scale = model.get_transform().scale;
-            glm::quat rotation = model.get_transform().rotation;
-            glm::vec3 translation = model.get_transform().translation;
+                build_transform_entry(tr);
 
-            glm::vec3 euler = glm::degrees(glm::eulerAngles(rotation));
-
-            ImGui::LabelText("%s", model.get_name().c_str());
-
-            if (ImGui::DragFloat3("Position", glm::value_ptr(translation)))
-            {
-                model.get_transform().set_translation(translation);
+                // if (e.has_component<ModelComponent>())
+                // {
+                //     auto& model = e.get_component<ModelComponent>();
+                // }
+                //
+                // if (e.has_component<SkinnedModelComponent>())
+                // {
+                //     auto& skinned_model = e.get_component<SkinnedModelComponent>();
+                // }
+                ImGui::PopID();
             }
-            if (ImGui::DragFloat3("Euler", glm::value_ptr(euler)))
-            {
-            }
-            if (ImGui::DragFloat3("Scale", glm::value_ptr(scale)))
-            {
-                model.get_transform().set_scale(scale);
-            }
-
-            bool active = model.get_active();
-            if (ImGui::Checkbox("Active", &active))
-            {
-                model.set_active(active);
-            }
-            ImGui::PopID();
+            ImGui::EndChild();
         }
 
         if (ImGui::Button("Hot reload shaders"))
@@ -176,56 +137,56 @@ namespace cologne
             Engine::get_renderer()->reload_shaders();
         }
 
-        for (size_t i = 0; i < _impl->float_cmds.size(); ++i)
+        for (size_t i = 0; i < float_cmds.size(); ++i)
         {
             ImGui::PushID(i);
-            float value = _impl->float_cmds[i].ref;
-            if (ImGui::DragFloat(_impl->float_cmds[i].name.c_str(), &value, 0.005f))
+            float value = float_cmds[i].ref;
+            if (ImGui::DragFloat(float_cmds[i].name.c_str(), &value, 0.005f))
             {
-                _impl->float_cmds[i].ref = value;
+                float_cmds[i].ref = value;
             }
             ImGui::PopID();
         }
 
-        for (size_t i = 0; i < _impl->int_cmds.size(); ++i)
+        for (size_t i = 0; i < int_cmds.size(); ++i)
         {
             ImGui::PushID(i);
-            int32_t value = _impl->int_cmds[i].ref;
-            if (ImGui::DragInt(_impl->int_cmds[i].name.c_str(), &value, 0.005f))
+            int32_t value = int_cmds[i].ref;
+            if (ImGui::DragInt(int_cmds[i].name.c_str(), &value, 0.005f))
             {
-                _impl->int_cmds[i].ref = value;
+                int_cmds[i].ref = value;
             }
             ImGui::PopID();
         }
 
-        for (size_t i = 0; i < _impl->vec3_cmds.size(); i++)
+        for (size_t i = 0; i < vec3_cmds.size(); i++)
         {
             ImGui::PushID(i);
-            glm::vec3 value = _impl->vec3_cmds[i].ref;
-            if (ImGui::DragFloat3(_impl->vec3_cmds[i].name.c_str(), &value[0], 0.005f))
+            glm::vec3 value = vec3_cmds[i].ref;
+            if (ImGui::DragFloat3(vec3_cmds[i].name.c_str(), &value[0], 0.005f))
             {
-                _impl->vec3_cmds[i].ref = value;
+                vec3_cmds[i].ref = value;
             }
             ImGui::PopID();
         }
 
-        for (size_t i = 0; i < _impl->bool_cmds.size(); i++)
+        for (size_t i = 0; i < bool_cmds.size(); i++)
         {
             ImGui::PushID(i);
-            bool value = _impl->bool_cmds[i].ref;
-            if (ImGui::Checkbox(_impl->bool_cmds[i].name.c_str(), &value))
+            bool value = bool_cmds[i].ref;
+            if (ImGui::Checkbox(bool_cmds[i].name.c_str(), &value))
             {
-                _impl->bool_cmds[i].ref = value;
+                bool_cmds[i].ref = value;
             }
             ImGui::PopID();
         }
 
-        for (size_t i = 0; i < _impl->button_cmds.size(); i++)
+        for (size_t i = 0; i < button_cmds.size(); i++)
         {
             ImGui::PushID(i);
-            if (ImGui::Button(_impl->button_cmds[i].name.c_str()))
+            if (ImGui::Button(button_cmds[i].name.c_str()))
             {
-                _impl->button_cmds[i].action();
+                button_cmds[i].action();
             }
             ImGui::PopID();
         }
@@ -233,13 +194,13 @@ namespace cologne
         if (ImGui::CollapsingHeader("Images"))
         {
             ImGui::BeginChild("Images", ImVec2(0, 800));
-            for (size_t i = 0; i < _impl->image_cmds.size(); i++)
+            for (size_t i = 0; i < image_cmds.size(); i++)
             {
                 ImGui::PushID(i);
-                ImGui::Text(_impl->image_cmds[i].name.c_str());
-                ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(_impl->image_cmds[i].id)),
-                             ImVec2(_impl->image_cmds[i].image_size.x / 4,
-                                    _impl->image_cmds[i].image_size.y / 4),
+                ImGui::Text(image_cmds[i].name.c_str());
+                ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(image_cmds[i].id)),
+                             ImVec2(image_cmds[i].image_size.x / 4,
+                                    image_cmds[i].image_size.y / 4),
                              ImVec2(0, 1), ImVec2(1, 0));
                 ImGui::PopID();
             }
@@ -274,8 +235,7 @@ namespace cologne
 
         ImGui::End();
         auto window = SDL_GL_GetCurrentWindow();
-        ImGui::BeginMainMenuBar();
-        {
+        ImGui::BeginMainMenuBar(); {
             if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0))
             {
                 auto delta = ImGui::GetMouseDragDelta(0);
@@ -310,6 +270,17 @@ namespace cologne
         ImGui::EndMainMenuBar();
     }
 
+    void DebugUI::build_transform_entry(TransformComponent &tr)
+    {
+        ImGui::Text("Transform");
+
+        ImGui::DragFloat3("Position", glm::value_ptr(tr.position), 0.01f);
+
+        ImGui::DragFloat4("Rotation", glm::value_ptr(tr.rotation), 0.01f);
+
+        ImGui::DragFloat3("Scale", glm::value_ptr(tr.scale), 0.01f);
+    }
+
     void DebugUI::present()
     {
         if (Engine::get_event_manager()->paused())
@@ -333,31 +304,31 @@ namespace cologne
 
     void DebugUI::add_float_entry(const char *name, float &value)
     {
-        _impl->float_cmds.emplace_back(FloatCmd{value, name});
+        float_cmds.emplace_back(FloatCmd{value, name});
     }
 
     void DebugUI::add_int_entry(const char *name, int &value)
     {
-        _impl->int_cmds.emplace_back(IntCmd{value, name});
+        int_cmds.emplace_back(IntCmd{value, name});
     }
 
     void DebugUI::add_vec3_entry(const char *name, glm::vec3 &value)
     {
-        _impl->vec3_cmds.emplace_back(Vec3Cmd{value, name});
+        vec3_cmds.emplace_back(Vec3Cmd{value, name});
     }
 
     void DebugUI::add_image_entry(const char *name, uint32_t value, const glm::vec2 &image_size)
     {
-        _impl->image_cmds.emplace_back(ImageCmd{value, name, image_size});
+        image_cmds.emplace_back(ImageCmd{value, name, image_size});
     }
 
     void DebugUI::add_bool_entry(const char *name, bool &value)
     {
-        _impl->bool_cmds.emplace_back(BoolCmd{value, name});
+        bool_cmds.emplace_back(BoolCmd{value, name});
     }
 
     void DebugUI::add_button(const char *name, std::function<void()> action)
     {
-        _impl->button_cmds.emplace_back(ButtonCmd{action, name});
+        button_cmds.emplace_back(ButtonCmd{action, name});
     }
 }

@@ -37,7 +37,11 @@ namespace cologne
         }
 
         Entity glowCube = create_entity("glowing cube");
-        glowCube.add_component<ModelComponent>(AssetManager::get_model_by_name("glowCube"), true);
+        glowCube.get_component<TransformComponent>().position = glm::vec3(0.0f, 1.0f, 4.5f);
+        glowCube.add_component<ModelComponent>(AssetManager::get_model_index_by_name("glowCube"), true);
+
+        Entity man = create_entity("man");
+        man.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("man"));
 
         re_calculate_bounds();
         // auto& skinned_model = add_skinned_model(RESOURCES_PATH "python/deagle.glb");
@@ -86,19 +90,12 @@ namespace cologne
 
         //game logic here
 
-
-
-
-
-
-        
-
         //submit draw calls
         auto view = _registry.view<ModelComponent, TransformComponent, ActiveComponent>();
         for (auto entity: view)
         {
             auto [m, tr, active] =
-                view.get<ModelComponent, TransformComponent, ActiveComponent>(entity);
+                    view.get<ModelComponent, TransformComponent, ActiveComponent>(entity);
             //culling step would be here probably? though for GI i dunno. might have to pack into render item
             if (!active)
             {
@@ -112,14 +109,14 @@ namespace cologne
         for (auto entity: view2)
         {
             auto [m, tr, active] =
-                view2.get<SkinnedModelComponent, TransformComponent, ActiveComponent>(entity);
+                    view2.get<SkinnedModelComponent, TransformComponent, ActiveComponent>(entity);
             //culling step would be here probably? though for GI i dunno. might have to pack into render item
             if (!active)
             {
                 continue;
             }
-            SkinnedModel *model = AssetManager::get_skinned_model_by_index(m.id);
-            Engine::get_renderer()->submit_skinned_render_item(SkinnedRenderItem(model, tr));
+            SkinnedModel *skinned_model = AssetManager::get_skinned_model_by_index(m.id);
+            Engine::get_renderer()->submit_skinned_render_item(SkinnedRenderItem(skinned_model, tr));
         }
         //update logic
 

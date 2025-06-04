@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <engine/scene/Components.h>
 
 namespace cologne
 {
@@ -36,8 +37,6 @@ namespace cologne
     private:
         DebugUI();
         void build();
-
-        struct Impl;
-        Impl *_impl;
+        static void build_transform_entry(TransformComponent& tr);
     };
 }

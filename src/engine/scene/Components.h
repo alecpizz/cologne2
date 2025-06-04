@@ -28,13 +28,13 @@ namespace cologne
     struct ModelComponent
     {
         //no clue what i want in here yet lmao, maybe just an id of the list of models? then just load all of da models?
-        uint32_t id = 0;
+        size_t id = 0;
         bool gi_only = false;
     };
 
     struct SkinnedModelComponent
     {
-        uint32_t id = 0;
+        size_t id = 0;
     };
 
     struct TagComponent

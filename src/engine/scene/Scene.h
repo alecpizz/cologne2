@@ -6,9 +6,11 @@
 #include <entt/entt.hpp>
 
 
+
 namespace cologne
 {
     class Entity;
+    class DebugUI;
     class Scene
     {
     public:
@@ -42,5 +44,6 @@ namespace cologne
         std::vector<Particles> _particles;
         entt::registry _registry;
         friend class Entity;
+        friend class DebugUI;
     };
 }

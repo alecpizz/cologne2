@@ -131,7 +131,7 @@ namespace cologne
             Physics::update(et.elapsed);
             _impl->debug_ui->clear();
             _impl->window->clear();
-            _impl->renderer->render_scene(*_impl->scene);
+            _impl->renderer->render_scene();
             _impl->debug_ui->present();
             _impl->window->present();
             et.update();

@@ -35,7 +35,7 @@ namespace cologne
 
         void draw_aabb(glm::mat4 transform, glm::vec3 min, glm::vec3 max, glm::vec3 color);
 
-        void render_scene(Scene &scene);
+        void render_scene();
 
         void window_resized(uint32_t width, uint32_t height);
 
@@ -72,13 +72,13 @@ namespace cologne
 
         void init_shadow();
 
-        void shadow_pass(Scene &scene);
+        void shadow_pass();
 
         void update_shadow(Shader &shader);
 
         void init_gbuffer();
 
-        void geometry_pass(Scene &scene);
+        void geometry_pass();
 
         void lit_pass();
 

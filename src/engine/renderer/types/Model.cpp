@@ -63,10 +63,6 @@ namespace cologne
         _bounds = aabb;
     }
 
-    bool Model::get_active() const
-    {
-        return _active;
-    }
 
     bool Model::get_gi_only() const
     {

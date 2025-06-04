@@ -193,7 +193,7 @@ namespace cologne
                                  glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), .6f);
     }
 
-    void Renderer::render_scene(Scene &scene)
+    void Renderer::render_scene()
     {
         //indirect pass
         //shadow maps
@@ -208,9 +208,9 @@ namespace cologne
         {
             reload_shaders();
         }
-        shadow_pass(scene);
+        shadow_pass();
         voxelize_scene();
-        geometry_pass(scene);
+        geometry_pass();
         indirect_pass();
         lit_pass();
         skybox_pass();

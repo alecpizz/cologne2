@@ -24,5 +24,6 @@ namespace cologne
     {
         SkinnedModel *skinned_model = nullptr;
         TransformComponent transform = {};
+        std::vector<glm::mat4> bones;
     };
 }
