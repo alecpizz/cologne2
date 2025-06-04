@@ -209,7 +209,7 @@ namespace cologne
     {
         _impl = new Impl();
         _impl->init();
-
+        LOG_INFO("Player created!");
     }
 
     Player::~Player()

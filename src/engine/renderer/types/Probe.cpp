@@ -5,7 +5,8 @@
 #include "Probe.h"
 
 #include <engine/core/Engine.h>
-
+#include <engine/renderer/types/RenderItem.h>
+#include <engine/renderer/types/Model.h>
 #include "Shader.h"
 
 namespace cologne
@@ -97,7 +98,7 @@ namespace cologne
         return _position;
     }
 
-    void Probe::bake_geo(Shader& shader)
+    void Probe::bake_geo(Shader& shader, std::vector<RenderItem>& render_items)
     {
         //framebuffer
         uint32_t fbo;
@@ -159,19 +160,18 @@ namespace cologne
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
                                    _depth_handle, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            auto scene = Engine::get_scene();
             shader.set_mat4("view", (capture_views[face]));
-            for (auto& model : scene->get_models())
+            for (auto item : render_items)
             {
-                if (!model.get_active())
+                if (!item.gi_only)
                 {
-                    continue;
+                    continue;;
                 }
-                shader.set_mat4("model", (model.get_transform().get_model_matrix()));
-                for (size_t j = 0; j < model.get_num_meshes(); j++)
+                shader.set_mat4("model", item.transform.get_mat4());
+
+                for (auto& mesh : item.model->get_meshes())
                 {
-                    auto mesh = model.get_meshes()[j];
-                    auto mat = model.get_materials()[mesh.get_material_index()];
+                    auto mat = item.model->get_materials()[mesh.get_material_index()];
                     mat.bind_all();
                     mesh.draw();
                 }

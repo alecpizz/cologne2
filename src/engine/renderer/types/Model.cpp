@@ -13,11 +13,11 @@ namespace cologne
     {
         for (auto& mesh : data.meshes)
         {
-            _meshes.emplace_back(mesh.vertices, mesh.indices, mesh.material_index);
+            _meshes.emplace_back(mesh.vertices, mesh.indices, mesh.material_index, mesh.name);
         }
         _materials = data.materials;
         _bounds = AABB(data.aabb_min, data.aabb_max);
-        _path = data.name;
+        _name = data.name;
     }
 
     Model::~Model()
@@ -39,7 +39,7 @@ namespace cologne
 
     const char *Model::get_name() const
     {
-        return _path.c_str();
+        return _name.c_str();
     }
 
     Material *Model::get_materials()
@@ -48,16 +48,10 @@ namespace cologne
     }
 
 
-    Mesh *Model::get_meshes()
+    std::vector<Mesh>& Model::get_meshes()
     {
-        return _meshes.data();
+        return _meshes;
     }
-
-    uint64_t Model::get_num_meshes() const
-    {
-        return _meshes.size();
-    }
-
 
     void Model::set_active(bool active)
     {

@@ -36,7 +36,7 @@ namespace cologne
 
         Node &get_root();
 
-        std::string &get_name();
+        std::string get_name() const;
 
         void read_missing_bones(const aiAnimation *animation, std::unordered_map<std::string, BoneInfo> &bone_map,
                                 int &bone_count);

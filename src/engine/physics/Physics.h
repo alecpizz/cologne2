@@ -1,5 +1,6 @@
 #pragma once
 #include <engine/renderer/types/Model.h>
+#include <engine/scene/Components.h>
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 
@@ -16,7 +17,7 @@ namespace cologne::Physics
     //TODO: Get these out!
     JPH::PhysicsSystem* get_physics_system();
     JPH::TempAllocator* get_temp_allocator();
-    void create_static_mesh_collider(Transform transform, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
-    void create_static_mesh_collider(Model& model);
+    uint32_t create_static_mesh_collider(TransformComponent transform, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
+    // void create_static_mesh_collider(Model& model);
     void destroy();
 }

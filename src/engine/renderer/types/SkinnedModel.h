@@ -42,7 +42,7 @@ namespace cologne
 
         void set_aabb(AABB aabb);
 
-        std::string& get_name();
+        std::string get_name() const;
 
         bool get_active() const;
 

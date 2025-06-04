@@ -14,6 +14,7 @@ namespace cologne
         _position = position;
         _forward = forward;
         _up = up;
+        LOG_INFO("CREATED CAMERA");
     }
 
     glm::vec3 Camera::get_position() const

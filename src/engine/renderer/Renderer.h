@@ -42,6 +42,7 @@ namespace cologne
         void add_light(Light light);
 
         void submit_render_item(RenderItem item);
+        void submit_skinned_render_item(SkinnedRenderItem item);
 
         void reload_shaders();
 
@@ -108,6 +109,7 @@ namespace cologne
         FrameBuffer* get_framebuffer_by_name(const char* name);
 
         std::vector<RenderItem> _render_items;
+        std::vector<SkinnedRenderItem> _skinned_render_items;
 
         //Textures
         uint32_t _shadow_depth;

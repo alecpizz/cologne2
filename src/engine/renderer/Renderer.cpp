@@ -106,6 +106,11 @@ namespace cologne
         _render_items.emplace_back(item);
     }
 
+    void Renderer::submit_skinned_render_item(SkinnedRenderItem item)
+    {
+        _skinned_render_items.emplace_back(item);
+    }
+
     void Renderer::update_lights(Shader &shader)
     {
         shader.bind();
@@ -141,7 +146,6 @@ namespace cologne
     Renderer::~Renderer()
     {
     }
-
 
     void Renderer::draw_line(glm::vec3 p1, glm::vec3 p2, glm::vec3 color)
     {
@@ -219,6 +223,8 @@ namespace cologne
         debug_voxel_pass();
         debug_renderer->present();
         text_renderer->present();
+        _render_items.clear();
+        _skinned_render_items.clear();
     }
 
     void Renderer::window_resized(uint32_t width, uint32_t height)
@@ -229,7 +235,7 @@ namespace cologne
         get_framebuffer_by_name("output")->resize(width, height);
         get_framebuffer_by_name("voxel_back")->resize(width, height);
         get_framebuffer_by_name("voxel_front")->resize(width, height);
-        render_scene(*Engine::get_scene());
+        // render_scene(*Engine::get_scene());
     }
 
     void Renderer::reload_shaders()
@@ -308,6 +314,7 @@ namespace cologne
                         LightType::Point));
         init_shadow();
         voxelize_scene();
+        LOG_INFO("Renderer initialized");
     }
 
     Renderer::Renderer()

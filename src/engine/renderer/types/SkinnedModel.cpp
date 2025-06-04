@@ -64,7 +64,7 @@ namespace cologne
         _bounds = aabb;
     }
 
-    std::string &SkinnedModel::get_name()
+    std::string SkinnedModel::get_name() const
     {
         return _name;
     }

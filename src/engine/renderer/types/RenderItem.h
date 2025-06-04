@@ -3,13 +3,26 @@
 //
 
 #pragma once
+#include <engine/scene/Components.h>
+#include <engine/renderer/types/Model.h>
+#include <engine/renderer/types/SkinnedModel.h>
 
 namespace cologne
 {
     struct RenderItem
     {
-        Model* model;
-        SkinnedModel* skinned_model;
-        glm::mat4 transform;
+        Model *model = nullptr;
+        TransformComponent transform = {};
+        bool gi_only = true;
+        RenderItem(Model *m, TransformComponent tr, bool gi)
+            : model(m), transform(tr), gi_only(gi)
+        {
+        }
+    };
+
+    struct SkinnedRenderItem
+    {
+        SkinnedModel *skinned_model = nullptr;
+        TransformComponent transform = {};
     };
 }

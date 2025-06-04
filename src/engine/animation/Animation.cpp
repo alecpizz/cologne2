@@ -44,7 +44,7 @@ namespace cologne
         return _root_node;
     }
 
-    std::string &Animation::get_name()
+    std::string Animation::get_name() const
     {
         return _name;
     }

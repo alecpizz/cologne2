@@ -17,7 +17,7 @@ namespace cologne
         auto fbo = get_framebuffer_by_name("gbuffer");
         if (fbo->is_valid())
         {
-            fbo->resize( width, height);
+            fbo->resize(width, height);
             return;
         }
         fbo->create("gbuffer", width, height);
@@ -34,17 +34,18 @@ namespace cologne
         fbo->draw_buffers(attachments.data(), static_cast<uint32_t>(attachments.size()));
 
         Engine::get_debug_ui()->add_image_entry("G_Normals", fbo->get_color_attachment_handle_by_name("normal"),
-            glm::vec2(width, height));
+                                                glm::vec2(width, height));
         Engine::get_debug_ui()->add_image_entry("G_Position",
-            fbo->get_color_attachment_handle_by_name("position"), glm::vec2(width, height));
+                                                fbo->get_color_attachment_handle_by_name("position"),
+                                                glm::vec2(width, height));
         Engine::get_debug_ui()->add_image_entry("G_Albedo", fbo->get_color_attachment_handle_by_name("albedo"),
-            glm::vec2(width, height));
+                                                glm::vec2(width, height));
         Engine::get_debug_ui()->add_image_entry("G_ORM", fbo->get_color_attachment_handle_by_name("orm"),
-            glm::vec2(width, height));
+                                                glm::vec2(width, height));
         Engine::get_debug_ui()->add_image_entry("G_Depth", fbo->get_depth_attachment_handle(),
-            glm::vec2(width, height));
+                                                glm::vec2(width, height));
         Engine::get_debug_ui()->add_image_entry("G_Emission", fbo->get_color_attachment_handle_by_name("emission"),
-            glm::vec2(width, height));
+                                                glm::vec2(width, height));
 
         fbo->release();
 
@@ -58,10 +59,7 @@ namespace cologne
     void Renderer::geometry_pass(Scene &scene)
     {
         DebugScope scope("Renderer::geometry_pass");
-        for (auto& particle : scene.get_particles())
-        {
-            particle.simulate();
-        }
+
         auto fbo = get_framebuffer_by_name("gbuffer");
         fbo->bind();
         fbo->set_viewport();
@@ -71,21 +69,16 @@ namespace cologne
         shader->set_mat4("projection", Engine::get_camera()->get_projection_matrix());
         shader->set_mat4("view", Engine::get_camera()->get_view_matrix());
 
-        for (auto & model : scene.get_models())
+        for (auto &[model, tr, gi]: _render_items)
         {
-            if (!model.get_active())
+            if (gi)
             {
                 continue;
             }
-            if (model.get_gi_only())
+            shader->set_mat4("model", tr.get_mat4());
+            for (auto &mesh: model->get_meshes())
             {
-                continue;
-            }
-            shader->set_mat4("model", (model.get_transform().get_model_matrix()));
-            for (size_t j = 0; j < model.get_num_meshes(); j++)
-            {
-                Mesh mesh = model.get_meshes()[j];
-                Material mat = model.get_materials()[mesh.get_material_index()];
+                Material mat = model->get_materials()[mesh.get_material_index()];
                 mat.bind_all();
                 mesh.draw();
                 glBindTextureUnit(ALBEDO_INDEX, 0);
@@ -102,25 +95,19 @@ namespace cologne
         shader->set_mat4("projection", Engine::get_camera()->get_projection_matrix());
         shader->set_mat4("view", Engine::get_camera()->get_view_matrix());
 
-        for (size_t i = 0; i < scene.get_skinned_models().size(); i++)
+        for (auto &[skinned_model, tr]: _skinned_render_items)
         {
-            auto& model = scene.get_skinned_models().at(i);
-            if (!model.get_active())
+            shader->set_mat4("model", tr.get_mat4());
+            if (scene->get_animator_by_name(skinned_model->get_name()) != nullptr)
             {
-                continue;
-            }
-            shader->set_mat4("model", (model.get_transform().get_model_matrix()));
-            if (scene.get_animators().contains(model.get_name()))
-            {
-                auto& animator = scene.get_animators().at(model.get_name());
-                auto& bones = animator.get_bones();
+                auto &animator = scene->get_animator_by_name(skinned_model->get_name());
+                auto &bones = animator.get_bones();
                 shader->set_mat4("bone_matrices", bones);
             }
-
-            for (size_t j = 0; j < model.get_num_meshes(); j++)
+            for (size_t j = 0; j < skinned_model->get_num_meshes(); j++)
             {
-                auto& mesh = model.get_meshes()[j];
-                Material& mat = model.get_materials()[mesh.get_material_index()];
+                auto &mesh = skinned_model->get_meshes()[j];
+                Material &mat = skinned_model->get_materials()[mesh.get_material_index()];
                 mat.bind_all();
                 mesh.draw();
                 glBindTextureUnit(ALBEDO_INDEX, 0);
@@ -137,7 +124,7 @@ namespace cologne
         shader->set_mat4("projection", Engine::get_camera()->get_projection_matrix());
         shader->set_mat4("view", Engine::get_camera()->get_view_matrix());
 
-        for (auto& particle : scene.get_particles())
+        for (auto &particle: scene.get_particles())
         {
             particle.render();
         }

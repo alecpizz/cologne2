@@ -79,5 +79,6 @@ namespace cologne
     {
         _impl = new Impl;
         SDL_AddEventWatch(event_watch, nullptr);
+        LOG_INFO("Event manager initialized");
     }
 }

@@ -6,6 +6,7 @@
 
 #include <engine/core/Engine.h>
 #include <engine/core/Input.h>
+#include <engine/scene/Components.h>
 #include <Jolt/Jolt.h>
 #include <Jolt/Core/Factory.h>
 #include <Jolt/Core/TempAllocator.h>
@@ -232,7 +233,7 @@ namespace cologne::Physics
     }
 
 
-    void create_static_mesh_collider(Transform transform, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
+    uint32_t create_static_mesh_collider(TransformComponent transform, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
     {
         JPH::TriangleList triangle_list;
         for (int i = 0; i * 3 < indices.size(); i++)
@@ -255,26 +256,27 @@ namespace cologne::Physics
         const auto shape = body_interface.GetShape(id);
         const auto new_shape = shape->ScaleShape(glm_vec3_to_jph_vec3(transform.scale)).Get();
         body_interface.SetShape(id, new_shape, true, EActivation::DontActivate);
-        body_interface.SetPositionAndRotation(id, glm_vec3_to_jph_vec3(transform.translation),
+        body_interface.SetPositionAndRotation(id, glm_vec3_to_jph_vec3(transform.position),
                                               glm_quat_to_jph_quat(transform.rotation),
                                               EActivation::DontActivate);
         LOG_INFO("Created id %d", id);
         colliders_static.push_back(id);
         physics_system.OptimizeBroadPhase();
+        return id.GetIndexAndSequenceNumber();
     }
 
-    void create_static_mesh_collider(Model &model)
-    {
-        const Transform tr = model.get_transform();
-        LOG_INFO("CREATING MESH COLLDIER WITH SCALE %f %f %f", tr.scale.x, tr.scale.y, tr.scale.z);
-        for (size_t i = 0; i < model.get_num_meshes(); i++)
-        {
-            auto& mesh = model.get_meshes()[i];
-            auto vertices = mesh.get_vertices();
-            auto indices = mesh.get_indices();
-            Physics::create_static_mesh_collider(tr, vertices, indices);
-        }
-    }
+    // void create_static_mesh_collider(Model &model)
+    // {
+    //     const Transform tr = model.get_transform();
+    //     LOG_INFO("CREATING MESH COLLDIER WITH SCALE %f %f %f", tr.scale.x, tr.scale.y, tr.scale.z);
+    //     for (size_t i = 0; i < model.get_num_meshes(); i++)
+    //     {
+    //         auto& mesh = model.get_meshes()[i];
+    //         auto vertices = mesh.get_vertices();
+    //         auto indices = mesh.get_indices();
+    //         Physics::create_static_mesh_collider(tr, vertices, indices);
+    //     }
+    // }
 
     void destroy()
     {

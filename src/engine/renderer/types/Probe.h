@@ -1,4 +1,6 @@
 #pragma once
+#include "RenderItem.h"
+
 namespace cologne
 {
     class Shader;
@@ -11,7 +13,7 @@ namespace cologne
     public:
         explicit Probe(glm::vec3 position);
         glm::vec3 get_position();
-        void bake_geo(Shader& shader);
+        void bake_geo(Shader& shader, std::vector<RenderItem>& render_items);
         void light();
         void cleanup();
         uint32_t get_albedo_handle() const;

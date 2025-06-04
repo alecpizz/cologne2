@@ -14,6 +14,7 @@ namespace cologne::AssetManager
     std::unordered_map<std::string, size_t> model_index_map;
     std::unordered_map<std::string, size_t> skinned_model_index_map;
     std::unordered_map<std::string, size_t> animation_index_map;
+    bool is_loading = true;
 
     void init()
     {
@@ -85,6 +86,37 @@ namespace cologne::AssetManager
     std::vector<SkinnedModel> &get_skinned_models()
     {
         return skinned_models;
+    }
+
+    void print_models()
+    {
+        for (const auto & model : models)
+        {
+            LOG_INFO("MODEL %s", model.get_name());
+        }
+    }
+
+    void print_skinned_models()
+    {
+        for (const auto & model : skinned_models)
+        {
+            LOG_INFO("SKINNED MODEL %s", model.get_name().c_str());
+        }
+    }
+
+    void print_all()
+    {
+        print_models();
+        print_skinned_models();
+        print_animations();
+    }
+
+    void print_animations()
+    {
+        for ( auto & anim : animations)
+        {
+            LOG_INFO("ANIMATION %s", anim.get_name().c_str());
+        }
     }
 
     std::vector<Animation> &get_animations()

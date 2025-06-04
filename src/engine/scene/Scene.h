@@ -18,13 +18,6 @@ namespace cologne
 
         Model &add_model(const char *path);
 
-        SkinnedModel &add_skinned_model(const char *path);
-
-        std::vector<SkinnedModel> &get_skinned_models();
-        std::vector<Model> &get_models();
-
-        std::unordered_map<std::string, Animator> &get_animators();
-
         void update(float delta_time);
 
         Scene(Scene &&) = delete;
@@ -46,10 +39,6 @@ namespace cologne
     private:
         //THIS IS fucking dumb
         AABB _scene_bounds;
-        std::vector<Model> _models;
-        std::vector<SkinnedModel> _skinned_models;
-        std::unordered_map<std::string, Animator> _animators;
-        std::vector<Animation> _animations;
         std::vector<Particles> _particles;
         entt::registry _registry;
         friend class Entity;

@@ -4,8 +4,10 @@
 namespace cologne
 {
 
-    Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t material)
+    Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t material,
+        const std::string& name)
     {
+        _name = name;
         _vertices.insert(_vertices.end(), vertices.begin(), vertices.end());
         _indices.insert(_indices.end(), indices.begin(), indices.end());
         _indices_count = _indices.size();
@@ -68,5 +70,10 @@ namespace cologne
     std::vector<uint32_t> Mesh::get_indices() const
     {
         return _indices;
+    }
+
+    std::string Mesh::get_name() const
+    {
+        return _name;
     }
 }

@@ -3,6 +3,9 @@
 //
 
 #include "Engine.h"
+
+#include <engine/asset_manager/AssetManager.h>
+
 #include "../physics/Physics.h"
 #include "../editor/DebugUI.h"
 #include "engine/renderer/DebugRenderer.h"
@@ -94,6 +97,8 @@ namespace cologne
         _impl->window = std::unique_ptr<Window>(new Window(width, height));
         Physics::init();
         Audio::init();
+        AssetManager::init();
+        AssetManager::print_all();
         // Audio::add_music(RESOURCES_PATH "sounds/music2.mp3");
         // Audio::play_music(RESOURCES_PATH "sounds/music2.mp3");
         // Audio::set_music_volume(12);
@@ -108,7 +113,7 @@ namespace cologne
             LOG_ERROR("Failed to initialize window or renderer!");
             return false;
         }
-
+        LOG_INFO("Engine initialized successfully!");
         return true;
     }
 

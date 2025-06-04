@@ -30,15 +30,12 @@ namespace cologne
 
         uint64_t get_num_materials() const;
 
-        Mesh *get_meshes();
-
-        uint64_t get_num_meshes() const;
+        std::vector<Mesh>& get_meshes();
 
         void set_active(bool active);
 
         void set_aabb(AABB aabb);
 
-        bool get_active() const;
 
         bool get_gi_only() const;
 
@@ -54,7 +51,7 @@ namespace cologne
         bool _active = true;
         bool _cast_shadows = true;
         bool _gi_only = false;
-        std::string _path;
+        std::string _name;
         Transform _transform;
         AABB _bounds;
     };
