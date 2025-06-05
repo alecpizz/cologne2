@@ -68,6 +68,11 @@ namespace cologne
         float fov_radians = glm::radians(45.0f);
     };
 
+    struct PlayerComponent
+    {
+        uint32_t id = -1;
+    };
+
     struct NativeScriptComponent
     {
         ScriptableEntity *instance = nullptr;

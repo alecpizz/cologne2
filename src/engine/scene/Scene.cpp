@@ -10,6 +10,7 @@
 #include <engine/physics/Physics.h>
 #include <engine/util/FileUtil.h>
 #include <engine/scripts/CameraController.h>
+#include <engine/scripts/PlayerController.h>
 
 #include "Components.h"
 #include "Entity.h"
@@ -34,7 +35,7 @@ namespace cologne
         {
             Entity collider = create_entity(mesh.get_name());
             collider.get_component<TransformComponent>() = tr;
-            uint32_t body_id = Physics::create_static_mesh_collider(tr, mesh.get_vertices(), mesh.get_indices());
+            uint32_t body_id = Physics::create_static_mesh_collider(collider, tr, mesh.get_vertices(), mesh.get_indices());
             collider.add_component<StaticColliderComponent>(body_id);
         }
 
@@ -51,7 +52,11 @@ namespace cologne
         revolver.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("Rig|Rig|MK_ReloadFull"));
 
         camera = create_entity("camera");
-        camera.add_component<NativeScriptComponent>().bind<CameraController>();
+        camera.add_component<NativeScriptComponent>().bind<PlayerController>();
+
+        PlayerCreateInfo info;
+        info.position = glm::vec3(-5.0f, 2.0f, 5.0f);
+        camera.add_component<PlayerComponent>(Physics::create_player(info));
         camera.add_component<CameraComponent>();
 
         re_calculate_bounds();

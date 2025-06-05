@@ -58,4 +58,23 @@ namespace cologne
         uint32_t base_vertex;
         uint32_t base_instance;
     };
+
+    struct PlayerCreateInfo
+    {
+        float height_standing = 1.35f;
+        float radius_standing = 0.3f;
+        float height_crouching = 0.8f;
+        float radius_crouching = 0.3f;
+        float inner_friction = 0.9f;
+        float character_speed = 3.5f;
+        float jump_speed = 4.0f;
+        glm::vec3 position = glm::vec3(0.0f);
+    };
+
+    struct PlayerMovementCommand
+    {
+        glm::vec3 movement;
+        glm::quat rotation;
+        glm::vec3 up;
+    };
 }

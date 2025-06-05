@@ -14,14 +14,24 @@
 #include <Jolt/Physics/PhysicsSettings.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
+#include <Jolt/Physics/Character/Character.h>
+#include <Jolt/Physics/Character/CharacterVirtual.h>
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
+#include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Physics/Collision/Shape/MeshShape.h>
 #include <Jolt/Renderer/DebugRendererSimple.h>
 
+#include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
 
+
+namespace JPH
+{
+    class CharacterVirtualSettings;
+    class CharacterVirtual;
+}
 
 JPH_SUPPRESS_WARNINGS
 
@@ -155,6 +165,16 @@ namespace cologne::Physics
         }
     };
 
+    struct PhysicsPlayer
+    {
+        JPH::RefConst<JPH::Shape> standing_shape;
+        JPH::RefConst<JPH::Shape> crouching_shape;
+        JPH::RefConst<JPH::Shape> inner_standing_shape;
+        JPH::RefConst<JPH::Shape> inner_crouching_shape;
+        JPH::Ref<JPH::CharacterVirtual> character;
+        glm::vec3 character_position;
+    };
+
     TempAllocatorImpl *temp_allocator = nullptr;
     JobSystemThreadPool *job_system = nullptr;
     BroadPhaseLayerImpl broad_phase_layer;
@@ -163,7 +183,10 @@ namespace cologne::Physics
     PhysicsSystem physics_system;
     PhysDebugRenderer *debug_renderer = nullptr;
     std::vector<JPH::BodyID> colliders_static;
+    std::unordered_map<JPH::BodyID, Entity> entity_to_collider_map;
+    std::unordered_map<uint32_t, PhysicsPlayer> physics_players;
     bool drawing = false;
+
 
     void init()
     {
@@ -192,6 +215,26 @@ namespace cologne::Physics
 
     void update(float dt)
     {
+        for (auto &physics_player: physics_players)
+        {
+            auto &p = physics_player.second;
+            auto &character = p.character;
+            JPH::CharacterVirtual::ExtendedUpdateSettings update_settings;
+            update_settings.mStickToFloorStepDown = -character->GetUp() * update_settings.mStickToFloorStepDown.
+                                                    Length();
+            update_settings.mWalkStairsStepUp = character->GetUp() * update_settings.mWalkStairsStepUp.Length();
+            character->ExtendedUpdate(
+                dt, character->GetUp() * physics_system.GetGravity().Length(), update_settings,
+                physics_system.GetDefaultBroadPhaseLayerFilter(1),
+                physics_system.GetDefaultLayerFilter(1),
+                {},
+                {},
+                *temp_allocator);
+
+            p.character_position = glm::vec3(character->GetPosition().GetX(), character->GetPosition().GetY(),
+                                             character->GetPosition().GetZ());
+        }
+
         if (cologne::Input::key_pressed(Input::Key::P))
         {
             drawing = !drawing;
@@ -217,6 +260,132 @@ namespace cologne::Physics
         return temp_allocator;
     }
 
+    JPH::Vec3 glm_vec3_to_vec3(const glm::vec3 &v)
+    {
+        return JPH::Vec3(v.x, v.y, v.z);
+    }
+
+    JPH::Quat glm_quat_to_jph_quat(const glm::quat& q)
+    {
+        return JPH::Quat(q.x, q.y, q.z, q.w).Normalized();
+    }
+
+    glm::vec3 jph_vec3_to_glm_vec3(const JPH::Vec3& v)
+    {
+        return glm::vec3(v.GetX(), v.GetY(), v.GetZ());
+    }
+
+    uint32_t create_player(PlayerCreateInfo &info)
+    {
+        PhysicsPlayer player;
+        player.standing_shape = JPH::RotatedTranslatedShapeSettings(
+            JPH::Vec3(0, 0.5f * info.height_standing + info.radius_standing, 0), JPH::Quat::sIdentity(),
+            new JPH::CapsuleShape(0.5f * info.height_standing, info.radius_standing)).Create().Get();
+        player.inner_standing_shape = JPH::RotatedTranslatedShapeSettings(
+            JPH::Vec3(0, 0.5f * info.height_standing + info.radius_standing, 0), JPH::Quat::sIdentity(),
+            new JPH::CapsuleShape(0.5f * info.inner_friction * info.height_standing,
+                                  info.inner_friction * info.radius_standing)).Create().Get();
+
+        JPH::Ref<JPH::CharacterVirtualSettings> settings = new JPH::CharacterVirtualSettings();
+        settings->mMaxSlopeAngle = glm::radians(45.0f);
+        settings->mMaxStrength = 100.0f;
+        settings->mShape = player.standing_shape;
+        settings->mBackFaceMode = JPH::EBackFaceMode::CollideWithBackFaces;
+        settings->mCharacterPadding = 0.02f;
+        settings->mPenetrationRecoverySpeed = 1.0f;
+        settings->mPredictiveContactDistance = 0.1f;
+        settings->mSupportingVolume = JPH::Plane(JPH::Vec3::sAxisY(), -info.radius_standing);
+        settings->mEnhancedInternalEdgeRemoval = false;
+        settings->mInnerBodyShape = player.inner_standing_shape;
+        settings->mInnerBodyLayer = cologne::Physics::NON_MOVING;
+
+
+        player.character = new JPH::CharacterVirtual(settings, glm_vec3_to_vec3(info.position),
+                                                     JPH::Quat::sIdentity(), 0, &physics_system);
+        uint32_t id = player.character->GetID().GetValue();
+        physics_players[id] = player;
+        return id;
+    }
+
+    glm::vec3 get_player_position(uint32_t id)
+    {
+        if (!physics_players.contains(id))
+        {
+            LOG_ERROR("NO PLAYER WITH id %d", id);
+            return glm::vec3(0.0f);
+        }
+        return physics_players[id].character_position;
+    }
+
+    void move_player(uint32_t id, PlayerMovementCommand cmd)
+    {
+        if (!physics_players.contains(id))
+        {
+            LOG_ERROR("NO PLAYER WITH id %d", id);
+            return;
+        }        auto& character = physics_players[id].character;
+        character->SetUp(glm_vec3_to_vec3(cmd.up));
+        character->SetRotation(glm_quat_to_jph_quat(cmd.rotation));
+        character->SetLinearVelocity(glm_vec3_to_vec3(cmd.movement));
+    }
+
+    bool player_is_grounded(uint32_t id)
+    {
+        if (!physics_players.contains(id))
+        {
+            LOG_ERROR("NO PLAYER WITH id %d", id);
+            return false;
+        }
+        return physics_players[id].character->GetGroundState() == JPH::CharacterVirtual::EGroundState::OnGround;
+    }
+
+    bool player_is_supported(uint32_t id)
+    {
+        if (!physics_players.contains(id))
+        {
+            LOG_ERROR("NO PLAYER WITH id %d", id);
+            return false;
+        }
+        return physics_players[id].character->IsSupported();
+    }
+
+    bool slope_to_steep_for_player(uint32_t id)
+    {
+        if (!physics_players.contains(id))
+        {
+            LOG_ERROR("NO PLAYER WITH id %d", id);
+            return false;
+        }
+        return physics_players[id].character->IsSlopeTooSteep(physics_players[id].character->GetGroundNormal());
+    }
+
+    glm::vec3 get_gravity()
+    {
+        return jph_vec3_to_glm_vec3(physics_system.GetGravity());
+    }
+
+
+    glm::vec3 get_player_velocity(uint32_t id)
+    {
+        if (!physics_players.contains(id))
+        {
+            LOG_ERROR("NO PLAYER WITH id %d", id);
+            return glm::vec3(0.0F);
+        }
+        return jph_vec3_to_glm_vec3(physics_players[id].character->GetLinearVelocity());
+    }
+
+    glm::vec3 get_player_ground_velocity(uint32_t id)
+    {
+        if (!physics_players.contains(id))
+        {
+            LOG_ERROR("NO PLAYER WITH id %d", id);
+            return glm::vec3(0.0F);
+        }
+        return jph_vec3_to_glm_vec3(physics_players[id].character->GetGroundVelocity());
+    }
+
+
     JPH::Float3 glm_vec3_to_float3(const glm::vec3 &v)
     {
         return JPH::Float3(v.x, v.y, v.z);
@@ -227,13 +396,8 @@ namespace cologne::Physics
         return JPH::Vec3(v.x, v.y, v.z);
     }
 
-    JPH::Quat glm_quat_to_jph_quat(const glm::quat &q)
-    {
-        return JPH::Quat(q.x, q.y, q.z, q.w).Normalized();
-    }
-
-
-    uint32_t create_static_mesh_collider(TransformComponent transform, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
+    uint32_t create_static_mesh_collider(Entity entity, TransformComponent transform,
+                                         const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices)
     {
         JPH::TriangleList triangle_list;
         for (int i = 0; i * 3 < indices.size(); i++)
@@ -249,8 +413,9 @@ namespace cologne::Physics
         JPH::MeshShapeSettings mesh_settings(triangle_list);
         mesh_settings.SetEmbedded();
         JPH::BodyCreationSettings settings(&mesh_settings, JPH::Vec3::sZero(),
-            JPH::Quat::sIdentity(), JPH::EMotionType::Static, cologne::Physics::NON_MOVING);
-        auto& body_interface = physics_system.GetBodyInterface();
+                                           JPH::Quat::sIdentity(), JPH::EMotionType::Static,
+                                           cologne::Physics::NON_MOVING);
+        auto &body_interface = physics_system.GetBodyInterface();
         auto id = body_interface.CreateAndAddBody(
             settings, JPH::EActivation::DontActivate);
         const auto shape = body_interface.GetShape(id);
@@ -262,6 +427,7 @@ namespace cologne::Physics
         LOG_INFO("Created id %d", id);
         colliders_static.push_back(id);
         physics_system.OptimizeBroadPhase();
+        entity_to_collider_map[id] = entity;
         return id.GetIndexAndSequenceNumber();
     }
 
