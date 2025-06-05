@@ -66,8 +66,8 @@ namespace cologne
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         auto shader = get_shader_by_name("gbuffer");
         shader->bind();
-        shader->set_mat4("projection", Engine::get_camera()->get_projection_matrix());
-        shader->set_mat4("view", Engine::get_camera()->get_view_matrix());
+        shader->set_mat4("projection", get_camera_projection(_camera_transform, _cam));
+        shader->set_mat4("view", get_camera_view(_camera_transform));
 
         for (auto &[model, tr, gi]: _render_items)
         {
@@ -102,8 +102,8 @@ namespace cologne
 
         shader = get_shader_by_name("skinned_gbuffer");
         shader->bind();
-        shader->set_mat4("projection", Engine::get_camera()->get_projection_matrix());
-        shader->set_mat4("view", Engine::get_camera()->get_view_matrix());
+        shader->set_mat4("projection",get_camera_projection(_camera_transform, _cam));
+        shader->set_mat4("view", get_camera_view(_camera_transform));
 
         for (auto &[skinned_model, tr, bones]: _skinned_render_items)
         {
@@ -143,8 +143,8 @@ namespace cologne
 
         shader = get_shader_by_name("particle_render");
         shader->bind();
-        shader->set_mat4("projection", Engine::get_camera()->get_projection_matrix());
-        shader->set_mat4("view", Engine::get_camera()->get_view_matrix());
+        shader->set_mat4("projection", get_camera_projection(_camera_transform, _cam));
+        shader->set_mat4("view", get_camera_view(_camera_transform));
 
         //GET ME OUTTA HERE!
         for (auto &particle: Engine::get_scene()->get_particles())

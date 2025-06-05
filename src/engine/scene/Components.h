@@ -17,6 +17,21 @@ namespace cologne
             m = glm::scale(m, scale);
             return m;
         }
+
+        glm::vec3 get_fwd() const
+        {
+            return glm::vec3(0.0f, 0.0f, 1.0f) * rotation;
+        }
+
+        glm::vec3 get_up() const
+        {
+            return glm::vec3(0.0f, 1.0f, 0.0f) * rotation;
+        }
+
+        glm::vec3 get_right() const
+        {
+            return glm::vec3(1.0f, 0.0f, 0.0f) * rotation;
+        }
     };
 
     struct ActiveComponent
@@ -46,6 +61,11 @@ namespace cologne
     struct StaticColliderComponent
     {
         uint32_t body_id = -1;
+    };
+
+    struct CameraComponent
+    {
+        float fov_radians = glm::radians(45.0f);
     };
 
     struct NativeScriptComponent

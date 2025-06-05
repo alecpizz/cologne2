@@ -15,6 +15,8 @@ namespace cologne
     float shadow_near = 0.1f;
     float shadow_far = 1200.0f;
     glm::vec3 _dir_shadow_offset = glm::vec3(0.0f);
+    glm::mat4 _cam_view;
+    glm::mat4 _cam_proj;
 
     glm::mat4 get_light_space_matrix(const float near_plane, const float far_plane, glm::vec3 light_dir);
 
@@ -27,10 +29,10 @@ namespace cologne
     glm::mat4 get_light_space_matrix(const float near_plane, const float far_plane, glm::vec3 light_dir)
     {
         const auto proj = glm::perspective(
-            Engine::get_camera()->get_fov(),
+            glm::radians(45.0f),
             (float) Engine::get_window()->get_width() / (float) Engine::get_window()->get_height(), near_plane,
             far_plane);
-        const auto corners = get_frustum_corners_world_space(proj, Engine::get_camera()->get_view_matrix());
+        const auto corners = get_frustum_corners_world_space(proj, _cam_view);
 
         glm::vec3 center = glm::vec3(0, 0, 0);
         for (const auto &v: corners)
@@ -191,6 +193,7 @@ namespace cologne
     void Renderer::shadow_pass()
     {
         DebugScope scope("Renderer::shadow_pass");
+        _cam_view = get_camera_view(_camera_transform);
         auto light = get_directional_light();
         shadowCascadeLevels[0] = (shadow_far / 50.0f);
         shadowCascadeLevels[1] = (shadow_far / 25.0f);

@@ -205,12 +205,6 @@ namespace cologne
             ImGui::EndChild();
         }
 
-        bool free_cam = Engine::get_camera()->is_free_cam();
-        if (ImGui::Checkbox("Free Cam", &free_cam))
-        {
-            Engine::get_camera()->set_free_cam(free_cam);
-        }
-
         glm::vec3 dir_light = Engine::get_renderer()->get_directional_light().direction;
         glm::vec3 dir_light_pos = Engine::get_renderer()->get_directional_light().position;;
         if (ImGui::DragFloat3("Directional light direction", glm::value_ptr(dir_light), 0.01f))
@@ -221,15 +215,6 @@ namespace cologne
         {
             Engine::get_renderer()->set_directional_light(dir_light_pos, dir_light);
         }
-        glm::vec3 cam_pos = Engine::get_camera()->get_position();
-        glm::vec3 cam_fwd = Engine::get_camera()->get_forward();
-        if (ImGui::Button("Align dir light to camera"))
-        {
-            Engine::get_renderer()->set_directional_light(cam_pos, cam_fwd);
-        }
-
-        ImGui::InputFloat3("Camera Position", glm::value_ptr(cam_pos));
-        ImGui::InputFloat3("Camera Forward", glm::value_ptr(cam_fwd));
 
         ImGui::End();
         auto window = SDL_GL_GetCurrentWindow();

@@ -19,6 +19,7 @@ namespace cologne
     glm::vec3 gun_offset_temp = glm::vec3(0.165f, -0.145f, -0.065f);
     glm::vec3 gun_offset_euler_temp = glm::vec3(0.0f, 90.0f, 0.0f);
     glm::vec3 gun_offset_scale_temp = glm::vec3(1.0f);
+    Entity camera;
 
     Scene::Scene()
     {
@@ -49,8 +50,9 @@ namespace cologne
         revolver.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
         revolver.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("Rig|Rig|MK_ReloadFull"));
 
-        Entity camera = create_entity("camera");
+        camera = create_entity("camera");
         camera.add_component<NativeScriptComponent>().bind<CameraController>();
+        camera.add_component<CameraComponent>();
 
         re_calculate_bounds();
         // auto& skinned_model = add_skinned_model(RESOURCES_PATH "python/deagle.glb");
@@ -97,10 +99,10 @@ namespace cologne
             particle.simulate();
         }
 
-        //game logic here
-        for (auto entity : _registry.view<NativeScriptComponent>())
+        //native scripting
+        for (auto entity: _registry.view<NativeScriptComponent, ActiveComponent>())
         {
-            auto& nsc = _registry.get<NativeScriptComponent>(entity);
+            auto &nsc = _registry.get<NativeScriptComponent>(entity);
             if (!nsc.instance)
             {
                 nsc.instance = nsc.instantiate_script();
@@ -108,16 +110,26 @@ namespace cologne
                 nsc.instance->on_create();
             }
 
+            if (!_registry.get<ActiveComponent>(entity).active)
+            {
+                continue;
+            }
             nsc.instance->on_update(delta_time);
         }
 
 
         auto animators = _registry.view<AnimatorComponent>();
-        for (auto entity : animators)
+        for (auto entity: animators)
         {
-            auto& animator = _registry.get<AnimatorComponent>(entity);
+            auto &animator = _registry.get<AnimatorComponent>(entity);
             animator.update_animation(delta_time);
         }
+
+        auto tr = camera.get_component<TransformComponent>();
+        auto cm = camera.get_component<CameraComponent>();
+        Engine::get_renderer()->submit_camera_transform(tr, cm);
+
+
         //submit draw calls
         auto view = _registry.view<ModelComponent, TransformComponent, ActiveComponent>();
         for (auto entity: view)
@@ -146,7 +158,7 @@ namespace cologne
             SkinnedRenderItem item;
             if (_registry.all_of<AnimatorComponent>(entity))
             {
-                auto& animator = _registry.get<AnimatorComponent>(entity);
+                auto &animator = _registry.get<AnimatorComponent>(entity);
                 item.bones = animator.get_bones();
             }
             SkinnedModel *skinned_model = AssetManager::get_skinned_model_by_index(m.id);

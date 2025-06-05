@@ -5,5 +5,5 @@
 #include "CameraController.h"
 
 namespace cologne
-    {
+{
 }

@@ -55,7 +55,7 @@ namespace cologne
 
         void init()
         {
-            auto cam_pos = glm_vec3_to_vec3(Engine::get_camera()->get_position());
+            auto cam_pos = glm_vec3_to_vec3(glm::vec3(0.0f));
 
             standing_shape = JPH::RotatedTranslatedShapeSettings(
                 JPH::Vec3(0, 0.5f * height_standing + radius_standing, 0), JPH::Quat::sIdentity(),
@@ -117,7 +117,8 @@ namespace cologne
             {
                 movement = movement.Normalized();
             }
-            glm::vec3 cam_fwd = Engine::get_camera()->get_forward();
+            // glm::vec3 cam_fwd = Engine::get_camera()->get_forward();
+            glm::vec3 cam_fwd = glm::vec3(0.0f);
             cam_fwd.y = 0.0f;
             glm::normalize(cam_fwd);
             JPH::Quat rotation = JPH::Quat::sFromTo(JPH::Vec3::sAxisX(), JPH::Vec3(cam_fwd.x, cam_fwd.y, cam_fwd.z));
@@ -224,10 +225,10 @@ namespace cologne
 
     void Player::update(float dt)
     {
-        if (Engine::get_camera()->is_free_cam())
-        {
-            return;
-        }
+        // if (Engine::get_camera()->is_free_cam())
+        // {
+        //     return;
+        // }
         _impl->handle_input(dt);
         JPH::CharacterVirtual::ExtendedUpdateSettings update_settings;
         update_settings.mStickToFloorStepDown = -_impl->character->GetUp() * update_settings.mStickToFloorStepDown.

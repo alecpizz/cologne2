@@ -52,6 +52,8 @@ namespace cologne
 
         void set_directional_light(glm::vec3 position, glm::vec3 direction);
 
+        void submit_camera_transform(TransformComponent tr, CameraComponent cam);
+
     private:
         //get me out of here!
         struct VoxelData
@@ -124,6 +126,10 @@ namespace cologne
         bool _voxel_debug_visuals = false;
         //misc
         glm::mat4 _dir_light_space;
+        TransformComponent _camera_transform;
+        CameraComponent _cam;
+        static glm::mat4 get_camera_view(TransformComponent tr);
+        static glm::mat4 get_camera_projection(TransformComponent tr, CameraComponent cam);
         VoxelData _voxel_data;
     };
 }

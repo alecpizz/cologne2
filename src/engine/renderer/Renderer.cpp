@@ -143,6 +143,23 @@ namespace cologne
         return &framebuffers[n];
     }
 
+    glm::mat4 Renderer::get_camera_view(TransformComponent tr)
+    {
+        glm::vec3 position = tr.position;
+        glm::vec3 fwd = tr.rotation * glm::vec3(0.0f, 0.0f, 1.0f);
+        glm::vec3 up = tr.rotation * glm::vec3(0.0f, 1.0f, 0.0f);
+        glm::mat4 view_mat = glm::lookAt(position, position + fwd, up);
+        return view_mat;
+    }
+
+    glm::mat4 Renderer::get_camera_projection(TransformComponent tr, CameraComponent cam)
+    {
+        return glm::perspective(cam.fov_radians,
+                                static_cast<float>(Engine::get_window()->get_width()) /
+                                static_cast<float>(Engine::get_window()->get_height()),
+                                0.1f, 300.0f);
+    }
+
     Renderer::~Renderer()
     {
     }
@@ -221,7 +238,7 @@ namespace cologne
         fbo->release();
         draw_fps();
         debug_voxel_pass();
-        debug_renderer->present();
+        debug_renderer->present(get_camera_view(_camera_transform), get_camera_projection(_camera_transform, _cam));
         text_renderer->present();
         _render_items.clear();
         _skinned_render_items.clear();
@@ -280,6 +297,11 @@ namespace cologne
         voxelize_scene();
     }
 
+    void Renderer::submit_camera_transform(TransformComponent tr, CameraComponent cam)
+    {
+        _camera_transform = tr;
+        _cam = cam;
+    }
 
     void Renderer::init()
     {

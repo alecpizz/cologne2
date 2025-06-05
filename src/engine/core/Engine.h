@@ -14,7 +14,6 @@
 #include "../scene/Scene.h"
 #include "engine/renderer/Renderer.h"
 #include "Window.h"
-#include "Camera.h"
 #include "EventManager.h"
 #include "engine/GoodGPUs.h"
 
@@ -33,8 +32,6 @@ namespace cologne
         static Window *get_window();
 
         static EventManager *get_event_manager();
-
-        static Camera *get_camera();
 
         static Scene *get_scene();
 

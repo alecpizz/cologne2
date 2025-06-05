@@ -22,7 +22,6 @@ namespace cologne
         std::unique_ptr<EventManager> event_manager = nullptr;
         std::unique_ptr<DebugUI> debug_ui = nullptr;
         std::unique_ptr<Scene> scene = nullptr;
-        std::unique_ptr<Camera> camera = nullptr;
         std::unique_ptr<Player> player = nullptr;
         bool running = true;
     };
@@ -70,11 +69,6 @@ namespace cologne
         return  _instance->_impl->event_manager.get();
     }
 
-    Camera *Engine::get_camera()
-    {
-        return _instance->_impl->camera.get();
-    }
-
     Scene *Engine::get_scene()
     {
         return _instance->_impl->scene.get();
@@ -105,8 +99,6 @@ namespace cologne
         _impl->scene = std::make_unique<Scene>();
         _impl->renderer = std::unique_ptr<Renderer>(new Renderer());
         _impl->event_manager = std::unique_ptr<EventManager>(new EventManager());
-        _impl->camera = std::make_unique<Camera>(glm::vec3(-5.0f, 2.0f, 5.0f), glm::vec3(0.0f, 0.0f, 1.0f),
-                                                 glm::vec3(0.0f, 1.0f, 0.0f));
         _impl->player = std::make_unique<Player>();
         if (_impl->window == nullptr || _impl->renderer == nullptr)
         {
@@ -125,9 +117,8 @@ namespace cologne
         {
             Input::update();
             _impl->event_manager->poll_events();
-            _impl->camera->update(et.elapsed);
             _impl->scene->update(et.elapsed);
-            _impl->player->update(et.elapsed);
+            // _impl->player->update(et.elapsed);
             Physics::update(et.elapsed);
             _impl->debug_ui->clear();
             _impl->window->clear();
