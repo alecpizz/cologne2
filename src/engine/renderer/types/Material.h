@@ -10,6 +10,8 @@ namespace cologne
         Texture roughness;
         Texture ao;
         Texture emission;
+        float roughness_override = 1.0f;
+        float metallic_override = 1.0f;
 #define ALBEDO_INDEX 0
 #define AO_INDEX 1
 #define METALLIC_INDEX 2

@@ -274,7 +274,14 @@ namespace cologne
 
         ImGui::DragFloat3("Position", glm::value_ptr(tr.position), 0.01f);
 
-        ImGui::DragFloat4("Rotation", glm::value_ptr(tr.rotation), 0.01f);
+        glm::vec3 euler = glm::eulerAngles(tr.rotation);
+        euler = glm::degrees(euler);
+        ImGui::DragFloat3("Rotation", glm::value_ptr(euler), 0.1f);
+        euler.x = fmodf(euler.x, 360.0f);
+        euler.y = fmodf(euler.y, 360.0f);
+        euler.z = fmodf(euler.z, 360.0f);
+        euler = glm::radians(euler);
+        tr.rotation = glm::quat(euler);
 
         ImGui::DragFloat3("Scale", glm::value_ptr(tr.scale), 0.01f);
     }

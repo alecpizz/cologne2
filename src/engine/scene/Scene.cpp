@@ -9,6 +9,7 @@
 #include <engine/core/Engine.h>
 #include <engine/physics/Physics.h>
 #include <engine/util/FileUtil.h>
+#include <engine/scripts/CameraController.h>
 
 #include "Components.h"
 #include "Entity.h"
@@ -43,6 +44,14 @@ namespace cologne
         Entity man = create_entity("man");
         man.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("man"));
         man.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("Idle"));
+
+        Entity revolver = create_entity("deagle");
+        revolver.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
+        revolver.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("Rig|Rig|MK_ReloadFull"));
+
+        Entity camera = create_entity("camera");
+        camera.add_component<NativeScriptComponent>().bind<CameraController>();
+
         re_calculate_bounds();
         // auto& skinned_model = add_skinned_model(RESOURCES_PATH "python/deagle.glb");
         // skinned_model.set_cast_shadows(false);
@@ -89,6 +98,20 @@ namespace cologne
         }
 
         //game logic here
+        for (auto entity : _registry.view<NativeScriptComponent>())
+        {
+            auto& nsc = _registry.get<NativeScriptComponent>(entity);
+            if (!nsc.instance)
+            {
+                nsc.instance = nsc.instantiate_script();
+                nsc.instance->_entity = Entity{entity, this};
+                nsc.instance->on_create();
+            }
+
+            nsc.instance->on_update(delta_time);
+        }
+
+
         auto animators = _registry.view<AnimatorComponent>();
         for (auto entity : animators)
         {

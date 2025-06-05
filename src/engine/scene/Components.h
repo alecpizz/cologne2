@@ -1,4 +1,5 @@
 #pragma once
+#include "ScriptableEntity.h"
 
 namespace cologne
 {
@@ -21,8 +22,8 @@ namespace cologne
     struct ActiveComponent
     {
         bool active = true;
-        explicit operator bool ()  {return active;}
-        explicit operator const bool() const {return active;}
+        explicit operator bool() { return active; }
+        explicit operator const bool() const { return active; }
     };
 
     struct ModelComponent
@@ -47,4 +48,18 @@ namespace cologne
         uint32_t body_id = -1;
     };
 
+    struct NativeScriptComponent
+    {
+        ScriptableEntity *instance = nullptr;
+
+        ScriptableEntity* (*instantiate_script)();
+        void (*destroy_script)(NativeScriptComponent*);
+
+        template<typename T>
+        void bind()
+        {
+            instantiate_script = []() { return static_cast<ScriptableEntity*> (new T()); };
+            destroy_script = [](NativeScriptComponent* nsc) {delete nsc->instance; nsc->instance = nullptr;};
+        }
+    };
 }

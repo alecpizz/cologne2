@@ -245,6 +245,18 @@ namespace cologne::FileUtil
                 }
             }
 
+            ai_real roughness_factor;
+            if (material->Get(AI_MATKEY_ROUGHNESS_FACTOR, roughness_factor) == aiReturn_SUCCESS)
+            {
+                mat.roughness_override = roughness_factor;
+            }
+
+            ai_real metallic_factor;
+            if (material->Get(AI_MATKEY_METALLIC_FACTOR, metallic_factor) == aiReturn_SUCCESS)
+            {
+                mat.metallic_override = metallic_factor;
+            }
+
             mats.push_back(mat);
         }
     }
@@ -257,7 +269,7 @@ namespace cologne::FileUtil
                                                        aiProcess_CalcTangentSpace |
                                                        aiProcess_RemoveRedundantMaterials |
                                                        aiProcess_GenBoundingBoxes);
-        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+        if (!scene || !scene->mRootNode)
         {
             LOG_ERROR("ASSIMP ERROR: %s", importer.GetErrorString());
             return {};
@@ -282,7 +294,7 @@ namespace cologne::FileUtil
         const aiScene *scene = importer.ReadFile(
             path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals |
                   aiProcess_RemoveRedundantMaterials | aiProcess_LimitBoneWeights);
-        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+        if (!scene || !scene->mRootNode)
         {
             LOG_ERROR("ASSIMP ERROR: %s", importer.GetErrorString());
             return result_data;

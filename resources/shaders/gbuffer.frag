@@ -16,6 +16,8 @@ layout (binding = 2) uniform sampler2D texture_metallic;
 layout (binding = 3) uniform sampler2D texture_roughness;
 layout (binding = 4) uniform sampler2D texture_normal;
 layout (binding = 5) uniform sampler2D texture_emission;
+uniform float metallic = -1.0f;
+uniform float roughness = -1.0f;
 
 
 void main()
@@ -29,8 +31,8 @@ void main()
 
     gEmission = texture(texture_emission, TexCoords).rgb;
     gl_FragDepth = gl_FragCoord.z;
-    gORM.r = texture(texture_metallic, TexCoords).b;
-    gORM.g = texture(texture_roughness, TexCoords).g;
+    gORM.r = texture(texture_metallic, TexCoords).b + max(metallic, 0.0f);
+    gORM.g = texture(texture_roughness, TexCoords).g + max(roughness, 0.0f);
     gORM.b = texture(texture_ao, TexCoords).r;
     vec4 albedo = texture(texture_albedo, TexCoords).rgba;
     if(albedo.a < 0.5)
