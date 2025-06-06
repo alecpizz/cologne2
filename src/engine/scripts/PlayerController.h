@@ -19,6 +19,9 @@ namespace cologne
         bool _was_grounded;
         bool _grounded;
         glm::vec3 _desired_velocity;
+        bool _footstep_played = false;
+        float _bob_time = 0.0f;
+        float _bob_offset = 0.0f;
 
         void update_camera(float dt)
         {
@@ -97,6 +100,36 @@ namespace cologne
             get_component<TransformComponent>().position = _position;
         }
 
+        void play_footstep(float dt)
+        {
+            auto vel = Physics::get_player_velocity(get_component<PlayerComponent>().id);
+            vel.y = 0.0f;
+            if (glm::abs(vel.x) < 0.1f && glm::abs(vel.z) < 0.1f)
+            {
+                return;
+            }
+
+            _bob_time += dt;
+            _bob_offset = glm::sin(_bob_time * 4.5f * _character_speed) * 0.05f;
+            if (_bob_offset < -0.04f && !_footstep_played && _grounded)
+            {
+                auto idx = rand() % 4;
+                Audio::play_sound(_footstep_sounds[idx].c_str(), 30);
+                _footstep_played = true;
+            }
+            if (_bob_offset > 0.0f)
+            {
+                _footstep_played = false;
+            }
+
+            if (_grounded && !_was_grounded)
+            {
+                auto idx = rand() % 4;
+                Audio::play_sound(_footstep_sounds[idx].c_str(), 30);
+                _bob_time = 0.0f;
+            }
+        }
+
     protected:
         void on_create() override
         {
@@ -138,7 +171,7 @@ namespace cologne
             bool jump = cologne::Input::key_pressed(cologne::Input::Key::Space);
             bool crouch = cologne::Input::key_pressed(cologne::Input::Key::LeftCtrl);
 
-            glm::vec3 movement = glm::vec3(x, 0.0f, y);
+            glm::vec3 movement = glm::vec3(-y, 0.0f, x);
             if (abs(x) > 0.0f || abs(y) > 0.0f)
             {
                 movement = glm::normalize(movement);
@@ -151,7 +184,8 @@ namespace cologne
             glm::vec3 b = fwd;
             float dot = glm::dot(a, b);
             glm::quat rotation = glm::quat(dot, glm::cross(a, b));
-            movement = rotation * movement;
+            movement = get_component<TransformComponent>().rotation * movement;
+            movement.y = 0.0f;
             _desired_velocity = movement * _character_speed;
 
             if (Physics::player_is_supported(get_component<PlayerComponent>().id))
@@ -196,9 +230,10 @@ namespace cologne
             Physics::move_player(get_component<PlayerComponent>().id, cmd);
             if (!_is_free_cam)
             {
+                play_footstep(dt);
                 get_component<TransformComponent>().position = Physics::get_player_position(
                                                                    get_component<PlayerComponent>().id) + glm::vec3(
-                                                                   0.0f, 1.45f, 0.0f);
+                                                                   0.0f, 1.45f + _bob_offset, 0.0f);
             }
         }
     };

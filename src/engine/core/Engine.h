@@ -10,7 +10,6 @@
 */
 #pragma once
 #include "../editor/DebugUI.h"
-#include "../player/Player.h"
 #include "../scene/Scene.h"
 #include "engine/renderer/Renderer.h"
 #include "Window.h"
@@ -35,7 +34,6 @@ namespace cologne
 
         static Scene *get_scene();
 
-        static Player *get_player();
 
         static DebugUI *get_debug_ui();
 

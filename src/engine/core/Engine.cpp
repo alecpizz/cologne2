@@ -22,7 +22,6 @@ namespace cologne
         std::unique_ptr<EventManager> event_manager = nullptr;
         std::unique_ptr<DebugUI> debug_ui = nullptr;
         std::unique_ptr<Scene> scene = nullptr;
-        std::unique_ptr<Player> player = nullptr;
         bool running = true;
     };
 
@@ -75,11 +74,6 @@ namespace cologne
     }
 
 
-    Player *Engine::get_player()
-    {
-        return _instance->_impl->player.get();
-    }
-
     DebugUI * Engine::get_debug_ui()
     {
         return _instance->_impl->debug_ui.get();
@@ -99,7 +93,6 @@ namespace cologne
         _impl->scene = std::make_unique<Scene>();
         _impl->renderer = std::unique_ptr<Renderer>(new Renderer());
         _impl->event_manager = std::unique_ptr<EventManager>(new EventManager());
-        _impl->player = std::make_unique<Player>();
         if (_impl->window == nullptr || _impl->renderer == nullptr)
         {
             LOG_ERROR("Failed to initialize window or renderer!");
