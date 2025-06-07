@@ -2,6 +2,11 @@
 #include <engine/renderer/types/Model.h>
 #include <engine/scene/Components.h>
 
+namespace cologne
+{
+    struct RaycastHitInfo;
+}
+
 namespace cologne::Physics
 {
     void init();
@@ -20,6 +25,7 @@ namespace cologne::Physics
     glm::vec3 get_gravity();
     glm::vec3 get_player_ground_velocity(uint32_t id);
     uint32_t create_static_mesh_collider(Entity entity, TransformComponent transform, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
+    bool raycast(glm::vec3 origin, glm::vec3 direction, float max_distance, uint32_t layers, RaycastHitInfo& info);
     // void create_static_mesh_collider(Model& model);
     void destroy();
 }

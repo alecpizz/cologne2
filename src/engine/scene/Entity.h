@@ -53,7 +53,6 @@ namespace cologne
         }
 
         explicit operator bool() const {return _entity_handle != entt::null; }
-
     private:
         entt::entity _entity_handle = entt::null;
         Scene *_scene;

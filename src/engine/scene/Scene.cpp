@@ -14,6 +14,8 @@
 
 #include "Components.h"
 #include "Entity.h"
+#include "engine/physics/RaycastHitInfo.h"
+#include "engine/util/Util.h"
 
 namespace cologne
 {
@@ -31,11 +33,12 @@ namespace cologne
 
         auto model = AssetManager::get_model_by_name("sponza2");
         auto tr = sponza.get_component<TransformComponent>();
-        for (auto &mesh: model->get_meshes())
+        for (auto& mesh : model->get_meshes())
         {
             Entity collider = create_entity(mesh.get_name());
             collider.get_component<TransformComponent>() = tr;
-            uint32_t body_id = Physics::create_static_mesh_collider(collider, tr, mesh.get_vertices(), mesh.get_indices());
+            uint32_t body_id = Physics::create_static_mesh_collider(collider, tr, mesh.get_vertices(),
+                                                                    mesh.get_indices());
             collider.add_component<StaticColliderComponent>(body_id);
         }
 
@@ -99,15 +102,15 @@ namespace cologne
     void Scene::update(float delta_time)
     {
         //compute shaders. should do skinning here too :3
-        for (auto &particle: Engine::get_scene()->get_particles())
+        for (auto& particle : Engine::get_scene()->get_particles())
         {
             particle.simulate();
         }
 
         //native scripting
-        for (auto entity: _registry.view<NativeScriptComponent, ActiveComponent>())
+        for (auto entity : _registry.view<NativeScriptComponent, ActiveComponent>())
         {
-            auto &nsc = _registry.get<NativeScriptComponent>(entity);
+            auto& nsc = _registry.get<NativeScriptComponent>(entity);
             if (!nsc.instance)
             {
                 nsc.instance = nsc.instantiate_script();
@@ -124,37 +127,58 @@ namespace cologne
 
 
         auto animators = _registry.view<AnimatorComponent>();
-        for (auto entity: animators)
+        for (auto entity : animators)
         {
-            auto &animator = _registry.get<AnimatorComponent>(entity);
+            auto& animator = _registry.get<AnimatorComponent>(entity);
             animator.update_animation(delta_time);
         }
 
         auto tr = camera.get_component<TransformComponent>();
         auto cm = camera.get_component<CameraComponent>();
+
+        glm::vec3 ray_start, ray_dir;
+        Util::get_screen_to_world_ray(
+            glm::vec2(Engine::get_window()->get_width() / 2, Engine::get_window()->get_height() / 2),
+            Renderer::get_camera_view(tr), Renderer::get_camera_projection(tr, cm), ray_start, ray_dir);
+        RaycastHitInfo info;
+        if (Physics::raycast(ray_start, ray_dir, 99999.0f, 0, info))
+        {
+            Entity hit_entity = info.hit_entity;
+            if (hit_entity)
+            {
+                std::string name = hit_entity.get_component<TagComponent>().tag;
+                Engine::get_renderer()->draw_text(name.c_str(),
+                                                  glm::vec3(0.0f, 400.0f, 0.0f),
+                                                  glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), .6f);
+                Engine::get_renderer()->draw_text(std::to_string(info.hit_length).c_str(),
+                                                  glm::vec3(0.0f, 450.0f, 0.0f),
+                                                  glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), .6f);
+            }
+        }
+
         Engine::get_renderer()->submit_camera_transform(tr, cm);
 
 
         //submit draw calls
         auto view = _registry.view<ModelComponent, TransformComponent, ActiveComponent>();
-        for (auto entity: view)
+        for (auto entity : view)
         {
             auto [m, tr, active] =
-                    view.get<ModelComponent, TransformComponent, ActiveComponent>(entity);
+                view.get<ModelComponent, TransformComponent, ActiveComponent>(entity);
             //culling step would be here probably? though for GI i dunno. might have to pack into render item
             if (!active)
             {
                 continue;
             }
-            Model *model = AssetManager::get_model_by_index(m.id);
+            Model* model = AssetManager::get_model_by_index(m.id);
             Engine::get_renderer()->submit_render_item(RenderItem(model, tr, m.gi_only));
         }
 
         auto view2 = _registry.view<SkinnedModelComponent, TransformComponent, ActiveComponent>();
-        for (auto entity: view2)
+        for (auto entity : view2)
         {
             auto [m, tr, active] =
-                    view2.get<SkinnedModelComponent, TransformComponent, ActiveComponent>(entity);
+                view2.get<SkinnedModelComponent, TransformComponent, ActiveComponent>(entity);
             //culling step would be here probably? though for GI i dunno. might have to pack into render item
             if (!active)
             {
@@ -163,10 +187,10 @@ namespace cologne
             SkinnedRenderItem item;
             if (_registry.all_of<AnimatorComponent>(entity))
             {
-                auto &animator = _registry.get<AnimatorComponent>(entity);
+                auto& animator = _registry.get<AnimatorComponent>(entity);
                 item.bones = animator.get_bones();
             }
-            SkinnedModel *skinned_model = AssetManager::get_skinned_model_by_index(m.id);
+            SkinnedModel* skinned_model = AssetManager::get_skinned_model_by_index(m.id);
             item.skinned_model = skinned_model;
             item.transform = tr;
             Engine::get_renderer()->submit_skinned_render_item(item);
@@ -202,7 +226,7 @@ namespace cologne
     {
         _scene_bounds = {};
         auto view = _registry.view<TransformComponent, ModelComponent>();
-        for (const auto entity: view)
+        for (const auto entity : view)
         {
             auto [tr, m] = view.get<TransformComponent, ModelComponent>(entity);
             const auto model = AssetManager::get_model_by_index(m.id);
@@ -220,12 +244,12 @@ namespace cologne
         return _scene_bounds;
     }
 
-    std::vector<Particles> &Scene::get_particles()
+    std::vector<Particles>& Scene::get_particles()
     {
         return _particles;
     }
 
-    Entity Scene::create_entity(const std::string &name)
+    Entity Scene::create_entity(const std::string& name)
     {
         //all entities have a transform, a tag/name, and a bool for whether or not they are currently active
         Entity entity = {_registry.create(), this};

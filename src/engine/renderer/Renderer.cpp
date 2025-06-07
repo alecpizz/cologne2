@@ -189,6 +189,11 @@ namespace cologne
         debug_renderer->draw_aabb(transform, min, max, color);
     }
 
+    void Renderer::draw_text(const char* text, glm::vec3 position, glm::vec4 color, float size)
+    {
+        text_renderer->draw_text(text, position, color, size);
+    }
+
     void draw_fps()
     {
         int fps = 0;

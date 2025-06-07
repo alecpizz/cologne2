@@ -35,6 +35,8 @@ namespace cologne
 
         void draw_aabb(glm::mat4 transform, glm::vec3 min, glm::vec3 max, glm::vec3 color);
 
+        void draw_text(const char* text, glm::vec3 position, glm::vec4 color, float size);
+
         void render_scene();
 
         void window_resized(uint32_t width, uint32_t height);
@@ -53,6 +55,9 @@ namespace cologne
         void set_directional_light(glm::vec3 position, glm::vec3 direction);
 
         void submit_camera_transform(TransformComponent tr, CameraComponent cam);
+
+        static glm::mat4 get_camera_view(TransformComponent tr);
+        static glm::mat4 get_camera_projection(TransformComponent tr, CameraComponent cam);
 
     private:
         //get me out of here!
@@ -128,8 +133,6 @@ namespace cologne
         glm::mat4 _dir_light_space;
         TransformComponent _camera_transform;
         CameraComponent _cam;
-        static glm::mat4 get_camera_view(TransformComponent tr);
-        static glm::mat4 get_camera_projection(TransformComponent tr, CameraComponent cam);
         VoxelData _voxel_data;
     };
 }

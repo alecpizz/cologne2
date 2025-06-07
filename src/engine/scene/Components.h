@@ -77,8 +77,8 @@ namespace cologne
     {
         ScriptableEntity *instance = nullptr;
 
-        ScriptableEntity* (*instantiate_script)();
-        void (*destroy_script)(NativeScriptComponent*);
+        ScriptableEntity* (*instantiate_script)() = nullptr;
+        void (*destroy_script)(NativeScriptComponent*) = nullptr;
 
         template<typename T>
         void bind()
