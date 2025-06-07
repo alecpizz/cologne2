@@ -10,7 +10,6 @@ namespace cologne
     private:
         std::vector<std::string> _footstep_sounds;
         glm::vec2 _rotation = glm::vec2(0.0f);
-        glm::vec3 _position = glm::vec3(0.0f);
         bool _is_free_cam = true;
         bool _show_mouse = true;
         bool _allow_sliding = true;
@@ -69,35 +68,35 @@ namespace cologne
             }
 
             float speed = 10.0f;
+            auto& tr = get_component<TransformComponent>();
             if (cologne::Input::key_down(Input::Key::LeftShift))
             {
                 speed *= 2.5f;
             }
             if (cologne::Input::key_down(Input::Key::W))
             {
-                _position += fwd * dt * speed;
+                tr.position += fwd * dt * speed;
             }
             if (cologne::Input::key_down(Input::Key::S))
             {
-                _position -= fwd * dt * speed;
+                tr.position -= fwd * dt * speed;
             }
             if (cologne::Input::key_down(Input::Key::A))
             {
-                _position += right * dt * speed;
+                tr.position += right * dt * speed;
             }
             if (cologne::Input::key_down(Input::Key::D))
             {
-                _position -= right * dt * speed;
+                tr.position -= right * dt * speed;
             }
             if (cologne::Input::key_down(Input::Key::Space))
             {
-                _position += up * dt * speed;
+                tr.position += up * dt * speed;
             }
             if (cologne::Input::key_down(Input::Key::LeftCtrl))
             {
-                _position -= up * dt * speed;
+                tr.position -= up * dt * speed;
             }
-            get_component<TransformComponent>().position = _position;
         }
 
         void play_footstep(float dt)
@@ -177,7 +176,7 @@ namespace cologne
                 movement = glm::normalize(movement);
             }
 
-            glm::vec3 fwd = get_component<TransformComponent>().get_fwd();
+            glm::vec3 fwd = get_component<TransformComponent>().get_forward();
             fwd.y = 0.0f;
             fwd = glm::normalize(fwd);
             glm::vec3 a = glm::vec3(1.0f, 0.0f, 0.0f);

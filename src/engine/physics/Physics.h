@@ -15,6 +15,7 @@ namespace cologne::Physics
 
     static constexpr uint8_t NON_MOVING(0);
     static constexpr uint8_t MOVING(1);
+    static constexpr uint8_t PLAYER(2);
     uint32_t create_player(PlayerCreateInfo& info);
     void move_player(uint32_t id, PlayerMovementCommand cmd);
     bool player_is_grounded(uint32_t id);

@@ -37,7 +37,7 @@ using namespace JPH::literals;
 
 namespace cologne::Physics
 {
-    void TraceImpl(const char* inFMT, ...)
+    void TraceImpl(const char *inFMT, ...)
     {
         va_list list;
         va_start(list, inFMT);
@@ -53,7 +53,8 @@ namespace cologne::Physics
     {
         static constexpr ObjectLayer NON_MOVING = 0;
         static constexpr ObjectLayer MOVING = 1;
-        static constexpr ObjectLayer NUM_LAYERS = 2;
+        static constexpr ObjectLayer PLAYER = 2;
+        static constexpr ObjectLayer NUM_LAYERS = 3;
     }
 
     class ObjectLayerPairFilterImpl : public ObjectLayerPairFilter
@@ -63,13 +64,15 @@ namespace cologne::Physics
         {
             switch (inLayer1)
             {
-            case Layers::NON_MOVING:
-                return inLayer2 == Layers::MOVING;
-            case Layers::MOVING:
-                return true;
-            default:
-                assert(false);
-                return false;
+                case Layers::NON_MOVING:
+                    return inLayer2 == Layers::MOVING || inLayer2 == Layers::PLAYER;
+                case Layers::MOVING:
+                    return true;
+                case Layers::PLAYER:
+                    return inLayer2 == Layers::NON_MOVING;
+                default:
+                    assert(false);
+                    return false;
             }
         }
     };
@@ -102,14 +105,14 @@ namespace cologne::Physics
         }
 
 #if defined(JPH_EXTERNAL_PROFILE) || defined(JPH_PROFILE_ENABLED)
-        virtual const char* GetBroadPhaseLayerName(BroadPhaseLayer inLayer) const override
+        virtual const char *GetBroadPhaseLayerName(BroadPhaseLayer inLayer) const override
         {
-            switch ((BroadPhaseLayer::Type)inLayer)
+            switch ((BroadPhaseLayer::Type) inLayer)
             {
-            case (BroadPhaseLayer::Type)BroadPhaseLayers::NON_MOVING: return "NON_MOVING";
-            case (BroadPhaseLayer::Type)BroadPhaseLayers::MOVING: return "MOVING";
-            default: assert(false);
-                return "INVALID";
+                case (BroadPhaseLayer::Type) BroadPhaseLayers::NON_MOVING: return "NON_MOVING";
+                case (BroadPhaseLayer::Type) BroadPhaseLayers::MOVING: return "MOVING";
+                default: assert(false);
+                    return "INVALID";
             }
         }
 #endif // JPH_EXTERNAL_PROFILE || JPH_PROFILE_ENABLED
@@ -125,17 +128,51 @@ namespace cologne::Physics
         {
             switch (inLayer1)
             {
-            case Layers::NON_MOVING:
-                return inLayer2 == BroadPhaseLayers::MOVING;
-            case Layers::MOVING:
-                return true;
-            default:
-                assert(false);
-                return false;
+                case Layers::NON_MOVING:
+                    return inLayer2 == BroadPhaseLayers::MOVING;
+                case Layers::MOVING:
+                    return true;
+                case Layers::PLAYER:
+                    return true;
+                default:
+                    assert(false);
+                    return false;
             }
         }
     };
 
+    class RayCastLayerFilter final : public ObjectLayerFilter
+    {
+    private:
+        uint32_t _flags;
+
+    public:
+        explicit RayCastLayerFilter(uint32_t flags)
+        {
+            _flags = flags;
+        }
+
+        ~RayCastLayerFilter() override
+        {
+        }
+
+        bool ShouldCollide(ObjectLayer inLayer) const override
+        {
+            if (_flags == 0)
+            {
+                return true;
+            }
+            uint8_t layer_byte = static_cast<uint8_t>(inLayer);
+            for (int i = 0; i < 4; i++)
+            {
+                if (static_cast<uint8_t>(_flags >> (i * 8)) == layer_byte)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
 
     class PhysDebugRenderer : public JPH::DebugRendererSimple
     {
@@ -156,7 +193,7 @@ namespace cologne::Physics
                                                   glm::vec3(inColor.r, inColor.g, inColor.b));
         }
 
-        void DrawText3D(RVec3Arg inPosition, const string_view& inString, ColorArg inColor, float inHeight)
+        void DrawText3D(RVec3Arg inPosition, const string_view &inString, ColorArg inColor, float inHeight)
         {
             //TODO!
         }
@@ -172,13 +209,13 @@ namespace cologne::Physics
         glm::vec3 character_position;
     };
 
-    TempAllocatorImpl* temp_allocator = nullptr;
-    JobSystemThreadPool* job_system = nullptr;
+    TempAllocatorImpl *temp_allocator = nullptr;
+    JobSystemThreadPool *job_system = nullptr;
     BroadPhaseLayerImpl broad_phase_layer;
     ObjectVsBroadPhaseLayerFilterImpl object_vs_broad_phase_layer_filter;
     ObjectLayerPairFilterImpl object_vs_object_filter;
     PhysicsSystem physics_system;
-    PhysDebugRenderer* debug_renderer = nullptr;
+    PhysDebugRenderer *debug_renderer = nullptr;
     std::vector<JPH::BodyID> colliders_static;
     std::unordered_map<JPH::BodyID, Entity> entity_to_collider_map;
     std::unordered_map<uint32_t, PhysicsPlayer> physics_players;
@@ -204,7 +241,7 @@ namespace cologne::Physics
         physics_system.Init(max_bodies, max_body_mutexes, max_body_pairs, max_body_contact_constraints,
                             broad_phase_layer, object_vs_broad_phase_layer_filter, object_vs_object_filter);
 
-        auto& body_interface = physics_system.GetBodyInterface();
+        auto &body_interface = physics_system.GetBodyInterface();
         debug_renderer = new PhysDebugRenderer();
 
         physics_system.OptimizeBroadPhase();
@@ -212,13 +249,13 @@ namespace cologne::Physics
 
     void update(float dt)
     {
-        for (auto& physics_player : physics_players)
+        for (auto &physics_player: physics_players)
         {
-            auto& p = physics_player.second;
-            auto& character = p.character;
+            auto &p = physics_player.second;
+            auto &character = p.character;
             JPH::CharacterVirtual::ExtendedUpdateSettings update_settings;
             update_settings.mStickToFloorStepDown = -character->GetUp() * update_settings.mStickToFloorStepDown.
-                Length();
+                                                    Length();
             update_settings.mWalkStairsStepUp = character->GetUp() * update_settings.mWalkStairsStepUp.Length();
             character->ExtendedUpdate(
                 dt, character->GetUp() * physics_system.GetGravity().Length(), update_settings,
@@ -247,32 +284,32 @@ namespace cologne::Physics
         }
     }
 
-    JPH::PhysicsSystem* get_physics_system()
+    JPH::PhysicsSystem *get_physics_system()
     {
         return &physics_system;
     }
 
-    JPH::TempAllocator* get_temp_allocator()
+    JPH::TempAllocator *get_temp_allocator()
     {
         return temp_allocator;
     }
 
-    JPH::Vec3 glm_vec3_to_vec3(const glm::vec3& v)
+    JPH::Vec3 glm_vec3_to_vec3(const glm::vec3 &v)
     {
         return JPH::Vec3(v.x, v.y, v.z);
     }
 
-    JPH::Quat glm_quat_to_jph_quat(const glm::quat& q)
+    JPH::Quat glm_quat_to_jph_quat(const glm::quat &q)
     {
         return JPH::Quat(q.x, q.y, q.z, q.w).Normalized();
     }
 
-    glm::vec3 jph_vec3_to_glm_vec3(const JPH::Vec3& v)
+    glm::vec3 jph_vec3_to_glm_vec3(const JPH::Vec3 &v)
     {
         return glm::vec3(v.GetX(), v.GetY(), v.GetZ());
     }
 
-    uint32_t create_player(PlayerCreateInfo& info)
+    uint32_t create_player(PlayerCreateInfo &info)
     {
         PhysicsPlayer player;
         player.standing_shape = JPH::RotatedTranslatedShapeSettings(
@@ -294,7 +331,7 @@ namespace cologne::Physics
         settings->mSupportingVolume = JPH::Plane(JPH::Vec3::sAxisY(), -info.radius_standing);
         settings->mEnhancedInternalEdgeRemoval = false;
         settings->mInnerBodyShape = player.inner_standing_shape;
-        settings->mInnerBodyLayer = cologne::Physics::NON_MOVING;
+        settings->mInnerBodyLayer = cologne::Physics::PLAYER;
 
 
         player.character = new JPH::CharacterVirtual(settings, glm_vec3_to_vec3(info.position),
@@ -321,7 +358,7 @@ namespace cologne::Physics
             LOG_ERROR("NO PLAYER WITH id %d", id);
             return;
         }
-        auto& character = physics_players[id].character;
+        auto &character = physics_players[id].character;
         character->SetUp(glm_vec3_to_vec3(cmd.up));
         character->SetRotation(glm_quat_to_jph_quat(cmd.rotation));
         character->SetLinearVelocity(glm_vec3_to_vec3(cmd.movement));
@@ -384,18 +421,18 @@ namespace cologne::Physics
     }
 
 
-    JPH::Float3 glm_vec3_to_float3(const glm::vec3& v)
+    JPH::Float3 glm_vec3_to_float3(const glm::vec3 &v)
     {
         return JPH::Float3(v.x, v.y, v.z);
     }
 
-    JPH::Vec3 glm_vec3_to_jph_vec3(const glm::vec3& v)
+    JPH::Vec3 glm_vec3_to_jph_vec3(const glm::vec3 &v)
     {
         return JPH::Vec3(v.x, v.y, v.z);
     }
 
     uint32_t create_static_mesh_collider(Entity entity, TransformComponent transform,
-                                         const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
+                                         const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices)
     {
         JPH::TriangleList triangle_list;
         for (int i = 0; i * 3 < indices.size(); i++)
@@ -413,7 +450,7 @@ namespace cologne::Physics
         JPH::BodyCreationSettings settings(&mesh_settings, JPH::Vec3::sZero(),
                                            JPH::Quat::sIdentity(), JPH::EMotionType::Static,
                                            cologne::Physics::NON_MOVING);
-        auto& body_interface = physics_system.GetBodyInterface();
+        auto &body_interface = physics_system.GetBodyInterface();
         auto id = body_interface.CreateAndAddBody(
             settings, JPH::EActivation::DontActivate);
         const auto shape = body_interface.GetShape(id);
@@ -429,11 +466,12 @@ namespace cologne::Physics
         return id.GetIndexAndSequenceNumber();
     }
 
-    bool raycast(glm::vec3 origin, glm::vec3 direction, float max_distance, uint32_t layers, RaycastHitInfo& info)
+    bool raycast(glm::vec3 origin, glm::vec3 direction, float max_distance, uint32_t layers, RaycastHitInfo &info)
     {
-        RRayCast cast (glm_vec3_to_jph_vec3(origin), glm_vec3_to_jph_vec3(direction));
+        RRayCast cast(glm_vec3_to_jph_vec3(origin), glm_vec3_to_jph_vec3(direction * max_distance));
         RayCastResult result{};
-        if (!physics_system.GetNarrowPhaseQuery().CastRay(cast, result ))
+        RayCastLayerFilter filter(layers);
+        if (!physics_system.GetNarrowPhaseQuery().CastRay(cast, result, {}, filter))
         {
             return false;
         }
@@ -441,24 +479,18 @@ namespace cologne::Physics
         //HitPoint = Start + mFraction * (End - Start)
         const Vec3 outPosition = cast.mOrigin + result.mFraction * cast.mDirection;
         float mag = (outPosition + cast.mOrigin).Length();
-        if (mag > max_distance)
-        {
-            LOG_INFO("MAX DISTANCE");
-            return false;
-        }
-
         info.direction = direction;
         info.hit_length = mag;
         info.hit_point = jph_vec3_to_glm_vec3(outPosition);
         BodyLockRead lock(physics_system.GetBodyLockInterfaceNoLock(), result.mBodyID);
         if (lock.Succeeded())
         {
-            const Body& hit_body = lock.GetBody();
+            const Body &hit_body = lock.GetBody();
             const Vec3 normal = hit_body.GetWorldSpaceSurfaceNormal(result.mSubShapeID2, outPosition);
             info.hit_normal = jph_vec3_to_glm_vec3(normal);
-        }
-        else
+        } else
         {
+            info.hit_normal = glm::vec3(0.0f, 1.0f, 0.0f);
             return false;
         }
         info.hit_entity = entity_to_collider_map[result.mBodyID];

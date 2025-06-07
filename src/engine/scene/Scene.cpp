@@ -136,12 +136,9 @@ namespace cologne
         auto tr = camera.get_component<TransformComponent>();
         auto cm = camera.get_component<CameraComponent>();
 
-        glm::vec3 ray_start, ray_dir;
-        Util::get_screen_to_world_ray(
-            glm::vec2(Engine::get_window()->get_width() / 2, Engine::get_window()->get_height() / 2),
-            Renderer::get_camera_view(tr), Renderer::get_camera_projection(tr, cm), ray_start, ray_dir);
+        glm::vec3 ray_start = tr.position, ray_dir = tr.get_forward();
         RaycastHitInfo info;
-        if (Physics::raycast(ray_start, ray_dir, 99999.0f, 0, info))
+        if (Physics::raycast(ray_start, ray_dir, 20.0f, Physics::NON_MOVING | Physics::MOVING, info))
         {
             Entity hit_entity = info.hit_entity;
             if (hit_entity)
@@ -154,6 +151,7 @@ namespace cologne
                                                   glm::vec3(0.0f, 450.0f, 0.0f),
                                                   glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), .6f);
             }
+            Engine::get_renderer()->draw_line(info.hit_point, info.hit_point + info.hit_normal * 0.1f, info.hit_normal);
         }
 
         Engine::get_renderer()->submit_camera_transform(tr, cm);

@@ -18,19 +18,19 @@ namespace cologne
             return m;
         }
 
-        glm::vec3 get_fwd() const
+        glm::vec3 get_forward() const
         {
-            return glm::vec3(0.0f, 0.0f, 1.0f) * rotation;
+            return rotation * glm::vec3(0.0f, 0.0f, 1.0f);
         }
 
         glm::vec3 get_up() const
         {
-            return glm::vec3(0.0f, 1.0f, 0.0f) * rotation;
+            return rotation * glm::vec3(0.0f, 1.0f, 0.0f);
         }
 
         glm::vec3 get_right() const
         {
-            return glm::vec3(1.0f, 0.0f, 0.0f) * rotation;
+            return rotation * glm::vec3(1.0f, 0.0f, 0.0f);
         }
     };
 
