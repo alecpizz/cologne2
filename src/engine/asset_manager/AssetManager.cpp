@@ -4,6 +4,7 @@
 
 #include "AssetManager.h"
 #include <filesystem>
+#include <engine/util/DebugScope.h>
 #include <engine/util/FileUtil.h>
 
 namespace cologne::AssetManager
@@ -18,6 +19,7 @@ namespace cologne::AssetManager
 
     void init()
     {
+        DebugScope scope (__PRETTY_FUNCTION__);
         find_file_paths();
         for (size_t i = 0; i < models.size(); i++)
         {

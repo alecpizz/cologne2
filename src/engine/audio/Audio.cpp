@@ -4,6 +4,7 @@
 
 #include "Audio.h"
 
+#include <engine/util/DebugScope.h>
 #include <SDL3_mixer/SDL_mixer.h>
 
 namespace cologne::Audio
@@ -12,6 +13,7 @@ namespace cologne::Audio
     std::unordered_map<std::string, Mix_Chunk*> sounds;
     void init()
     {
+        DebugScope scope("Audio::init");
         if (!Mix_OpenAudio(0, nullptr))
         {
             LOG_ERROR("Failed to start SDL_MIXER! Error: %s", SDL_GetError());

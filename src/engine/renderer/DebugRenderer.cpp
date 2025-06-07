@@ -2,7 +2,7 @@
 
 #include <engine/core/Engine.h>
 
-#include "DebugScope.h"
+#include "OpenGLDebugScope.h"
 #include "engine/core/Input.h"
 #include "../renderer/types/Shader.h"
 
@@ -71,7 +71,7 @@ namespace cologne
                 cmds.clear();
                 return;
             }
-            DebugScope scope("DebugRenderer::draw");
+            OpenGLDebugScope scope("DebugRenderer::draw");
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);
             glDisable(GL_BLEND);

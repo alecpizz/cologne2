@@ -4,6 +4,8 @@
 
 #include "Window.h"
 
+#include <engine/util/DebugScope.h>
+
 #include "../editor/DebugUI.h"
 #include <SDL3/SDL.h>
 
@@ -129,6 +131,7 @@ namespace cologne
 
     Window::Window(uint32_t width, uint32_t height)
     {
+        DebugScope scope (__PRETTY_FUNCTION__);
         _impl = new Impl();
         _impl->init(width, height);
         // hide_mouse();

@@ -1,6 +1,6 @@
 ﻿
 #include <engine/core/Engine.h>
-#include <engine/renderer/DebugScope.h>
+#include <engine/renderer/OpenGLDebugScope.h>
 #include <engine/renderer/types/Shader.h>
 
 
@@ -192,7 +192,7 @@ namespace cologne
 
     void Renderer::shadow_pass()
     {
-        DebugScope scope("Renderer::shadow_pass");
+        OpenGLDebugScope scope("Renderer::shadow_pass");
         _cam_view = get_camera_view(_camera_transform);
         auto light = get_directional_light();
         shadowCascadeLevels[0] = (shadow_far / 50.0f);

@@ -1,5 +1,5 @@
 ﻿#include <engine/core/Engine.h>
-#include <engine/renderer/DebugScope.h>
+#include <engine/renderer/OpenGLDebugScope.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Shader.h>
 //
@@ -61,7 +61,7 @@ namespace cologne
             return;
         }
 
-        DebugScope scope("Renderer::debug_voxel_pass");
+        OpenGLDebugScope scope("Renderer::debug_voxel_pass");
 
         Shader *world_pos_shader = get_shader_by_name("world_pos_shader");
         world_pos_shader->bind();
@@ -119,7 +119,7 @@ namespace cologne
 
     void Renderer::voxelize_scene()
     {
-        DebugScope scope("Renderer::voxelize_scene");
+        OpenGLDebugScope scope("Renderer::voxelize_scene");
         auto scene = Engine::get_scene();
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);

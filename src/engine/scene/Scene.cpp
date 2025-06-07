@@ -11,6 +11,7 @@
 #include <engine/util/FileUtil.h>
 #include <engine/scripts/CameraController.h>
 #include <engine/scripts/PlayerController.h>
+#include <engine/util/DebugScope.h>
 
 #include "Components.h"
 #include "Entity.h"
@@ -26,6 +27,7 @@ namespace cologne
 
     Scene::Scene()
     {
+        DebugScope scope (__PRETTY_FUNCTION__);
         //Create entities
         Entity sponza = create_entity("sponza");
         sponza.get_component<TransformComponent>().scale = glm::vec3(0.01f);

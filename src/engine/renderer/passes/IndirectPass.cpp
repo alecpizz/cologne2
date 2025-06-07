@@ -1,7 +1,7 @@
 ﻿
 #include <engine/renderer/Renderer.h>
 #include <engine/core/Engine.h>
-#include <engine/renderer/DebugScope.h>
+#include <engine/renderer/OpenGLDebugScope.h>
 #include <engine/renderer/types/Shader.h>
 
 namespace cologne
@@ -29,7 +29,7 @@ namespace cologne
         {
             return;
         }
-        DebugScope scope("Renderer::indirect_pass");
+        OpenGLDebugScope scope("Renderer::indirect_pass");
         Shader* shader = get_shader_by_name("indirect");
         if (!shader)
         {

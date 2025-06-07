@@ -3,7 +3,7 @@
 //
 #include "engine/core/Engine.h"
 
-#include "engine/renderer/DebugScope.h"
+#include "engine/renderer/OpenGLDebugScope.h"
 #include "engine/renderer/types/FrameBuffer.h"
 #include "engine/renderer/Renderer.h"
 #include "engine/renderer/types/Shader.h"
@@ -58,7 +58,7 @@ namespace cologne
 
     void Renderer::geometry_pass()
     {
-        DebugScope scope("Renderer::geometry_pass");
+        OpenGLDebugScope scope("Renderer::geometry_pass");
 
         auto fbo = get_framebuffer_by_name("gbuffer");
         fbo->bind();

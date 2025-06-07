@@ -4,6 +4,7 @@
 
 #include "Physics.h"
 
+#include <engine/util/DebugScope.h>
 #include "RaycastHitInfo.h"
 #include <engine/core/Engine.h>
 #include <engine/core/Input.h>
@@ -225,6 +226,7 @@ namespace cologne::Physics
     void init()
     {
         LOG_INFO("Initializing Physics");
+        DebugScope scope("Physics::init");
 
         RegisterDefaultAllocator();
         Trace = TraceImpl;

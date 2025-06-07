@@ -3,7 +3,7 @@
 //
 #include <engine/core/Engine.h>
 #include <engine/core/Time.h>
-#include <engine/renderer/DebugScope.h>
+#include <engine/renderer/OpenGLDebugScope.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Shader.h>
 
@@ -12,7 +12,7 @@ namespace cologne
 {
     void Renderer::lit_pass()
     {
-        DebugScope scope("Renderer::lit_pass");
+        OpenGLDebugScope scope("Renderer::lit_pass");
         auto shader = get_shader_by_name("lit");
         auto output_fbo = get_framebuffer_by_name("output");
         auto gbuffer_fbo = get_framebuffer_by_name("gbuffer");

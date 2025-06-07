@@ -4,12 +4,14 @@
 
 #include "Renderer.h"
 
+#include <engine/util/DebugScope.h>
+
 #include "DebugRenderer.h"
 #include "engine/core/Engine.h"
 #include "engine/core/Input.h"
 
 #include "engine/editor/DebugUI.h"
-#include "DebugScope.h"
+#include "OpenGLDebugScope.h"
 #include "../renderer/types/FrameBuffer.h"
 #include "../renderer/types/Light.h"
 #include "openglErrorReporting.h"
@@ -346,7 +348,8 @@ namespace cologne
 
     Renderer::Renderer()
     {
-        DebugScope scope("initialization");
+        OpenGLDebugScope scope("initialization");
+        DebugScope scope2 (__PRETTY_FUNCTION__);
         init();
     }
 }

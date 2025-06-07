@@ -3,7 +3,7 @@
 //
 
 #include <engine/core/Engine.h>
-#include <engine/renderer/DebugScope.h>
+#include <engine/renderer/OpenGLDebugScope.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Shader.h>
 
@@ -95,7 +95,7 @@ namespace cologne
 
     void Renderer::skybox_pass()
     {
-        DebugScope scope("Renderer::skybox_pass");
+        OpenGLDebugScope scope("Renderer::skybox_pass");
         auto fbo = get_framebuffer_by_name("output");
         fbo->bind();
         glDisable(GL_CULL_FACE);

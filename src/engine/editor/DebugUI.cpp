@@ -6,6 +6,7 @@
 
 #include <engine/core/Engine.h>
 #include <engine/scene/Entity.h>
+#include <engine/util/DebugScope.h>
 
 #include "engine/imguiThemes.h"
 
@@ -59,6 +60,7 @@ namespace cologne
 
     DebugUI::DebugUI()
     {
+        cologne::DebugScope scope (__PRETTY_FUNCTION__);
         ImGui::CreateContext();
         imguiThemes::green();
         ImGuiIO &io = ImGui::GetIO();
