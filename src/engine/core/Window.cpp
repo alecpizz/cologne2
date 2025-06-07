@@ -24,6 +24,7 @@ namespace cologne
             if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO))
             {
                 LOG_ERROR("SDL_Init Error: %s", SDL_GetError());
+                return;
             }
 
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
@@ -36,7 +37,9 @@ namespace cologne
             window = SDL_CreateWindow("cologne 2", w, h, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
             if (window == nullptr)
             {
+                LOG_ERROR("SDL_CreateWindow Error: %s", SDL_GetError());
                 SDL_Quit();
+                return;
             }
             SDL_SetWindowBordered(window, false);
             SDL_RaiseWindow(window);

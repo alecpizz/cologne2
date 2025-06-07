@@ -27,6 +27,8 @@ project(cologne)
 
 include(FetchContent)
 
+set(SDL_OPENGL_AVAILABLE 1)
+set(SDL_GL ON)
 set(SDL_STATIC ON)
 set(SDLMIXER_VENDORED OFF)
 set(SDLMIXER_STATIC ON)
@@ -88,9 +90,7 @@ file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/
 
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
-add_executable("${CMAKE_PROJECT_NAME}"
-        src/engine/renderer/types/Probe.cpp
-        src/engine/renderer/types/Probe.h)
+add_executable("${CMAKE_PROJECT_NAME}")
 
 set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY CXX_STANDARD 20)
 
