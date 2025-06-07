@@ -52,7 +52,7 @@ namespace cologne
             glm::quat y_quat = glm::angleAxis(glm::radians(_rotation.y),
                                               glm::vec3(1.0f, 0.0f, 0.0f));
             glm::quat target_rotation = x_quat * y_quat;
-            get_component<TransformComponent>().rotation = target_rotation;
+            get_component<PlayerComponent>().camera.get_component<TransformComponent>().rotation = target_rotation;
             glm::vec3 fwd = target_rotation * glm::vec3(0.0f, 0.0f, 1.0f);
             glm::vec3 right = target_rotation * glm::vec3(1.0f, 0.0f, 0.0f);
             glm::vec3 up = target_rotation * glm::vec3(0.0f, 1.0f, 0.0f);
@@ -68,7 +68,7 @@ namespace cologne
             }
 
             float speed = 10.0f;
-            auto& tr = get_component<TransformComponent>();
+            auto &tr = get_component<PlayerComponent>().camera.get_component<TransformComponent>();
             if (cologne::Input::key_down(Input::Key::LeftShift))
             {
                 speed *= 2.5f;
@@ -176,14 +176,7 @@ namespace cologne
                 movement = glm::normalize(movement);
             }
 
-            glm::vec3 fwd = get_component<TransformComponent>().get_forward();
-            fwd.y = 0.0f;
-            fwd = glm::normalize(fwd);
-            glm::vec3 a = glm::vec3(1.0f, 0.0f, 0.0f);
-            glm::vec3 b = fwd;
-            float dot = glm::dot(a, b);
-            glm::quat rotation = glm::quat(dot, glm::cross(a, b));
-            movement = get_component<TransformComponent>().rotation * movement;
+            movement = get_component<PlayerComponent>().camera.get_component<TransformComponent>().rotation * movement;
             movement.y = 0.0f;
             _desired_velocity = movement * _character_speed;
 
@@ -230,9 +223,12 @@ namespace cologne
             if (!_is_free_cam)
             {
                 play_footstep(dt);
-                get_component<TransformComponent>().position = Physics::get_player_position(
-                                                                   get_component<PlayerComponent>().id) + glm::vec3(
-                                                                   0.0f, 1.45f + _bob_offset, 0.0f);
+                glm::vec3 player_pos = Physics::get_player_position(
+                    get_component<PlayerComponent>().id);
+                glm::vec3 camera_pos = player_pos + glm::vec3(
+                                    0.0f, 1.45f + _bob_offset, 0.0f);
+                get_component<PlayerComponent>().camera.get_component<TransformComponent>().position = camera_pos;
+                get_component<TransformComponent>().position = player_pos;
             }
         }
     };

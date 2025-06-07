@@ -55,12 +55,13 @@ namespace cologne
         revolver.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("Rig|Rig|MK_ReloadFull"));
 
         camera = create_entity("camera");
-        camera.add_component<NativeScriptComponent>().bind<PlayerController>();
+        camera.add_component<CameraComponent>();
 
+        Entity player = create_entity("player");
+        player.add_component<NativeScriptComponent>().bind<PlayerController>();
         PlayerCreateInfo info;
         info.position = glm::vec3(-5.0f, 2.0f, 5.0f);
-        camera.add_component<PlayerComponent>(Physics::create_player(info));
-        camera.add_component<CameraComponent>();
+        player.add_component<PlayerComponent>(Physics::create_player(info), camera);
 
         re_calculate_bounds();
         // auto& skinned_model = add_skinned_model(RESOURCES_PATH "python/deagle.glb");

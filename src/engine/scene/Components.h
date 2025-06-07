@@ -71,7 +71,9 @@ namespace cologne
     struct PlayerComponent
     {
         uint32_t id = -1;
+        Entity camera = {};
     };
+
 
     struct NativeScriptComponent
     {
