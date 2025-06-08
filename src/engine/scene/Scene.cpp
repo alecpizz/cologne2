@@ -12,7 +12,6 @@
 #include <engine/scripts/CameraController.h>
 #include <engine/scripts/PlayerController.h>
 #include <engine/util/DebugScope.h>
-
 #include "Components.h"
 #include "Entity.h"
 #include "engine/physics/RaycastHitInfo.h"
@@ -27,7 +26,7 @@ namespace cologne
 
     Scene::Scene()
     {
-        DebugScope scope (__PRETTY_FUNCTION__);
+        DebugScope scope(__PRETTY_FUNCTION__);
         //Create entities
         Entity sponza = create_entity("sponza");
         sponza.get_component<TransformComponent>().scale = glm::vec3(0.01f);
@@ -35,7 +34,7 @@ namespace cologne
 
         auto model = AssetManager::get_model_by_name("sponza2");
         auto tr = sponza.get_component<TransformComponent>();
-        for (auto& mesh : model->get_meshes())
+        for (auto &mesh: model->get_meshes())
         {
             Entity collider = create_entity(mesh.get_name());
             collider.get_component<TransformComponent>() = tr;
@@ -59,11 +58,16 @@ namespace cologne
         camera = create_entity("camera");
         camera.add_component<CameraComponent>();
 
+        Entity viewModel = create_entity("viewmodel");
+        viewModel.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
+        viewModel.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("Rig|Rig|MK_Idle"));
+        viewModel.add_component<ViewmodelComponent>();
+
         Entity player = create_entity("player");
         player.add_component<NativeScriptComponent>().bind<PlayerController>();
         PlayerCreateInfo info;
-        info.position = glm::vec3(-5.0f, 2.0f, 5.0f);
-        player.add_component<PlayerComponent>(Physics::create_player(info), camera);
+        info.position = glm::vec3(-3.0f, 2.0f, 0.0f);
+        player.add_component<PlayerComponent>(Physics::create_player(info), camera, viewModel);
 
         re_calculate_bounds();
         // auto& skinned_model = add_skinned_model(RESOURCES_PATH "python/deagle.glb");
@@ -91,8 +95,8 @@ namespace cologne
         LOG_INFO("Scene size is (%f, %f, %f)", _scene_bounds.size().x, _scene_bounds.size().y, _scene_bounds.size().z);
         _particles.emplace_back(Particles());
         _particles[0].init(_scene_bounds, 20);
-        Engine::get_debug_ui()->add_vec3_entry("gun position", gun_offset_temp);
-        Engine::get_debug_ui()->add_vec3_entry("gun euler", gun_offset_euler_temp);
+        // Engine::get_debug_ui()->add_vec3_entry("gun position", vm.position_offset);
+        // Engine::get_debug_ui()->add_vec3_entry("gun euler", vm.euler_offset);
     }
 
     Scene::~Scene()
@@ -105,15 +109,15 @@ namespace cologne
     void Scene::update(float delta_time)
     {
         //compute shaders. should do skinning here too :3
-        for (auto& particle : Engine::get_scene()->get_particles())
+        for (auto &particle: Engine::get_scene()->get_particles())
         {
             particle.simulate();
         }
 
         //native scripting
-        for (auto entity : _registry.view<NativeScriptComponent, ActiveComponent>())
+        for (auto entity: _registry.view<NativeScriptComponent, ActiveComponent>())
         {
-            auto& nsc = _registry.get<NativeScriptComponent>(entity);
+            auto &nsc = _registry.get<NativeScriptComponent>(entity);
             if (!nsc.instance)
             {
                 nsc.instance = nsc.instantiate_script();
@@ -130,9 +134,9 @@ namespace cologne
 
 
         auto animators = _registry.view<AnimatorComponent>();
-        for (auto entity : animators)
+        for (auto entity: animators)
         {
-            auto& animator = _registry.get<AnimatorComponent>(entity);
+            auto &animator = _registry.get<AnimatorComponent>(entity);
             animator.update_animation(delta_time);
         }
 
@@ -162,24 +166,24 @@ namespace cologne
 
         //submit draw calls
         auto view = _registry.view<ModelComponent, TransformComponent, ActiveComponent>();
-        for (auto entity : view)
+        for (auto entity: view)
         {
             auto [m, tr, active] =
-                view.get<ModelComponent, TransformComponent, ActiveComponent>(entity);
+                    view.get<ModelComponent, TransformComponent, ActiveComponent>(entity);
             //culling step would be here probably? though for GI i dunno. might have to pack into render item
             if (!active)
             {
                 continue;
             }
-            Model* model = AssetManager::get_model_by_index(m.id);
+            Model *model = AssetManager::get_model_by_index(m.id);
             Engine::get_renderer()->submit_render_item(RenderItem(model, tr, m.gi_only));
         }
 
         auto view2 = _registry.view<SkinnedModelComponent, TransformComponent, ActiveComponent>();
-        for (auto entity : view2)
+        for (auto entity: view2)
         {
             auto [m, tr, active] =
-                view2.get<SkinnedModelComponent, TransformComponent, ActiveComponent>(entity);
+                    view2.get<SkinnedModelComponent, TransformComponent, ActiveComponent>(entity);
             //culling step would be here probably? though for GI i dunno. might have to pack into render item
             if (!active)
             {
@@ -188,10 +192,10 @@ namespace cologne
             SkinnedRenderItem item;
             if (_registry.all_of<AnimatorComponent>(entity))
             {
-                auto& animator = _registry.get<AnimatorComponent>(entity);
+                auto &animator = _registry.get<AnimatorComponent>(entity);
                 item.bones = animator.get_bones();
             }
-            SkinnedModel* skinned_model = AssetManager::get_skinned_model_by_index(m.id);
+            SkinnedModel *skinned_model = AssetManager::get_skinned_model_by_index(m.id);
             item.skinned_model = skinned_model;
             item.transform = tr;
             Engine::get_renderer()->submit_skinned_render_item(item);
@@ -227,7 +231,7 @@ namespace cologne
     {
         _scene_bounds = {};
         auto view = _registry.view<TransformComponent, ModelComponent>();
-        for (const auto entity : view)
+        for (const auto entity: view)
         {
             auto [tr, m] = view.get<TransformComponent, ModelComponent>(entity);
             const auto model = AssetManager::get_model_by_index(m.id);
@@ -245,12 +249,12 @@ namespace cologne
         return _scene_bounds;
     }
 
-    std::vector<Particles>& Scene::get_particles()
+    std::vector<Particles> &Scene::get_particles()
     {
         return _particles;
     }
 
-    Entity Scene::create_entity(const std::string& name)
+    Entity Scene::create_entity(const std::string &name)
     {
         //all entities have a transform, a tag/name, and a bool for whether or not they are currently active
         Entity entity = {_registry.create(), this};

@@ -1,4 +1,6 @@
 #pragma once
+#include <engine/physics/Physics.h>
+
 #include "ScriptableEntity.h"
 
 namespace cologne
@@ -72,6 +74,17 @@ namespace cologne
     {
         uint32_t id = -1;
         Entity camera = {};
+        Entity viewmodel = {};
+        void teleport_to_position(glm::vec3 pos)
+        {
+            cologne::Physics::teleport_player(id, pos);
+        }
+    };
+
+    struct ViewmodelComponent
+    {
+        glm::vec3 position_offset = glm::vec3(0.045, -0.270, -0.255);
+        glm::vec3 euler_offset = glm::vec3(0.0f, 180.0f, 0.0f);
     };
 
 

@@ -366,6 +366,18 @@ namespace cologne::Physics
         character->SetLinearVelocity(glm_vec3_to_vec3(cmd.movement));
     }
 
+    void teleport_player(uint32_t id, glm::vec3 position)
+    {
+        if (!physics_players.contains(id))
+        {
+            return;
+        }
+
+        auto& player = physics_players[id];
+        auto& character = player.character;
+        character->SetPosition(glm_vec3_to_vec3(position));
+    }
+
     bool player_is_grounded(uint32_t id)
     {
         if (!physics_players.contains(id))

@@ -1,10 +1,11 @@
 #pragma once
 #include <engine/renderer/types/Model.h>
-#include <engine/scene/Components.h>
 
 namespace cologne
 {
     struct RaycastHitInfo;
+    struct TransformComponent;
+    class Entity;
 }
 
 namespace cologne::Physics
@@ -18,6 +19,7 @@ namespace cologne::Physics
     static constexpr uint8_t PLAYER(2);
     uint32_t create_player(PlayerCreateInfo& info);
     void move_player(uint32_t id, PlayerMovementCommand cmd);
+    void teleport_player(uint32_t id, glm::vec3 position);
     bool player_is_grounded(uint32_t id);
     bool player_is_supported(uint32_t id);
     bool slope_to_steep_for_player(uint32_t id);

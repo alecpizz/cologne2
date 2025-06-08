@@ -10,8 +10,8 @@ namespace cologne
     private:
         std::vector<std::string> _footstep_sounds;
         glm::vec2 _rotation = glm::vec2(0.0f);
-        bool _is_free_cam = true;
-        bool _show_mouse = true;
+        bool _is_free_cam = false;
+        bool _show_mouse = false;
         bool _allow_sliding = true;
         float _jump_speed = 4.0f;
         float _character_speed = 3.5f;
@@ -27,7 +27,7 @@ namespace cologne
             if (cologne::Input::key_pressed(Input::Key::Escape))
             {
                 _show_mouse = !_show_mouse;
-                if (!_show_mouse)
+                if (_show_mouse)
                 {
                     Engine::get_window()->show_mouse();
                 } else
@@ -57,6 +57,7 @@ namespace cologne
             glm::vec3 right = target_rotation * glm::vec3(1.0f, 0.0f, 0.0f);
             glm::vec3 up = target_rotation * glm::vec3(0.0f, 1.0f, 0.0f);
 
+            bool was_free_cam = _is_free_cam;
             if (Input::key_pressed(Input::Key::F))
             {
                 _is_free_cam = !_is_free_cam;
@@ -129,6 +130,24 @@ namespace cologne
             }
         }
 
+        void move_viewmodel()
+        {
+            glm::mat4 gun_mat = glm::mat4(1.0f);
+            auto &viewmodel = get_component<PlayerComponent>().viewmodel.get_component<ViewmodelComponent>();
+            auto &cam_transform = get_component<PlayerComponent>().camera.get_component<TransformComponent>();
+            gun_mat = glm::translate(gun_mat, viewmodel.position_offset);
+            gun_mat *= glm::toMat4(glm::quat(glm::radians(glm::vec3(viewmodel.euler_offset))));
+            gun_mat = glm::inverse(Renderer::get_camera_view(cam_transform)) * gun_mat;
+            glm::quat orientation;
+            glm::vec3 translation;
+            glm::vec3 scale;
+            glm::vec4 persp;
+            glm::vec3 skew;
+            glm::decompose(gun_mat, scale, orientation, translation, skew, persp);
+            get_component<PlayerComponent>().viewmodel.get_component<TransformComponent>().position = translation;
+            get_component<PlayerComponent>().viewmodel.get_component<TransformComponent>().rotation = orientation;
+        }
+
     protected:
         void on_create() override
         {
@@ -149,6 +168,13 @@ namespace cologne
         void on_update(float dt) override
         {
             update_camera(dt);
+            if (_is_free_cam)
+            {
+                get_component<PlayerComponent>().teleport_to_position(
+                    get_component<PlayerComponent>().camera.get_component<TransformComponent>().position);
+                move_viewmodel();
+                return;
+            }
             float x = 0.0f;
             float y = 0.0f;
             if (cologne::Input::key_down(cologne::Input::Key::W))
@@ -220,16 +246,15 @@ namespace cologne
             cmd.movement = new_velocity;
 
             Physics::move_player(get_component<PlayerComponent>().id, cmd);
-            if (!_is_free_cam)
-            {
-                play_footstep(dt);
-                glm::vec3 player_pos = Physics::get_player_position(
-                    get_component<PlayerComponent>().id);
-                glm::vec3 camera_pos = player_pos + glm::vec3(
-                                    0.0f, 1.45f + _bob_offset, 0.0f);
-                get_component<PlayerComponent>().camera.get_component<TransformComponent>().position = camera_pos;
-                get_component<TransformComponent>().position = player_pos;
-            }
+
+            play_footstep(dt);
+            glm::vec3 player_pos = Physics::get_player_position(
+                get_component<PlayerComponent>().id);
+            glm::vec3 camera_pos = player_pos + glm::vec3(
+                                       0.0f, 1.45f + _bob_offset, 0.0f);
+            get_component<PlayerComponent>().camera.get_component<TransformComponent>().position = camera_pos;
+            get_component<TransformComponent>().position = player_pos;
+            move_viewmodel();
         }
     };
 }

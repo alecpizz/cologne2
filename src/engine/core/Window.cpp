@@ -134,7 +134,7 @@ namespace cologne
         DebugScope scope (__PRETTY_FUNCTION__);
         _impl = new Impl();
         _impl->init(width, height);
-        // hide_mouse();
+        hide_mouse();
     }
 
     Window::~Window()
