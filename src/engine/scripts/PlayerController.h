@@ -292,8 +292,7 @@ namespace cologne
             play_footstep(dt);
             glm::vec3 player_pos = Physics::get_player_position(
                 get_component<PlayerComponent>().id);
-            glm::vec3 camera_pos = player_pos + glm::vec3(
-                                       0.0f, 1.45f + _bob_offset, 0.0f);
+            glm::vec3 camera_pos = player_pos + glm::vec3(0.0f, 1.45f, 0.0f);
             get_component<PlayerComponent>().camera.get_component<TransformComponent>().position = camera_pos;
             get_component<TransformComponent>().position = player_pos;
             move_viewmodel(dt);
