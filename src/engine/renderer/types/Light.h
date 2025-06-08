@@ -25,6 +25,5 @@ namespace cologne
         glm::vec3 color = glm::vec3(1, 0.7799999713897705, 0.5289999842643738);
         float radius = 6.0f;
         LightType type = LightType::Directional;
-
     };
 }

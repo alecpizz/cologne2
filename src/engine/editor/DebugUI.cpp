@@ -119,6 +119,19 @@ namespace cologne
 
                 build_transform_entry(tr);
 
+                if (e.has_component<ViewmodelComponent>())
+                {
+                    auto& vm = e.get_component<ViewmodelComponent>();
+                    ImGui::DragFloat("smoothing", &vm.smoothing, 0.1f);
+                    ImGui::DragFloat("amplitude", &vm.amplitude, 0.01f);
+                    ImGui::DragFloat("frequency", &vm.frequency, 0.1f);
+                    ImGui::DragFloat("vertical velocity multi", &vm.vertical_velocity_multiplier, 0.01f);
+                    ImGui::DragFloat("max vertical offset", &vm.max_vertical_offset, 0.01f);
+                    ImGui::DragFloat("sway multiplier", &vm.sway_multiplier);
+                    ImGui::DragFloat3("position offset", glm::value_ptr(vm.position_offset));
+                    ImGui::DragFloat3("euler offset", glm::value_ptr(vm.euler_offset));
+                }
+
                 // if (e.has_component<ModelComponent>())
                 // {
                 //     auto& model = e.get_component<ModelComponent>();

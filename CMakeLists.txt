@@ -13,7 +13,9 @@ option(PRODUCTION_BUILD "Make this a production build" OFF)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE) #link time optimization
+
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG FALSE) #link time optimization
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE) #link time optimization
 #set(CMAKE_LINKER "mold")
 #set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=mold")
 #set(CMAKE_SHARED_LINKER_FLAGS "-fuse-ld=mold")
@@ -24,6 +26,9 @@ else()
 endif ()
 
 project(cologne)
+
+
+
 
 include(FetchContent)
 
