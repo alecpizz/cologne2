@@ -85,6 +85,12 @@ namespace cologne
     {
         glm::vec3 position_offset = glm::vec3(0.045, -0.270, -0.255);
         glm::vec3 euler_offset = glm::vec3(0.0f, 180.0f, 0.0f);
+        float sway_multiplier = 20.0f;
+        float smoothing = 8.0f;
+        float amplitude = 0.01f;
+        float frequency = 10.0f;
+        float vertical_velocity_multiplier = 0.01f;
+        float max_vertical_offset = 0.05f;
     };
 
 

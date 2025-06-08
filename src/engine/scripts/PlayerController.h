@@ -22,6 +22,10 @@ namespace cologne
         float _bob_time = 0.0f;
         float _bob_offset = 0.0f;
 
+        //view model stuff
+        float _time = 0.0f;
+        TransformComponent _prev_transform;
+
         void update_camera(float dt)
         {
             if (cologne::Input::key_pressed(Input::Key::Escape))
@@ -46,7 +50,6 @@ namespace cologne
             _rotation.x += mouse.x * sensitivity * dt;
             _rotation.y += mouse.y * sensitivity * dt;
             _rotation.y = glm::clamp(_rotation.y, -89.0f, 89.0f);
-
             glm::quat x_quat = glm::angleAxis(glm::radians(-_rotation.x),
                                               glm::vec3(0.0f, 1.0f, 0.0f));
             glm::quat y_quat = glm::angleAxis(glm::radians(_rotation.y),
@@ -130,13 +133,51 @@ namespace cologne
             }
         }
 
-        void move_viewmodel()
+        void move_viewmodel(float dt)
         {
-            glm::mat4 gun_mat = glm::mat4(1.0f);
+            if (Engine::get_event_manager()->paused())
+            {
+                return;
+            }
+
+            glm::vec2 mouse = Input::get_relative_mouse();
             auto &viewmodel = get_component<PlayerComponent>().viewmodel.get_component<ViewmodelComponent>();
+            float mouse_x = mouse.x * viewmodel.sway_multiplier * dt;
+            float mouse_y = mouse.y * viewmodel.sway_multiplier * dt;
+
+            glm::quat x_rotation = glm::angleAxis(glm::radians(-mouse_y), glm::vec3(1.0f, 0.0f, 0.0f));
+            glm::quat y_rotation = glm::angleAxis(glm::radians(-mouse_x), glm::vec3(0.0, 1.0f, 0.0f));
+            glm::quat target_rotation = x_rotation * y_rotation;
+            glm::quat new_rotation = glm::slerp(_prev_transform.rotation,
+                                                target_rotation * glm::quat(
+                                                    glm::radians(glm::vec3(viewmodel.euler_offset))),
+                                                    dt * viewmodel.smoothing);
+            glm::vec3 velocity = Physics::get_player_velocity(get_component<PlayerComponent>().id);
+            float y_vel = velocity.y;
+            velocity.y = 0.0f;
+            if (glm::length2(velocity) > 0.0f)
+            {
+                _time += dt;
+            }
+            else
+            {
+                _time = 0.0f;
+            }
+
+            glm::vec3 bob = glm::vec3(0.0f);
+            bob.y += glm::sin(_time * viewmodel.frequency) * viewmodel.amplitude;
+            bob.x += glm::cos(_time * viewmodel.frequency / 2.0f) * viewmodel.amplitude * 2.0f;
+            bob.y += glm::clamp(-y_vel * viewmodel.vertical_velocity_multiplier,
+                -viewmodel.max_vertical_offset, viewmodel.max_vertical_offset);
+            glm::vec3 new_position = glm::lerp(_prev_transform.position,
+                bob + viewmodel.position_offset, dt * viewmodel.smoothing);
+            _prev_transform.position = new_position;
+            _prev_transform.rotation = new_rotation;
+
+            glm::mat4 gun_mat = glm::mat4(1.0f);
             auto &cam_transform = get_component<PlayerComponent>().camera.get_component<TransformComponent>();
-            gun_mat = glm::translate(gun_mat, viewmodel.position_offset);
-            gun_mat *= glm::toMat4(glm::quat(glm::radians(glm::vec3(viewmodel.euler_offset))));
+            gun_mat = glm::translate(gun_mat, new_position);
+            gun_mat *= glm::toMat4(new_rotation);
             gun_mat = glm::inverse(Renderer::get_camera_view(cam_transform)) * gun_mat;
             glm::quat orientation;
             glm::vec3 translation;
@@ -144,6 +185,7 @@ namespace cologne
             glm::vec4 persp;
             glm::vec3 skew;
             glm::decompose(gun_mat, scale, orientation, translation, skew, persp);
+
             get_component<PlayerComponent>().viewmodel.get_component<TransformComponent>().position = translation;
             get_component<PlayerComponent>().viewmodel.get_component<TransformComponent>().rotation = orientation;
         }
@@ -172,7 +214,7 @@ namespace cologne
             {
                 get_component<PlayerComponent>().teleport_to_position(
                     get_component<PlayerComponent>().camera.get_component<TransformComponent>().position);
-                move_viewmodel();
+                move_viewmodel(dt);
                 return;
             }
             float x = 0.0f;
@@ -254,7 +296,7 @@ namespace cologne
                                        0.0f, 1.45f + _bob_offset, 0.0f);
             get_component<PlayerComponent>().camera.get_component<TransformComponent>().position = camera_pos;
             get_component<TransformComponent>().position = player_pos;
-            move_viewmodel();
+            move_viewmodel(dt);
         }
     };
 }
