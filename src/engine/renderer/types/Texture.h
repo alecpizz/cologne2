@@ -24,7 +24,10 @@ namespace cologne
 
         bool is_valid() const;
 
+        void load();
+
     private:
+        std::vector<unsigned char> _data;
         uint32_t _handle = 0;
         uint32_t _width = 0;
         uint32_t _height = 0;

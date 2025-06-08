@@ -28,5 +28,15 @@ namespace cologne
             normal.bind(NORMAL_INDEX);
             emission.bind(EMISSION_INDEX);
         }
+
+        void load_all()
+        {
+            albedo.load();
+            ao.load();
+            metallic.load();
+            roughness.load();
+            normal.load();
+            emission.load();
+        }
     };
 }

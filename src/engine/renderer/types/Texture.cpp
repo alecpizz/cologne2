@@ -40,53 +40,16 @@ namespace cologne
 
     Texture::Texture(unsigned char *data, uint32_t width, uint32_t height)
     {
-        int new_width, new_height, new_channels;
-        stbi_uc *image_data;
+        // int new_width, new_height, new_channels;
+        _width = width;
+        _height = height;
         if (height == 0)
         {
-            image_data = stbi_load_from_memory(data, width, &new_width, &new_height, &new_channels, 0);
+            _data = std::vector<unsigned char>(data, data + width);
         } else
         {
-            image_data = stbi_load_from_memory(data, width * height, &new_width, &new_height, &new_channels, 0);
+            _data = std::vector<unsigned char>(data, data + (width * height));
         }
-
-
-        glCreateTextures(GL_TEXTURE_2D, 1, &_handle);
-        glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTextureParameteri(_handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        if (!image_data)
-        {
-            LOG_ERROR("Failed to load texture from ptr");
-            glDeleteTextures(1, &_handle);
-        } else
-        {
-            _width = new_width;
-            _height = new_height;
-            _channels = new_channels;
-            int32_t format = GL_RGB;
-            int32_t format_internal = GL_RGBA8;
-            if (new_channels == 1)
-            {
-                format = GL_RED;
-                format_internal = GL_R8;
-            } else if (new_channels == 3)
-            {
-                format = GL_RGB;
-                format_internal = GL_RGB8;
-            } else if (new_channels == 4)
-            {
-                format = GL_RGBA;
-                format_internal = GL_RGBA8;
-            }
-            int32_t mips = ceil(log2(std::max(_width, _height))) + 1;
-            glTextureStorage2D(_handle, mips, format_internal, _width, _height);
-            glTextureSubImage2D(_handle, 0, 0, 0, _width, _height, format, GL_UNSIGNED_BYTE, image_data);
-            glGenerateTextureMipmap(_handle);
-        }
-        stbi_image_free(image_data);
     }
 
     Texture::Texture(uint32_t handle, uint32_t width, uint32_t height, uint32_t channels)
@@ -140,5 +103,51 @@ namespace cologne
     bool Texture::is_valid() const
     {
         return _handle != 0;
+    }
+
+    void Texture::load()
+    {
+        if (_data.empty())
+        {
+            return;
+        }
+
+        int new_width, new_height, new_channels;
+        stbi_uc *img_data =
+            stbi_load_from_memory(_data.data(), _data.size(),
+                &new_width, &new_height, &new_channels, 0);
+        _width = new_width;
+        _height = new_height;
+        _channels = new_channels;
+
+        glCreateTextures(GL_TEXTURE_2D, 1, &_handle);
+        glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTextureParameteri(_handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        int32_t format = GL_RGB;
+        int32_t format_internal = GL_RGBA8;
+        if (_channels == 1)
+        {
+            format = GL_RED;
+            format_internal = GL_R8;
+        } else if (_channels == 3)
+        {
+            format = GL_RGB;
+            format_internal = GL_RGB8;
+        } else if (_channels == 4)
+        {
+            format = GL_RGBA;
+            format_internal = GL_RGBA8;
+        }
+        int32_t mips = ceil(log2(std::max(_width, _height))) + 1;
+        glTextureStorage2D(_handle, mips, format_internal, _width, _height);
+        glTextureSubImage2D(_handle, 0, 0, 0, _width, _height, format, GL_UNSIGNED_BYTE,
+                            img_data);
+        glGenerateTextureMipmap(_handle);
+        stbi_image_free(img_data);
+        _data.clear();
+        _data.shrink_to_fit();
     }
 }

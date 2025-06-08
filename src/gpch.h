@@ -19,6 +19,8 @@
 #include <functional>
 #include <unordered_map>
 #include <unordered_set>
+#include <execution>
+
 #include <glad/glad.h>
 
 #include "engine/core/Log.h"
@@ -44,3 +46,8 @@
 #include "../vendor/glm/glm/gtx/euler_angles.hpp"
 #include "../../../vendor/glm/glm/gtc/random.hpp"
 #include <stb_image/stb_image.h>
+
+
+#if !defined(__PRETTY_FUNCTION__) && !defined(__GNUC__)
+#define __PRETTY_FUNCTION__ __FUNCSIG__
+#endif

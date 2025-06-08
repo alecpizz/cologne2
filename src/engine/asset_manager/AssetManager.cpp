@@ -19,7 +19,7 @@ namespace cologne::AssetManager
 
     void init()
     {
-        DebugScope scope (__PRETTY_FUNCTION__);
+        DebugScope scope(__PRETTY_FUNCTION__);
         find_file_paths();
         for (size_t i = 0; i < models.size(); i++)
         {
@@ -39,27 +39,59 @@ namespace cologne::AssetManager
 
     void find_file_paths()
     {
-        //models
-        for (auto &info: FileUtil::iterate_directory(RESOURCES_PATH "models"))
-        {
-            auto model_data = FileUtil::import_model(info.path);
-            if (!model_data.meshes.empty())
-            {
-                models.emplace_back(model_data);
-            }
-        }
+        DebugScope scope(__PRETTY_FUNCTION__);
+
+        std::vector<FileUtil::FileInfo> model_paths = FileUtil::iterate_directory(RESOURCES_PATH "models");
+        std::vector<ModelData> model_datas;
+        model_datas.resize(model_paths.size());
+        std::transform(std::execution::par, std::begin(model_paths),
+                       std::end(model_paths), std::begin(model_datas),
+                       [](const FileUtil::FileInfo &file)
+                       {
+                           const ModelData data = FileUtil::import_model(file.path);
+                           return data;
+                       });
 
         //skinned models --> assuming animations are in models for now
-        for (auto &info: FileUtil::iterate_directory(RESOURCES_PATH "skinned_models"))
+        std::vector<FileUtil::FileInfo> skinned_paths = FileUtil::iterate_directory(RESOURCES_PATH "skinned_models");
+        std::vector<SkinnedModelData> skinned_model_datas;
+        skinned_model_datas.resize(skinned_paths.size());
+        std::transform(std::execution::par_unseq, std::begin(skinned_paths), std::end(skinned_paths),
+                       std::begin(skinned_model_datas), [](const FileUtil::FileInfo &file)
+                       {
+                           const SkinnedModelData data = FileUtil::import_skinned_model(file.path);
+                           return data;
+                       });
+        scope = DebugScope("load models");
+        for (auto &model_data: model_datas)
         {
-            auto model_data = FileUtil::import_skinned_model(info.path);
-            if (!model_data.meshes.empty())
+            for (auto &material: model_data.materials)
             {
-                animations.insert(animations.end(),
-                                  model_data.animations.begin(), model_data.animations.end());
-                skinned_models.emplace_back(model_data);
+                material.load_all();
             }
+            models.emplace_back(model_data);
         }
+        for (auto &skinned_model_data: skinned_model_datas)
+        {
+            for (auto &material: skinned_model_data.materials)
+            {
+                material.load_all();
+            }
+
+            animations.insert(animations.end(),
+                              skinned_model_data.animations.begin(), skinned_model_data.animations.end());
+            skinned_models.emplace_back(skinned_model_data);
+        }
+        // for (auto &info: FileUtil::iterate_directory(RESOURCES_PATH "skinned_models"))
+        // {
+        //     auto model_data = FileUtil::import_skinned_model(info.path);
+        //     if (!model_data.meshes.empty())
+        //     {
+        //         animations.insert(animations.end(),
+        //                           model_data.animations.begin(), model_data.animations.end());
+        //         skinned_models.emplace_back(model_data);
+        //     }
+        // }
     }
 
     void load_model(const std::string &path)
@@ -92,7 +124,7 @@ namespace cologne::AssetManager
 
     void print_models()
     {
-        for (const auto & model : models)
+        for (const auto &model: models)
         {
             LOG_INFO("MODEL %s", model.get_name());
         }
@@ -100,7 +132,7 @@ namespace cologne::AssetManager
 
     void print_skinned_models()
     {
-        for (const auto & model : skinned_models)
+        for (const auto &model: skinned_models)
         {
             LOG_INFO("SKINNED MODEL %s", model.get_name().c_str());
         }
@@ -115,7 +147,7 @@ namespace cologne::AssetManager
 
     void print_animations()
     {
-        for ( auto & anim : animations)
+        for (auto &anim: animations)
         {
             LOG_INFO("ANIMATION %s", anim.get_name().c_str());
         }
