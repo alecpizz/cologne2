@@ -46,7 +46,7 @@ namespace cologne
 
         void window_resized(uint32_t width, uint32_t height);
 
-        void add_light(Light light);
+        void submit_light(Light light);
 
         void submit_render_item(RenderItem item);
         void submit_skinned_render_item(SkinnedRenderItem item);
@@ -56,8 +56,6 @@ namespace cologne
         Shader *get_shader_by_name(const char *name);
 
         Light &get_directional_light() const;
-
-        void set_directional_light(glm::vec3 position, glm::vec3 direction);
 
         void submit_camera_transform(TransformComponent tr, CameraComponent cam);
 
@@ -120,7 +118,6 @@ namespace cologne
 
         void init_brdf();
 
-        void update_lights(Shader &shader);
 
         FrameBuffer* get_framebuffer_by_name(const char* name);
         SSBO* get_ssbo_by_name(const char* name);

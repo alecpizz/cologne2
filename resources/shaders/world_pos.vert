@@ -2,7 +2,7 @@
 
 layout (location = 0) in vec3 position;
 
-layout (binding = 1, std430) readonly buffer viewportdata
+layout (binding = 1, std430) restrict readonly buffer viewportdata
 {
     mat4 projection;
     mat4 view;

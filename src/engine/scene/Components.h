@@ -75,6 +75,7 @@ namespace cologne
         uint32_t id = -1;
         Entity camera = {};
         Entity viewmodel = {};
+
         void teleport_to_position(glm::vec3 pos)
         {
             cologne::Physics::teleport_player(id, pos);
@@ -93,19 +94,38 @@ namespace cologne
         float max_vertical_offset = 0.05f;
     };
 
+    struct LightComponent
+    {
+        enum LightType
+        {
+            Directional = 0,
+            Point
+        };
+
+        glm::vec3 color = glm::vec4(1, 0.7799999713897705, 0.5289999842643738, 1.0f);
+        float strength = 1.0f;
+        float radius = 3.0f;
+        LightType type = LightType::Point;
+    };
+
 
     struct NativeScriptComponent
     {
         ScriptableEntity *instance = nullptr;
 
-        ScriptableEntity* (*instantiate_script)() = nullptr;
-        void (*destroy_script)(NativeScriptComponent*) = nullptr;
+        ScriptableEntity * (*instantiate_script)() = nullptr;
+
+        void (*destroy_script)(NativeScriptComponent *) = nullptr;
 
         template<typename T>
         void bind()
         {
-            instantiate_script = []() { return static_cast<ScriptableEntity*> (new T()); };
-            destroy_script = [](NativeScriptComponent* nsc) {delete nsc->instance; nsc->instance = nullptr;};
+            instantiate_script = []() { return static_cast<ScriptableEntity *>(new T()); };
+            destroy_script = [](NativeScriptComponent *nsc)
+            {
+                delete nsc->instance;
+                nsc->instance = nullptr;
+            };
         }
     };
 }

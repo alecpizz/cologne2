@@ -8,12 +8,13 @@ in vec2 TexCoords;
 
 struct Light
 {
-    vec3 position;
-    vec3 direction;
-    vec3 color;
-    float radius;
+    vec4 direction;
+    vec4 position;
+    vec4 color;
     float strength;
+    float radius;
     int type;
+    int padding;
 };
 
 #define MAX_LIGHTS 8
@@ -25,8 +26,6 @@ struct Light
 #define MIPMAP_HARDCAP 5.4f
 #define DIFFUSE_INDIRECT_FACTOR 0.52f
 
-uniform Light lights[MAX_LIGHTS];
-uniform int num_lights = 0;
 uniform float time = 0.0f;
 
 layout (binding = 0) uniform sampler2D gPosition;
@@ -64,13 +63,18 @@ layout (std140) uniform LightSpaceMatrices
     mat4 lightSpaceMatrices[16];
 };
 
-layout (binding = 1, std430) readonly buffer viewportdata
+layout (binding = 1, std430) restrict readonly buffer viewportdata
 {
     mat4 projection;
     mat4 view;
     mat4 view_inverse;
     mat4 projection_view;
     vec4 camera_position;
+};
+
+layout (binding = 2, std430) restrict readonly buffer lights_buffer
+{
+    Light lights[];
 };
 
 
@@ -176,27 +180,25 @@ void main()
     F0 = mix(F0, albedo, metallic);
 
     vec3 Lo = vec3(0.0);
-    vec3 lightDirection = normalize(-lights[0].direction);
+    vec3 lightDirection = normalize(-lights[0].direction.xyz);
 
-    float shadow = 1.0 - shadowCalculation(FragPos, N, lightDirection);
-
-    for (int i = 0; i < num_lights; i++)
+    for (int i = 0; i < lights.length(); i++)
     {
-        float shadow = 0.0f;
+        float shadow = 1.0f;
         vec3 L = vec3(0.0);
         vec3 radiance = vec3(0.0);
         if (lights[i].type == DIRECTIONAL)
         {
-            L = normalize(-lights[i].direction);
-            radiance = lights[i].color;
+            L = normalize(-lights[i].direction.xyz);
+            radiance = lights[i].color.rgb;
             shadow = 1.0 - shadowCalculation(FragPos, N, L);
         }
         else if (lights[i].type == POINT)
         {
-            L = normalize(lights[i].position - FragPos);
-            float distance = length(lights[i].position - FragPos);
+            L = normalize(lights[i].position.xyz - FragPos);
+            float distance = length(lights[i].position.xyz - FragPos);
             float attenuation = 1.0 / (distance * distance);
-            radiance = lights[i].color * attenuation;
+            radiance = lights[i].color.rgb * lights[i].strength * attenuation;
         }
         vec3 H = normalize(V + L);
 
@@ -236,10 +238,10 @@ void main()
         indirect_light = vec3(0.02) * albedo;
     }
 
-//    const float MAX_RELFECTION_LOD = 4.0;
-//    vec3 prefilteredColor = textureLod(prefilter_map, R, roughness * MAX_RELFECTION_LOD).rgb;
-//    vec2 brdf = texture(brdf, vec2(max(dot(N, V), 0.0), roughness)).rg;
-//    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+    //    const float MAX_RELFECTION_LOD = 4.0;
+    //    vec3 prefilteredColor = textureLod(prefilter_map, R, roughness * MAX_RELFECTION_LOD).rgb;
+    //    vec2 brdf = texture(brdf, vec2(max(dot(N, V), 0.0), roughness)).rg;
+    //    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 
 
 

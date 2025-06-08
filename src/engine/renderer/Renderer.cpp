@@ -82,7 +82,8 @@ namespace cologne
 
     void Renderer::update_ssbos()
     {
-        ViewportData data;
+        OpenGLDebugScope scope ("update ssbos");
+        ViewportData data{};
         data.projection = get_camera_projection(_camera_transform, _cam);
         data.view = get_camera_view(_camera_transform);
         data.projection_view = data.projection * data.view;
@@ -90,8 +91,10 @@ namespace cologne
         data.camera_position = glm::vec4(_camera_transform.position, 1.0f);
 
         ssbos["viewport"].update(sizeof(ViewportData), &data);
+        ssbos["viewport"].bind(1);
+        ssbos["lights"].update(sizeof(Light) * lights.size(), lights.data());
+        ssbos["lights"].bind(2);
     }
-
 
     void Renderer::init_framebuffers()
     {
@@ -103,26 +106,9 @@ namespace cologne
         framebuffers["output"] = FrameBuffer();
     }
 
-    void Renderer::add_light(Light light)
+    void Renderer::submit_light(Light light)
     {
         lights.emplace_back(light);
-        size_t light_idx = lights.size() - 1;
-        const auto lit_shader = get_shader_by_name("lit");
-        lit_shader->bind();
-        lit_shader->set_vec3(std::string("lights[" + std::to_string(light_idx) + "].position"),
-                             (lights[light_idx].position));
-        lit_shader->set_vec3(std::string("lights[" + std::to_string(light_idx) + "].color"),
-                             (lights[light_idx].color));
-        lit_shader->set_float(std::string("lights[" + std::to_string(light_idx) + "].radius"),
-                              lights[light_idx].radius);
-        lit_shader->set_int(std::string("lights[" + std::to_string(light_idx) + "].type"),
-                            lights[light_idx].type);
-        lit_shader->set_float(std::string("lights[" + std::to_string(light_idx) + "].strength"),
-                              lights[light_idx].strength);
-        lit_shader->set_vec3(std::string("lights[" + std::to_string(light_idx) + "].direction"),
-                             (lights[light_idx].direction));
-        lit_shader->set_int("num_lights", lights.size());
-        voxelize_scene();
     }
 
     void Renderer::submit_render_item(RenderItem item)
@@ -133,27 +119,6 @@ namespace cologne
     void Renderer::submit_skinned_render_item(SkinnedRenderItem item)
     {
         _skinned_render_items.emplace_back(item);
-    }
-
-    void Renderer::update_lights(Shader &shader)
-    {
-        shader.bind();
-        for (size_t i = 0; i < lights.size(); i++)
-        {
-            shader.set_vec3(std::string("lights[" + std::to_string(i) + "].position"),
-                            (lights[i].position));
-            shader.set_vec3(std::string("lights[" + std::to_string(i) + "].color"),
-                            (lights[i].color));
-            shader.set_float(std::string("lights[" + std::to_string(i) + "].radius"),
-                             lights[i].radius);
-            shader.set_int(std::string("lights[" + std::to_string(i) + "].type"),
-                           lights[i].type);
-            shader.set_float(std::string("lights[" + std::to_string(i) + "].strength"),
-                             lights[i].strength);
-            shader.set_vec3(std::string("lights[" + std::to_string(i) + "].direction"),
-                            (lights[i].direction));
-        }
-        shader.set_int("num_lights", lights.size());
     }
 
     FrameBuffer *Renderer::get_framebuffer_by_name(const char *name)
@@ -276,6 +241,7 @@ namespace cologne
         text_renderer->present();
         _render_items.clear();
         _skinned_render_items.clear();
+        lights.clear();
     }
 
     void Renderer::window_resized(uint32_t width, uint32_t height)
@@ -292,7 +258,6 @@ namespace cologne
     void Renderer::reload_shaders()
     {
         init_shaders();
-        update_lights(*get_shader_by_name("lit"));
         update_shadow(*get_shader_by_name("lit"));
         LOG_INFO("RELOADED SHADERS");
     }
@@ -318,17 +283,6 @@ namespace cologne
             }
         }
         return lights[0];
-    }
-
-    void Renderer::set_directional_light(glm::vec3 position, glm::vec3 direction)
-    {
-        auto &directional_light = get_directional_light();
-        directional_light.position = position;
-        directional_light.direction = direction;
-        update_lights(*get_shader_by_name("lit"));
-        update_shadow(*get_shader_by_name("lit"));
-        update_lights(*get_shader_by_name("voxelize"));
-        voxelize_scene();
     }
 
     void Renderer::submit_camera_transform(TransformComponent tr, CameraComponent cam)
@@ -363,12 +317,7 @@ namespace cologne
         init_prefilter();
         init_brdf();
         glEnable(GL_CULL_FACE);
-        add_light(Light(glm::vec3(0.790f, 18.867f, 0.024f), glm::vec3(0.20f, -0.913f, 0.024f),
-                        glm::vec3(2.0f, 2.0f, 2.0f), 6.0f, 1.0f,
-                        LightType::Directional));
-        add_light(Light(glm::vec3(0.0f, 10.0f, 10.0f), glm::vec3(.0f),
-                        glm::vec3(200.0f, 200.0f, 200.0f), 6.0f, 1.0f,
-                        LightType::Point));
+
         init_shadow();
         voxelize_scene();
         LOG_INFO("Renderer initialized");

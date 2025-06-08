@@ -258,7 +258,7 @@ namespace cologne
         {
             char info_log[512];
             glGetShaderInfoLog(shader, 512, nullptr, info_log);
-            LOG_ERROR("Failed to compile shader %s with reason: %s", shader_path, info_log);
+            LOG_ERROR("Failed to compile shader %s with reason: %s", shader_path.c_str(), info_log);
         }
         return shader;
     }

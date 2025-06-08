@@ -220,17 +220,6 @@ namespace cologne
             ImGui::EndChild();
         }
 
-        glm::vec3 dir_light = Engine::get_renderer()->get_directional_light().direction;
-        glm::vec3 dir_light_pos = Engine::get_renderer()->get_directional_light().position;;
-        if (ImGui::DragFloat3("Directional light direction", glm::value_ptr(dir_light), 0.01f))
-        {
-            Engine::get_renderer()->set_directional_light(dir_light_pos, dir_light);
-        }
-        if (ImGui::DragFloat3("Directional light position", glm::value_ptr(dir_light_pos), 0.01f))
-        {
-            Engine::get_renderer()->set_directional_light(dir_light_pos, dir_light);
-        }
-
         ImGui::End();
         auto window = SDL_GL_GetCurrentWindow();
         ImGui::BeginMainMenuBar(); {

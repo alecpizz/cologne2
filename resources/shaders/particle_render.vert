@@ -10,7 +10,7 @@ layout (std430, binding = 1) buffer velocity
     vec4 velocities[];
 };
 
-layout (binding = 1, std430) readonly buffer viewportdata
+layout (binding = 1, std430) restrict readonly buffer viewportdata
 {
     mat4 projection;
     mat4 view;

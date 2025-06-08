@@ -15,7 +15,7 @@ out flat int ProbeIndex;
 out vec3 ProbeWorldPos;
 out vec3 FragPos;
 
-layout (binding = 1, std430) readonly buffer probe_positions
+layout (binding = 1, std430) restrict readonly buffer probe_positions
 {
     vec4 positions[];
 };

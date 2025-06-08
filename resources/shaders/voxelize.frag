@@ -23,12 +23,13 @@ uniform int cascadeCount;// number of frusta - 1
 
 struct Light
 {
-    vec3 position;
-    vec3 direction;
-    vec3 color;
-    float radius;
+    vec4 direction;
+    vec4 position;
+    vec4 color;
     float strength;
+    float radius;
     int type;
+    int padding;
 };
 
 #define MAX_LIGHTS 8
@@ -36,8 +37,10 @@ struct Light
 #define DIRECTIONAL 0
 #define POINT 1
 
-uniform Light lights[MAX_LIGHTS];
-uniform int num_lights = 0;
+layout (binding = 2, std430) restrict readonly buffer lights_buffer
+{
+    Light lights[];
+};
 uniform mat4 view;
 
 
@@ -114,7 +117,7 @@ vec3 diffuse(Light light, vec3 albedo, vec3 sampleToLight, vec3 N)
     float dist = length(sampleToLight);
     if (light.type == DIRECTIONAL)
     {
-        vec3 diffuse = (light.color) * dot(normalize(N), -light.direction) * albedo;
+        vec3 diffuse = (light.color.rgb) * dot(normalize(N), -light.direction.xyz) * albedo;
         return diffuse * 4.0f;
     }
     else if (light.type == POINT)
@@ -123,7 +126,7 @@ vec3 diffuse(Light light, vec3 albedo, vec3 sampleToLight, vec3 N)
         float cosTheta = dot(normalize(N), (sampleToLight));
         if (cosTheta > 0.0)
         {
-            vec3 diffuse = light.color * cosTheta * albedo;
+            vec3 diffuse = light.color.rgb * cosTheta * albedo;
             float radiance = 1.0 / (dist * dist);
             return diffuse * radiance;
         }
@@ -155,10 +158,10 @@ vec4 pbr()
 
     float shadow = 1.0 - shadow_calculation2(FragPosLightSpace);
     vec3 color = vec3(0.0f);
-    color += diffuse(lights[0], albedo, lights[0].position - FragPos.xyz, N) * shadow;
-    for (int i = 1; i < num_lights; i++)
+    color += diffuse(lights[0], albedo, lights[0].position.xyz - FragPos.xyz, N) * shadow;
+    for (int i = 1; i < lights.length(); i++)
     {
-//        color += diffuse(lights[i], albedo, lights[i].position - FragPos, N);
+        color += diffuse(lights[i], albedo, lights[i].position.xyz - FragPos.xyz, N);
     }
 
     vec3 ambient = vec3(0.02) * albedo;

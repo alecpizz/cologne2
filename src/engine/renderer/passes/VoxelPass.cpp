@@ -2,6 +2,7 @@
 #include <engine/renderer/OpenGLDebugScope.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Shader.h>
+#include <engine/renderer/types/SSBO.h>
 //
 // Created by alecpizz on 5/4/2025.
 //
@@ -122,7 +123,7 @@ namespace cologne
 
         auto shader = get_shader_by_name("voxelize");
         shader->bind();
-        update_lights(*shader);
+        get_ssbo_by_name("lights")->bind(2);
         shader->set_mat4("lightSpaceMatrix", (_dir_light_space));
         shader->set_mat4("projection", (glm::ortho(-1.0f, 1.0f, -1.0f,
                                                    1.0f, -1.0f, 1.0f)));

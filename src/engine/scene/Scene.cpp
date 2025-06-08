@@ -215,6 +215,13 @@ namespace cologne
             item.transform = tr;
             Engine::get_renderer()->submit_skinned_render_item(item);
         }
+
+        Engine::get_renderer()->submit_light(Light(glm::vec3(0.790f, 18.867f, 0.024f), glm::vec3(0.20f, -0.913f, 0.024f),
+                glm::vec3(2.0f, 2.0f, 2.0f), 6.0f, 1.0f,
+                LightType::Directional));
+        Engine::get_renderer()->submit_light(Light(glm::vec3(-6.0f, 5.0f, -5.0f), glm::vec3(.0f),
+                        glm::vec3(1, 0.7799999713897705, 0.5289999842643738), 3.0f, 5.0f,
+                        LightType::Point));
         //update logic
 
         //update animations

@@ -13,6 +13,7 @@ namespace cologne
         glm::vec3 point;
         glm::vec3 color;
     };
+
     struct DebugCmd
     {
         glm::vec3 p1, p2;
@@ -35,7 +36,7 @@ namespace cologne
             shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/debug.vert", RESOURCES_PATH "shaders/debug.frag");
         }
 
-        void update_vertex_data(std::vector<DebugVertex>& vertices)
+        void update_vertex_data(std::vector<DebugVertex> &vertices)
         {
             if (VAO == 0)
             {
@@ -55,10 +56,10 @@ namespace cologne
             glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSize, vertices.data());
 
             glEnableVertexAttribArray(0);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void*)offsetof(DebugVertex, point));
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void *) offsetof(DebugVertex, point));
 
             glEnableVertexAttribArray(1);
-            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void*)offsetof(DebugVertex, color));
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void *) offsetof(DebugVertex, color));
             glBindVertexArray(0);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             vertex_count = static_cast<uint32_t>(vertices.size());
@@ -105,6 +106,43 @@ namespace cologne
 
     void DebugRenderer::draw_sphere(glm::vec3 center, float radius, glm::vec3 color)
     {
+        constexpr int sectors = 36;
+        constexpr int stacks = 16;
+
+        std::vector<std::vector<glm::vec3> > vertices(stacks + 1, std::vector<glm::vec3>(sectors + 1));
+        for (int i = 0; i <= stacks; ++i)
+        {
+            float v = static_cast<float>(i) / static_cast<float>(stacks);
+            float phi = glm::pi<float>() * v;
+
+            for (int j = 0; j <= sectors; ++j)
+            {
+                float u = static_cast<float>(j) / static_cast<float>(sectors);
+                float theta = 2.0f * glm::pi<float>() * u;
+
+                float x = glm::cos(theta) * glm::sin(phi);
+                float y = glm::cos(phi);
+                float z = glm::sin(theta) * glm::sin(phi);
+
+                vertices[i][j] = center + glm::vec3(x, y, z) * radius;
+            }
+        }
+
+        for (int i = 0; i <= stacks; ++i)
+        {
+            for (int j = 0; j < sectors; ++j)
+            {
+                draw_line(vertices[i][j], vertices[i][j + 1], color);
+            }
+        }
+
+        for (int j = 0; j <= sectors; ++j)
+        {
+            for (int i = 0; i < stacks; ++i)
+            {
+                draw_line(vertices[i][j], vertices[i + 1][j], color);
+            }
+        }
     }
 
     void DebugRenderer::draw_point(glm::vec3 p, glm::vec3 color)

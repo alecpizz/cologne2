@@ -10,7 +10,7 @@ const int MAX_BONES = 100;
 const int MAX_BONE_INFLUENCE = 4;
 uniform mat4 bone_matrices[MAX_BONES];
 
-layout (binding = 1, std430) readonly buffer viewportdata
+layout (binding = 1, std430) restrict readonly buffer viewportdata
 {
     mat4 projection;
     mat4 view;

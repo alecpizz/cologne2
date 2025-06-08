@@ -9,7 +9,7 @@ out vec2 TexCoords;
 out vec3 Normal;
 out mat3 TBN;
 
-layout (binding = 1, std430) readonly buffer viewportdata
+layout (binding = 1, std430) restrict readonly buffer viewportdata
 {
     mat4 projection;
     mat4 view;
