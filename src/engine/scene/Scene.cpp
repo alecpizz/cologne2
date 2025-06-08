@@ -69,6 +69,21 @@ namespace cologne
         info.position = glm::vec3(-3.0f, 2.0f, 0.0f);
         player.add_component<PlayerComponent>(Physics::create_player(info), camera, viewModel);
 
+        Entity lamp = create_entity("lamp");
+        lamp.add_component<ModelComponent>(AssetManager::get_model_index_by_name("Lantern"));
+        lamp.get_component<TransformComponent>().position = glm::vec3(0.180f, 0.0f, -4.8f);
+        lamp.get_component<TransformComponent>().rotation = glm::quat(glm::radians(glm::vec3(0.0f, -90.0f, 0.0f)));
+        model = AssetManager::get_model_by_name("Lantern");
+        tr = lamp.get_component<TransformComponent>();
+        for (auto &mesh: model->get_meshes())
+        {
+            Entity collider = create_entity(mesh.get_name());
+            collider.get_component<TransformComponent>() = tr;
+            uint32_t body_id = Physics::create_static_mesh_collider(collider, tr, mesh.get_vertices(),
+                                                                    mesh.get_indices());
+            collider.add_component<StaticColliderComponent>(body_id);
+        }
+
         re_calculate_bounds();
         // auto& skinned_model = add_skinned_model(RESOURCES_PATH "python/deagle.glb");
         // skinned_model.set_cast_shadows(false);

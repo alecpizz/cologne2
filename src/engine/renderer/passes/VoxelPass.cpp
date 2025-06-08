@@ -33,7 +33,7 @@ namespace cologne
         delete[] data;
 
         auto voxel_back_fbo = get_framebuffer_by_name("voxel_back");
-        auto voxel_front_fbo = get_framebuffer_by_name("voxel_back");
+        auto voxel_front_fbo = get_framebuffer_by_name("voxel_front");
         voxel_back_fbo->create("voxel cube back", Engine::get_window()->get_width(),
                                Engine::get_window()->get_height());
         voxel_back_fbo->create_attachment("color", GL_RGBA16F, GL_NEAREST, GL_NEAREST);
