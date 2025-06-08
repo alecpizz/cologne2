@@ -69,11 +69,8 @@ namespace cologne
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
 
-        world_pos_shader->set_mat4("projection", get_camera_projection(_camera_transform, _cam));
-        world_pos_shader->set_mat4("view", get_camera_view(_camera_transform));
         glm::mat4 model = glm::mat4(1.0f);
         world_pos_shader->set_mat4("model", (model));
-        world_pos_shader->set_vec3("camera_position", _camera_transform.position);
 
         auto voxel_back_fbo = get_framebuffer_by_name("voxel_back");
         auto voxel_front_fbo = get_framebuffer_by_name("voxel_front");
@@ -97,11 +94,6 @@ namespace cologne
 
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
-
-        voxelize_debug_shader->set_mat4("projection",
-                                        get_camera_projection(_camera_transform, _cam));
-        voxelize_debug_shader->set_mat4("view", get_camera_view(_camera_transform));
-        voxelize_debug_shader->set_vec3("camera_position", _camera_transform.position);
 
         glBindTexture(GL_TEXTURE_3D, _voxel_texture);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

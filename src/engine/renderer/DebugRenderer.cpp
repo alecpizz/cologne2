@@ -64,7 +64,7 @@ namespace cologne
             vertex_count = static_cast<uint32_t>(vertices.size());
         }
 
-        void draw(glm::mat4 view, glm::mat4 proj)
+        void draw()
         {
             if (!is_drawing)
             {
@@ -83,8 +83,6 @@ namespace cologne
 
             cmds.clear();
 
-            shader->set_mat4("view", view);
-            shader->set_mat4("projection", proj);
             glBindVertexArray(VAO);
             glDrawArrays(GL_LINES, 0, vertex_count);
 
@@ -147,9 +145,9 @@ namespace cologne
     }
 
 
-    void DebugRenderer::present(glm::mat4 view, glm::mat4 proj)
+    void DebugRenderer::present()
     {
-        _impl->draw(view, proj);
+        _impl->draw();
     }
 
     DebugRenderer::DebugRenderer()

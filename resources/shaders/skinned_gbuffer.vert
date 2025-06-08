@@ -10,14 +10,22 @@ const int MAX_BONES = 100;
 const int MAX_BONE_INFLUENCE = 4;
 uniform mat4 bone_matrices[MAX_BONES];
 
+layout (binding = 1, std430) readonly buffer viewportdata
+{
+    mat4 projection;
+    mat4 view;
+    mat4 view_inverse;
+    mat4 projection_view;
+    vec4 camera_position;
+};
+
+
 out vec3 FragPos;
 out vec2 TexCoords;
 out vec3 Normal;
 out mat3 TBN;
 
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
 
 void main()
 {
@@ -51,5 +59,5 @@ void main()
     vec3 B = cross(N, T);
     TBN = mat3(T, B, N);
     Normal = normalMatrix * normal;
-    gl_Position = projection * view * worldPos;
+    gl_Position = projection_view * worldPos;
 }

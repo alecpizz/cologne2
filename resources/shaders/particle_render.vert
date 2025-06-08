@@ -10,8 +10,15 @@ layout (std430, binding = 1) buffer velocity
     vec4 velocities[];
 };
 
-uniform mat4 view;
-uniform mat4 projection;
+layout (binding = 1, std430) readonly buffer viewportdata
+{
+    mat4 projection;
+    mat4 view;
+    mat4 view_inverse;
+    mat4 projection_view;
+    vec4 camera_position;
+};
+
 
 out vec3 FragPos;
 

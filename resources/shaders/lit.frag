@@ -25,11 +25,9 @@ struct Light
 #define MIPMAP_HARDCAP 5.4f
 #define DIFFUSE_INDIRECT_FACTOR 0.52f
 
-uniform vec3 camera_pos;
 uniform Light lights[MAX_LIGHTS];
 uniform int num_lights = 0;
 uniform float time = 0.0f;
-uniform mat4 view;
 
 layout (binding = 0) uniform sampler2D gPosition;
 layout (binding = 1) uniform sampler2D gNormal;
@@ -66,6 +64,14 @@ layout (std140) uniform LightSpaceMatrices
     mat4 lightSpaceMatrices[16];
 };
 
+layout (binding = 1, std430) readonly buffer viewportdata
+{
+    mat4 projection;
+    mat4 view;
+    mat4 view_inverse;
+    mat4 projection_view;
+    vec4 camera_position;
+};
 
 
 uniform float far_plane = 20.0f;
@@ -163,7 +169,7 @@ void main()
     float ao = orm.b + ao_strength;
 
     vec3 N = texture2D(gNormal, TexCoords).rgb;
-    vec3 V = normalize(camera_pos - FragPos);
+    vec3 V = normalize(camera_position.xyz - FragPos);
     vec3 R = reflect(-V, N);
 
     vec3 F0 = vec3(0.04);
@@ -241,7 +247,7 @@ void main()
     vec3 emission = texture2D(gEmission, TexCoords).rgb;
     vec3 color = Lo + indirect_light + emission;
 
-    float dist = length(FragPos - camera_pos);
+    float dist = length(FragPos - camera_position.xyz);
     float fog_factor = 1.0 / exp((dist * fog_density) * (dist * fog_density));
     color = mix(fog_color, color, fog_factor);
 

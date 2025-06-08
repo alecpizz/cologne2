@@ -3,12 +3,20 @@
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 color;
 
-uniform mat4 view;
-uniform mat4 projection;
+layout (binding = 1, std430) readonly buffer viewportdata
+{
+    mat4 projection;
+    mat4 view;
+    mat4 view_inverse;
+    mat4 projection_view;
+    vec4 camera_position;
+};
+
+
 out vec4 Color;
 
 void main()
 {
     Color = vec4(color, 1.0);
-    gl_Position = projection * view * vec4(position, 1.0);
+    gl_Position = projection_view * vec4(position, 1.0);
 }

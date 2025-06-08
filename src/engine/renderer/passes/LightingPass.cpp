@@ -6,6 +6,7 @@
 #include <engine/renderer/OpenGLDebugScope.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Shader.h>
+#include <engine/renderer/types/SSBO.h>
 
 
 namespace cologne
@@ -21,14 +22,14 @@ namespace cologne
         // glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         shader->bind();
-        shader->set_vec3("camera_pos", _camera_transform.position);
+
         // env_irradiance.bind(IRRADIANCE_INDEX);
         // env_prefilter.bind(PREFILTER_INDEX);
         // env_brdf.bind(BRDF_INDEX);
         update_shadow(*shader);
+        get_ssbo_by_name("viewport")->bind(1);
+
         glm::mat4 camera_view = get_camera_view(_camera_transform);
-        shader->set_mat4("view_inverse", (glm::inverse(camera_view)));
-        shader->set_mat4("view", (camera_view));
         shader->set_int("voxel_grid_size", _voxel_data.voxel_dimensions);
         shader->set_vec3("voxel_offset", (_voxel_data.voxel_offset));
         auto bounds = Engine::get_scene()->get_bounds();

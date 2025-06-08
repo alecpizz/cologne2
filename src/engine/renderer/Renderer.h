@@ -7,6 +7,11 @@
 
 namespace cologne
 {
+    class SSBO;
+}
+
+namespace cologne
+{
     class Scene;
     class Shader;
 
@@ -73,6 +78,10 @@ namespace cologne
 
         void init_shaders();
 
+        void init_ssbos();
+
+        void update_ssbos();
+
         void render_cube(int32_t count = 1);
 
         void render_quad();
@@ -114,6 +123,7 @@ namespace cologne
         void update_lights(Shader &shader);
 
         FrameBuffer* get_framebuffer_by_name(const char* name);
+        SSBO* get_ssbo_by_name(const char* name);
 
         std::vector<RenderItem> _render_items;
         std::vector<SkinnedRenderItem> _skinned_render_items;

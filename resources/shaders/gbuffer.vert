@@ -9,9 +9,17 @@ out vec2 TexCoords;
 out vec3 Normal;
 out mat3 TBN;
 
+layout (binding = 1, std430) readonly buffer viewportdata
+{
+    mat4 projection;
+    mat4 view;
+    mat4 view_inverse;
+    mat4 projection_view;
+    vec4 camera_position;
+};
+
+
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
 
 void main()
 {
@@ -25,5 +33,5 @@ void main()
     vec3 B = cross(N, T);
     TBN = mat3(T, B, N);
     Normal = normalMatrix * normal;
-    gl_Position = projection * view * worldPos;
+    gl_Position = projection_view * worldPos;
 }

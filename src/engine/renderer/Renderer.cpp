@@ -19,6 +19,8 @@
 #include "../renderer/types/Shader.h"
 #include "TextRenderer.h"
 #include "../core/Time.h"
+#include "types/SSBO.h"
+#include "types/ViewportData.h"
 
 namespace cologne
 {
@@ -28,8 +30,9 @@ namespace cologne
 
     std::shared_ptr<DebugRenderer> debug_renderer = nullptr;
     std::shared_ptr<TextRenderer> text_renderer = nullptr;
-    std::unordered_map<std::string, Shader> shaders = std::unordered_map<std::string,Shader>();
+    std::unordered_map<std::string, Shader> shaders = std::unordered_map<std::string, Shader>();
     std::unordered_map<std::string, FrameBuffer> framebuffers = std::unordered_map<std::string, FrameBuffer>();
+    std::unordered_map<std::string, SSBO> ssbos = std::unordered_map<std::string, SSBO>();
     std::vector<Light> lights;
 
     void Renderer::init_shaders()
@@ -70,6 +73,25 @@ namespace cologne
         shaders["particle_sim"] = Shader(RESOURCES_PATH "shaders/particle_sim.comp");
     }
 
+    void Renderer::init_ssbos()
+    {
+        const size_t max_lights = 128;
+        ssbos["lights"] = SSBO(sizeof(Light) * max_lights, GL_DYNAMIC_STORAGE_BIT);
+        ssbos["viewport"] = SSBO(sizeof(ViewportData), GL_DYNAMIC_STORAGE_BIT);
+    }
+
+    void Renderer::update_ssbos()
+    {
+        ViewportData data;
+        data.projection = get_camera_projection(_camera_transform, _cam);
+        data.view = get_camera_view(_camera_transform);
+        data.projection_view = data.projection * data.view;
+        data.view_inverse = glm::inverse(data.view);
+        data.camera_position = glm::vec4(_camera_transform.position, 1.0f);
+
+        ssbos["viewport"].update(sizeof(ViewportData), &data);
+    }
+
 
     void Renderer::init_framebuffers()
     {
@@ -88,17 +110,17 @@ namespace cologne
         const auto lit_shader = get_shader_by_name("lit");
         lit_shader->bind();
         lit_shader->set_vec3(std::string("lights[" + std::to_string(light_idx) + "].position"),
-                            (lights[light_idx].position));
+                             (lights[light_idx].position));
         lit_shader->set_vec3(std::string("lights[" + std::to_string(light_idx) + "].color"),
-                            (lights[light_idx].color));
+                             (lights[light_idx].color));
         lit_shader->set_float(std::string("lights[" + std::to_string(light_idx) + "].radius"),
-                             lights[light_idx].radius);
+                              lights[light_idx].radius);
         lit_shader->set_int(std::string("lights[" + std::to_string(light_idx) + "].type"),
-                           lights[light_idx].type);
+                            lights[light_idx].type);
         lit_shader->set_float(std::string("lights[" + std::to_string(light_idx) + "].strength"),
-                             lights[light_idx].strength);
+                              lights[light_idx].strength);
         lit_shader->set_vec3(std::string("lights[" + std::to_string(light_idx) + "].direction"),
-                            (lights[light_idx].direction));
+                             (lights[light_idx].direction));
         lit_shader->set_int("num_lights", lights.size());
         voxelize_scene();
     }
@@ -134,7 +156,7 @@ namespace cologne
         shader.set_int("num_lights", lights.size());
     }
 
-    FrameBuffer * Renderer::get_framebuffer_by_name(const char *name)
+    FrameBuffer *Renderer::get_framebuffer_by_name(const char *name)
     {
         const auto n = std::string(name);
         if (!framebuffers.contains(n))
@@ -143,6 +165,17 @@ namespace cologne
             return nullptr;
         }
         return &framebuffers[n];
+    }
+
+    SSBO *Renderer::get_ssbo_by_name(const char *name)
+    {
+        const auto n = std::string(name);
+        if (!ssbos.contains(n))
+        {
+            LOG_ERROR("SSBO %s not found!", name);
+            return nullptr;
+        }
+        return &ssbos[n];
     }
 
     glm::mat4 Renderer::get_camera_view(TransformComponent tr)
@@ -191,7 +224,7 @@ namespace cologne
         debug_renderer->draw_aabb(transform, min, max, color);
     }
 
-    void Renderer::draw_text(const char* text, glm::vec3 position, glm::vec4 color, float size)
+    void Renderer::draw_text(const char *text, glm::vec3 position, glm::vec4 color, float size)
     {
         text_renderer->draw_text(text, position, color, size);
     }
@@ -219,33 +252,27 @@ namespace cologne
 
     void Renderer::render_scene()
     {
-        //indirect pass
-        //shadow maps
-        //geometry pass
-        //culling pass
-        //lighting pass
-        //skybox pass
-        //post processing pass
-        //any debug visuals pass
-
         if (cologne::Input::key_pressed(Input::Key::H))
         {
             reload_shaders();
         }
+        update_ssbos();
         shadow_pass();
         voxelize_scene();
         geometry_pass();
         indirect_pass();
         lit_pass();
         skybox_pass();
+        //composite_pass();
+
         auto fbo = get_framebuffer_by_name("output");
         fbo->blit_to_default_frame_buffer("color", 0, 0,
-                                                 Engine::get_window()->get_width(), Engine::get_window()->get_height(),
-                                                 GL_COLOR_BUFFER_BIT, GL_NEAREST);
+                                          Engine::get_window()->get_width(), Engine::get_window()->get_height(),
+                                          GL_COLOR_BUFFER_BIT, GL_NEAREST);
         fbo->release();
         draw_fps();
         debug_voxel_pass();
-        debug_renderer->present(get_camera_view(_camera_transform), get_camera_projection(_camera_transform, _cam));
+        debug_renderer->present();
         text_renderer->present();
         _render_items.clear();
         _skinned_render_items.clear();
@@ -325,6 +352,7 @@ namespace cologne
         Engine::get_debug_ui()->add_bool_entry("Indirect Lighting", _apply_indirect_lighting);
         Engine::get_debug_ui()->add_vec3_entry("Voxel Offset", _voxel_data.voxel_offset);
         init_shaders();
+        init_ssbos();
         init_framebuffers();
         init_voxels();
         init_indirect();
@@ -349,7 +377,7 @@ namespace cologne
     Renderer::Renderer()
     {
         OpenGLDebugScope scope("initialization");
-        DebugScope scope2 (__PRETTY_FUNCTION__);
+        DebugScope scope2(__PRETTY_FUNCTION__);
         init();
     }
 }

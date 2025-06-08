@@ -1,6 +1,8 @@
 ﻿//
 // Created by alecpizz on 5/3/2025.
 //
+#include <engine/renderer/types/SSBO.h>
+
 #include "engine/core/Engine.h"
 
 #include "engine/renderer/OpenGLDebugScope.h"
@@ -66,8 +68,7 @@ namespace cologne
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         auto shader = get_shader_by_name("gbuffer");
         shader->bind();
-        shader->set_mat4("projection", get_camera_projection(_camera_transform, _cam));
-        shader->set_mat4("view", get_camera_view(_camera_transform));
+        get_ssbo_by_name("viewport")->bind(1);
 
         for (auto &[model, tr, gi]: _render_items)
         {
@@ -102,8 +103,6 @@ namespace cologne
 
         shader = get_shader_by_name("skinned_gbuffer");
         shader->bind();
-        shader->set_mat4("projection",get_camera_projection(_camera_transform, _cam));
-        shader->set_mat4("view", get_camera_view(_camera_transform));
 
         for (auto &[skinned_model, tr, bones]: _skinned_render_items)
         {
