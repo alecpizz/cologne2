@@ -106,8 +106,8 @@ namespace cologne
 
     void DebugRenderer::draw_sphere(glm::vec3 center, float radius, glm::vec3 color)
     {
-        constexpr int sectors = 36;
-        constexpr int stacks = 16;
+        constexpr int sectors = 18;
+        constexpr int stacks = 8;
 
         std::vector<std::vector<glm::vec3> > vertices(stacks + 1, std::vector<glm::vec3>(sectors + 1));
         for (int i = 0; i <= stacks; ++i)

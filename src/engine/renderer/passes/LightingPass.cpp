@@ -27,8 +27,6 @@ namespace cologne
         // env_prefilter.bind(PREFILTER_INDEX);
         // env_brdf.bind(BRDF_INDEX);
         update_shadow(*shader);
-        get_ssbo_by_name("viewport")->bind(1);
-        get_ssbo_by_name("lights")->bind(2);
 
         shader->set_int("voxel_grid_size", _voxel_data.voxel_dimensions);
         shader->set_vec3("voxel_offset", (_voxel_data.voxel_offset));

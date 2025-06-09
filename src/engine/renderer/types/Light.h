@@ -15,10 +15,15 @@ namespace cologne
         {
             position = glm::vec4(transform.position, 1.0f);
             direction = glm::vec4(transform.get_forward(), 1.0f);
+            if (abs(direction.z) < 0.0001f)
+            {
+                direction.z = 5.0f;
+            }
             color = glm::vec4(light_component.color, 1.0f);
             strength = light_component.strength;
             radius = light_component.radius;
             type = static_cast<LightType>(light_component.type);
+            active = 1;
         }
         Light() = default;
         Light(glm::vec3 pos, glm::vec3 direction, glm::vec3 color, float radius, float strength, LightType type)
@@ -29,6 +34,7 @@ namespace cologne
             this->radius = radius;
             this->strength = strength;
             this->type = type;
+            active = 1;
         }
         glm::vec4 direction;
         glm::vec4 position;
@@ -36,6 +42,6 @@ namespace cologne
         float strength = 1.0f;
         float radius = 6.0f;
         LightType type = LightType::Directional;
-        int padding = 0;
+        int active = 0;
     };
 }

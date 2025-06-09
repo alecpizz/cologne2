@@ -14,7 +14,7 @@ struct Light
     float strength;
     float radius;
     int type;
-    int padding;
+    int enabled;
 };
 
 #define MAX_LIGHTS 8
@@ -180,10 +180,13 @@ void main()
     F0 = mix(F0, albedo, metallic);
 
     vec3 Lo = vec3(0.0);
-    vec3 lightDirection = normalize(-lights[0].direction.xyz);
 
     for (int i = 0; i < lights.length(); i++)
     {
+        if(lights[i].enabled == 0)
+        {
+            continue;
+        }
         float shadow = 1.0f;
         vec3 L = vec3(0.0);
         vec3 radiance = vec3(0.0);

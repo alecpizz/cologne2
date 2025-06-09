@@ -75,14 +75,13 @@ namespace cologne
 
     void Renderer::init_ssbos()
     {
-        const size_t max_lights = 128;
-        ssbos["lights"] = SSBO(sizeof(Light) * max_lights, GL_DYNAMIC_STORAGE_BIT);
+        ssbos["lights"] = SSBO(sizeof(Light) * 8, GL_DYNAMIC_STORAGE_BIT);
         ssbos["viewport"] = SSBO(sizeof(ViewportData), GL_DYNAMIC_STORAGE_BIT);
     }
 
     void Renderer::update_ssbos()
     {
-        OpenGLDebugScope scope ("update ssbos");
+        OpenGLDebugScope scope("update ssbos");
         ViewportData data{};
         data.projection = get_camera_projection(_camera_transform, _cam);
         data.view = get_camera_view(_camera_transform);
@@ -92,7 +91,7 @@ namespace cologne
 
         ssbos["viewport"].update(sizeof(ViewportData), &data);
         ssbos["viewport"].bind(1);
-        ssbos["lights"].update(sizeof(Light) * lights.size(), lights.data());
+        ssbos["lights"].update((sizeof(Light) * lights.size()), lights.data());
         ssbos["lights"].bind(2);
     }
 
@@ -237,6 +236,13 @@ namespace cologne
         fbo->release();
         draw_fps();
         debug_voxel_pass();
+        if (Engine::get_event_manager()->paused())
+        {
+            for (auto &light: lights)
+            {
+                draw_sphere(light.position, light.radius, light.color);
+            }
+        }
         debug_renderer->present();
         text_renderer->present();
         _render_items.clear();

@@ -84,6 +84,30 @@ namespace cologne
             collider.add_component<StaticColliderComponent>(body_id);
         }
 
+        Entity dir_light = create_entity("directional light");
+        auto &light = dir_light.add_component<LightComponent>();
+        light.color = glm::vec3(1, 0.7799999713897705, 0.5289999842643738);
+        light.radius = 6.0f;
+        light.strength = 2.0f;
+        light.type = LightComponent::Directional;
+        dir_light.get_component<TransformComponent>().position = glm::vec3(0.790f, 18.867f, 0.024f);
+        dir_light.get_component<TransformComponent>().rotation =
+            glm::quat(glm::radians(glm::vec3(82.300, 0.0f, 0.0f)));
+
+
+        Entity point_light = create_entity("point light");
+        auto &light2 = point_light.add_component<LightComponent>();
+        light2.color = glm::vec3(1, 0.7799999713897705, 0.5289999842643738);
+        light2.radius = 3.0f;
+        light2.strength = 5.0f;
+        light2.type = LightComponent::Point;
+        point_light.get_component<TransformComponent>().position = glm::vec3(-6.0f, 5.0f, -5.0f);
+
+        Entity point_light2 = create_entity("point light2");
+        auto& light3 = point_light2.add_component<LightComponent>();
+        light3 = light2;
+        light3.color = glm::vec3(0.2f, 0.9f, 0.15f);
+        point_light2.get_component<TransformComponent>().position = glm::vec3(6.0f, 3.4, 5.0f);
         re_calculate_bounds();
         // auto& skinned_model = add_skinned_model(RESOURCES_PATH "python/deagle.glb");
         // skinned_model.set_cast_shadows(false);
@@ -155,6 +179,17 @@ namespace cologne
             animator.update_animation(delta_time);
         }
 
+        for (auto entity: _registry.view<LightComponent, TransformComponent, ActiveComponent>())
+        {
+            auto [light, transform, active] = _registry.get<LightComponent, TransformComponent,
+                ActiveComponent>(entity);
+            if (!active)
+            {
+                continue;
+            }
+            Engine::get_renderer()->submit_light(Light(light, transform));
+        }
+
         auto tr = camera.get_component<TransformComponent>();
         auto cm = camera.get_component<CameraComponent>();
 
@@ -216,12 +251,7 @@ namespace cologne
             Engine::get_renderer()->submit_skinned_render_item(item);
         }
 
-        Engine::get_renderer()->submit_light(Light(glm::vec3(0.790f, 18.867f, 0.024f), glm::vec3(0.20f, -0.913f, 0.024f),
-                glm::vec3(2.0f, 2.0f, 2.0f), 6.0f, 1.0f,
-                LightType::Directional));
-        Engine::get_renderer()->submit_light(Light(glm::vec3(-6.0f, 5.0f, -5.0f), glm::vec3(.0f),
-                        glm::vec3(1, 0.7799999713897705, 0.5289999842643738), 3.0f, 5.0f,
-                        LightType::Point));
+
         //update logic
 
         //update animations

@@ -123,7 +123,6 @@ namespace cologne
 
         auto shader = get_shader_by_name("voxelize");
         shader->bind();
-        get_ssbo_by_name("lights")->bind(2);
         shader->set_mat4("lightSpaceMatrix", (_dir_light_space));
         shader->set_mat4("projection", (glm::ortho(-1.0f, 1.0f, -1.0f,
                                                    1.0f, -1.0f, 1.0f)));

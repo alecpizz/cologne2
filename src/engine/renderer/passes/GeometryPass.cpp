@@ -68,7 +68,6 @@ namespace cologne
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         auto shader = get_shader_by_name("gbuffer");
         shader->bind();
-        get_ssbo_by_name("viewport")->bind(1);
 
         for (auto &[model, tr, gi]: _render_items)
         {

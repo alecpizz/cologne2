@@ -271,7 +271,7 @@ namespace cologne
         glm::mat4 light_projection = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, shadow_near, shadow_far);
         auto dir_light = get_directional_light();
         glm::vec3 center = dir_light.position;
-        glm::mat4 light_view = glm::lookAt(center, (center + (glm::vec3(dir_light.direction) * 5.0f)),
+        glm::mat4 light_view = glm::lookAt(center, (center + (glm::normalize(glm::vec3(dir_light.direction)) * 5.0f)),
             glm::vec3(0.0, 1.0, 0.0));
         glm::mat4 light_space = light_projection * light_view;
         _dir_light_space = light_space;

@@ -4,7 +4,14 @@ layout (binding = 0) uniform sampler3D texture_voxel;
 layout (binding = 1) uniform sampler2D texture_cube_back;
 layout (binding = 2) uniform sampler2D texture_cube_front;
 
-uniform vec3 camera_position;
+layout (binding = 1, std430) restrict readonly buffer viewportdata
+{
+    mat4 projection;
+    mat4 view;
+    mat4 view_inverse;
+    mat4 projection_view;
+    vec4 camera_position;
+};
 
 
 in vec2 TexCoord;
@@ -18,8 +25,8 @@ bool is_inside_voxelgrid(const vec3 p) {
 void main()
 {
     vec4 accumulated_color = vec4(0, 0, 0, 0);
-    vec3 ray_origin = is_inside_voxelgrid(camera_position) ?
-    camera_position : texture(texture_cube_front, TexCoord).xyz;
+    vec3 ray_origin = is_inside_voxelgrid(camera_position.xyz) ?
+    camera_position.xyz : texture(texture_cube_front, TexCoord).xyz;
     vec3 ray_end = texture(texture_cube_back, TexCoord).xyz;
     vec3 ray_direction = normalize(ray_end - ray_origin);
 

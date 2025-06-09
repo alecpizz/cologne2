@@ -60,7 +60,7 @@ namespace cologne
 
     DebugUI::DebugUI()
     {
-        cologne::DebugScope scope (__PRETTY_FUNCTION__);
+        cologne::DebugScope scope(__PRETTY_FUNCTION__);
         ImGui::CreateContext();
         imguiThemes::green();
         ImGuiIO &io = ImGui::GetIO();
@@ -100,50 +100,63 @@ namespace cologne
 
         ImGui::Text("FPS %f", ImGui::GetIO().Framerate);
         size_t counter = 0;
-        if (ImGui::CollapsingHeader("Entities"))
+        ImGui::Separator();
+        ImGui::Text("Entities");
+        for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
         {
-            for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
+            Entity e = {entity, Engine::get_scene()};
+            if (e.has_component<StaticColliderComponent>())
             {
-                Entity e = {entity, Engine::get_scene()};
-                if (e.has_component<StaticColliderComponent>())
-                {
-                    continue;
-                }
-                ImGui::PushID(counter++);
-                auto &tr = e.get_component<TransformComponent>();
-                auto &tag = e.get_component<TagComponent>();
-                auto &active = e.get_component<ActiveComponent>();
-
-                ImGui::Text("%s", tag.tag.c_str());
-                ImGui::Checkbox("Active", &active.active);
-
-                build_transform_entry(tr);
-
-                if (e.has_component<ViewmodelComponent>())
-                {
-                    auto& vm = e.get_component<ViewmodelComponent>();
-                    ImGui::DragFloat("smoothing", &vm.smoothing, 0.1f);
-                    ImGui::DragFloat("amplitude", &vm.amplitude, 0.01f);
-                    ImGui::DragFloat("frequency", &vm.frequency, 0.1f);
-                    ImGui::DragFloat("vertical velocity multi", &vm.vertical_velocity_multiplier, 0.01f);
-                    ImGui::DragFloat("max vertical offset", &vm.max_vertical_offset, 0.01f);
-                    ImGui::DragFloat("sway multiplier", &vm.sway_multiplier);
-                    ImGui::DragFloat3("position offset", glm::value_ptr(vm.position_offset));
-                    ImGui::DragFloat3("euler offset", glm::value_ptr(vm.euler_offset));
-                }
-
-                // if (e.has_component<ModelComponent>())
-                // {
-                //     auto& model = e.get_component<ModelComponent>();
-                // }
-                //
-                // if (e.has_component<SkinnedModelComponent>())
-                // {
-                //     auto& skinned_model = e.get_component<SkinnedModelComponent>();
-                // }
-                ImGui::PopID();
+                continue;
             }
+            ImGui::PushID(counter++);
+            auto &tr = e.get_component<TransformComponent>();
+            auto &tag = e.get_component<TagComponent>();
+            if (!ImGui::CollapsingHeader(tag.tag.c_str()))
+            {
+                ImGui::PopID();
+                continue;
+            }
+            auto &active = e.get_component<ActiveComponent>();
+
+            ImGui::Text("%s", tag.tag.c_str());
+            ImGui::Checkbox("Active", &active.active);
+
+            build_transform_entry(tr);
+
+            if (e.has_component<ViewmodelComponent>())
+            {
+                auto &vm = e.get_component<ViewmodelComponent>();
+                ImGui::DragFloat("smoothing", &vm.smoothing, 0.1f);
+                ImGui::DragFloat("amplitude", &vm.amplitude, 0.01f);
+                ImGui::DragFloat("frequency", &vm.frequency, 0.1f);
+                ImGui::DragFloat("vertical velocity multi", &vm.vertical_velocity_multiplier, 0.01f);
+                ImGui::DragFloat("max vertical offset", &vm.max_vertical_offset, 0.01f);
+                ImGui::DragFloat("sway multiplier", &vm.sway_multiplier);
+                ImGui::DragFloat3("position offset", glm::value_ptr(vm.position_offset));
+                ImGui::DragFloat3("euler offset", glm::value_ptr(vm.euler_offset));
+            }
+
+            if (e.has_component<LightComponent>())
+            {
+                auto &light = e.get_component<LightComponent>();
+                ImGui::DragFloat("radius", &light.radius, 0.01f);
+                ImGui::DragFloat("strength", &light.strength, 0.01f);
+                ImGui::ColorEdit3("color", glm::value_ptr(light.color),ImGuiColorEditFlags_HDR
+                                    | ImGuiColorEditFlags_Float );
+            }
+            // if (e.has_component<ModelComponent>())
+            // {
+            //     auto& model = e.get_component<ModelComponent>();
+            // }
+            //
+            // if (e.has_component<SkinnedModelComponent>())
+            // {
+            //     auto& skinned_model = e.get_component<SkinnedModelComponent>();
+            // }
+            ImGui::PopID();
         }
+
 
         if (ImGui::Button("Hot reload shaders"))
         {

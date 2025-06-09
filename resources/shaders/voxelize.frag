@@ -29,7 +29,7 @@ struct Light
     float strength;
     float radius;
     int type;
-    int padding;
+    int enabled;
 };
 
 #define MAX_LIGHTS 8
@@ -97,11 +97,16 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
 float shadow_calculation2(vec4 fragPosLightSpace)
 {
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
-    if(projCoords.z > 1.0)
+    if (projCoords.z > 1.0)
     {
         return 0.0;
     }
@@ -111,24 +116,37 @@ float shadow_calculation2(vec4 fragPosLightSpace)
     return shadow;
 }
 
+float GetAttenuationFactor(float distSq, float lightRadius)
+{
+    lightRadius = max(lightRadius, 0.0001);
+    distSq = max(distSq, 0.0001);
+
+    float factor = (lightRadius * lightRadius) / distSq;
+
+    return factor;
+}
 
 vec3 diffuse(Light light, vec3 albedo, vec3 sampleToLight, vec3 N)
 {
-    float dist = length(sampleToLight);
+    float shadow = 0.0f;
     if (light.type == DIRECTIONAL)
     {
+        shadow = 1.0 - shadow_calculation2(FragPosLightSpace);
         vec3 diffuse = (light.color.rgb) * dot(normalize(N), -light.direction.xyz) * albedo;
-        return diffuse * 4.0f;
+        return diffuse  * shadow;
     }
     else if (light.type == POINT)
     {
-        sampleToLight = sampleToLight / dist;
-        float cosTheta = dot(normalize(N), (sampleToLight));
+        float dist = length(sampleToLight);
+
+        vec3 lightDir = sampleToLight / dist;
+        float cosTheta = dot(normalize(N), lightDir);
         if (cosTheta > 0.0)
         {
-            vec3 diffuse = light.color.rgb * cosTheta * albedo;
-            float radiance = 1.0 / (dist * dist);
-            return diffuse * radiance;
+            vec3 diffuse = light.color.rgb  * cosTheta * albedo;
+            float attenuation = GetAttenuationFactor(dist * dist, light.radius);
+
+            return diffuse * attenuation;
         }
     }
     return vec3(0.0);
@@ -137,9 +155,8 @@ vec3 diffuse(Light light, vec3 albedo, vec3 sampleToLight, vec3 N)
 vec4 pbr()
 {
     vec4 albedo_texture = texture2D(texture_albedo, TexCoords);
-//    vec3 albedo = albedo_texture.rgb;
+//    albedo = albedo_texture.rgb;
     vec3 albedo = pow(albedo_texture.rgb, vec3(2.2));
-    vec3 orm;
     float metallic = texture2D(texture_metallic, TexCoords).r;
     float roughness = texture2D(texture_roughness, TexCoords).g;
     float ao = texture2D(texture_ao, TexCoords).b + 0.2;
@@ -150,23 +167,59 @@ vec4 pbr()
 
     vec3 V = normalize(-FragPos.xyz);
     vec3 R = reflect(-V, N);
-
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, albedo, metallic);
-
     vec3 Lo = vec3(0.0);
 
-    float shadow = 1.0 - shadow_calculation2(FragPosLightSpace);
-    vec3 color = vec3(0.0f);
-    color += diffuse(lights[0], albedo, lights[0].position.xyz - FragPos.xyz, N) * shadow;
-    for (int i = 1; i < lights.length(); i++)
+    for (int i = 0; i < lights.length(); i++)
     {
-        color += diffuse(lights[i], albedo, lights[i].position.xyz - FragPos.xyz, N);
+        if(lights[i].enabled == 0)
+        {
+            continue;
+        }
+        float shadow = 1.0f;
+        vec3 L = vec3(0.0);
+        vec3 radiance = vec3(0.0);
+        if (lights[i].type == DIRECTIONAL)
+        {
+            L = normalize(-lights[i].direction.xyz);
+            radiance = lights[i].color.rgb * lights[i].strength;
+            shadow = 1.0 - shadow_calculation2(FragPosLightSpace);
+        }
+        else if (lights[i].type == POINT)
+        {
+            L = normalize(lights[i].position.xyz - FragPos.xyz);
+            float distance = length(lights[i].position.xyz - FragPos.xyz);
+            float attenuation = 1.0 / (distance * distance);
+            radiance = lights[i].color.rgb * lights[i].strength * attenuation;
+        }
+        vec3 H = normalize(V + L);
+
+
+        float NDF = distributionGGX(N, H, roughness);
+        float G = geometrySmith(N, V, L, roughness);
+        vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
+
+        vec3 numerator = NDF * G * F;
+        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+        vec3 specular = numerator / denominator;
+
+        vec3 kS = F;
+        vec3 kD = vec3(1.0) - kS;
+        kD *= 1.0 - metallic;
+
+        float NdotL = max(dot(N, L), 0.0);
+        Lo += ((kD * albedo / PI + specular) * radiance * NdotL) * shadow;
     }
 
+    vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+    vec3 kS = F;
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metallic;
+
     vec3 ambient = vec3(0.02) * albedo;
-    color += ambient;
-    color += texture(texture_emission, TexCoords).rgb;
+    vec3 emission = texture2D(texture_emission, TexCoords).rgb;
+    vec3 color = Lo + ambient + emission;
     return vec4(color, 1.0);
 }
 
@@ -178,7 +231,7 @@ void main()
     }
 
 
-    vec4 color = pbr() ;
+    vec4 color = pbr();
 
     vec3 voxelgrid_tex_pos = from_clipspace_to_texcoords(FragPos.xyz);
     ivec3 voxelgrid_resolution = imageSize(texture_voxel);
