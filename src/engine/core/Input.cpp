@@ -8,6 +8,9 @@ namespace cologne::Input
     std::unordered_map<Key, bool> _key_down_map;
     std::unordered_map<Key, bool> _key_pressed_map;
     std::unordered_map<Key, bool> _key_pressed_last_frame_map;
+    std::unordered_map<MouseButton, bool> _mouse_down_map;
+    std::unordered_map<MouseButton, bool> _mouse_pressed_map;
+    std::unordered_map<MouseButton, bool> _mouse_pressed_last_frame_map;
 
     Key translate_key(uint32_t scan_code)
     {
@@ -121,6 +124,19 @@ namespace cologne::Input
         }
     }
 
+    MouseButton translate_button(uint32_t scan_code)
+    {
+        switch (scan_code)
+        {
+            case SDL_BUTTON_LEFT: return MouseButton::Left;
+            case SDL_BUTTON_RIGHT: return MouseButton::Right;
+            case SDL_BUTTON_MIDDLE: return MouseButton::Middle;
+            case SDL_BUTTON_X1: return MouseButton::Secondary_1;
+            case SDL_BUTTON_X2: return MouseButton::Secondary_2;
+            default: return MouseButton::Unknown;
+        }
+    }
+
     void update()
     {
         _mouse_motion.x = 0.0f;
@@ -129,6 +145,11 @@ namespace cologne::Input
         {
             _key_pressed_map[key_down_map.first] = false;
         }
+
+        for (auto mouse_pressed_map : _mouse_pressed_map)
+        {
+            _mouse_pressed_map[mouse_pressed_map.first] = false;
+        }
     }
 
     void update_mouse(float x, float y)
@@ -136,6 +157,39 @@ namespace cologne::Input
         _mouse_motion.x = x;
         _mouse_motion.y = y;
     }
+
+    void update_mouse_down(uint32_t scan_code)
+    {
+        MouseButton button = translate_button(scan_code);
+        _mouse_down_map[button] = true;
+        if (!_mouse_pressed_last_frame_map[button])
+        {
+            _mouse_pressed_map[button] = true;
+            _mouse_pressed_last_frame_map[button] = true;
+        }
+    }
+
+    void update_mouse_up(uint32_t scan_code)
+    {
+        MouseButton button = translate_button(scan_code);
+        _mouse_down_map[button] = false;
+
+        if (_mouse_pressed_last_frame_map[button])
+        {
+            _mouse_pressed_last_frame_map[button] = false;
+        }
+    }
+
+    bool mouse_pressed(MouseButton button)
+    {
+        return _mouse_pressed_map[button];
+    }
+
+    bool mouse_down(MouseButton button)
+    {
+        return _mouse_down_map[button];
+    }
+
 
     void update_key_up(uint32_t scan_code)
     {

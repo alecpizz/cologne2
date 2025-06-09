@@ -236,7 +236,7 @@ namespace cologne
         fbo->release();
         draw_fps();
         debug_voxel_pass();
-        if (Engine::get_event_manager()->paused())
+        if (_light_debug_visuals)
         {
             for (auto &light: lights)
             {
@@ -310,6 +310,7 @@ namespace cologne
 
         Engine::get_debug_ui()->add_bool_entry("Voxel Debug Visuals", _voxel_debug_visuals);
         Engine::get_debug_ui()->add_bool_entry("Indirect Lighting", _apply_indirect_lighting);
+        Engine::get_debug_ui()->add_bool_entry("Light Debug Visuals", _light_debug_visuals);
         Engine::get_debug_ui()->add_vec3_entry("Voxel Offset", _voxel_data.voxel_offset);
         init_shaders();
         init_ssbos();

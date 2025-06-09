@@ -21,6 +21,15 @@ namespace cologne::Input
         RightGui, AltGr
     };
 
+    enum class MouseButton
+    {
+        Left,
+        Right,
+        Middle,
+        Secondary_1,
+        Secondary_2,
+        Unknown
+    };
 
     void init();
 
@@ -31,6 +40,14 @@ namespace cologne::Input
     void enable_mouse();
 
     void update_mouse(float x, float y);
+
+    void update_mouse_down(uint32_t scan_code);
+
+    void update_mouse_up(uint32_t scan_code);
+
+    bool mouse_pressed(MouseButton button);
+
+    bool mouse_down(MouseButton button);
 
     void update_key_up(uint32_t scan_code);
 

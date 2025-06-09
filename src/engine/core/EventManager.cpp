@@ -46,6 +46,15 @@ namespace cologne
             {
                 Input::update_mouse(event.motion.xrel, event.motion.yrel);
             }
+            if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
+            {
+                Input::update_mouse_down(event.button.button);
+            }
+
+            if (event.type == SDL_EVENT_MOUSE_BUTTON_UP)
+            {
+                Input::update_mouse_up(event.button.button);
+            }
         }
     }
 

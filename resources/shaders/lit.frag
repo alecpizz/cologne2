@@ -187,6 +187,10 @@ void main()
         {
             continue;
         }
+//        if(length( lights[i].position.xyz - FragPos) > lights[i].radius)
+//        {
+//            continue;
+//        }
         float shadow = 1.0f;
         vec3 L = vec3(0.0);
         vec3 radiance = vec3(0.0);

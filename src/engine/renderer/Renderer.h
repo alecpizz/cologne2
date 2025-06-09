@@ -136,6 +136,7 @@ namespace cologne
         //state
         bool _apply_indirect_lighting = true;
         bool _voxel_debug_visuals = false;
+        bool _light_debug_visuals = false;
         //misc
         glm::mat4 _dir_light_space;
         TransformComponent _camera_transform;

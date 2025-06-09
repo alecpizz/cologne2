@@ -12,6 +12,8 @@
 #include <engine/scripts/CameraController.h>
 #include <engine/scripts/PlayerController.h>
 #include <engine/util/DebugScope.h>
+#include <engine/util/Frustum.h>
+
 #include "Components.h"
 #include "Entity.h"
 #include "engine/physics/RaycastHitInfo.h"
@@ -19,11 +21,8 @@
 
 namespace cologne
 {
-    glm::vec3 gun_offset_temp = glm::vec3(0.165f, -0.145f, -0.065f);
-    glm::vec3 gun_offset_euler_temp = glm::vec3(0.0f, 90.0f, 0.0f);
-    glm::vec3 gun_offset_scale_temp = glm::vec3(1.0f);
     Entity camera;
-
+    Frustum cam_frustum;
     Scene::Scene()
     {
         DebugScope scope(__PRETTY_FUNCTION__);
@@ -89,7 +88,7 @@ namespace cologne
         light.color = glm::vec3(1, 0.7799999713897705, 0.5289999842643738);
         light.radius = 6.0f;
         light.strength = 2.0f;
-        light.type = LightComponent::Directional;
+        light.type = 0;
         dir_light.get_component<TransformComponent>().position = glm::vec3(0.790f, 18.867f, 0.024f);
         dir_light.get_component<TransformComponent>().rotation =
             glm::quat(glm::radians(glm::vec3(82.300, 0.0f, 0.0f)));
@@ -99,7 +98,7 @@ namespace cologne
         auto &light2 = point_light.add_component<LightComponent>();
         light2.color = glm::vec3(1, 0.7799999713897705, 0.5289999842643738);
         light2.radius = 3.0f;
-        light2.strength = 5.0f;
+        light2.strength = 6.0f;
         light2.type = LightComponent::Point;
         point_light.get_component<TransformComponent>().position = glm::vec3(-6.0f, 5.0f, -5.0f);
 
@@ -109,33 +108,11 @@ namespace cologne
         light3.color = glm::vec3(0.2f, 0.9f, 0.15f);
         point_light2.get_component<TransformComponent>().position = glm::vec3(6.0f, 3.4, 5.0f);
         re_calculate_bounds();
-        // auto& skinned_model = add_skinned_model(RESOURCES_PATH "python/deagle.glb");
-        // skinned_model.set_cast_shadows(false);
-        // _animations = FileUtil::import_animations(RESOURCES_PATH "python/deagle.glb");
-        // for (auto & animation : _animations)
-        // {
-        //     animation.read_missing_bones(skinned_model)
-        // }
-        // _animators.insert(std::make_pair(skinned_model.get_name(), Animator(_animations[1])));
-        // auto& skinned_model2 = add_skinned_model(RESOURCES_PATH "man.glb");
-        // skinned_model2.get_transform().set_scale(glm::vec3(0.9f));
-        // //where the fuck should animations live lol
-        // std::vector<Animation> animations2 = FileUtil::import_animations(RESOURCES_PATH "man.glb", skinned_model2);
-        // _animations.insert(_animations.end(), animations2.begin(), animations2.end());
-        // _animators.insert(std::make_pair(skinned_model2.get_name(), Animator(_animations.back())));
-        //
-        // for (auto & static_model : _models)
-        // {
-        //     Physics::create_static_mesh_collider(static_model);
-        // }
-
         LOG_INFO("Scene bounds are min (%f, %f, %f), max (%f, %f, %f)", _scene_bounds.min.x, _scene_bounds.min.y,
                  _scene_bounds.min.z, _scene_bounds.max.z, _scene_bounds.max.y, _scene_bounds.max.z);
         LOG_INFO("Scene size is (%f, %f, %f)", _scene_bounds.size().x, _scene_bounds.size().y, _scene_bounds.size().z);
         _particles.emplace_back(Particles());
         _particles[0].init(_scene_bounds, 20);
-        // Engine::get_debug_ui()->add_vec3_entry("gun position", vm.position_offset);
-        // Engine::get_debug_ui()->add_vec3_entry("gun euler", vm.euler_offset);
     }
 
     Scene::~Scene()
@@ -171,13 +148,18 @@ namespace cologne
             nsc.instance->on_update(delta_time);
         }
 
-
         auto animators = _registry.view<AnimatorComponent>();
         for (auto entity: animators)
         {
             auto &animator = _registry.get<AnimatorComponent>(entity);
             animator.update_animation(delta_time);
         }
+
+
+        auto tr = camera.get_component<TransformComponent>();
+        auto cm = camera.get_component<CameraComponent>();
+        Engine::get_renderer()->submit_camera_transform(tr, cm);
+        cam_frustum.update(Renderer::get_camera_projection(tr, cm) * Renderer::get_camera_view(tr));
 
         for (auto entity: _registry.view<LightComponent, TransformComponent, ActiveComponent>())
         {
@@ -187,18 +169,20 @@ namespace cologne
             {
                 continue;
             }
+            // //TEMP, need to figure out a better radius culling tech
+            // if (light.radius < 6.0f && !cam_frustum.intersect_point(transform.position))
+            // {
+            //     continue;
+            // }
             Engine::get_renderer()->submit_light(Light(light, transform));
         }
 
-        auto tr = camera.get_component<TransformComponent>();
-        auto cm = camera.get_component<CameraComponent>();
 
         glm::vec3 ray_start = tr.position, ray_dir = tr.get_forward();
         RaycastHitInfo info;
         if (Physics::raycast(ray_start, ray_dir, 20.0f, Physics::NON_MOVING | Physics::MOVING, info))
         {
-            Entity hit_entity = info.hit_entity;
-            if (hit_entity)
+            if (Entity hit_entity = info.hit_entity)
             {
                 std::string name = hit_entity.get_component<TagComponent>().tag;
                 Engine::get_renderer()->draw_text(name.c_str(),
@@ -209,9 +193,15 @@ namespace cologne
                                                   glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), .6f);
             }
             Engine::get_renderer()->draw_line(info.hit_point, info.hit_point + info.hit_normal * 0.1f, info.hit_normal);
+            if (Input::mouse_pressed(Input::MouseButton::Left) && !Engine::get_event_manager()->paused())
+            {
+                Entity light = create_entity();
+                light.get_component<TransformComponent>().position = info.hit_point + info.hit_normal * 0.25f;
+                auto& lc = light.add_component<LightComponent>();
+                lc.color = glm::linearRand(glm::vec3(0.0f), glm::vec3(1.0f));
+            }
         }
 
-        Engine::get_renderer()->submit_camera_transform(tr, cm);
 
 
         //submit draw calls
@@ -251,32 +241,6 @@ namespace cologne
             Engine::get_renderer()->submit_skinned_render_item(item);
         }
 
-
-        //update logic
-
-        //update animations
-
-
-        // auto &model = _models[1];
-        // static float time = 0.0f;
-        // time += delta_time * 0.85;
-        // // -11 1 4 init pos
-        // // 13 1 4 final pos
-        // glm::vec3 new_pos = glm::lerp(glm::vec3(-11.0f, 1.0f, 4.0f),
-        // glm::vec3(13.0f, 1.0f, 4.0f), glm::abs(glm::cos(time)));
-        // model.get_transform().set_translation(glm::vec3(new_pos));
-
-        // for (auto& anim : _animators)
-        // {
-        //     anim.second.update_animation(delta_time);
-        // }
-        //
-        // glm::mat4 gun_mat = glm::mat4(1.0f);
-        // gun_mat = glm::translate(gun_mat, gun_offset_temp);
-        // gun_mat *= glm::toMat4(glm::quat(glm::radians(glm::vec3(gun_offset_euler_temp))));
-        // gun_mat *= glm::scale(gun_mat, gun_offset_scale_temp);
-        // gun_mat = glm::inverse(Engine::get_camera()->get_view_matrix()) * gun_mat;
-        // _skinned_models[0].get_transform().set_model_matrix(gun_mat);
     }
 
     AABB Scene::re_calculate_bounds()

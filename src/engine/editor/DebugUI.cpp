@@ -100,8 +100,7 @@ namespace cologne
 
         ImGui::Text("FPS %f", ImGui::GetIO().Framerate);
         size_t counter = 0;
-        ImGui::Separator();
-        ImGui::Text("Entities");
+        ImGui::SeparatorText("Entities");
         for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
         {
             Entity e = {entity, Engine::get_scene()};
@@ -118,14 +117,15 @@ namespace cologne
                 continue;
             }
             auto &active = e.get_component<ActiveComponent>();
-
             ImGui::Text("%s", tag.tag.c_str());
             ImGui::Checkbox("Active", &active.active);
-
+            ImGui::SeparatorText("Transform");
             build_transform_entry(tr);
+            ImGui::Separator();
 
             if (e.has_component<ViewmodelComponent>())
             {
+                ImGui::SeparatorText("View Model Config");
                 auto &vm = e.get_component<ViewmodelComponent>();
                 ImGui::DragFloat("smoothing", &vm.smoothing, 0.1f);
                 ImGui::DragFloat("amplitude", &vm.amplitude, 0.01f);
@@ -135,29 +135,24 @@ namespace cologne
                 ImGui::DragFloat("sway multiplier", &vm.sway_multiplier);
                 ImGui::DragFloat3("position offset", glm::value_ptr(vm.position_offset));
                 ImGui::DragFloat3("euler offset", glm::value_ptr(vm.euler_offset));
+                ImGui::Separator();
             }
 
             if (e.has_component<LightComponent>())
             {
+                ImGui::SeparatorText("Light Settings");
                 auto &light = e.get_component<LightComponent>();
                 ImGui::DragFloat("radius", &light.radius, 0.01f);
                 ImGui::DragFloat("strength", &light.strength, 0.01f);
                 ImGui::ColorEdit3("color", glm::value_ptr(light.color),ImGuiColorEditFlags_HDR
                                     | ImGuiColorEditFlags_Float );
+                ImGui::Separator();
             }
-            // if (e.has_component<ModelComponent>())
-            // {
-            //     auto& model = e.get_component<ModelComponent>();
-            // }
-            //
-            // if (e.has_component<SkinnedModelComponent>())
-            // {
-            //     auto& skinned_model = e.get_component<SkinnedModelComponent>();
-            // }
             ImGui::PopID();
         }
 
 
+        ImGui::SeparatorText("Quick Actions");
         if (ImGui::Button("Hot reload shaders"))
         {
             Engine::get_renderer()->reload_shaders();
