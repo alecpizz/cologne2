@@ -192,10 +192,11 @@ namespace cologne
                                                   glm::vec3(0.0f, 450.0f, 0.0f),
                                                   glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), .6f);
             }
+            static int light_count = 0;
             Engine::get_renderer()->draw_line(info.hit_point, info.hit_point + info.hit_normal * 0.1f, info.hit_normal);
             if (Input::mouse_pressed(Input::MouseButton::Left) && !Engine::get_event_manager()->paused())
             {
-                Entity light = create_entity();
+                Entity light = create_entity("Point Light" + std::to_string(light_count++));
                 light.get_component<TransformComponent>().position = info.hit_point + info.hit_normal * 0.25f;
                 auto& lc = light.add_component<LightComponent>();
                 lc.color = glm::linearRand(glm::vec3(0.0f), glm::vec3(1.0f));
