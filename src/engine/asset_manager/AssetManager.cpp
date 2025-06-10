@@ -4,7 +4,6 @@
 
 #include "AssetManager.h"
 #include <filesystem>
-#include <thread>
 #include <engine/util/DebugScope.h>
 #include <engine/util/FileUtil.h>
 
@@ -41,10 +40,11 @@ namespace cologne::AssetManager
     void find_file_paths()
     {
         DebugScope scope(__PRETTY_FUNCTION__);
+
         std::vector<FileUtil::FileInfo> model_paths = FileUtil::iterate_directory(RESOURCES_PATH "models");
         std::vector<ModelData> model_datas;
         model_datas.resize(model_paths.size());
-        std::transform(std::execution::seq, std::begin(model_paths),
+        std::transform(std::execution::par_unseq, std::begin(model_paths),
                        std::end(model_paths), std::begin(model_datas),
                        [](const FileUtil::FileInfo &file)
                        {
@@ -56,13 +56,12 @@ namespace cologne::AssetManager
         std::vector<FileUtil::FileInfo> skinned_paths = FileUtil::iterate_directory(RESOURCES_PATH "skinned_models");
         std::vector<SkinnedModelData> skinned_model_datas;
         skinned_model_datas.resize(skinned_paths.size());
-        std::transform(std::execution::seq, std::begin(skinned_paths), std::end(skinned_paths),
+        std::transform(std::execution::par_unseq, std::begin(skinned_paths), std::end(skinned_paths),
                        std::begin(skinned_model_datas), [](const FileUtil::FileInfo &file)
                        {
                            const SkinnedModelData data = FileUtil::import_skinned_model(file.path);
                            return data;
                        });
-
         scope = DebugScope("load models");
         for (auto &model_data: model_datas)
         {

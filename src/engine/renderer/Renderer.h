@@ -142,6 +142,5 @@ namespace cologne
         TransformComponent _camera_transform;
         CameraComponent _cam;
         VoxelData _voxel_data;
-        bool _initialized = false;
     };
 }

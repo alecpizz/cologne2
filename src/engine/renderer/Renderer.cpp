@@ -252,10 +252,6 @@ namespace cologne
 
     void Renderer::window_resized(uint32_t width, uint32_t height)
     {
-        if (!_initialized)
-        {
-            LOG_ERROR("NO INIT!");
-        }
         //regen framebuffers here
         init_gbuffer();
         init_indirect();
@@ -303,14 +299,14 @@ namespace cologne
 
     void Renderer::init()
     {
-        glFlush();
-        glFinish();
         enableReportGlErrors();
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         glEnable(GL_MULTISAMPLE);
-
+        debug_renderer = std::make_unique<DebugRenderer>();
+        text_renderer = std::unique_ptr<TextRenderer>(
+            new TextRenderer(RESOURCES_PATH "fonts/Montserrat-Regular.ttf"));
 
         Engine::get_debug_ui()->add_bool_entry("Voxel Debug Visuals", _voxel_debug_visuals);
         Engine::get_debug_ui()->add_bool_entry("Indirect Lighting", _apply_indirect_lighting);
@@ -320,6 +316,7 @@ namespace cologne
         init_ssbos();
         init_framebuffers();
         init_voxels();
+        init_indirect();
         init_gbuffer();
         glDisable(GL_CULL_FACE);
         init_skybox(RESOURCES_PATH "HDR_blue_local_star.hdr");
@@ -329,13 +326,8 @@ namespace cologne
         glEnable(GL_CULL_FACE);
 
         init_shadow();
-        init_indirect();
         voxelize_scene();
-        debug_renderer = std::make_unique<DebugRenderer>();
-        text_renderer = std::unique_ptr<TextRenderer>(
-            new TextRenderer(RESOURCES_PATH "fonts/Montserrat-Regular.ttf"));
         LOG_INFO("Renderer initialized");
-        _initialized = true;
     }
 
     Renderer::Renderer()
