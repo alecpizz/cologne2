@@ -107,6 +107,11 @@ namespace cologne
         light3 = light2;
         light3.color = glm::vec3(0.2f, 0.9f, 0.15f);
         point_light2.get_component<TransformComponent>().position = glm::vec3(6.0f, 3.4, 5.0f);
+
+        Entity point_light3 = create_entity("lamp point light");
+        auto& light4 = point_light3.add_component<LightComponent>();
+        point_light3.get_component<TransformComponent>().position = glm::vec3(-0.124f, 1.582f, -3.814f);
+
         re_calculate_bounds();
         LOG_INFO("Scene bounds are min (%f, %f, %f), max (%f, %f, %f)", _scene_bounds.min.x, _scene_bounds.min.y,
                  _scene_bounds.min.z, _scene_bounds.max.z, _scene_bounds.max.y, _scene_bounds.max.z);

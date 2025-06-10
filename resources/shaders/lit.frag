@@ -39,6 +39,7 @@ layout (binding = 6) uniform samplerCube irradiance_map;
 layout (binding = 7) uniform samplerCube prefilter_map;
 layout (binding = 8) uniform sampler2D brdf;
 layout (binding = 9) uniform sampler2D indirect_texture;
+layout (binding = 10) uniform sampler2D bloom_texture;
 
 uniform int voxel_grid_size;
 uniform float voxel_size = 128;
@@ -259,6 +260,7 @@ void main()
     float dist = length(FragPos - camera_position.xyz);
     float fog_factor = 1.0 / exp((dist * fog_density) * (dist * fog_density));
     color = mix(fog_color, color, fog_factor);
+    color += texture(bloom_texture, TexCoords).rgb;
 
     color = mix(color, Tonemap_ACES(color), 1.0);
     color = color / (color + vec3(1.0));

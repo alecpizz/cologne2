@@ -20,6 +20,8 @@ namespace cologne
 
         uint32_t get_height() const;
 
+        glm::vec2 get_dimensions() const;
+
         void clear() const;
 
         void resize() const;

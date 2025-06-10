@@ -71,6 +71,11 @@ namespace cologne
         shaders["particle_render"] = Shader(RESOURCES_PATH "shaders/particle_render.vert",
                                             RESOURCES_PATH "shaders/particle_render.frag");
         shaders["particle_sim"] = Shader(RESOURCES_PATH "shaders/particle_sim.comp");
+
+        shaders["downsample"] = Shader(RESOURCES_PATH "shaders/quad.vert",
+                                       RESOURCES_PATH "shaders/bloom/downsample.frag");
+        shaders["upsample"] = Shader(RESOURCES_PATH "shaders/quad.vert",
+            RESOURCES_PATH "shaders/bloom/upsample.frag");
     }
 
     void Renderer::init_ssbos()
@@ -225,10 +230,9 @@ namespace cologne
         voxelize_scene();
         geometry_pass();
         indirect_pass();
+        bloom_pass();
         lit_pass();
         skybox_pass();
-        //composite_pass();
-
         auto fbo = get_framebuffer_by_name("output");
         fbo->blit_to_default_frame_buffer("color", 0, 0,
                                           Engine::get_window()->get_width(), Engine::get_window()->get_height(),
@@ -254,6 +258,7 @@ namespace cologne
     {
         //regen framebuffers here
         init_gbuffer();
+        init_bloom();
         init_indirect();
         get_framebuffer_by_name("output")->resize(width, height);
         get_framebuffer_by_name("voxel_back")->resize(width, height);
@@ -314,6 +319,7 @@ namespace cologne
         Engine::get_debug_ui()->add_vec3_entry("Voxel Offset", _voxel_data.voxel_offset);
         init_shaders();
         init_ssbos();
+        init_bloom();
         init_framebuffers();
         init_voxels();
         init_indirect();

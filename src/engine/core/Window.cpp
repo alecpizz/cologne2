@@ -82,6 +82,11 @@ namespace cologne
         return _impl->height;
     }
 
+    glm::vec2 Window::get_dimensions() const
+    {
+        return glm::vec2(_impl->width, _impl->height);
+    }
+
     void Window::clear() const
     {
         glClearColor(0.1f, 0.1f, 0.2f, 1.0f);

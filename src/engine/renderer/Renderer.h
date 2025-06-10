@@ -98,6 +98,10 @@ namespace cologne
 
         void init_skybox(const char *hdr_path);
 
+        void init_bloom();
+
+        void bloom_pass();
+
         void skybox_pass();
 
         void init_framebuffers();
@@ -133,6 +137,7 @@ namespace cologne
         uint32_t _env_irradiance = 0;
         uint32_t _env_prefilter = 0;
         uint32_t _env_brdf = 0;
+        uint32_t _bloom_texture = 0;
         //state
         bool _apply_indirect_lighting = true;
         bool _voxel_debug_visuals = false;
