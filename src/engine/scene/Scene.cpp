@@ -279,4 +279,9 @@ namespace cologne
         entity.add_component<ActiveComponent>(true);
         return entity;
     }
+
+    void Scene::destroy_entity(Entity entity)
+    {
+        _registry.destroy(entity);
+    }
 }

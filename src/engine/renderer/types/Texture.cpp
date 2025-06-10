@@ -121,6 +121,7 @@ namespace cologne
         _channels = new_channels;
 
         glCreateTextures(GL_TEXTURE_2D, 1, &_handle);
+        LOG_INFO("CERATED TEXTURE %d", _handle);
         glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);

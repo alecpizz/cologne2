@@ -188,10 +188,11 @@ vec4 pbr()
         }
         else if (lights[i].type == POINT)
         {
-            L = normalize(lights[i].position.xyz - FragPos.xyz);
-            float distance = length(lights[i].position.xyz - FragPos.xyz);
+            vec3 light_pos_voxel_space = lights[i].position.xyz * voxel_size;
+            L = normalize(light_pos_voxel_space - FragPos.xyz);
+            float distance = length(light_pos_voxel_space - FragPos.xyz);
             float attenuation = 1.0 / (distance * distance);
-            radiance = lights[i].color.rgb * lights[i].strength * attenuation;
+            radiance = lights[i].color.rgb * lights[i].strength * attenuation * 0.1f;
         }
         vec3 H = normalize(V + L);
 

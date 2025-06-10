@@ -151,15 +151,14 @@ namespace cologne
             glm::quat new_rotation = glm::slerp(_prev_transform.rotation,
                                                 target_rotation * glm::quat(
                                                     glm::radians(glm::vec3(viewmodel.euler_offset))),
-                                                    dt * viewmodel.smoothing);
+                                                dt * viewmodel.smoothing);
             glm::vec3 velocity = Physics::get_player_velocity(get_component<PlayerComponent>().id);
             float y_vel = velocity.y;
             velocity.y = 0.0f;
             if (glm::length2(velocity) > 0.0f)
             {
                 _time += dt;
-            }
-            else
+            } else
             {
                 _time = 0.0f;
             }
@@ -168,9 +167,9 @@ namespace cologne
             bob.y += glm::sin(_time * viewmodel.frequency) * viewmodel.amplitude;
             bob.x += glm::cos(_time * viewmodel.frequency / 2.0f) * viewmodel.amplitude * 2.0f;
             bob.y += glm::clamp(-y_vel * viewmodel.vertical_velocity_multiplier,
-                -viewmodel.max_vertical_offset, viewmodel.max_vertical_offset);
+                                -viewmodel.max_vertical_offset, viewmodel.max_vertical_offset);
             glm::vec3 new_position = glm::lerp(_prev_transform.position,
-                bob + viewmodel.position_offset, dt * viewmodel.smoothing);
+                                               bob + viewmodel.position_offset, dt * viewmodel.smoothing);
             _prev_transform.position = new_position;
             _prev_transform.rotation = new_rotation;
 
@@ -213,7 +212,8 @@ namespace cologne
             if (_is_free_cam)
             {
                 get_component<PlayerComponent>().teleport_to_position(
-                    get_component<PlayerComponent>().camera.get_component<TransformComponent>().position);
+                    get_component<PlayerComponent>().camera.get_component<TransformComponent>().position
+                    - glm::vec3(0.0f, 1.45f, 0.0f));
                 move_viewmodel(dt);
                 return;
             }

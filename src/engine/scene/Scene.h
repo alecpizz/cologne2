@@ -38,6 +38,8 @@ namespace cologne
 
         Entity create_entity(const std::string& name = std::string());
 
+        void destroy_entity(Entity entity);
+
     private:
         //THIS IS fucking dumb
         AABB _scene_bounds;

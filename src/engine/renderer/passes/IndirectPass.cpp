@@ -1,5 +1,4 @@
-﻿
-#include <engine/renderer/Renderer.h>
+﻿#include <engine/renderer/Renderer.h>
 #include <engine/core/Engine.h>
 #include <engine/renderer/OpenGLDebugScope.h>
 #include <engine/renderer/types/Shader.h>
@@ -7,22 +6,35 @@
 namespace cologne
 {
     const uint32_t pixel_ratio = 2;
+
     void Renderer::init_indirect()
     {
         if (_indirect_texture != 0)
         {
             glDeleteTextures(1, &_indirect_texture);
         }
-        glCreateTextures(GL_TEXTURE_2D, 1, &_indirect_texture);
-        glTextureParameteri(_indirect_texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTextureParameteri(_indirect_texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTextureParameteri(_indirect_texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTextureParameteri(_indirect_texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTextureStorage2D(_indirect_texture, 1, GL_RGBA8,
-                           Engine::get_window()->get_width() / pixel_ratio, Engine::get_window()->get_height() / pixel_ratio);
+        glGenTextures(1, &_indirect_texture);
+        glBindTexture(GL_TEXTURE_2D, _indirect_texture);
+        LOG_INFO("CREATED INDIRECT TEXTURE ID %d", _indirect_texture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, Engine::get_window()->get_width() / pixel_ratio,
+        //                Engine::get_window()->get_height() / pixel_ratio);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, Engine::get_window()->get_width() / pixel_ratio,
+                     Engine::get_window()->get_height() / pixel_ratio, 0, GL_RGBA, GL_UNSIGNED_INT, nullptr);
+        // glTextureStorage2D(_indirect_texture, 1, GL_RGBA8,
+        //                    Engine::get_window()->get_width() / pixel_ratio,
+        //                    Engine::get_window()->get_height() / pixel_ratio);
+        glBindTexture(GL_TEXTURE_2D, 0);
         Engine::get_debug_ui()->add_image_entry("Indirect_Lighting", _indirect_texture,
-            {Engine::get_window()->get_width() / pixel_ratio, Engine::get_window()->get_height() / pixel_ratio});
+                                                {
+                                                    Engine::get_window()->get_width() / pixel_ratio,
+                                                    Engine::get_window()->get_height() / pixel_ratio
+                                                });
     }
+
     void Renderer::indirect_pass()
     {
         if (!_apply_indirect_lighting)
@@ -30,7 +42,7 @@ namespace cologne
             return;
         }
         OpenGLDebugScope scope("Renderer::indirect_pass");
-        Shader* shader = get_shader_by_name("indirect");
+        Shader *shader = get_shader_by_name("indirect");
         if (!shader)
         {
             return;
@@ -48,9 +60,9 @@ namespace cologne
         shader->set_float("voxel_size", voxel_size);
         shader->set_vec3("voxel_offset", _voxel_data.voxel_offset);
         shader->set_int("voxel_grid_size", _voxel_data.voxel_dimensions);
-        
+
         glBindImageTexture(0, _indirect_texture, 0, GL_FALSE, 0,
-            GL_WRITE_ONLY, GL_RGBA8);
+                           GL_WRITE_ONLY, GL_RGBA8);
         glBindTextureUnit(1, _voxel_texture);
         auto gbuffer = get_framebuffer_by_name("gbuffer");
         glBindTextureUnit(2, gbuffer->get_color_attachment_handle_by_name("position"));

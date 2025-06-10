@@ -109,12 +109,20 @@ namespace cologne
                 continue;
             }
             ImGui::PushID(counter++);
+
+
             auto &tr = e.get_component<TransformComponent>();
             auto &tag = e.get_component<TagComponent>();
             if (!ImGui::CollapsingHeader(tag.tag.c_str()))
             {
                 ImGui::PopID();
                 continue;
+            }
+            bool entity_delete = false;
+
+            if (ImGui::Button("Delete Entity"))
+            {
+                entity_delete = true;
             }
             auto &active = e.get_component<ActiveComponent>();
             ImGui::Text("%s", tag.tag.c_str());
@@ -144,11 +152,15 @@ namespace cologne
                 auto &light = e.get_component<LightComponent>();
                 ImGui::DragFloat("radius", &light.radius, 0.01f);
                 ImGui::DragFloat("strength", &light.strength, 0.01f);
-                ImGui::ColorEdit3("color", glm::value_ptr(light.color),ImGuiColorEditFlags_HDR
-                                    | ImGuiColorEditFlags_Float );
+                ImGui::ColorEdit3("color", glm::value_ptr(light.color), ImGuiColorEditFlags_HDR
+                                                                        | ImGuiColorEditFlags_Float);
                 ImGui::Separator();
             }
             ImGui::PopID();
+            if (entity_delete)
+            {
+                Engine::get_scene()->destroy_entity(e);
+            }
         }
 
 
