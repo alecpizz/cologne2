@@ -126,13 +126,13 @@ namespace cologne
         std::vector<SkinnedRenderItem> _skinned_render_items;
 
         //Textures
-        uint32_t _shadow_depth;
-        uint32_t _voxel_texture;
-        uint32_t _indirect_texture;
-        uint32_t _skybox_texture;
-        uint32_t _env_irradiance;
-        uint32_t _env_prefilter;
-        uint32_t _env_brdf;
+        uint32_t _shadow_depth = 0;
+        uint32_t _voxel_texture = 0;
+        uint32_t _indirect_texture = 0;
+        uint32_t _skybox_texture = 0;
+        uint32_t _env_irradiance = 0;
+        uint32_t _env_prefilter = 0;
+        uint32_t _env_brdf = 0;
         //state
         bool _apply_indirect_lighting = true;
         bool _voxel_debug_visuals = false;
