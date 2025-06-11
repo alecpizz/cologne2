@@ -241,40 +241,40 @@ namespace cologne
         }
 
         ImGui::End();
-        auto window = SDL_GL_GetCurrentWindow();
-        ImGui::BeginMainMenuBar(); {
-            if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0))
-            {
-                auto delta = ImGui::GetMouseDragDelta(0);
-                if (delta.x != 0.0f && delta.y != 0.0f)
-                {
-                    int currentWindowX, currentWindowY;
-                    SDL_GetWindowPosition(window, &currentWindowX, &currentWindowY);
-
-                    int newWindowX = currentWindowX + static_cast<int>(delta.x);
-                    int newWindowY = currentWindowY + static_cast<int>(delta.y);
-                    SDL_SetWindowPosition(window, newWindowX, newWindowY);
-                    ImGui::ResetMouseDragDelta(0);
-                }
-            }
-            auto posX = (ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize("- X []   ").x
-                         - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
-            if (posX > ImGui::GetCursorPosX())
-                ImGui::SetCursorPosX(posX);
-            if (ImGui::MenuItem("-"))
-            {
-                Engine::get_window()->minimize();
-            }
-            if (ImGui::MenuItem("[]"))
-            {
-                Engine::get_window()->maximize();
-            }
-            if (ImGui::MenuItem("x"))
-            {
-                Engine::get_event_manager()->set_should_quit(true);
-            }
-        }
-        ImGui::EndMainMenuBar();
+        // auto window = SDL_GL_GetCurrentWindow();
+        // ImGui::BeginMainMenuBar(); {
+        //     if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0))
+        //     {
+        //         auto delta = ImGui::GetMouseDragDelta(0);
+        //         if (delta.x != 0.0f && delta.y != 0.0f)
+        //         {
+        //             int currentWindowX, currentWindowY;
+        //             SDL_GetWindowPosition(window, &currentWindowX, &currentWindowY);
+        //
+        //             int newWindowX = currentWindowX + static_cast<int>(delta.x);
+        //             int newWindowY = currentWindowY + static_cast<int>(delta.y);
+        //             SDL_SetWindowPosition(window, newWindowX, newWindowY);
+        //             ImGui::ResetMouseDragDelta(0);
+        //         }
+        //     }
+        //     auto posX = (ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize("- X []   ").x
+        //                  - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
+        //     if (posX > ImGui::GetCursorPosX())
+        //         ImGui::SetCursorPosX(posX);
+        //     if (ImGui::MenuItem("-"))
+        //     {
+        //         Engine::get_window()->minimize();
+        //     }
+        //     if (ImGui::MenuItem("[]"))
+        //     {
+        //         Engine::get_window()->maximize();
+        //     }
+        //     if (ImGui::MenuItem("x"))
+        //     {
+        //         Engine::get_event_manager()->set_should_quit(true);
+        //     }
+        // }
+        // ImGui::EndMainMenuBar();
     }
 
     void DebugUI::build_transform_entry(TransformComponent &tr)

@@ -43,7 +43,7 @@ namespace cologne
                 SDL_Quit();
                 return;
             }
-            SDL_SetWindowBordered(window, false);
+            // SDL_SetWindowBordered(window, false);
             SDL_RaiseWindow(window);
             context = SDL_GL_CreateContext(window);
 

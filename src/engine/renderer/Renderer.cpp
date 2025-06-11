@@ -33,7 +33,6 @@ namespace cologne
     std::unordered_map<std::string, Shader> shaders = std::unordered_map<std::string, Shader>();
     std::unordered_map<std::string, FrameBuffer> framebuffers = std::unordered_map<std::string, FrameBuffer>();
     std::unordered_map<std::string, SSBO> ssbos = std::unordered_map<std::string, SSBO>();
-    std::vector<Light> lights;
 
     void Renderer::init_shaders()
     {
@@ -96,7 +95,7 @@ namespace cologne
 
         ssbos["viewport"].update(sizeof(ViewportData), &data);
         ssbos["viewport"].bind(1);
-        ssbos["lights"].update((sizeof(Light) * lights.size()), lights.data());
+        ssbos["lights"].update((sizeof(Light) * _lights.size()), _lights.data());
         ssbos["lights"].bind(2);
     }
 
@@ -112,7 +111,7 @@ namespace cologne
 
     void Renderer::submit_light(Light light)
     {
-        lights.emplace_back(light);
+        _lights.emplace_back(light);
     }
 
     void Renderer::submit_render_item(RenderItem item)
@@ -242,7 +241,7 @@ namespace cologne
         debug_voxel_pass();
         if (_light_debug_visuals)
         {
-            for (auto &light: lights)
+            for (auto &light: _lights)
             {
                 draw_sphere(light.position, light.radius, light.color);
             }
@@ -251,7 +250,7 @@ namespace cologne
         text_renderer->present();
         _render_items.clear();
         _skinned_render_items.clear();
-        lights.clear();
+        _lights.clear();
     }
 
     void Renderer::window_resized(uint32_t width, uint32_t height)
@@ -284,16 +283,16 @@ namespace cologne
         return &shaders[n];
     }
 
-    Light &Renderer::get_directional_light() const
+    Light Renderer::get_directional_light() const
     {
-        for (auto &light: lights)
+        for (auto &light: _lights)
         {
             if (light.type == LightType::Directional)
             {
                 return light;
             }
         }
-        return lights[0];
+        return _lights[0];
     }
 
     void Renderer::submit_camera_transform(TransformComponent tr, CameraComponent cam)

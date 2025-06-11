@@ -55,10 +55,14 @@ namespace cologne
     }
 
 
-    void Mesh::draw() const
+    void Mesh::draw(int32_t count) const
     {
+        if (count == 0)
+        {
+            return;
+        }
         glBindVertexArray(_vao);
-        glDrawElements(GL_TRIANGLES, _indices_count, GL_UNSIGNED_INT, 0);
+        glDrawElementsInstanced(GL_TRIANGLES, _indices_count, GL_UNSIGNED_INT, 0, count);
         glBindVertexArray(0);
     }
 

@@ -4,16 +4,11 @@
 #include "types/FrameBuffer.h"
 #include "engine/renderer/types/RenderItem.h"
 
-
-namespace cologne
-{
-    class SSBO;
-}
-
 namespace cologne
 {
     class Scene;
     class Shader;
+    class SSBO;
 
     class Renderer
     {
@@ -55,7 +50,7 @@ namespace cologne
 
         Shader *get_shader_by_name(const char *name);
 
-        Light &get_directional_light() const;
+        Light get_directional_light() const;
 
         void submit_camera_transform(TransformComponent tr, CameraComponent cam);
 
@@ -126,8 +121,10 @@ namespace cologne
         FrameBuffer* get_framebuffer_by_name(const char* name);
         SSBO* get_ssbo_by_name(const char* name);
 
+
         std::vector<RenderItem> _render_items;
         std::vector<SkinnedRenderItem> _skinned_render_items;
+        std::vector<Light> _lights;
 
         //Textures
         uint32_t _shadow_depth = 0;
