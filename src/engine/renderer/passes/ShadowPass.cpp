@@ -17,7 +17,7 @@ namespace cologne
     float shadow_near = 0.1f;
     float shadow_far = 1200.0f;
     float point_shadow_near = 1.0f;
-    float point_shadow_far = 50.0f;
+    float point_shadow_far = 20.0f;
     glm::vec3 _dir_shadow_offset = glm::vec3(0.0f);
     glm::mat4 _cam_view;
     glm::mat4 _cam_proj;
@@ -151,15 +151,15 @@ namespace cologne
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
         return handle_result;
     }
 
     std::vector<glm::mat4> create_shadow_projection_matrices(glm::vec3 position)
     {
-        static std::vector<glm::mat4> shadowTransforms;
-        shadowTransforms.clear();
-        static glm::mat4 proj = glm::perspective(glm::radians(90.0f),
-            1.0f, point_shadow_near, point_shadow_far);
+        std::vector<glm::mat4> shadowTransforms;
+        glm::mat4 proj = glm::perspective(glm::radians(90.0f),
+                                          1.0f, point_shadow_near, point_shadow_far);
         shadowTransforms.push_back(proj *
                                    glm::lookAt(position, position + glm::vec3(1.0, 0.0, 0.0),
                                                glm::vec3(0.0, -1.0, 0.0)));
@@ -385,6 +385,9 @@ namespace cologne
                        _shadow_maps[counter].get_height());
             glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
                                  _shadow_maps[counter].get_handle(), 0);
+            glDrawBuffer(GL_NONE);
+            glReadBuffer(GL_NONE);
+            glClear(GL_DEPTH_BUFFER_BIT);
             counter++;
             glm::vec3 position = light.position;
             shader->set_vec3("light_position", position);

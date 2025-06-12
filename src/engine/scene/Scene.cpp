@@ -42,9 +42,9 @@ namespace cologne
             collider.add_component<StaticColliderComponent>(body_id);
         }
 
-        Entity glowCube = create_entity("glowing cube");
-        glowCube.get_component<TransformComponent>().position = glm::vec3(0.0f, 1.0f, 4.5f);
-        glowCube.add_component<ModelComponent>(AssetManager::get_model_index_by_name("glowCube"), true);
+        // Entity glowCube = create_entity("glowing cube");
+        // glowCube.get_component<TransformComponent>().position = glm::vec3(0.0f, 1.0f, 4.5f);
+        // glowCube.add_component<ModelComponent>(AssetManager::get_model_index_by_name("glowCube"), true);
 
         Entity man = create_entity("man");
         man.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("man"));
@@ -102,15 +102,15 @@ namespace cologne
         light2.type = LightComponent::Point;
         point_light.get_component<TransformComponent>().position = glm::vec3(-6.0f, 5.0f, -5.0f);
 
-        Entity point_light2 = create_entity("point light2");
-        auto& light3 = point_light2.add_component<LightComponent>();
-        light3 = light2;
-        light3.color = glm::vec3(0.2f, 0.9f, 0.15f);
-        point_light2.get_component<TransformComponent>().position = glm::vec3(6.0f, 3.4, 5.0f);
-
-        Entity point_light3 = create_entity("lamp point light");
-        auto& light4 = point_light3.add_component<LightComponent>();
-        point_light3.get_component<TransformComponent>().position = glm::vec3(-0.124f, 1.582f, -3.814f);
+        // Entity point_light2 = create_entity("point light2");
+        // auto& light3 = point_light2.add_component<LightComponent>();
+        // light3 = light2;
+        // light3.color = glm::vec3(0.2f, 0.9f, 0.15f);
+        // point_light2.get_component<TransformComponent>().position = glm::vec3(6.0f, 3.4, 5.0f);
+        //
+        // Entity point_light3 = create_entity("lamp point light");
+        // auto& light4 = point_light3.add_component<LightComponent>();
+        // point_light3.get_component<TransformComponent>().position = glm::vec3(-0.124f, 1.582f, -3.814f);
 
         re_calculate_bounds();
         LOG_INFO("Scene bounds are min (%f, %f, %f), max (%f, %f, %f)", _scene_bounds.min.x, _scene_bounds.min.y,
@@ -198,7 +198,7 @@ namespace cologne
                                                   glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), .6f);
             }
             static int light_count = 0;
-            Engine::get_renderer()->draw_line(info.hit_point, info.hit_point + info.hit_normal * 0.1f, info.hit_normal);
+            Engine::get_renderer()->draw_line(info.hit_point, info.hit_point + info.hit_normal * 0.1f, glm::max(info.hit_normal, glm::vec3(0.1f, 0.1f, 0.1f)));
             if (Input::mouse_pressed(Input::MouseButton::Left) && !Engine::get_event_manager()->paused())
             {
                 Entity light = create_entity("Point Light" + std::to_string(light_count++));

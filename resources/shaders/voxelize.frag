@@ -1,6 +1,7 @@
 ﻿#version 460 core
 #extension GL_NV_shader_atomic_fp16_vector: require
 #extension GL_NV_gpu_shader5: require
+#extension GL_ARB_bindless_texture : require
 layout (binding = 0) uniform sampler2D texture_albedo;
 layout (binding = 1) uniform sampler2D texture_ao;
 layout (binding = 2) uniform sampler2D texture_metallic;
@@ -127,31 +128,28 @@ float GetAttenuationFactor(float distSq, float lightRadius)
     return factor;
 }
 
-vec3 diffuse(Light light, vec3 albedo, vec3 sampleToLight, vec3 N)
+float get_log_depth(float near, float far, float distance)
 {
-    float shadow = 0.0f;
-    if (light.type == DIRECTIONAL)
-    {
-        shadow = 1.0 - shadow_calculation2(FragPosLightSpace);
-        vec3 diffuse = (light.color.rgb) * dot(normalize(N), -light.direction.xyz) * albedo;
-        return diffuse  * shadow;
-    }
-    else if (light.type == POINT)
-    {
-        float dist = length(sampleToLight);
-
-        vec3 lightDir = sampleToLight / dist;
-        float cosTheta = dot(normalize(N), lightDir);
-        if (cosTheta > 0.0)
-        {
-            vec3 diffuse = light.color.rgb  * cosTheta * albedo;
-            float attenuation = GetAttenuationFactor(dist * dist, light.radius);
-
-            return diffuse * attenuation;
-        }
-    }
-    return vec3(0.0);
+    float depth = (1.0 / distance - 1.0 / near) / (1.0 / far - 1.0 / near);
+    return depth;
 }
+
+float get_light_space_depth(float near, float far, vec3 light_to_sample)
+{
+    float dist = max(abs(light_to_sample.x), max(abs(light_to_sample.y), abs(light_to_sample.z)));
+    float depth = get_log_depth(near, far, dist);
+    return depth;
+}
+
+float point_shadow_calc(vec3 fragPos, vec3 lightPos, samplerCubeShadow shadow_map)
+{
+    vec3 frag_to_light = fragPos - lightPos;
+    float bias = 0.02f;
+    float current_depth = get_light_space_depth(1.0f, 20.0f, frag_to_light );
+    float shadow = texture(shadow_map, vec4(frag_to_light, current_depth ));
+    return shadow;
+}
+
 
 vec4 pbr()
 {
@@ -193,6 +191,7 @@ vec4 pbr()
             L = normalize(light_pos_voxel_space - FragPos.xyz);
             float distance = length(light_pos_voxel_space - FragPos.xyz);
             float attenuation = 1.0 / (distance * distance);
+            shadow = point_shadow_calc(FragPos.xyz, light_pos_voxel_space, samplerCubeShadow(lights[i].shadow_map));
             radiance = lights[i].color.rgb * lights[i].strength * attenuation * 0.1f;
         }
         vec3 H = normalize(V + L);

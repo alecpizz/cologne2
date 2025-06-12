@@ -17,6 +17,7 @@ out vec3 WorldPosition;
 
 void main()
 {
-    WorldPosition = vec3(model * vec4(position, 1.0));
+    mat4 m = model;
+    WorldPosition = vec3(m * vec4(position, 1.0)) ;
     gl_Position = projection_view * vec4(WorldPosition, 1.0);
 }

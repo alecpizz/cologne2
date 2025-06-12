@@ -97,7 +97,7 @@ float geometrySchlickGGX(float NdotV, float roughness);
 float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
 float klemenVisibility(vec3 L, vec3 H);
 float shadowCalculation(vec3 fragPos, vec3 n, vec3 l);
-float point_shadow_calculation(vec3 fragPos, vec3 lightPos, samplerCube shadow_map);
+float point_shadow_calculation(vec3 fragPos, vec3 lightPos, samplerCubeShadow shadow_map);
 vec4 texture2D_bilinear(sampler2DArray t, vec3 uv, vec3 texture_size, vec3 texel_size, int layer);
 
 vec3 sampleOffsetDirections[20] = vec3[]
@@ -212,7 +212,7 @@ void main()
             float distance = length(lights[i].position.xyz - FragPos);
             float attenuation = 1.0 / (distance * distance);
             radiance = lights[i].color.rgb * lights[i].strength * attenuation;
-            shadow = 1.0 - point_shadow_calculation(FragPos, lights[i].position.xyz, samplerCube(lights[i].shadow_map));
+            shadow =  point_shadow_calculation(FragPos, lights[i].position.xyz, samplerCubeShadow(lights[i].shadow_map));
         }
         vec3 H = normalize(V + L);
 
@@ -343,14 +343,25 @@ float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
     return ggx1 * ggx2;
 }
 
-float point_shadow_calculation(vec3 fragPos, vec3 lightPos, samplerCube shadow_map)
+float get_log_depth(float near, float far, float distance)
+{
+    float depth = (1.0 / distance - 1.0 / near) / (1.0 / far - 1.0 / near);
+    return depth;
+}
+
+float get_light_space_depth(float near, float far, vec3 light_to_sample)
+{
+    float dist = max(abs(light_to_sample.x), max(abs(light_to_sample.y), abs(light_to_sample.z)));
+    float depth = get_log_depth(near, far, dist);
+    return depth;
+}
+
+float point_shadow_calculation(vec3 fragPos, vec3 lightPos, samplerCubeShadow shadow_map)
 {
     vec3 frag_to_light = fragPos - lightPos;
-    float closest = texture(shadow_map, frag_to_light).r;
-    closest *= 20.0f;
-    float current = length(frag_to_light);
-    float bias = 0.05f;
-    float shadow = current - bias > closest ? 1.0f : 0.0f;
+    float bias = 0.05;
+    float current_depth = get_light_space_depth(1.0f, 20.0f, frag_to_light * (1.0 - bias));
+    float shadow = texture(shadow_map, vec4(frag_to_light, current_depth));
     return shadow;
 }
 
