@@ -1,4 +1,5 @@
 #version 460 core
+#extension GL_ARB_bindless_texture : require
 out vec4 FragColor;
 
 in vec2 TexCoords;
@@ -15,6 +16,9 @@ struct Light
     float radius;
     int type;
     int enabled;
+    uvec2 shadow_map;
+    int padding;
+    int padding1;
 };
 
 #define MAX_LIGHTS 8
@@ -40,6 +44,7 @@ layout (binding = 7) uniform samplerCube prefilter_map;
 layout (binding = 8) uniform sampler2D brdf;
 layout (binding = 9) uniform sampler2D indirect_texture;
 layout (binding = 10) uniform sampler2D bloom_texture;
+layout (binding = 11) uniform samplerCube point_shadow;
 
 uniform int voxel_grid_size;
 uniform float voxel_size = 128;
@@ -78,7 +83,6 @@ layout (binding = 2, std430) restrict readonly buffer lights_buffer
     Light lights[];
 };
 
-
 uniform float far_plane = 20.0f;
 uniform float ao_strength = 0.2;
 uniform int has_ao_texture = 0;
@@ -93,6 +97,7 @@ float geometrySchlickGGX(float NdotV, float roughness);
 float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
 float klemenVisibility(vec3 L, vec3 H);
 float shadowCalculation(vec3 fragPos, vec3 n, vec3 l);
+float point_shadow_calculation(vec3 fragPos, vec3 lightPos, samplerCube shadow_map);
 vec4 texture2D_bilinear(sampler2DArray t, vec3 uv, vec3 texture_size, vec3 texel_size, int layer);
 
 vec3 sampleOffsetDirections[20] = vec3[]
@@ -207,6 +212,7 @@ void main()
             float distance = length(lights[i].position.xyz - FragPos);
             float attenuation = 1.0 / (distance * distance);
             radiance = lights[i].color.rgb * lights[i].strength * attenuation;
+            shadow = 1.0 - point_shadow_calculation(FragPos, lights[i].position.xyz, samplerCube(lights[i].shadow_map));
         }
         vec3 H = normalize(V + L);
 
@@ -335,6 +341,17 @@ float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
     float ggx2 = geometrySchlickGGX(NdotV, roughness);
     float ggx1 = geometrySchlickGGX(NdotL, roughness);
     return ggx1 * ggx2;
+}
+
+float point_shadow_calculation(vec3 fragPos, vec3 lightPos, samplerCube shadow_map)
+{
+    vec3 frag_to_light = fragPos - lightPos;
+    float closest = texture(shadow_map, frag_to_light).r;
+    closest *= 20.0f;
+    float current = length(frag_to_light);
+    float bias = 0.05f;
+    float shadow = current - bias > closest ? 1.0f : 0.0f;
+    return shadow;
 }
 
 float shadowCalculation(vec3 fragPos, vec3 n, vec3 l)

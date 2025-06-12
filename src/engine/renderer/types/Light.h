@@ -9,7 +9,7 @@ namespace cologne
          Point
     };
 
-    struct Light
+    struct alignas(16) Light
     {
         Light(LightComponent light_component, TransformComponent transform)
         {
@@ -36,12 +36,15 @@ namespace cologne
             this->type = type;
             active = 1;
         }
-        glm::vec4 direction;
-        glm::vec4 position;
+        glm::vec4 direction = glm::vec4(0.0f);
+        glm::vec4 position = glm::vec4(0.0f);
         glm::vec4 color = glm::vec4(1, 0.7799999713897705, 0.5289999842643738, 1.0f);
         float strength = 1.0f;
         float radius = 6.0f;
         LightType type = LightType::Directional;
-        int active = 0;
+        int32_t active = 0;
+        uint64_t shadow_handle = 0;
+        int32_t padding0 = 0;
+        int32_t padding1 = 0;
     };
 }

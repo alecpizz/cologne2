@@ -55,10 +55,14 @@ namespace cologne
         return _material_index;
     }
 
-    void SkinnedMesh::draw() const
+    void SkinnedMesh::draw(int32_t count) const
     {
+        if (count == 0)
+        {
+            return;
+        }
         glBindVertexArray(_vao);
-        glDrawElements(GL_TRIANGLES, _indices_count, GL_UNSIGNED_INT, 0);
+        glDrawElementsInstanced(GL_TRIANGLES, _indices_count, GL_UNSIGNED_INT, 0, count);
         glBindVertexArray(0);
     }
 }

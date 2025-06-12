@@ -239,13 +239,14 @@ namespace cologne
             bool crouch = cologne::Input::key_pressed(cologne::Input::Key::LeftCtrl);
 
             glm::vec3 movement = glm::vec3(-y, 0.0f, x);
-            if (abs(x) > 0.0f || abs(y) > 0.0f)
+
+            movement = get_component<PlayerComponent>().camera.get_component<TransformComponent>().rotation * movement;
+            movement.y = 0.0f;
+            if (abs(movement.x) > 0.0f || abs(movement.y) > 0.0f)
             {
                 movement = glm::normalize(movement);
             }
 
-            movement = get_component<PlayerComponent>().camera.get_component<TransformComponent>().rotation * movement;
-            movement.y = 0.0f;
             _desired_velocity = movement * _character_speed;
 
             if (Physics::player_is_supported(get_component<PlayerComponent>().id))

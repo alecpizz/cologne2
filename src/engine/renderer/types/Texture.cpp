@@ -89,6 +89,11 @@ namespace cologne
         return _handle;
     }
 
+    uint64_t Texture::get_bindless_handle() const
+    {
+        return _bindless_handle;
+    }
+
 
     void Texture::bind(const uint8_t index) const
     {
@@ -149,5 +154,16 @@ namespace cologne
         stbi_image_free(img_data);
         _data.clear();
         _data.shrink_to_fit();
+    }
+
+    void Texture::make_resident()
+    {
+        _bindless_handle = glGetTextureHandleARB(_handle);
+        glMakeTextureHandleResidentARB(_bindless_handle);
+    }
+
+    void Texture::make_non_resident()
+    {
+        glMakeTextureHandleNonResidentARB(_bindless_handle);
     }
 }

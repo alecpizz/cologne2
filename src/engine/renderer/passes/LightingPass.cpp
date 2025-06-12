@@ -31,7 +31,6 @@ namespace cologne
         shader->set_int("voxel_grid_size", _voxel_data.voxel_dimensions);
         shader->set_vec3("voxel_offset", (_voxel_data.voxel_offset));
         auto bounds = Engine::get_scene()->get_bounds();
-        const glm::vec3 center = bounds.center();
         const glm::vec3 size = bounds.size(); //THIS IS WRONG!
         const float world_size = glm::max(size.x, glm::max(size.y, size.z));
         const float texelSize = 1.0f / _voxel_data.voxel_dimensions;

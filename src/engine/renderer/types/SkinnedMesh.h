@@ -10,7 +10,7 @@ namespace cologne
         SkinnedMesh(const std::vector<WeightedVertex>& vertices, const std::vector<uint32_t>& indices, uint32_t material_idx);
         ~SkinnedMesh();
         uint32_t get_material_index() const;
-        void draw() const;
+        void draw(int32_t count = 1) const;
     private:
         uint32_t _material_index = 0;
         uint32_t _indices_count = 0;

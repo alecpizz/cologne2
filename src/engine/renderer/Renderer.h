@@ -117,11 +117,10 @@ namespace cologne
 
         void init_brdf();
 
-
         FrameBuffer* get_framebuffer_by_name(const char* name);
         SSBO* get_ssbo_by_name(const char* name);
 
-
+        std::vector<Texture> _shadow_maps;
         std::vector<RenderItem> _render_items;
         std::vector<SkinnedRenderItem> _skinned_render_items;
         std::vector<Light> _lights;

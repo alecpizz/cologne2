@@ -74,7 +74,10 @@ namespace cologne
         shaders["downsample"] = Shader(RESOURCES_PATH "shaders/quad.vert",
                                        RESOURCES_PATH "shaders/bloom/downsample.frag");
         shaders["upsample"] = Shader(RESOURCES_PATH "shaders/quad.vert",
-            RESOURCES_PATH "shaders/bloom/upsample.frag");
+                                     RESOURCES_PATH "shaders/bloom/upsample.frag");
+
+        shaders["point_shadow"] = Shader(RESOURCES_PATH "shaders/shadows/point_shadow.vert",
+                                         RESOURCES_PATH "shaders/shadows/point_shadow.frag");
     }
 
     void Renderer::init_ssbos()
@@ -224,8 +227,8 @@ namespace cologne
         {
             reload_shaders();
         }
-        update_ssbos();
         shadow_pass();
+        update_ssbos();
         voxelize_scene();
         geometry_pass();
         indirect_pass();

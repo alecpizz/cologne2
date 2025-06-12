@@ -30,6 +30,7 @@ struct Light
     float radius;
     int type;
     int enabled;
+    uvec2 shadow_map;
 };
 
 #define MAX_LIGHTS 8
