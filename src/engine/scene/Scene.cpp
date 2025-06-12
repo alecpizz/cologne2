@@ -17,7 +17,6 @@
 #include "Components.h"
 #include "Entity.h"
 #include "engine/physics/RaycastHitInfo.h"
-#include "engine/util/Util.h"
 
 namespace cologne
 {
@@ -85,7 +84,7 @@ namespace cologne
 
         Entity dir_light = create_entity("directional light");
         auto &light = dir_light.add_component<LightComponent>();
-        light.color = glm::vec3(1, 0.7799999713897705, 0.5289999842643738);
+        light.color = glm::vec3(1, 0.864, 0.709);
         light.radius = 6.0f;
         light.strength = 2.0f;
         light.type = 0;
@@ -102,15 +101,12 @@ namespace cologne
         light2.type = LightComponent::Point;
         point_light.get_component<TransformComponent>().position = glm::vec3(-6.0f, 5.0f, -5.0f);
 
-        // Entity point_light2 = create_entity("point light2");
-        // auto& light3 = point_light2.add_component<LightComponent>();
-        // light3 = light2;
-        // light3.color = glm::vec3(0.2f, 0.9f, 0.15f);
-        // point_light2.get_component<TransformComponent>().position = glm::vec3(6.0f, 3.4, 5.0f);
-        //
-        // Entity point_light3 = create_entity("lamp point light");
-        // auto& light4 = point_light3.add_component<LightComponent>();
-        // point_light3.get_component<TransformComponent>().position = glm::vec3(-0.124f, 1.582f, -3.814f);
+        Entity point_light2 = create_entity("point light2");
+        auto& light3 = point_light2.add_component<LightComponent>();
+        light3 = light2;
+        light3.color = glm::vec3(0.2f, 0.9f, 0.15f);
+        point_light2.get_component<TransformComponent>().position = glm::vec3(6.0f, 3.4, 5.0f);
+
 
         re_calculate_bounds();
         LOG_INFO("Scene bounds are min (%f, %f, %f), max (%f, %f, %f)", _scene_bounds.min.x, _scene_bounds.min.y,
@@ -202,7 +198,7 @@ namespace cologne
             if (Input::mouse_pressed(Input::MouseButton::Left) && !Engine::get_event_manager()->paused())
             {
                 Entity light = create_entity("Point Light" + std::to_string(light_count++));
-                light.get_component<TransformComponent>().position = info.hit_point + info.hit_normal * 0.25f;
+                light.get_component<TransformComponent>().position = info.hit_point + info.hit_normal * 0.5f;
                 auto& lc = light.add_component<LightComponent>();
                 lc.color = glm::linearRand(glm::vec3(0.0f), glm::vec3(1.0f));
             }

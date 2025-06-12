@@ -1,7 +1,7 @@
 ﻿#version 460 core
 #extension GL_NV_shader_atomic_fp16_vector: require
 #extension GL_NV_gpu_shader5: require
-#extension GL_ARB_bindless_texture : require
+#extension GL_ARB_bindless_texture: require
 layout (binding = 0) uniform sampler2D texture_albedo;
 layout (binding = 1) uniform sampler2D texture_ao;
 layout (binding = 2) uniform sampler2D texture_metallic;
@@ -141,12 +141,14 @@ float get_light_space_depth(float near, float far, vec3 light_to_sample)
     return depth;
 }
 
-float point_shadow_calc(vec3 fragPos, vec3 lightPos, samplerCubeShadow shadow_map)
+float point_shadow_calc(vec3 fragPos, Light light)
 {
+    vec3 lightPos = light.position.xyz * voxel_size;
     vec3 frag_to_light = fragPos - lightPos;
     float bias = 0.02f;
-    float current_depth = get_light_space_depth(1.0f, 20.0f, frag_to_light );
-    float shadow = texture(shadow_map, vec4(frag_to_light, current_depth ));
+    float far_plane = (light.radius );//* max(voxel_size.z, max(voxel_size.y, voxel_size.x)));
+    float current_depth = get_light_space_depth(1.0f, far_plane, frag_to_light);
+    float shadow = texture(samplerCubeShadow(light.shadow_map), vec4(frag_to_light, current_depth));
     return shadow;
 }
 
@@ -154,7 +156,7 @@ float point_shadow_calc(vec3 fragPos, vec3 lightPos, samplerCubeShadow shadow_ma
 vec4 pbr()
 {
     vec4 albedo_texture = texture2D(texture_albedo, TexCoords);
-//    albedo = albedo_texture.rgb;
+    //    albedo = albedo_texture.rgb;
     vec3 albedo = pow(albedo_texture.rgb, vec3(2.2));
     float metallic = texture2D(texture_metallic, TexCoords).r;
     float roughness = texture2D(texture_roughness, TexCoords).g;
@@ -172,7 +174,7 @@ vec4 pbr()
 
     for (int i = 0; i < lights.length(); i++)
     {
-        if(lights[i].enabled == 0)
+        if (lights[i].enabled == 0)
         {
             continue;
         }
@@ -182,7 +184,7 @@ vec4 pbr()
         if (lights[i].type == DIRECTIONAL)
         {
             L = normalize(-lights[i].direction.xyz);
-            radiance = lights[i].color.rgb * lights[i].strength;
+            radiance = lights[i].color.rgb * lights[i].strength * 4.0f;
             shadow = 1.0 - shadow_calculation2(FragPosLightSpace);
         }
         else if (lights[i].type == POINT)
@@ -190,9 +192,12 @@ vec4 pbr()
             vec3 light_pos_voxel_space = lights[i].position.xyz * voxel_size;
             L = normalize(light_pos_voxel_space - FragPos.xyz);
             float distance = length(light_pos_voxel_space - FragPos.xyz);
-            float attenuation = 1.0 / (distance * distance);
-            shadow = point_shadow_calc(FragPos.xyz, light_pos_voxel_space, samplerCubeShadow(lights[i].shadow_map));
-            radiance = lights[i].color.rgb * lights[i].strength * attenuation * 0.1f;
+            float dist_range = distance / (lights[i].radius * max(voxel_size.z, max(voxel_size.y, voxel_size.x)));
+            float falloff = pow(dist_range, 2.0f);
+            float smoothing = pow(max(0.0, 1.0 - falloff), 2.0f);
+            float attenuation = smoothing / (distance * distance + 1.0f);
+//            shadow = 1.0 - point_shadow_calc(FragPos.xyz, lights[i]);
+            radiance = lights[i].color.rgb * lights[i].strength * attenuation;
         }
         vec3 H = normalize(V + L);
 
@@ -218,7 +223,7 @@ vec4 pbr()
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    vec3 ambient = vec3(0.02) * albedo;
+    vec3 ambient = vec3(0.04) * albedo;
     vec3 emission = texture2D(texture_emission, TexCoords).rgb;
     vec3 color = Lo + ambient + emission;
     return vec4(color, 1.0);

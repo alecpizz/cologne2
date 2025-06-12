@@ -85,6 +85,12 @@ namespace cologne
 
         void update_shadow(Shader &shader);
 
+        void cascaded_shadow_map_pass();
+
+        void dumb_voxel_extra_dir_shadow_pass();
+
+        void point_shadow_pass();
+
         void init_gbuffer();
 
         void geometry_pass();

@@ -1,5 +1,5 @@
 #version 460 core
-#extension GL_ARB_bindless_texture : require
+#extension GL_ARB_bindless_texture: require
 out vec4 FragColor;
 
 in vec2 TexCoords;
@@ -38,13 +38,8 @@ layout (binding = 2) uniform sampler2D gAlbedo;
 layout (binding = 3) uniform sampler2D gORM;
 layout (binding = 4) uniform sampler2D gEmission;
 layout (binding = 5) uniform sampler2DArray shadow_cascades;
-
-layout (binding = 6) uniform samplerCube irradiance_map;
-layout (binding = 7) uniform samplerCube prefilter_map;
-layout (binding = 8) uniform sampler2D brdf;
-layout (binding = 9) uniform sampler2D indirect_texture;
-layout (binding = 10) uniform sampler2D bloom_texture;
-layout (binding = 11) uniform samplerCube point_shadow;
+layout (binding = 6) uniform sampler2D indirect_texture;
+layout (binding = 7) uniform sampler2D bloom_texture;
 
 uniform int voxel_grid_size;
 uniform float voxel_size = 128;
@@ -97,7 +92,7 @@ float geometrySchlickGGX(float NdotV, float roughness);
 float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
 float klemenVisibility(vec3 L, vec3 H);
 float shadowCalculation(vec3 fragPos, vec3 n, vec3 l);
-float point_shadow_calculation(vec3 fragPos, vec3 lightPos, samplerCubeShadow shadow_map);
+float point_shadow_calculation(vec3 fragPos, Light light);
 vec4 texture2D_bilinear(sampler2DArray t, vec3 uv, vec3 texture_size, vec3 texel_size, int layer);
 
 vec3 sampleOffsetDirections[20] = vec3[]
@@ -189,30 +184,30 @@ void main()
 
     for (int i = 0; i < lights.length(); i++)
     {
-        if(lights[i].enabled == 0)
+        if (lights[i].enabled == 0)
         {
             continue;
         }
-//        if(length( lights[i].position.xyz - FragPos) > lights[i].radius)
-//        {
-//            continue;
-//        }
         float shadow = 1.0f;
         vec3 L = vec3(0.0);
         vec3 radiance = vec3(0.0);
         if (lights[i].type == DIRECTIONAL)
         {
             L = normalize(-lights[i].direction.xyz);
-            radiance = lights[i].color.rgb;
+            radiance = lights[i].color.rgb * lights[i].strength;
             shadow = 1.0 - shadowCalculation(FragPos, N, L);
         }
         else if (lights[i].type == POINT)
         {
             L = normalize(lights[i].position.xyz - FragPos);
             float distance = length(lights[i].position.xyz - FragPos);
-            float attenuation = 1.0 / (distance * distance);
+            float dist_range = distance / lights[i].radius;
+            float falloff = pow(dist_range, 2.0f);
+            float smoothing = pow(max(0.0, 1.0 - falloff), 2.0f);
+            float attenuation = smoothing / (distance * distance + 1.0f);
             radiance = lights[i].color.rgb * lights[i].strength * attenuation;
-            shadow =  point_shadow_calculation(FragPos, lights[i].position.xyz, samplerCubeShadow(lights[i].shadow_map));
+            shadow = point_shadow_calculation(FragPos, lights[i]);
+
         }
         vec3 H = normalize(V + L);
 
@@ -252,16 +247,9 @@ void main()
         indirect_light = vec3(0.02) * albedo;
     }
 
-    //    const float MAX_RELFECTION_LOD = 4.0;
-    //    vec3 prefilteredColor = textureLod(prefilter_map, R, roughness * MAX_RELFECTION_LOD).rgb;
-    //    vec2 brdf = texture(brdf, vec2(max(dot(N, V), 0.0), roughness)).rg;
-    //    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
-
-
-
     vec3 ambient = vec3(0.02) * albedo;
     vec3 emission = texture2D(gEmission, TexCoords).rgb;
-    vec3 color = Lo + indirect_light + emission;
+    vec3 color = ambient + Lo + indirect_light + emission;
 
     float dist = length(FragPos - camera_position.xyz);
     float fog_factor = 1.0 / exp((dist * fog_density) * (dist * fog_density));
@@ -356,12 +344,13 @@ float get_light_space_depth(float near, float far, vec3 light_to_sample)
     return depth;
 }
 
-float point_shadow_calculation(vec3 fragPos, vec3 lightPos, samplerCubeShadow shadow_map)
+float point_shadow_calculation(vec3 fragPos, Light light)
 {
+    vec3 lightPos = light.position.xyz;
     vec3 frag_to_light = fragPos - lightPos;
     float bias = 0.05;
-    float current_depth = get_light_space_depth(1.0f, 20.0f, frag_to_light * (1.0 - bias));
-    float shadow = texture(shadow_map, vec4(frag_to_light, current_depth));
+    float current_depth = get_light_space_depth(1.0f, light.radius, frag_to_light * (1.0 - bias));
+    float shadow = texture(samplerCubeShadow(light.shadow_map), vec4(frag_to_light, current_depth));
     return shadow;
 }
 

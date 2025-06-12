@@ -17,7 +17,6 @@ namespace cologne
     float shadow_near = 0.1f;
     float shadow_far = 1200.0f;
     float point_shadow_near = 1.0f;
-    float point_shadow_far = 20.0f;
     glm::vec3 _dir_shadow_offset = glm::vec3(0.0f);
     glm::mat4 _cam_view;
     glm::mat4 _cam_proj;
@@ -155,11 +154,11 @@ namespace cologne
         return handle_result;
     }
 
-    std::vector<glm::mat4> create_shadow_projection_matrices(glm::vec3 position)
+    std::vector<glm::mat4> create_shadow_projection_matrices(glm::vec3 position, float far)
     {
         std::vector<glm::mat4> shadowTransforms;
         glm::mat4 proj = glm::perspective(glm::radians(90.0f),
-                                          1.0f, point_shadow_near, point_shadow_far);
+                                          1.0f, point_shadow_near, far);
         shadowTransforms.push_back(proj *
                                    glm::lookAt(position, position + glm::vec3(1.0, 0.0, 0.0),
                                                glm::vec3(0.0, -1.0, 0.0)));
@@ -247,7 +246,6 @@ namespace cologne
 
         Engine::get_debug_ui()->add_image_entry("dir_shadow", dir_shadow_fbo->get_depth_attachment_handle(),
                                                 glm::vec2(dir_shadow_size));
-        Engine::get_debug_ui()->add_float_entry("point shadow far_plane", point_shadow_far);
         Engine::get_debug_ui()->add_float_entry("point shadow near_plane", point_shadow_near);
     }
 
@@ -263,10 +261,9 @@ namespace cologne
         shader.set_int("cascadeCount", shadowCascadeLevels.size());
     }
 
-
-    void Renderer::shadow_pass()
+    void Renderer::cascaded_shadow_map_pass()
     {
-        OpenGLDebugScope scope("Renderer::shadow_pass");
+        OpenGLDebugScope scope("Renderer::csm_pass");
         _cam_view = get_camera_view(_camera_transform);
         auto light = get_directional_light();
         shadowCascadeLevels[0] = (shadow_far / 50.0f);
@@ -286,8 +283,7 @@ namespace cologne
         glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
         glViewport(0, 0, shadow_size, shadow_size);
         glClear(GL_DEPTH_BUFFER_BIT);
-        glCullFace(GL_FRONT);
-        glEnable(GL_DEPTH_CLAMP);
+
 
         for (auto &item: _render_items)
         {
@@ -332,14 +328,17 @@ namespace cologne
                 mesh.draw();
             }
         }
+    }
 
-
+    void Renderer::dumb_voxel_extra_dir_shadow_pass()
+    {
         //voxel shadow
+        OpenGLDebugScope scope("Renderer::dumb_voxel_shadow_pass");
         auto dir_shadow_fbo = get_framebuffer_by_name("dir_shadow");
         dir_shadow_fbo->bind();
         dir_shadow_fbo->set_viewport();
         glClear(GL_DEPTH_BUFFER_BIT);
-        shader = get_shader_by_name("dir_shadow");
+        auto shader = get_shader_by_name("dir_shadow");
         shader->bind();
         glm::mat4 light_projection = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, shadow_near, shadow_far);
         auto dir_light = get_directional_light();
@@ -360,11 +359,13 @@ namespace cologne
                 mesh.draw();
             }
         }
+    }
 
-
-        shader = get_shader_by_name("point_shadow");
+    void Renderer::point_shadow_pass()
+    {
+        OpenGLDebugScope scope("Renderer::point_shadow_pass");
+        auto shader = get_shader_by_name("point_shadow");
         shader->bind();
-        shader->set_float("far_plane", point_shadow_far);
         glBindFramebuffer(GL_FRAMEBUFFER, point_shadow_fbo);
 
         size_t counter = 0;
@@ -376,7 +377,6 @@ namespace cologne
             }
             if (counter > _shadow_maps.size() - 1)
             {
-                LOG_ERROR("Out of shadow maps!");
                 break;
             }
             light.shadow_handle = _shadow_maps[counter].get_bindless_handle();
@@ -391,7 +391,7 @@ namespace cologne
             counter++;
             glm::vec3 position = light.position;
             shader->set_vec3("light_position", position);
-            shader->set_mat4("light_space_matrices", create_shadow_projection_matrices(position));
+            shader->set_mat4("light_space_matrices", create_shadow_projection_matrices(position, light.radius));
             for (auto &item: _render_items)
             {
                 shader->set_mat4("model", item.transform.get_mat4());
@@ -428,7 +428,19 @@ namespace cologne
                 }
             }
         }
+    }
 
+    void Renderer::shadow_pass()
+    {
+        OpenGLDebugScope scope("Renderer::shadow_pass");
+        glCullFace(GL_FRONT);
+        glEnable(GL_DEPTH_CLAMP);
+
+        cascaded_shadow_map_pass();
+
+        dumb_voxel_extra_dir_shadow_pass();
+
+        point_shadow_pass();
 
         glCullFace(GL_BACK);
         glDisable(GL_DEPTH_CLAMP);
