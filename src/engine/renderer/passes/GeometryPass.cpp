@@ -55,6 +55,8 @@ namespace cologne
         fbo->create("output", width, height);
         fbo->create_attachment("color", GL_RGBA16F, GL_LINEAR, GL_LINEAR);
         fbo->create_depth_attachment(GL_DEPTH_COMPONENT32F, GL_NEAREST, GL_NEAREST, GL_REPEAT);
+        Engine::get_debug_ui()->add_image_entry("output", fbo->get_color_attachment_handle_by_name("color"),
+                                                glm::vec2(width, height));
         fbo->release();
     }
 

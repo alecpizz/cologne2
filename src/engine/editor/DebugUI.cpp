@@ -75,7 +75,7 @@ namespace cologne
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
             //style.WindowRounding = 0.0f;
-            style.Colors[ImGuiCol_WindowBg].w = 0.f;
+            style.Colors[ImGuiCol_WindowBg].w = 1.0f;
             style.Colors[ImGuiCol_DockingEmptyBg].w = 0.f;
         }
     }
@@ -281,7 +281,6 @@ namespace cologne
 
     void DebugUI::build_transform_entry(TransformComponent &tr)
     {
-        ImGui::Text("Transform");
 
         ImGui::DragFloat3("Position", glm::value_ptr(tr.position), 0.01f);
 
@@ -301,52 +300,179 @@ namespace cologne
     {
         if (Engine::get_event_manager()->paused())
         {
+            //
+            //
+            //     bool open = true;
+            //     ImGui::Begin("agh", &open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize| ImGuiWindowFlags_NoBackground);
+            //     build();
+            //     ImGui::SetWindowPos(ImGui::GetMainViewport()->Pos);
+            //     ImGuiIO &io = ImGui::GetIO();
+            //     ImGui::SetWindowSize(ImGui::GetMainViewport()->Size);
+            //     ImGui::SetWindowCollapsed(false);
+            //     ImGuizmo::Enable(true);
+            //     ImGuizmo::SetOrthographic(false);
+            //     ImGuizmo::SetDrawlist();
+            //     ImGuizmo::SetRect(ImGui::GetMainViewport()->Pos.x, ImGui::GetMainViewport()->Pos.y,
+            //         ImGui::GetMainViewport()->Size.x, ImGui::GetMainViewport()->Size.y);
+            //
+            //
+            //     auto camera = Engine::get_scene()->get_camera_entity();
+            //     auto camera_comp = camera.get_component<CameraComponent>();
+            //     auto transform = camera.get_component<TransformComponent>();
+            //     glm::mat4 view = Renderer::get_camera_view(transform);
+            //     glm::mat4 proj = Renderer::get_camera_projection(transform, camera_comp);
+            //
+            //     auto et = Engine::get_scene()->_registry.view<TransformComponent, SkinnedModelComponent>();
+            //     for (auto entity : et)
+            //     {
+            //         Entity e = {entity, Engine::get_scene()};
+            //         if (e.has_component<ViewmodelComponent>())
+            //         {
+            //             continue;
+            //         }
+            //         auto& tr = Engine::get_scene()->_registry.get<TransformComponent>(entity);
+            //         glm::mat4 transform = tr.get_mat4();
+            //         ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(proj),
+            //                              ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::WORLD, glm::value_ptr(transform));
+            //
+            //         glm::quat orientation;
+            //         glm::vec3 translation;
+            //         glm::vec3 scale;
+            //         glm::vec4 persp;
+            //         glm::vec3 skew;
+            //         glm::decompose(transform, scale, orientation, translation, skew, persp);
+            //         tr.position = translation;
+            //         break;
+            //     }
+            //
+            //     ImGui::End();
+            // }
+            ImGuiStyle &style = ImGui::GetStyle();
+            style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+            static Entity selected_entity = {};
+            ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+            ImGuiViewport *viewport = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(viewport->Pos);
+            ImGui::SetNextWindowSize(viewport->Size);
+            ImGui::SetNextWindowViewport(viewport->ID);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+            window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+                    ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+            ImGui::Begin("Dock space", nullptr, window_flags);
+            ImGui::PopStyleVar(3);
 
-
-            bool open = true;
-            ImGui::Begin("agh", &open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize| ImGuiWindowFlags_NoBackground);
-            build();
-            ImGui::SetWindowPos(ImGui::GetMainViewport()->Pos);
-            ImGuiIO &io = ImGui::GetIO();
-            ImGui::SetWindowSize(ImGui::GetMainViewport()->Size);
-            ImGui::SetWindowCollapsed(false);
-            ImGuizmo::Enable(true);
-            ImGuizmo::SetOrthographic(false);
-            ImGuizmo::SetDrawlist();
-            ImGuizmo::SetRect(ImGui::GetMainViewport()->Pos.x, ImGui::GetMainViewport()->Pos.y,
-                ImGui::GetMainViewport()->Size.x, ImGui::GetMainViewport()->Size.y);
-
-
-            auto camera = Engine::get_scene()->get_camera_entity();
-            auto camera_comp = camera.get_component<CameraComponent>();
-            auto transform = camera.get_component<TransformComponent>();
-            glm::mat4 view = Renderer::get_camera_view(transform);
-            glm::mat4 proj = Renderer::get_camera_projection(transform, camera_comp);
-
-            auto et = Engine::get_scene()->_registry.view<TransformComponent, SkinnedModelComponent>();
-            for (auto entity : et)
+            ImGuiID dock_space_id = ImGui::GetID("MyDockSpace");
+            ImGui::DockSpace(dock_space_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+            if (ImGui::BeginMenuBar())
             {
-                Entity e = {entity, Engine::get_scene()};
-                if (e.has_component<ViewmodelComponent>())
+                if (ImGui::BeginMenu("File"))
                 {
-                    continue;
+                    if (ImGui::MenuItem("Exit"))
+                    {
+                    }
                 }
-                auto& tr = Engine::get_scene()->_registry.get<TransformComponent>(entity);
-                glm::mat4 transform = tr.get_mat4();
-                ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(proj),
-                                     ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::WORLD, glm::value_ptr(transform));
-
-                glm::quat orientation;
-                glm::vec3 translation;
-                glm::vec3 scale;
-                glm::vec4 persp;
-                glm::vec3 skew;
-                glm::decompose(transform, scale, orientation, translation, skew, persp);
-                tr.position = translation;
-                break;
+                if (ImGui::BeginMenu("Settings"))
+                {
+                }
+                ImGui::EndMenuBar();
             }
 
+            ImGui::Begin("Asset Browser");
+            if (ImGui::Button("Asset 1"))
+            {
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Asset 2"))
+            {
+            }
             ImGui::End();
+
+
+            ImGui::Begin("Scene Hiearchy");
+            if (ImGui::TreeNode("Scene"))
+            {
+                for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
+                {
+                    Entity e = {entity, Engine::get_scene()};
+                    bool isSelected = selected_entity == e;
+                    if (ImGui::Selectable(e.get_component<TagComponent>().tag.c_str(), isSelected))
+                    {
+                        selected_entity = e;
+                    }
+                    if (isSelected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::TreePop();
+            }
+            ImGui::End();
+
+            ImGui::Begin("Properties");
+            if (selected_entity)
+            {
+                ImGui::Text(selected_entity.get_component<TagComponent>().tag.c_str());
+                ImGui::Separator();
+                ImGui::Text("Transform");
+                build_transform_entry(selected_entity.get_component<TransformComponent>());
+                if (selected_entity.has_component<ViewmodelComponent>())
+                {
+                    ImGui::SeparatorText("View Model Config");
+                    auto &vm = selected_entity.get_component<ViewmodelComponent>();
+                    ImGui::DragFloat("smoothing", &vm.smoothing, 0.1f);
+                    ImGui::DragFloat("amplitude", &vm.amplitude, 0.01f);
+                    ImGui::DragFloat("frequency", &vm.frequency, 0.1f);
+                    ImGui::DragFloat("vertical velocity multi", &vm.vertical_velocity_multiplier, 0.01f);
+                    ImGui::DragFloat("max vertical offset", &vm.max_vertical_offset, 0.01f);
+                    ImGui::DragFloat("sway multiplier", &vm.sway_multiplier);
+                    ImGui::DragFloat3("position offset", glm::value_ptr(vm.position_offset));
+                    ImGui::DragFloat3("euler offset", glm::value_ptr(vm.euler_offset));
+                    ImGui::Separator();
+                }
+
+                if (selected_entity.has_component<LightComponent>())
+                {
+                    ImGui::SeparatorText("Light Settings");
+                    auto &light = selected_entity.get_component<LightComponent>();
+                    ImGui::DragFloat("radius", &light.radius, 0.01f);
+                    ImGui::DragFloat("strength", &light.strength, 0.01f);
+                    ImGui::ColorEdit3("color", glm::value_ptr(light.color), ImGuiColorEditFlags_HDR
+                                                                            | ImGuiColorEditFlags_Float);
+                    ImGui::Separator();
+                }
+            }
+            else
+            {
+                ImGui::Text("Select an entity");
+            }
+            ImGui::End();
+
+            ImGui::Begin("Settings");
+            ImGui::Text("Settings here");
+            static bool test = false;
+            ImGui::Checkbox("Feature", &test);
+            if (ImGui::Button("Print shit"))
+            {
+                for (size_t i = 0; i < image_cmds.size(); i++)
+                {
+                    LOG_INFO("image name %s, idx %d", image_cmds[i].name.c_str(), i);
+                }
+            }
+            ImGui::End();
+
+            ImGui::Begin("Game View");
+            ImGui::Text("Game rendered here");
+            ImVec2 viewport_size = ImGui::GetContentRegionAvail();
+            ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(image_cmds[10].id)), viewport_size, ImVec2(0, 1), ImVec2(1, 0));
+            ImGui::End();
+            ImGui::End();
+        }
+        else
+        {
+            ImGuiStyle &style = ImGui::GetStyle();
+            style.Colors[ImGuiCol_WindowBg].w = 0.0f;
         }
 
         ImGui::Render();

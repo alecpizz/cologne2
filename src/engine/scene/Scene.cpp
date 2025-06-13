@@ -34,7 +34,7 @@ namespace cologne
         auto tr = sponza.get_component<TransformComponent>();
         for (auto &mesh: model->get_meshes())
         {
-            Entity collider = create_entity(mesh.get_name());
+            Entity collider = create_entity(mesh.get_name() + "_Collider");
             collider.get_component<TransformComponent>() = tr;
             uint32_t body_id = Physics::create_static_mesh_collider(collider, tr, mesh.get_vertices(),
                                                                     mesh.get_indices());
