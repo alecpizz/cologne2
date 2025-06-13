@@ -20,3 +20,6 @@
 [submodule "vendor/entt"]
 	path = vendor/entt
 	url = https://github.com/skypjack/entt.git
+[submodule "vendor/imguizmo"]
+	path = vendor/imguizmo
+	url = https://github.com/alecpizz/ImGuizmo-cmake

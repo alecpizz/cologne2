@@ -8,6 +8,7 @@
 #include <engine/scene/Entity.h>
 #include <engine/util/DebugScope.h>
 
+#include "ImGuizmo.h"
 #include "engine/imguiThemes.h"
 
 namespace cologne
@@ -77,6 +78,7 @@ namespace cologne
             style.Colors[ImGuiCol_WindowBg].w = 0.f;
             style.Colors[ImGuiCol_DockingEmptyBg].w = 0.f;
         }
+        ImGuizmo::Enable(false);
     }
 
     DebugUI::~DebugUI()
