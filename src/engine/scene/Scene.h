@@ -40,6 +40,8 @@ namespace cologne
 
         void destroy_entity(Entity entity);
 
+        Entity get_camera_entity();
+
     private:
         //THIS IS fucking dumb
         AABB _scene_bounds;

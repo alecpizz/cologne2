@@ -78,7 +78,6 @@ namespace cologne
             style.Colors[ImGuiCol_WindowBg].w = 0.f;
             style.Colors[ImGuiCol_DockingEmptyBg].w = 0.f;
         }
-        ImGuizmo::Enable(false);
     }
 
     DebugUI::~DebugUI()
@@ -93,6 +92,7 @@ namespace cologne
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
+        ImGuizmo::BeginFrame();
         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->ID);
     }
 
@@ -301,7 +301,52 @@ namespace cologne
     {
         if (Engine::get_event_manager()->paused())
         {
+
+
+            bool open = true;
+            ImGui::Begin("agh", &open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize| ImGuiWindowFlags_NoBackground);
             build();
+            ImGui::SetWindowPos(ImGui::GetMainViewport()->Pos);
+            ImGuiIO &io = ImGui::GetIO();
+            ImGui::SetWindowSize(ImGui::GetMainViewport()->Size);
+            ImGui::SetWindowCollapsed(false);
+            ImGuizmo::Enable(true);
+            ImGuizmo::SetOrthographic(false);
+            ImGuizmo::SetDrawlist();
+            ImGuizmo::SetRect(ImGui::GetMainViewport()->Pos.x, ImGui::GetMainViewport()->Pos.y,
+                ImGui::GetMainViewport()->Size.x, ImGui::GetMainViewport()->Size.y);
+
+
+            auto camera = Engine::get_scene()->get_camera_entity();
+            auto camera_comp = camera.get_component<CameraComponent>();
+            auto transform = camera.get_component<TransformComponent>();
+            glm::mat4 view = Renderer::get_camera_view(transform);
+            glm::mat4 proj = Renderer::get_camera_projection(transform, camera_comp);
+
+            auto et = Engine::get_scene()->_registry.view<TransformComponent, SkinnedModelComponent>();
+            for (auto entity : et)
+            {
+                Entity e = {entity, Engine::get_scene()};
+                if (e.has_component<ViewmodelComponent>())
+                {
+                    continue;
+                }
+                auto& tr = Engine::get_scene()->_registry.get<TransformComponent>(entity);
+                glm::mat4 transform = tr.get_mat4();
+                ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(proj),
+                                     ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::WORLD, glm::value_ptr(transform));
+
+                glm::quat orientation;
+                glm::vec3 translation;
+                glm::vec3 scale;
+                glm::vec4 persp;
+                glm::vec3 skew;
+                glm::decompose(transform, scale, orientation, translation, skew, persp);
+                tr.position = translation;
+                break;
+            }
+
+            ImGui::End();
         }
 
         ImGui::Render();

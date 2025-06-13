@@ -286,4 +286,9 @@ namespace cologne
     {
         _registry.destroy(entity);
     }
+
+    Entity Scene::get_camera_entity()
+    {
+        return camera;
+    }
 }
