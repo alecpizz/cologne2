@@ -6,7 +6,7 @@
 
 #include <engine/util/DebugScope.h>
 
-#include "../editor/DebugUI.h"
+#include "../editor/Editor.h"
 #include <SDL3/SDL.h>
 
 namespace cologne
@@ -74,18 +74,18 @@ namespace cologne
 
     uint32_t Window::get_width() const
     {
-        if (DebugUI::edit_mode())
+        if (Editor::in_edit_mode())
         {
-            return DebugUI::get_viewport_width();
+            return Editor::get_viewport_width();
         }
         return _impl->width;
     }
 
     uint32_t Window::get_height() const
     {
-        if (DebugUI::edit_mode())
+        if (Editor::in_edit_mode())
         {
-            return DebugUI::get_viewport_height();
+            return Editor::get_viewport_height();
         }
         return _impl->height;
     }

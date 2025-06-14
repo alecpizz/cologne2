@@ -3,12 +3,12 @@
 
 namespace cologne
 {
-    class DebugUI
+    class Editor
     {
         friend class Engine;
 
     public:
-        ~DebugUI();
+        ~Editor();
 
         void clear();
 
@@ -24,22 +24,29 @@ namespace cologne
 
         void add_bool_entry(const char *name, bool &value);
 
-        void add_button(const char* name, std::function<void()> action);
+        void add_button(const char *name, std::function<void()> action);
 
-        DebugUI(DebugUI &&) = delete;
+        Editor(Editor &&) = delete;
 
-        DebugUI(const DebugUI &) = delete;
+        Editor(const Editor &) = delete;
 
-        DebugUI &operator=(DebugUI &&) = delete;
+        Editor &operator=(Editor &&) = delete;
 
-        DebugUI &operator=(const DebugUI &) = delete;
-        static bool edit_mode();
+        Editor &operator=(const Editor &) = delete;
+
+        static bool in_edit_mode();
+
+        static void toggle_edit_mode(bool b);
+
         static uint32_t get_viewport_width();
+
         static uint32_t get_viewport_height();
 
     private:
-        DebugUI();
+        Editor();
+
         void build();
-        static void build_transform_entry(TransformComponent& tr);
+
+        static void build_transform_entry(TransformComponent &tr);
     };
 }

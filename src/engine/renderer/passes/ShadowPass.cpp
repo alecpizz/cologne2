@@ -1,6 +1,7 @@
 ﻿#include <engine/core/Engine.h>
 #include <engine/renderer/OpenGLDebugScope.h>
 #include <engine/renderer/types/Shader.h>
+#include <engine/editor/Editor.h>
 
 #include "spdlog/fmt/bundled/chrono.h"
 

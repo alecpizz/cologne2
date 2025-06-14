@@ -22,6 +22,7 @@ namespace cologne
 {
     Entity camera;
     Frustum cam_frustum;
+
     Scene::Scene()
     {
         DebugScope scope(__PRETTY_FUNCTION__);
@@ -90,7 +91,7 @@ namespace cologne
         light.type = 0;
         dir_light.get_component<TransformComponent>().position = glm::vec3(0.790f, 18.867f, 0.024f);
         dir_light.get_component<TransformComponent>().rotation =
-            glm::quat(glm::radians(glm::vec3(82.300, 0.0f, 0.0f)));
+                glm::quat(glm::radians(glm::vec3(82.300, 0.0f, 0.0f)));
 
 
         Entity point_light = create_entity("point light");
@@ -102,7 +103,7 @@ namespace cologne
         point_light.get_component<TransformComponent>().position = glm::vec3(-6.0f, 5.0f, -5.0f);
 
         Entity point_light2 = create_entity("point light2");
-        auto& light3 = point_light2.add_component<LightComponent>();
+        auto &light3 = point_light2.add_component<LightComponent>();
         light3 = light2;
         light3.color = glm::vec3(0.2f, 0.9f, 0.15f);
         point_light2.get_component<TransformComponent>().position = glm::vec3(6.0f, 3.4, 5.0f);
@@ -181,30 +182,32 @@ namespace cologne
 
         glm::vec3 ray_start = tr.position, ray_dir = tr.get_forward();
         RaycastHitInfo info;
-        if (Physics::raycast(ray_start, ray_dir, 20.0f, Physics::NON_MOVING | Physics::MOVING, info))
+        if (!Engine::in_edit_mode())
         {
-            if (Entity hit_entity = info.hit_entity)
+            if (Physics::raycast(ray_start, ray_dir, 20.0f, Physics::NON_MOVING | Physics::MOVING, info))
             {
-                std::string name = hit_entity.get_component<TagComponent>().tag;
-                Engine::get_renderer()->draw_text(name.c_str(),
-                                                  glm::vec3(0.0f, 400.0f, 0.0f),
-                                                  glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), .6f);
-                Engine::get_renderer()->draw_text(std::to_string(info.hit_length).c_str(),
-                                                  glm::vec3(0.0f, 450.0f, 0.0f),
-                                                  glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), .6f);
-            }
-            static int light_count = 0;
-            Engine::get_renderer()->draw_line(info.hit_point, info.hit_point + info.hit_normal * 0.1f, glm::max(info.hit_normal, glm::vec3(0.1f, 0.1f, 0.1f)));
-            if (Input::mouse_pressed(Input::MouseButton::Left) && !Engine::get_event_manager()->paused())
-            {
-                Entity light = create_entity("Point Light" + std::to_string(light_count++));
-                light.get_component<TransformComponent>().position = info.hit_point + info.hit_normal * 0.5f;
-                auto& lc = light.add_component<LightComponent>();
-                lc.color = glm::linearRand(glm::vec3(0.0f), glm::vec3(1.0f));
+                if (Entity hit_entity = info.hit_entity)
+                {
+                    std::string name = hit_entity.get_component<TagComponent>().tag;
+                    Engine::get_renderer()->draw_text(name.c_str(),
+                                                      glm::vec3(0.0f, 400.0f, 0.0f),
+                                                      glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), .6f);
+                    Engine::get_renderer()->draw_text(std::to_string(info.hit_length).c_str(),
+                                                      glm::vec3(0.0f, 450.0f, 0.0f),
+                                                      glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), .6f);
+                }
+                static int light_count = 0;
+                Engine::get_renderer()->draw_line(info.hit_point, info.hit_point + info.hit_normal * 0.1f,
+                                                  glm::max(info.hit_normal, glm::vec3(0.1f, 0.1f, 0.1f)));
+                if (Input::mouse_pressed(Input::MouseButton::Left))
+                {
+                    Entity light = create_entity("Point Light" + std::to_string(light_count++));
+                    light.get_component<TransformComponent>().position = info.hit_point + info.hit_normal * 0.5f;
+                    auto &lc = light.add_component<LightComponent>();
+                    lc.color = glm::linearRand(glm::vec3(0.0f), glm::vec3(1.0f));
+                }
             }
         }
-
-
 
         //submit draw calls
         auto view = _registry.view<ModelComponent, TransformComponent, ActiveComponent>();
@@ -242,7 +245,6 @@ namespace cologne
             item.transform = tr;
             Engine::get_renderer()->submit_skinned_render_item(item);
         }
-
     }
 
     AABB Scene::re_calculate_bounds()

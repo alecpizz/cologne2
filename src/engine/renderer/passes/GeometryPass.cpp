@@ -9,6 +9,8 @@
 #include "engine/renderer/types/FrameBuffer.h"
 #include "engine/renderer/Renderer.h"
 #include "engine/renderer/types/Shader.h"
+#include <engine/editor/Editor.h>
+
 
 namespace cologne
 {

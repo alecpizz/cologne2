@@ -40,7 +40,7 @@ namespace cologne
                 }
             }
 
-            if (Engine::get_event_manager()->paused())
+            if (Engine::in_edit_mode())
             {
                 return;
             }
@@ -135,7 +135,7 @@ namespace cologne
 
         void move_viewmodel(float dt)
         {
-            if (Engine::get_event_manager()->paused())
+            if (Engine::in_edit_mode())
             {
                 return;
             }

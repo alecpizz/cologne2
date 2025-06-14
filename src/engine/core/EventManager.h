@@ -27,8 +27,6 @@ namespace cologne
 
         bool should_quit() const;
 
-        bool paused() const;
-
         void invoke_resize(uint32_t width, uint32_t height);
 
     private:

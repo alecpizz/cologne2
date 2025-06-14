@@ -2,7 +2,7 @@
 #include <engine/renderer/OpenGLDebugScope.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Shader.h>
-#include <engine/renderer/types/SSBO.h>
+#include <engine/editor/Editor.h>
 //
 // Created by alecpizz on 5/4/2025.
 //

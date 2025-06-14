@@ -2,7 +2,7 @@
 // Created by alecpizz on 3/1/2025.
 //
 
-#include "DebugUI.h"
+#include "Editor.h"
 
 #include <engine/core/Engine.h>
 #include <engine/scene/Entity.h>
@@ -57,29 +57,41 @@ namespace cologne
     std::vector<ImageCmd> image_cmds;
     std::vector<BoolCmd> bool_cmds;
     std::vector<ButtonCmd> button_cmds;
+    bool active = false;
     ImVec2 prev_viewport_size = ImVec2(1280, 720);
 
-    bool DebugUI::edit_mode()
+    bool Editor::in_edit_mode()
     {
-        if (Engine::get_event_manager() == nullptr)
-        {
-            return false;
-        }
-        return Engine::get_event_manager()->paused(); //TEMP
+        return active;
     }
 
-    uint32_t DebugUI::get_viewport_width()
+    void Editor::toggle_edit_mode(bool b)
+    {
+        active = b;
+        //do something with edit mode here
+        if (active)
+        {
+            Engine::get_window()->show_mouse();
+        }
+        else
+        {
+            Engine::get_window()->hide_mouse();
+        }
+    }
+
+    uint32_t Editor::get_viewport_width()
     {
         return prev_viewport_size.x;
     }
 
-    uint32_t DebugUI::get_viewport_height()
+    uint32_t Editor::get_viewport_height()
     {
         return prev_viewport_size.y;
     }
 
-    DebugUI::DebugUI()
+    Editor::Editor()
     {
+        active = false;
         cologne::DebugScope scope(__PRETTY_FUNCTION__);
         ImGui::CreateContext();
         imguiThemes::green();
@@ -99,14 +111,14 @@ namespace cologne
         }
     }
 
-    DebugUI::~DebugUI()
+    Editor::~Editor()
     {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplSDL3_Shutdown();
         ImGui::DestroyContext();
     }
 
-    void DebugUI::clear()
+    void Editor::clear()
     {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
@@ -115,7 +127,7 @@ namespace cologne
         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->ID);
     }
 
-    void DebugUI::build()
+    void Editor::build()
     {
         ImGui::Begin("cologne window");
 
@@ -298,7 +310,7 @@ namespace cologne
         // ImGui::EndMainMenuBar();
     }
 
-    void DebugUI::build_transform_entry(TransformComponent &tr)
+    void Editor::build_transform_entry(TransformComponent &tr)
     {
         ImGui::DragFloat3("Position", glm::value_ptr(tr.position), 0.01f);
 
@@ -314,9 +326,9 @@ namespace cologne
         ImGui::DragFloat3("Scale", glm::value_ptr(tr.scale), 0.01f);
     }
 
-    void DebugUI::present()
+    void Editor::present()
     {
-        if (Engine::get_event_manager()->paused())
+        if (active)
         {
             ImGuiStyle &style = ImGui::GetStyle();
             auto color = style.Colors[ImGuiCol_WindowBg];
@@ -497,32 +509,32 @@ namespace cologne
         }
     }
 
-    void DebugUI::add_float_entry(const char *name, float &value)
+    void Editor::add_float_entry(const char *name, float &value)
     {
         float_cmds.emplace_back(FloatCmd{value, name});
     }
 
-    void DebugUI::add_int_entry(const char *name, int &value)
+    void Editor::add_int_entry(const char *name, int &value)
     {
         int_cmds.emplace_back(IntCmd{value, name});
     }
 
-    void DebugUI::add_vec3_entry(const char *name, glm::vec3 &value)
+    void Editor::add_vec3_entry(const char *name, glm::vec3 &value)
     {
         vec3_cmds.emplace_back(Vec3Cmd{value, name});
     }
 
-    void DebugUI::add_image_entry(const char *name, uint32_t value, const glm::vec2 &image_size)
+    void Editor::add_image_entry(const char *name, uint32_t value, const glm::vec2 &image_size)
     {
         image_cmds.emplace_back(ImageCmd{value, name, image_size});
     }
 
-    void DebugUI::add_bool_entry(const char *name, bool &value)
+    void Editor::add_bool_entry(const char *name, bool &value)
     {
         bool_cmds.emplace_back(BoolCmd{value, name});
     }
 
-    void DebugUI::add_button(const char *name, std::function<void()> action)
+    void Editor::add_button(const char *name, std::function<void()> action)
     {
         button_cmds.emplace_back(ButtonCmd{action, name});
     }

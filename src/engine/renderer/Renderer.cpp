@@ -10,7 +10,7 @@
 #include "engine/core/Engine.h"
 #include "engine/core/Input.h"
 
-#include "engine/editor/DebugUI.h"
+#include "engine/editor/Editor.h"
 #include "OpenGLDebugScope.h"
 #include "../renderer/types/FrameBuffer.h"
 #include "../renderer/types/Light.h"
