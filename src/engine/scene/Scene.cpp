@@ -147,7 +147,22 @@ namespace cologne
             {
                 continue;
             }
-            nsc.instance->on_update(delta_time);
+            if (Engine::in_edit_mode())
+            {
+                if (nsc.instance->get_runtime_mode() == RuntimeMode::EDITOR_ONLY
+                    || nsc.instance->get_runtime_mode() == RuntimeMode::EDITOR_AND_GAME)
+                {
+                    nsc.instance->on_update(delta_time);
+                }
+            }
+            else
+            {
+                if (nsc.instance->get_runtime_mode() == RuntimeMode::GAME_ONLY
+                    || nsc.instance->get_runtime_mode() == RuntimeMode::EDITOR_AND_GAME)
+                {
+                    nsc.instance->on_update(delta_time);
+                }
+            }
         }
 
         auto animators = _registry.view<AnimatorComponent>();

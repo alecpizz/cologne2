@@ -3,6 +3,12 @@
 
 namespace cologne
 {
+    enum class RuntimeMode
+    {
+        GAME_ONLY = 0,
+        EDITOR_ONLY = 1,
+        EDITOR_AND_GAME = 2,
+    };
     class ScriptableEntity
     {
     public:
@@ -24,6 +30,11 @@ namespace cologne
         }
 
     protected:
+        virtual RuntimeMode get_runtime_mode()
+        {
+            return RuntimeMode::GAME_ONLY;
+        }
+
         virtual void on_create()
         {
         }
@@ -39,5 +50,6 @@ namespace cologne
     private:
         Entity _entity;
         friend class Scene;
+        friend class Editor;
     };
 }
