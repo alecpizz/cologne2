@@ -33,6 +33,9 @@ namespace cologne
         DebugUI &operator=(DebugUI &&) = delete;
 
         DebugUI &operator=(const DebugUI &) = delete;
+        static bool edit_mode();
+        static uint32_t get_viewport_width();
+        static uint32_t get_viewport_height();
 
     private:
         DebugUI();

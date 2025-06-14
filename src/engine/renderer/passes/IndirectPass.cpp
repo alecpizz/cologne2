@@ -23,6 +23,23 @@ namespace cologne
         Engine::get_debug_ui()->add_image_entry("Indirect_Lighting", _indirect_texture,
             {Engine::get_window()->get_width() / pixel_ratio, Engine::get_window()->get_height() / pixel_ratio});
     }
+
+    void Renderer::init_indirect(uint32_t width, uint32_t height)
+    {
+        if (_indirect_texture != 0)
+        {
+            glDeleteTextures(1, &_indirect_texture);
+        }
+        glCreateTextures(GL_TEXTURE_2D, 1, &_indirect_texture);
+        glTextureParameteri(_indirect_texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(_indirect_texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(_indirect_texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(_indirect_texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTextureStorage2D(_indirect_texture, 1, GL_RGBA8,
+                           width / pixel_ratio, height / pixel_ratio);
+        Engine::get_debug_ui()->add_image_entry("Indirect_Lighting", _indirect_texture,
+            {width / pixel_ratio, height / pixel_ratio});
+    }
     void Renderer::indirect_pass()
     {
         if (!_apply_indirect_lighting)

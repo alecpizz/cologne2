@@ -74,17 +74,25 @@ namespace cologne
 
     uint32_t Window::get_width() const
     {
+        if (DebugUI::edit_mode())
+        {
+            return DebugUI::get_viewport_width();
+        }
         return _impl->width;
     }
 
     uint32_t Window::get_height() const
     {
+        if (DebugUI::edit_mode())
+        {
+            return DebugUI::get_viewport_height();
+        }
         return _impl->height;
     }
 
     glm::vec2 Window::get_dimensions() const
     {
-        return glm::vec2(_impl->width, _impl->height);
+        return glm::vec2(get_height(), get_width());
     }
 
     void Window::clear() const
@@ -139,7 +147,7 @@ namespace cologne
         DebugScope scope (__PRETTY_FUNCTION__);
         _impl = new Impl();
         _impl->init(width, height);
-        hide_mouse();
+        //hide_mouse();
     }
 
     Window::~Window()

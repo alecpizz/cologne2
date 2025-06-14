@@ -9,15 +9,15 @@ namespace cologne
 {
     struct BloomMip
     {
-        glm::vec2 size;
-        glm::ivec2 sizei;
-        uint32_t texture;
+        glm::vec2 size = glm::vec2(0.0f);
+        glm::ivec2 sizei = glm::ivec2(0.0);
+        uint32_t texture = 0;
     };
 
     std::vector<BloomMip> mips;
     uint32_t bloom_fbo = 0;
 
-    void Renderer::init_bloom()
+    void Renderer::init_bloom(uint32_t width, uint32_t height)
     {
         if (bloom_fbo != 0)
         {
@@ -26,12 +26,29 @@ namespace cologne
         constexpr uint32_t mip_chain_length = 5;
         mips.clear();
         mips.reserve(5);
-        glm::vec2 mip_size = Engine::get_window()->get_dimensions();
+        glm::vec2 mip_size;
+        if (width == 0)
+        {
+            mip_size = Engine::get_window()->get_dimensions();
+        }
+        else
+        {
+            mip_size = glm::vec2(width, height);
+        }
         glm::ivec2 mip_int_size = glm::ivec2(mip_size);
 
         glGenFramebuffers(1, &bloom_fbo);
         glBindFramebuffer(GL_FRAMEBUFFER, bloom_fbo);
 
+        for (auto& bloom_mip : mips)
+        {
+            if (bloom_mip.texture == 0)
+            {
+                continue;
+            }
+            glDeleteTextures(1, &bloom_mip.texture);
+        }
+        mips.clear();
         for (uint32_t i = 0; i < mip_chain_length; i++)
         {
             BloomMip mip;

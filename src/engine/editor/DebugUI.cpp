@@ -57,7 +57,26 @@ namespace cologne
     std::vector<ImageCmd> image_cmds;
     std::vector<BoolCmd> bool_cmds;
     std::vector<ButtonCmd> button_cmds;
+    ImVec2 prev_viewport_size = ImVec2(1280, 720);
 
+    bool DebugUI::edit_mode()
+    {
+        if (Engine::get_event_manager() == nullptr)
+        {
+            return false;
+        }
+        return Engine::get_event_manager()->paused(); //TEMP
+    }
+
+    uint32_t DebugUI::get_viewport_width()
+    {
+        return prev_viewport_size.x;
+    }
+
+    uint32_t DebugUI::get_viewport_height()
+    {
+        return prev_viewport_size.y;
+    }
 
     DebugUI::DebugUI()
     {
@@ -69,13 +88,13 @@ namespace cologne
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
-
+        prev_viewport_size = ImVec2(1280, 720);
 
         ImGuiStyle &style = ImGui::GetStyle();
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
             //style.WindowRounding = 0.0f;
-            style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+            style.Colors[ImGuiCol_WindowBg].w = 0.0f;
             style.Colors[ImGuiCol_DockingEmptyBg].w = 0.f;
         }
     }
@@ -281,7 +300,6 @@ namespace cologne
 
     void DebugUI::build_transform_entry(TransformComponent &tr)
     {
-
         ImGui::DragFloat3("Position", glm::value_ptr(tr.position), 0.01f);
 
         glm::vec3 euler = glm::eulerAngles(tr.rotation);
@@ -300,55 +318,11 @@ namespace cologne
     {
         if (Engine::get_event_manager()->paused())
         {
-            //
-            //
-            //     bool open = true;
-            //     ImGui::Begin("agh", &open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize| ImGuiWindowFlags_NoBackground);
-            //     build();
-            //     ImGui::SetWindowPos(ImGui::GetMainViewport()->Pos);
-            //     ImGuiIO &io = ImGui::GetIO();
-            //     ImGui::SetWindowSize(ImGui::GetMainViewport()->Size);
-            //     ImGui::SetWindowCollapsed(false);
-            //     ImGuizmo::Enable(true);
-            //     ImGuizmo::SetOrthographic(false);
-            //     ImGuizmo::SetDrawlist();
-            //     ImGuizmo::SetRect(ImGui::GetMainViewport()->Pos.x, ImGui::GetMainViewport()->Pos.y,
-            //         ImGui::GetMainViewport()->Size.x, ImGui::GetMainViewport()->Size.y);
-            //
-            //
-            //     auto camera = Engine::get_scene()->get_camera_entity();
-            //     auto camera_comp = camera.get_component<CameraComponent>();
-            //     auto transform = camera.get_component<TransformComponent>();
-            //     glm::mat4 view = Renderer::get_camera_view(transform);
-            //     glm::mat4 proj = Renderer::get_camera_projection(transform, camera_comp);
-            //
-            //     auto et = Engine::get_scene()->_registry.view<TransformComponent, SkinnedModelComponent>();
-            //     for (auto entity : et)
-            //     {
-            //         Entity e = {entity, Engine::get_scene()};
-            //         if (e.has_component<ViewmodelComponent>())
-            //         {
-            //             continue;
-            //         }
-            //         auto& tr = Engine::get_scene()->_registry.get<TransformComponent>(entity);
-            //         glm::mat4 transform = tr.get_mat4();
-            //         ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(proj),
-            //                              ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::WORLD, glm::value_ptr(transform));
-            //
-            //         glm::quat orientation;
-            //         glm::vec3 translation;
-            //         glm::vec3 scale;
-            //         glm::vec4 persp;
-            //         glm::vec3 skew;
-            //         glm::decompose(transform, scale, orientation, translation, skew, persp);
-            //         tr.position = translation;
-            //         break;
-            //     }
-            //
-            //     ImGui::End();
-            // }
             ImGuiStyle &style = ImGui::GetStyle();
-            style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+            auto color = style.Colors[ImGuiCol_WindowBg];
+            color.w = 1.0f;
+            // style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+            ImGui::PushStyleColor(ImGuiCol_WindowBg, color);
             static Entity selected_entity = {};
             ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
             ImGuiViewport *viewport = ImGui::GetMainViewport();
@@ -365,18 +339,20 @@ namespace cologne
 
             ImGuiID dock_space_id = ImGui::GetID("MyDockSpace");
             ImGui::DockSpace(dock_space_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
-            if (ImGui::BeginMenuBar())
+            if (ImGui::BeginMainMenuBar())
             {
                 if (ImGui::BeginMenu("File"))
                 {
                     if (ImGui::MenuItem("Exit"))
                     {
                     }
+                    ImGui::EndMenu();
                 }
                 if (ImGui::BeginMenu("Settings"))
                 {
+                    ImGui::EndMenu();
                 }
-                ImGui::EndMenuBar();
+                ImGui::EndMainMenuBar();
             }
 
             ImGui::Begin("Asset Browser");
@@ -442,8 +418,7 @@ namespace cologne
                                                                             | ImGuiColorEditFlags_Float);
                     ImGui::Separator();
                 }
-            }
-            else
+            } else
             {
                 ImGui::Text("Select an entity");
             }
@@ -465,14 +440,47 @@ namespace cologne
             ImGui::Begin("Game View");
             ImGui::Text("Game rendered here");
             ImVec2 viewport_size = ImGui::GetContentRegionAvail();
-            ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(image_cmds[10].id)), viewport_size, ImVec2(0, 1), ImVec2(1, 0));
+            if (prev_viewport_size.x != viewport_size.x || prev_viewport_size.y != viewport_size.y)
+            {
+                LOG_INFO("view port resized uwu");
+                Engine::get_event_manager()->invoke_resize(viewport_size.x, viewport_size.y);
+                prev_viewport_size = viewport_size;
+            }
+            ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(Renderer::get_output_image())), viewport_size,
+                         ImVec2(0, 1), ImVec2(1, 0));
+            if (selected_entity)
+            {
+                ImGuizmo::SetOrthographic(false);
+                ImGuizmo::SetDrawlist();
+                ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, viewport_size.x, viewport_size.y);
+                //
+                //
+                auto camera = Engine::get_scene()->get_camera_entity();
+                auto camera_comp = camera.get_component<CameraComponent>();
+                auto transform = camera.get_component<TransformComponent>();
+                glm::mat4 view = Renderer::get_camera_view(transform);
+                glm::mat4 proj = Renderer::get_camera_projection(transform, camera_comp);
+                auto &tr = selected_entity.get_component<TransformComponent>();
+                //         auto& tr = Engine::get_scene()->_registry.get<TransformComponent>(entity);
+                glm::mat4 mat4 = tr.get_mat4();
+                ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(proj),
+                                     ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::WORLD, glm::value_ptr(mat4));
+                //
+                glm::quat orientation;
+                glm::vec3 translation;
+                glm::vec3 scale;
+                glm::vec4 persp;
+                glm::vec3 skew;
+                glm::decompose(mat4, scale, orientation, translation, skew, persp);
+                tr.position = translation;
+            }
             ImGui::End();
             ImGui::End();
-        }
-        else
+            ImGui::PopStyleColor();
+        } else
         {
-            ImGuiStyle &style = ImGui::GetStyle();
-            style.Colors[ImGuiCol_WindowBg].w = 0.0f;
+            // ImGuiStyle &style = ImGui::GetStyle();
+            // style.Colors[ImGuiCol_WindowBg].w = 0.0f;
         }
 
         ImGui::Render();

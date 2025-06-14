@@ -36,6 +36,7 @@ namespace cologne
                 if (event.key.scancode == SDL_SCANCODE_ESCAPE)
                 {
                     _impl->paused = !_impl->paused;
+                    invoke_resize(Engine::get_window()->get_width(), Engine::get_window()->get_height());
                 }
             }
             if (event.type == SDL_EVENT_KEY_UP)
@@ -73,13 +74,19 @@ namespace cologne
         return _impl->paused;
     }
 
+    void EventManager::invoke_resize(uint32_t width, uint32_t height)
+    {
+        Engine::get_window()->resize();
+        Engine::get_renderer()->window_resized(width, height);
+    }
+
     bool event_watch(void *data, SDL_Event *event)
     {
         if (event->type == SDL_EVENT_WINDOW_RESIZED)
         {
             Engine::get_window()->resize();
             Engine::get_renderer()->window_resized(event->window.data1, event->window.data2);
-            Engine::get_window()->present();
+            // Engine::get_window()->present();
         }
         return true;
     }

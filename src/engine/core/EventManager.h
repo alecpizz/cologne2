@@ -29,6 +29,8 @@ namespace cologne
 
         bool paused() const;
 
+        void invoke_resize(uint32_t width, uint32_t height);
+
     private:
         EventManager();
 

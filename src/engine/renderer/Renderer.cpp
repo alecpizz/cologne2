@@ -166,6 +166,11 @@ namespace cologne
                                 0.1f, 300.0f);
     }
 
+    uint32_t Renderer::get_output_image()
+    {
+        return get_framebuffer_by_name("output")->get_color_attachment_handle_by_name("color");
+    }
+
     Renderer::~Renderer()
     {
     }
@@ -261,7 +266,7 @@ namespace cologne
         //regen framebuffers here
         init_gbuffer();
         init_bloom();
-        init_indirect();
+        init_indirect(width, height);
         get_framebuffer_by_name("output")->resize(width, height);
         get_framebuffer_by_name("voxel_back")->resize(width, height);
         get_framebuffer_by_name("voxel_front")->resize(width, height);
