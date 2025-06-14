@@ -6,13 +6,12 @@
 
 namespace cologne
 {
-    class CameraController : public ScriptableEntity
+    class CameraController final : public ScriptableEntity
     {
     private:
         glm::vec2 _rotation = glm::vec2(0.0f);
         glm::vec3 _position = glm::vec3(0.0f);
-        bool _is_free_cam = true;
-        bool _show_mouse = true;
+        bool _was_controlling = false;
 
     protected:
         void on_create() override
@@ -25,21 +24,23 @@ namespace cologne
 
         void on_update(float dt) override
         {
-            if (cologne::Input::key_pressed(Input::Key::Escape))
+            if (Input::mouse_down(Input::MouseButton::Right))
             {
-                _show_mouse = !_show_mouse;
-                if (!_show_mouse)
-                {
-                    Engine::get_window()->show_mouse();
-                } else
+                bool prev_controlling = _was_controlling;
+                _was_controlling = true;
+                if (prev_controlling != _was_controlling)
                 {
                     Engine::get_window()->hide_mouse();
                 }
             }
-
-            if (Engine::in_edit_mode())
+            else
             {
-                return;
+                bool prev_controlling = _was_controlling;
+                _was_controlling = false;
+                if (prev_controlling != _was_controlling)
+                {
+                    Engine::get_window()->show_mouse();
+                }
             }
 
             auto mouse = Input::get_relative_mouse();
@@ -57,16 +58,6 @@ namespace cologne
             glm::vec3 fwd = target_rotation * glm::vec3(0.0f, 0.0f, 1.0f);
             glm::vec3 right = target_rotation * glm::vec3(1.0f, 0.0f, 0.0f);
             glm::vec3 up = target_rotation * glm::vec3(0.0f, 1.0f, 0.0f);
-
-            if (Input::key_pressed(Input::Key::F))
-            {
-                _is_free_cam = !_is_free_cam;
-            }
-
-            if (!_is_free_cam)
-            {
-                return;
-            }
 
             float speed = 10.0f;
             if (cologne::Input::key_down(Input::Key::LeftShift))
@@ -98,6 +89,11 @@ namespace cologne
                 _position -= up * dt * speed;
             }
             get_component<TransformComponent>().position = _position;
+        }
+
+        RuntimeMode get_runtime_mode() override
+        {
+            return RuntimeMode::EDITOR_ONLY;
         }
     };
 }
