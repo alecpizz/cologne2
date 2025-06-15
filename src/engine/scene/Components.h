@@ -68,6 +68,7 @@ namespace cologne
     struct CameraComponent
     {
         float fov_radians = glm::radians(45.0f);
+        bool primary = false;
     };
 
     struct PlayerComponent

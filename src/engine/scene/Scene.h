@@ -40,7 +40,8 @@ namespace cologne
 
         void destroy_entity(Entity entity);
 
-        Entity get_camera_entity();
+        Entity get_primary_camera();
+        Entity get_scene_camera();
 
     private:
         //THIS IS fucking dumb

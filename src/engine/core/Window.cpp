@@ -17,6 +17,7 @@ namespace cologne
         SDL_GLContext context = nullptr;
         uint32_t width = 0;
         uint32_t height = 0;
+        bool mouse_visible = false;
 
 
         void init(uint32_t w, uint32_t h)
@@ -135,11 +136,18 @@ namespace cologne
     void Window::hide_mouse() const
     {
         SDL_SetWindowRelativeMouseMode(_impl->window, true);
+        _impl->mouse_visible = false;
     }
 
     void Window::show_mouse() const
     {
         SDL_SetWindowRelativeMouseMode(_impl->window, false);
+        _impl->mouse_visible = true;
+    }
+
+    bool Window::mouse_visible() const
+    {
+        return _impl->mouse_visible;
     }
 
     Window::Window(uint32_t width, uint32_t height)

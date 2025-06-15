@@ -20,7 +20,6 @@
 
 namespace cologne
 {
-    Entity camera;
     Frustum cam_frustum;
 
     Scene::Scene()
@@ -54,8 +53,9 @@ namespace cologne
         revolver.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
         revolver.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("Rig|Rig|MK_ReloadFull"));
 
-        camera = create_entity("camera");
-        camera.add_component<CameraComponent>();
+        auto camera = create_entity("camera");
+        auto& c = camera.add_component<CameraComponent>();
+        c.primary = true;
 
         Entity viewModel = create_entity("viewmodel");
         viewModel.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
@@ -107,6 +107,11 @@ namespace cologne
         light3 = light2;
         light3.color = glm::vec3(0.2f, 0.9f, 0.15f);
         point_light2.get_component<TransformComponent>().position = glm::vec3(6.0f, 3.4, 5.0f);
+
+        Entity scene_camera = create_entity("Scene Camera");
+        auto& cam = scene_camera.add_component<CameraComponent>();
+        cam.primary = false;
+        scene_camera.add_component<NativeScriptComponent>().bind<CameraController>();
 
 
         re_calculate_bounds();
@@ -172,7 +177,7 @@ namespace cologne
             animator.update_animation(delta_time);
         }
 
-
+        auto camera = !Engine::in_edit_mode() ? get_primary_camera() : get_scene_camera();
         auto tr = camera.get_component<TransformComponent>();
         auto cm = camera.get_component<CameraComponent>();
         Engine::get_renderer()->submit_camera_transform(tr, cm);
@@ -304,8 +309,29 @@ namespace cologne
         _registry.destroy(entity);
     }
 
-    Entity Scene::get_camera_entity()
+    Entity Scene::get_primary_camera()
     {
-        return camera;
+        for (auto entity : _registry.view<CameraComponent>())
+        {
+            Entity e = {entity, this};
+            if (e.get_component<CameraComponent>().primary)
+            {
+                return e;
+            }
+        }
+        return {};
+    }
+
+    Entity Scene::get_scene_camera()
+    {
+        for (auto entity : _registry.view<CameraComponent>())
+        {
+            Entity e = {entity, this};
+            if (!e.get_component<CameraComponent>().primary)
+            {
+                return e;
+            }
+        }
+        return {};
     }
 }

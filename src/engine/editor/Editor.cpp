@@ -345,6 +345,10 @@ namespace cologne
             ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
             window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
                     ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+            if (!Engine::get_window()->mouse_visible())
+            {
+                window_flags |= ImGuiWindowFlags_NoInputs;
+            }
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
             ImGui::Begin("Dock space", nullptr, window_flags);
             ImGui::PopStyleVar(3);
@@ -357,6 +361,7 @@ namespace cologne
                 {
                     if (ImGui::MenuItem("Exit"))
                     {
+                        Engine::get_event_manager()->set_should_quit(true);
                     }
                     ImGui::EndMenu();
                 }
@@ -467,7 +472,7 @@ namespace cologne
                 ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, viewport_size.x, viewport_size.y);
                 //
                 //
-                auto camera = Engine::get_scene()->get_camera_entity();
+                auto camera = Engine::get_scene()->get_scene_camera();
                 auto camera_comp = camera.get_component<CameraComponent>();
                 auto transform = camera.get_component<TransformComponent>();
                 glm::mat4 view = Renderer::get_camera_view(transform);

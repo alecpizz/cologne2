@@ -24,6 +24,7 @@ namespace cologne
 
         void on_update(float dt) override
         {
+            bool active = false;
             if (Input::mouse_down(Input::MouseButton::Right))
             {
                 bool prev_controlling = _was_controlling;
@@ -32,6 +33,7 @@ namespace cologne
                 {
                     Engine::get_window()->hide_mouse();
                 }
+                active = true;
             }
             else
             {
@@ -41,6 +43,11 @@ namespace cologne
                 {
                     Engine::get_window()->show_mouse();
                 }
+            }
+
+            if (!active)
+            {
+                return;
             }
 
             auto mouse = Input::get_relative_mouse();
