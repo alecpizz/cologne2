@@ -155,157 +155,6 @@ namespace cologne
     }
 
 
-#if 0
-    void Editor::build_main_window()
-    {
-        ImGui::Begin("cologne window");
-
-        ImGui::Text("FPS %f", ImGui::GetIO().Framerate);
-        size_t counter = 0;
-        ImGui::SeparatorText("Entities");
-        for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
-        {
-            Entity e = {entity, Engine::get_scene()};
-            if (e.has_component<StaticColliderComponent>())
-            {
-                continue;
-            }
-            ImGui::PushID(counter++);
-
-
-            auto &tr = e.get_component<TransformComponent>();
-            auto &tag = e.get_component<TagComponent>();
-            if (!ImGui::CollapsingHeader(tag.tag.c_str()))
-            {
-                ImGui::PopID();
-                continue;
-            }
-            bool entity_delete = false;
-
-            if (ImGui::Button("Delete Entity"))
-            {
-                entity_delete = true;
-            }
-            auto &active = e.get_component<ActiveComponent>();
-            ImGui::Text("%s", tag.tag.c_str());
-            ImGui::Checkbox("Active", &active.active);
-            ImGui::SeparatorText("Transform");
-            build_transform_entry(tr);
-            ImGui::Separator();
-
-            if (e.has_component<ViewmodelComponent>())
-            {
-                ImGui::SeparatorText("View Model Config");
-                auto &vm = e.get_component<ViewmodelComponent>();
-                ImGui::DragFloat("smoothing", &vm.smoothing, 0.1f);
-                ImGui::DragFloat("amplitude", &vm.amplitude, 0.01f);
-                ImGui::DragFloat("frequency", &vm.frequency, 0.1f);
-                ImGui::DragFloat("vertical velocity multi", &vm.vertical_velocity_multiplier, 0.01f);
-                ImGui::DragFloat("max vertical offset", &vm.max_vertical_offset, 0.01f);
-                ImGui::DragFloat("sway multiplier", &vm.sway_multiplier);
-                ImGui::DragFloat3("position offset", glm::value_ptr(vm.position_offset));
-                ImGui::DragFloat3("euler offset", glm::value_ptr(vm.euler_offset));
-                ImGui::Separator();
-            }
-
-            if (e.has_component<LightComponent>())
-            {
-                ImGui::SeparatorText("Light Settings");
-                auto &light = e.get_component<LightComponent>();
-                ImGui::DragFloat("radius", &light.radius, 0.01f);
-                ImGui::DragFloat("strength", &light.strength, 0.01f);
-                ImGui::ColorEdit3("color", glm::value_ptr(light.color), ImGuiColorEditFlags_HDR
-                                                                        | ImGuiColorEditFlags_Float);
-                ImGui::Separator();
-            }
-            ImGui::PopID();
-            if (entity_delete)
-            {
-                Engine::get_scene()->destroy_entity(e);
-            }
-        }
-
-
-        ImGui::SeparatorText("Quick Actions");
-        if (ImGui::Button("Hot reload shaders"))
-        {
-            Engine::get_renderer()->reload_shaders();
-        }
-
-        for (size_t i = 0; i < float_cmds.size(); ++i)
-        {
-            ImGui::PushID(i);
-            float value = float_cmds[i].ref;
-            if (ImGui::DragFloat(float_cmds[i].name.c_str(), &value, 0.005f))
-            {
-                float_cmds[i].ref = value;
-            }
-            ImGui::PopID();
-        }
-
-        for (size_t i = 0; i < int_cmds.size(); ++i)
-        {
-            ImGui::PushID(i);
-            int32_t value = int_cmds[i].ref;
-            if (ImGui::DragInt(int_cmds[i].name.c_str(), &value, 0.005f))
-            {
-                int_cmds[i].ref = value;
-            }
-            ImGui::PopID();
-        }
-
-        for (size_t i = 0; i < vec3_cmds.size(); i++)
-        {
-            ImGui::PushID(i);
-            glm::vec3 value = vec3_cmds[i].ref;
-            if (ImGui::DragFloat3(vec3_cmds[i].name.c_str(), &value[0], 0.005f))
-            {
-                vec3_cmds[i].ref = value;
-            }
-            ImGui::PopID();
-        }
-
-        for (size_t i = 0; i < bool_cmds.size(); i++)
-        {
-            ImGui::PushID(i);
-            bool value = bool_cmds[i].ref;
-            if (ImGui::Checkbox(bool_cmds[i].name.c_str(), &value))
-            {
-                bool_cmds[i].ref = value;
-            }
-            ImGui::PopID();
-        }
-
-        for (size_t i = 0; i < button_cmds.size(); i++)
-        {
-            ImGui::PushID(i);
-            if (ImGui::Button(button_cmds[i].name.c_str()))
-            {
-                button_cmds[i].action();
-            }
-            ImGui::PopID();
-        }
-
-        if (ImGui::CollapsingHeader("Images"))
-        {
-            ImGui::BeginChild("Images", ImVec2(0, 800));
-            for (size_t i = 0; i < image_cmds.size(); i++)
-            {
-                ImGui::PushID(i);
-                ImGui::Text(image_cmds[i].name.c_str());
-                ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(image_cmds[i].id)),
-                             ImVec2(image_cmds[i].image_size.x / 4,
-                                    image_cmds[i].image_size.y / 4),
-                             ImVec2(0, 1), ImVec2(1, 0));
-                ImGui::PopID();
-            }
-            ImGui::EndChild();
-        }
-
-        ImGui::End();
-    }
-#endif
-
     void Editor::build_main_menu_bar()
     {
         if (ImGui::BeginMainMenuBar())
@@ -487,7 +336,6 @@ namespace cologne
         ImVec2 viewport_size = ImGui::GetContentRegionAvail();
         if (prev_viewport_size.x != viewport_size.x || prev_viewport_size.y != viewport_size.y)
         {
-            LOG_INFO("view port resized uwu");
             Engine::get_event_manager()->invoke_resize(viewport_size.x, viewport_size.y);
             prev_viewport_size = viewport_size;
         }
@@ -541,15 +389,79 @@ namespace cologne
     void Editor::build_settings_panel()
     {
         ImGui::Begin("Settings");
-        ImGui::Text("Settings here");
-        static bool test = false;
-        ImGui::Checkbox("Feature", &test);
-        if (ImGui::Button("Print shit"))
+        if (ImGui::Button("Hot reload shaders"))
         {
+            Engine::get_renderer()->reload_shaders();
+        }
+
+        for (size_t i = 0; i < float_cmds.size(); ++i)
+        {
+            ImGui::PushID(i);
+            float value = float_cmds[i].ref;
+            if (ImGui::DragFloat(float_cmds[i].name.c_str(), &value, 0.005f))
+            {
+                float_cmds[i].ref = value;
+            }
+            ImGui::PopID();
+        }
+
+        for (size_t i = 0; i < int_cmds.size(); ++i)
+        {
+            ImGui::PushID(i);
+            int32_t value = int_cmds[i].ref;
+            if (ImGui::DragInt(int_cmds[i].name.c_str(), &value, 0.005f))
+            {
+                int_cmds[i].ref = value;
+            }
+            ImGui::PopID();
+        }
+
+        for (size_t i = 0; i < vec3_cmds.size(); i++)
+        {
+            ImGui::PushID(i);
+            glm::vec3 value = vec3_cmds[i].ref;
+            if (ImGui::DragFloat3(vec3_cmds[i].name.c_str(), &value[0], 0.005f))
+            {
+                vec3_cmds[i].ref = value;
+            }
+            ImGui::PopID();
+        }
+
+        for (size_t i = 0; i < bool_cmds.size(); i++)
+        {
+            ImGui::PushID(i);
+            bool value = bool_cmds[i].ref;
+            if (ImGui::Checkbox(bool_cmds[i].name.c_str(), &value))
+            {
+                bool_cmds[i].ref = value;
+            }
+            ImGui::PopID();
+        }
+
+        for (size_t i = 0; i < button_cmds.size(); i++)
+        {
+            ImGui::PushID(i);
+            if (ImGui::Button(button_cmds[i].name.c_str()))
+            {
+                button_cmds[i].action();
+            }
+            ImGui::PopID();
+        }
+
+        if (ImGui::CollapsingHeader("Images"))
+        {
+            ImGui::BeginChild("Images", ImVec2(0, 800));
             for (size_t i = 0; i < image_cmds.size(); i++)
             {
-                LOG_INFO("image name %s, idx %d", image_cmds[i].name.c_str(), i);
+                ImGui::PushID(i);
+                ImGui::Text(image_cmds[i].name.c_str());
+                ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(image_cmds[i].id)),
+                             ImVec2(image_cmds[i].image_size.x,
+                                    image_cmds[i].image_size.y),
+                             ImVec2(0, 1), ImVec2(1, 0));
+                ImGui::PopID();
             }
+            ImGui::EndChild();
         }
         ImGui::End();
     }
