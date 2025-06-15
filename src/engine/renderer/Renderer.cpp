@@ -240,11 +240,6 @@ namespace cologne
         bloom_pass();
         lit_pass();
         skybox_pass();
-        auto fbo = get_framebuffer_by_name("output");
-        fbo->blit_to_default_frame_buffer("color", 0, 0,
-                                          Engine::get_window()->get_width(), Engine::get_window()->get_height(),
-                                          GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        fbo->release();
         draw_fps();
         debug_voxel_pass();
         if (_light_debug_visuals)
@@ -254,8 +249,14 @@ namespace cologne
                 draw_sphere(light.position, light.radius, light.color);
             }
         }
+        auto fbo = get_framebuffer_by_name("output");
+        fbo->bind();
         debug_renderer->present();
         text_renderer->present();
+        fbo->blit_to_default_frame_buffer("color", 0, 0,
+                                          Engine::get_window()->get_width(), Engine::get_window()->get_height(),
+                                          GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        fbo->release();
         _render_items.clear();
         _skinned_render_items.clear();
         _lights.clear();

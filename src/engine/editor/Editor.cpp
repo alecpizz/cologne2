@@ -5,6 +5,7 @@
 #include "Editor.h"
 
 #include <engine/core/Engine.h>
+#include <engine/core/Input.h>
 #include <engine/scene/Entity.h>
 #include <engine/util/DebugScope.h>
 
@@ -72,8 +73,7 @@ namespace cologne
         if (active)
         {
             Engine::get_window()->show_mouse();
-        }
-        else
+        } else
         {
             Engine::get_window()->hide_mouse();
         }
@@ -465,6 +465,7 @@ namespace cologne
             }
             ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(Renderer::get_output_image())), viewport_size,
                          ImVec2(0, 1), ImVec2(1, 0));
+            static ImGuizmo::OPERATION current_operation = ImGuizmo::OPERATION::TRANSLATE;
             if (selected_entity)
             {
                 ImGuizmo::SetOrthographic(false);
@@ -472,6 +473,21 @@ namespace cologne
                 ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, viewport_size.x, viewport_size.y);
                 //
                 //
+                if (ImGui::IsWindowHovered() && !Input::mouse_down(Input::MouseButton::Right))
+                {
+                    if (Input::key_pressed(Input::Key::W))
+                    {
+                        current_operation = ImGuizmo::OPERATION::TRANSLATE;
+                    }
+                    else if (Input::key_pressed(Input::Key::E))
+                    {
+                        current_operation = ImGuizmo::OPERATION::ROTATE;
+                    }
+                    else if (Input::key_pressed(Input::Key::R))
+                    {
+                        current_operation = ImGuizmo::OPERATION::SCALE;
+                    }
+                }
                 auto camera = Engine::get_scene()->get_scene_camera();
                 auto camera_comp = camera.get_component<CameraComponent>();
                 auto transform = camera.get_component<TransformComponent>();
@@ -481,7 +497,7 @@ namespace cologne
                 //         auto& tr = Engine::get_scene()->_registry.get<TransformComponent>(entity);
                 glm::mat4 mat4 = tr.get_mat4();
                 ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(proj),
-                                     ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::WORLD, glm::value_ptr(mat4));
+                                     current_operation, ImGuizmo::LOCAL, glm::value_ptr(mat4));
                 //
                 glm::quat orientation;
                 glm::vec3 translation;
@@ -490,6 +506,8 @@ namespace cologne
                 glm::vec3 skew;
                 glm::decompose(mat4, scale, orientation, translation, skew, persp);
                 tr.position = translation;
+                tr.rotation = orientation;
+                tr.scale = scale;
             }
             ImGui::End();
             ImGui::End();
