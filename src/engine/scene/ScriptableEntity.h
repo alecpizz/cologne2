@@ -9,6 +9,7 @@ namespace cologne
         EDITOR_ONLY = 1,
         EDITOR_AND_GAME = 2,
     };
+
     class ScriptableEntity
     {
     public:

@@ -5,7 +5,7 @@
 
 namespace cologne
 {
-    class PlayerController : public ScriptableEntity
+    class PlayerController final : public ScriptableEntity
     {
     private:
         std::vector<std::string> _footstep_sounds;
@@ -13,8 +13,6 @@ namespace cologne
         bool _is_free_cam = false;
         bool _show_mouse = false;
         bool _allow_sliding = true;
-        float _jump_speed = 4.0f;
-        float _character_speed = 3.5f;
         bool _was_grounded;
         bool _grounded;
         glm::vec3 _desired_velocity;
@@ -113,7 +111,7 @@ namespace cologne
             }
 
             _bob_time += dt;
-            _bob_offset = glm::sin(_bob_time * 4.5f * _character_speed) * 0.05f;
+            _bob_offset = glm::sin(_bob_time * 4.5f * get_component<PlayerComponent>().character_speed) * 0.05f;
             if (_bob_offset < -0.04f && !_footstep_played && _grounded)
             {
                 auto idx = rand() % 4;
@@ -200,6 +198,7 @@ namespace cologne
             {
                 Audio::add_sound(footstep_sound.c_str());
             }
+
         }
 
         void on_destroy() override
@@ -247,7 +246,7 @@ namespace cologne
                 movement = glm::normalize(movement);
             }
 
-            _desired_velocity = movement * _character_speed;
+            _desired_velocity = movement * get_component<PlayerComponent>().character_speed;
 
             if (Physics::player_is_supported(get_component<PlayerComponent>().id))
             {
@@ -273,7 +272,7 @@ namespace cologne
                 new_velocity = ground_velocity;
                 if (jump && moving_towards_ground)
                 {
-                    new_velocity += _jump_speed * up;
+                    new_velocity += get_component<PlayerComponent>().jump_speed * up;
                 }
             } else
             {
@@ -297,6 +296,11 @@ namespace cologne
             get_component<PlayerComponent>().camera.get_component<TransformComponent>().position = camera_pos;
             get_component<TransformComponent>().position = player_pos;
             move_viewmodel(dt);
+        }
+
+        RuntimeMode get_runtime_mode() override
+        {
+            return RuntimeMode::GAME_ONLY;
         }
     };
 }

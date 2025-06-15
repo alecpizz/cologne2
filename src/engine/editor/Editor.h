@@ -45,8 +45,21 @@ namespace cologne
     private:
         Editor();
 
-        void build();
+        void build_main_window();
+
+        void build_main_menu_bar();
+
+        void build_asset_browser();
+
+        void build_scene_graph();
+
+        void build_properties_panel();
+
+        void build_game_view();
+
+        void build_settings_panel();
 
         static void build_transform_entry(TransformComponent &tr);
+        Entity _selected_entity = {};
     };
 }

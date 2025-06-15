@@ -76,6 +76,8 @@ namespace cologne
         uint32_t id = -1;
         Entity camera = {};
         Entity viewmodel = {};
+        float character_speed = 3.5f;
+        float jump_speed = 4.0f;
 
         void teleport_to_position(glm::vec3 pos)
         {
