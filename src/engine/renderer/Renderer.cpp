@@ -171,6 +171,24 @@ namespace cologne
         return get_framebuffer_by_name("output")->get_color_attachment_handle_by_name("color");
     }
 
+    uint32_t Renderer::read_fbo_pixel(const std::string &fbo_name, const std::string &attachment_name, uint32_t x,
+                                      uint32_t y)
+    {
+        auto fbo = get_framebuffer_by_name(fbo_name.c_str());
+        if (!fbo)
+        {
+            LOG_ERROR("No framebuffeer with name %s", fbo_name.c_str());
+            return -1;
+        }
+        fbo->bind();
+        glReadBuffer(fbo->get_color_attachment_slot_by_name(attachment_name.c_str()));
+        uint32_t pixelData;
+        glReadPixels(x, y, 1, 1, fbo->get_color_attachment_format_by_name(attachment_name.c_str()), GL_UNSIGNED_INT,
+                     &pixelData);
+        fbo->release();
+        return pixelData;
+    }
+
     Renderer::~Renderer()
     {
     }

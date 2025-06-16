@@ -4,6 +4,7 @@ layout (location = 1) out vec4 gNormal;
 layout (location = 2) out vec4 gAlbedo;
 layout (location = 3) out vec3 gORM;
 layout (location = 4) out vec3 gEmission;
+layout (location = 5) out uint gEntityId;
 
 in vec3 FragPos;
 in vec2 TexCoords;
@@ -18,10 +19,11 @@ layout (binding = 4) uniform sampler2D texture_normal;
 layout (binding = 5) uniform sampler2D texture_emission;
 uniform float metallic = -1.0f;
 uniform float roughness = -1.0f;
-
+uniform uint entity_id = 0;
 
 void main()
 {
+    gEntityId = entity_id;
     gPosition = vec4(FragPos, 1.0);
     vec3 N = texture2D(texture_normal, TexCoords).rgb;
 

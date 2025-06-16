@@ -241,7 +241,7 @@ namespace cologne
                 continue;
             }
             Model *model = AssetManager::get_model_by_index(m.id);
-            Engine::get_renderer()->submit_render_item(RenderItem(model, tr, m.gi_only));
+            Engine::get_renderer()->submit_render_item(RenderItem(model, tr, m.gi_only, static_cast<uint32_t>(entity)));
         }
 
         auto view2 = _registry.view<SkinnedModelComponent, TransformComponent, ActiveComponent>();
@@ -263,6 +263,7 @@ namespace cologne
             SkinnedModel *skinned_model = AssetManager::get_skinned_model_by_index(m.id);
             item.skinned_model = skinned_model;
             item.transform = tr;
+            item.id = static_cast<uint32_t>(entity);
             Engine::get_renderer()->submit_skinned_render_item(item);
         }
     }

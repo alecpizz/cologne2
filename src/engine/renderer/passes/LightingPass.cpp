@@ -52,6 +52,7 @@ namespace cologne
         glBindTextureUnit(5, _shadow_depth);
         glBindTextureUnit(6, _indirect_texture);
         glBindTextureUnit(7, _bloom_texture);
+        glBindTextureUnit(8, gbuffer_fbo->get_color_attachment_handle_by_name("entity_id"));
         render_quad();
         glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer_fbo->get_handle());
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, output_fbo->get_handle()); // write to output framebuffer

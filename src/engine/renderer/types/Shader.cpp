@@ -160,6 +160,19 @@ namespace cologne
         glUniform1f(_uniforms[name], value);
     }
 
+    void Shader::set_uint(const std::string &name, const uint32_t id)
+    {
+        if (!_linked)
+        {
+            return;
+        }
+        if (!_uniforms.contains(name))
+        {
+            _uniforms[name] = glGetUniformLocation(_program, name.c_str());
+        }
+        glUniform1ui(_uniforms[name], id);
+    }
+
     void Shader::compile(const std::string &comp_path)
     {
         _program = glCreateProgram();

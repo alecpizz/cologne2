@@ -217,6 +217,7 @@ namespace cologne
         if (_selected_entity)
         {
             ImGui::Text(_selected_entity.get_component<TagComponent>().tag.c_str());
+            ImGui::Text("Entity ID: %d", static_cast<uint32_t>(_selected_entity));
             ImGui::Separator();
             ImGui::Checkbox("Active", &_selected_entity.get_component<ActiveComponent>().active);
             ImGui::Text("Transform");
@@ -252,7 +253,7 @@ namespace cologne
             if (_selected_entity.has_component<ModelComponent>())
             {
                 ImGui::SeparatorText("Model Info");
-                auto& model = _selected_entity.get_component<ModelComponent>();
+                auto &model = _selected_entity.get_component<ModelComponent>();
                 int id = static_cast<int>(model.id);
                 ImGui::BeginDisabled(true);
                 if (ImGui::InputInt("Model ID", &id))
@@ -267,7 +268,7 @@ namespace cologne
             if (_selected_entity.has_component<SkinnedModelComponent>())
             {
                 ImGui::SeparatorText("Skinned Model Info");
-                auto& model = _selected_entity.get_component<SkinnedModelComponent>();
+                auto &model = _selected_entity.get_component<SkinnedModelComponent>();
                 int id = static_cast<int>(model.id);
                 ImGui::BeginDisabled(true);
                 if (ImGui::InputInt("Model ID", &id))
@@ -293,7 +294,7 @@ namespace cologne
             if (_selected_entity.has_component<CameraComponent>())
             {
                 ImGui::SeparatorText("Camera");
-                auto& camera = _selected_entity.get_component<CameraComponent>();
+                auto &camera = _selected_entity.get_component<CameraComponent>();
                 float degrees = glm::degrees(camera.fov_radians);
                 if (ImGui::SliderFloat("FOV", &degrees, 30.0f, 120.0f))
                 {
@@ -309,7 +310,7 @@ namespace cologne
 
             if (_selected_entity.has_component<PlayerComponent>())
             {
-                auto& player = _selected_entity.get_component<PlayerComponent>();
+                auto &player = _selected_entity.get_component<PlayerComponent>();
                 ImGui::SeparatorText("Player Settings");
                 ImGui::DragFloat("Character Speed", &player.character_speed);
                 ImGui::DragFloat("Jump Speed", &player.jump_speed);
@@ -338,6 +339,24 @@ namespace cologne
         {
             Engine::get_event_manager()->invoke_resize(viewport_size.x, viewport_size.y);
             prev_viewport_size = viewport_size;
+        }
+        ImVec2 mouse_pos = ImGui::GetMousePos();
+        ImVec2 viewport_pos = ImGui::GetCursorScreenPos();
+        ImVec2 mouse_pos_relative = ImVec2(mouse_pos.x - viewport_pos.x, mouse_pos.y - viewport_pos.y);
+        mouse_pos_relative.y = viewport_size.y - mouse_pos_relative.y;
+        if (mouse_pos_relative.x >= 0 && mouse_pos_relative.y >= 0 && mouse_pos_relative.x < viewport_size.x &&
+            mouse_pos_relative.y < viewport_size.y)
+        {
+            uint32_t x = static_cast<uint32_t>(mouse_pos_relative.x);
+            uint32_t y = static_cast<uint32_t>(mouse_pos_relative.y);
+            if (Input::mouse_pressed(Input::MouseButton::Left) && !ImGuizmo::IsOver())
+            {
+                uint32_t id = Renderer::read_fbo_pixel("gbuffer", "entity_id", x, y);
+                if (id != entt::null)
+                {
+                    _selected_entity = {static_cast<entt::entity>(id), Engine::get_scene()};
+                }
+            }
         }
         ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(Renderer::get_output_image())), viewport_size,
                      ImVec2(0, 1), ImVec2(1, 0));
@@ -532,7 +551,7 @@ namespace cologne
 
     void Editor::add_image_entry(const char *name, uint32_t value, const glm::vec2 &image_size)
     {
-        image_cmds.emplace_back(ImageCmd{value, name, image_size});
+        //image_cmds.emplace_back(ImageCmd{value, name, image_size});
     }
 
     void Editor::add_bool_entry(const char *name, bool &value)
