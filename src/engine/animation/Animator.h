@@ -18,6 +18,8 @@ namespace cologne
         void play_animation(size_t idx);
         void calculate_bone_transform( Node& node, glm::mat4 parent_transform);
         std::vector<glm::mat4>& get_bones();
+        Animation& get_current_animation() const;
+        float get_current_time() const;
     private:
         std::vector<glm::mat4> _bone_mats;
         Animation& _current_animation;

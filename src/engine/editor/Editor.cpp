@@ -4,6 +4,7 @@
 
 #include "Editor.h"
 
+#include <engine/animation/Animation.h>
 #include <engine/core/Engine.h>
 #include <engine/core/Input.h>
 #include <engine/scene/Entity.h>
@@ -191,7 +192,7 @@ namespace cologne
     void Editor::build_scene_graph()
     {
         ImGui::Begin("Scene Hiearchy");
-        if (ImGui::TreeNode("Scene"))
+        if (ImGui::TreeNodeEx("Scene", ImGuiTreeNodeFlags_DefaultOpen))
         {
             for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
             {
@@ -322,6 +323,16 @@ namespace cologne
                 ImGui::SeparatorText("Native script component");
                 ImGui::TextDisabled("how should these components work lol");
                 ImGui::Separator();
+            }
+
+            if (_selected_entity.has_component<AnimatorComponent>())
+            {
+                auto& anim = _selected_entity.get_component<AnimatorComponent>();
+                ImGui::SeparatorText("Animator");
+                float progress = anim.get_current_time();
+                float total = anim.get_current_animation().get_duration();
+                float percent = progress / total;
+                ImGui::SliderFloat("Animation Progress", &percent, 0.0f, 1.0f);
             }
         } else
         {
