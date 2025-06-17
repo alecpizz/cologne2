@@ -46,6 +46,10 @@ namespace cologne
         void set_float(const std::string &name, float value);
 
         void set_uint(const std::string &name, uint32_t id);
+        void set_ivec2(const std::string& name, std::vector<glm::ivec2> vecs);
+
+        void cleanup();
+
 
     private:
         void compile(const std::string &comp_path);

@@ -6,11 +6,10 @@
 
 namespace cologne
 {
-    class CameraController final : public ScriptableEntity
+    class EditorCameraController final : public ScriptableEntity
     {
     private:
         glm::vec2 _rotation = glm::vec2(0.0f);
-        glm::vec3 _position = glm::vec3(0.0f);
         bool _was_controlling = false;
 
     protected:
@@ -71,31 +70,32 @@ namespace cologne
             {
                 speed *= 2.5f;
             }
+            auto pos = get_component<TransformComponent>().position;
             if (cologne::Input::key_down(Input::Key::W))
             {
-                _position += fwd * dt * speed;
+                pos += fwd * dt * speed;
             }
             if (cologne::Input::key_down(Input::Key::S))
             {
-                _position -= fwd * dt * speed;
+                pos -= fwd * dt * speed;
             }
             if (cologne::Input::key_down(Input::Key::A))
             {
-                _position += right * dt * speed;
+                pos += right * dt * speed;
             }
             if (cologne::Input::key_down(Input::Key::D))
             {
-                _position -= right * dt * speed;
+                pos -= right * dt * speed;
             }
-            if (cologne::Input::key_down(Input::Key::Space))
+            if (cologne::Input::key_down(Input::Key::E))
             {
-                _position += up * dt * speed;
+                pos += up * dt * speed;
             }
-            if (cologne::Input::key_down(Input::Key::LeftCtrl))
+            if (cologne::Input::key_down(Input::Key::Q))
             {
-                _position -= up * dt * speed;
+                pos -= up * dt * speed;
             }
-            get_component<TransformComponent>().position = _position;
+            get_component<TransformComponent>().position = pos;
         }
 
         RuntimeMode get_runtime_mode() override

@@ -1,6 +1,9 @@
 #version 460 core
-out vec4 FragColor;
+layout (location = 0) out vec4 Position;
+layout (location = 2) out vec4 FragColor;
+layout (location = 4) out vec3 gEmission;
 in vec3 LocalPosition;
+in vec4 WorldPosition;
 
 layout (binding = 0) uniform samplerCube environment_map;
 
@@ -10,4 +13,6 @@ void main()
     envColor = envColor / (envColor + vec3(1.0));
     envColor = pow(envColor, vec3(1.0 / 2.2));
     FragColor = vec4(envColor, 1.0);
+    Position = WorldPosition;
+    gEmission = vec3(0.0f);
 }

@@ -5,6 +5,7 @@
 #include "Editor.h"
 
 #include <engine/animation/Animation.h>
+#include <engine/asset_manager/AssetManager.h>
 #include <engine/core/Engine.h>
 #include <engine/core/Input.h>
 #include <engine/scene/Entity.h>
@@ -73,8 +74,10 @@ namespace cologne
         //do something with edit mode here
         if (active)
         {
+            Engine::get_scene()->copy_scene_camera_to_primary_camera();
             Engine::get_window()->show_mouse();
-        } else
+        }
+        else
         {
             Engine::get_window()->hide_mouse();
         }
@@ -255,6 +258,10 @@ namespace cologne
             {
                 ImGui::SeparatorText("Model Info");
                 auto &model = _selected_entity.get_component<ModelComponent>();
+                Engine::get_renderer()->submit_outline_render_item(RenderItem(
+                    AssetManager::get_model_by_index(model.id), _selected_entity.get_component<TransformComponent>(),
+                    false,
+                    static_cast<uint32_t>(_selected_entity)));
                 int id = static_cast<int>(model.id);
                 ImGui::BeginDisabled(true);
                 if (ImGui::InputInt("Model ID", &id))
@@ -270,6 +277,15 @@ namespace cologne
             {
                 ImGui::SeparatorText("Skinned Model Info");
                 auto &model = _selected_entity.get_component<SkinnedModelComponent>();
+                SkinnedRenderItem item;
+                item.skinned_model = AssetManager::get_skinned_model_by_index(model.id);
+                item.transform = _selected_entity.get_component<TransformComponent>();
+                if (_selected_entity.has_component<AnimatorComponent>())
+                {
+                    auto& anim = _selected_entity.get_component<AnimatorComponent>();
+                    item.bones = anim.get_bones();
+                }
+                Engine::get_renderer()->submit_skinned_outline_render_item(item);
                 int id = static_cast<int>(model.id);
                 ImGui::BeginDisabled(true);
                 if (ImGui::InputInt("Model ID", &id))
@@ -327,14 +343,15 @@ namespace cologne
 
             if (_selected_entity.has_component<AnimatorComponent>())
             {
-                auto& anim = _selected_entity.get_component<AnimatorComponent>();
+                auto &anim = _selected_entity.get_component<AnimatorComponent>();
                 ImGui::SeparatorText("Animator");
                 float progress = anim.get_current_time();
                 float total = anim.get_current_animation().get_duration();
                 float percent = progress / total;
                 ImGui::SliderFloat("Animation Progress", &percent, 0.0f, 1.0f);
             }
-        } else
+        }
+        else
         {
             ImGui::Text("Select an entity");
         }
@@ -384,10 +401,12 @@ namespace cologne
                 if (Input::key_pressed(Input::Key::W))
                 {
                     current_operation = ImGuizmo::OPERATION::TRANSLATE;
-                } else if (Input::key_pressed(Input::Key::E))
+                }
+                else if (Input::key_pressed(Input::Key::E))
                 {
                     current_operation = ImGuizmo::OPERATION::ROTATE;
-                } else if (Input::key_pressed(Input::Key::R))
+                }
+                else if (Input::key_pressed(Input::Key::R))
                 {
                     current_operation = ImGuizmo::OPERATION::SCALE;
                 }
@@ -480,14 +499,22 @@ namespace cologne
 
         if (ImGui::CollapsingHeader("Images"))
         {
-            ImGui::BeginChild("Images", ImVec2(0, 800));
+            ImGui::BeginChild("Images");
             for (size_t i = 0; i < image_cmds.size(); i++)
             {
                 ImGui::PushID(i);
                 ImGui::Text(image_cmds[i].name.c_str());
+                float available_width = ImGui::GetContentRegionAvail().x;
+                ImVec2 original_size = ImVec2(image_cmds[i].image_size.x, image_cmds[i].image_size.y);
+                ImVec2 new_size = original_size;
+                if (original_size.x > 0)
+                {
+                    float aspect_ratio = original_size.y / original_size.x;
+                    new_size.x = available_width;
+                    new_size.y = available_width * aspect_ratio;
+                }
                 ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(image_cmds[i].id)),
-                             ImVec2(image_cmds[i].image_size.x,
-                                    image_cmds[i].image_size.y),
+                             new_size,
                              ImVec2(0, 1), ImVec2(1, 0));
                 ImGui::PopID();
             }
@@ -525,7 +552,8 @@ namespace cologne
             build_game_view();
             ImGui::End();
             ImGui::PopStyleColor();
-        } else
+        }
+        else
         {
             // ImGuiStyle &style = ImGui::GetStyle();
             // style.Colors[ImGuiCol_WindowBg].w = 0.0f;
@@ -562,7 +590,16 @@ namespace cologne
 
     void Editor::add_image_entry(const char *name, uint32_t value, const glm::vec2 &image_size)
     {
-        //image_cmds.emplace_back(ImageCmd{value, name, image_size});
+        for (auto &image_cmd: image_cmds)
+        {
+            if (image_cmd.name == name)
+            {
+                image_cmd.id = value;
+                image_cmd.image_size = image_size;
+                return;
+            }
+        }
+        image_cmds.emplace_back(ImageCmd{value, name, image_size});
     }
 
     void Editor::add_bool_entry(const char *name, bool &value)

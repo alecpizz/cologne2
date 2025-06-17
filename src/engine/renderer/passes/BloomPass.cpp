@@ -79,7 +79,7 @@ namespace cologne
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
-        // Engine::get_debug_ui()->add_image_entry("Bloom result", mips[0].texture, mips[0].size);
+        Engine::get_debug_ui()->add_image_entry("Bloom result", mips[0].texture, mips[0].size);
     }
 
     void Renderer::bloom_pass()

@@ -96,7 +96,7 @@ namespace cologne
     void Renderer::skybox_pass()
     {
         OpenGLDebugScope scope("Renderer::skybox_pass");
-        auto fbo = get_framebuffer_by_name("output");
+        auto fbo = get_framebuffer_by_name("gbuffer");
         fbo->bind();
         glDisable(GL_CULL_FACE);
         glDisable(GL_BLEND);

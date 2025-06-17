@@ -43,6 +43,8 @@ namespace cologne
         Entity get_primary_camera();
         Entity get_scene_camera();
 
+        void copy_scene_camera_to_primary_camera();
+
     private:
         //THIS IS fucking dumb
         AABB _scene_bounds;

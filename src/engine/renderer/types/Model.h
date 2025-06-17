@@ -4,7 +4,6 @@
 
 #include "Texture.h"
 #include "Mesh.h"
-#include "engine/Transform.h"
 #include "Material.h"
 #include "engine/AABB.h"
 
@@ -19,8 +18,6 @@ namespace cologne
         explicit Model(const ModelData& data);
 
         ~Model();
-
-        Transform &get_transform();
 
         AABB get_aabb() const;
 
@@ -52,7 +49,6 @@ namespace cologne
         bool _cast_shadows = true;
         bool _gi_only = false;
         std::string _name;
-        Transform _transform;
         AABB _bounds;
     };
 }

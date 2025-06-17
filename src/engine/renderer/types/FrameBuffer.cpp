@@ -223,7 +223,7 @@ namespace cologne
 
     void FrameBuffer::bind_depth_attachment(const FrameBuffer &src_frame_buffer)
     {
-        glNamedFramebufferTexture(_handle, GL_DEPTH_ATTACHMENT, src_frame_buffer._handle, 0);
+        glNamedFramebufferTexture(_handle, GL_DEPTH_ATTACHMENT, src_frame_buffer._depth_attachment.handle, 0);
     }
 
     void FrameBuffer::bind()

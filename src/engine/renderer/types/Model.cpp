@@ -27,10 +27,6 @@ namespace cologne
         _materials.clear();
     }
 
-    Transform &Model::get_transform()
-    {
-        return _transform;
-    }
 
     AABB Model::get_aabb() const
     {

@@ -67,14 +67,16 @@ namespace cologne
         if (minZ < 0)
         {
             minZ *= zMulti;
-        } else
+        }
+        else
         {
             minZ /= zMulti;
         }
         if (maxZ < 0)
         {
             maxZ /= zMulti;
-        } else
+        }
+        else
         {
             maxZ *= zMulti;
         }
@@ -91,11 +93,13 @@ namespace cologne
             if (i == 0)
             {
                 ret.push_back(get_light_space_matrix(shadow_near, shadowCascadeLevels[i], light_dir));
-            } else if (i < shadowCascadeLevels.size())
+            }
+            else if (i < shadowCascadeLevels.size())
             {
                 ret.push_back(get_light_space_matrix(shadowCascadeLevels[i - 1],
                                                      shadowCascadeLevels[i], light_dir));
-            } else
+            }
+            else
             {
                 ret.push_back(get_light_space_matrix(shadowCascadeLevels[i - 1], shadow_far, light_dir));
             }
@@ -315,15 +319,15 @@ namespace cologne
             if (!item.bones.empty())
             {
                 shader->set_mat4("bone_matrices", item.bones);
-            } else
+            }
+            else
             {
                 static std::vector<glm::mat4> empty_bones(200, glm::mat4(1.0f));
                 shader->set_mat4("bone_matrices", empty_bones);
             }
 
-            for (size_t j = 0; j < item.skinned_model->get_num_meshes(); j++)
+            for (auto &mesh: item.skinned_model->get_meshes())
             {
-                auto &mesh = item.skinned_model->get_meshes()[j];
                 Material &mat = item.skinned_model->get_materials()[mesh.get_material_index()];
                 mat.albedo.bind(ALBEDO_INDEX);
                 mesh.draw();
@@ -415,14 +419,14 @@ namespace cologne
                 {
                     shader->set_bool("is_skinned", true);
                     shader->set_mat4("bone_matrices", item.bones);
-                } else
+                }
+                else
                 {
                     shader->set_bool("is_skinned", false);
                 }
 
-                for (size_t j = 0; j < item.skinned_model->get_num_meshes(); j++)
+                for (auto &mesh: item.skinned_model->get_meshes())
                 {
-                    auto &mesh = item.skinned_model->get_meshes()[j];
                     Material &mat = item.skinned_model->get_materials()[mesh.get_material_index()];
                     mat.albedo.bind(ALBEDO_INDEX);
                     mesh.draw(6);

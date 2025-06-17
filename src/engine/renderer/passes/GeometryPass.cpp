@@ -117,14 +117,14 @@ namespace cologne
             if (!bones.empty())
             {
                 shader->set_mat4("bone_matrices", bones);
-            } else
+            }
+            else
             {
                 static std::vector<glm::mat4> empty_bones(200, glm::mat4(1.0f));
                 shader->set_mat4("bone_matrices", empty_bones);
             }
-            for (size_t j = 0; j < skinned_model->get_num_meshes(); j++)
+            for (auto& mesh : skinned_model->get_meshes())
             {
-                auto &mesh = skinned_model->get_meshes()[j];
                 Material &mat = skinned_model->get_materials()[mesh.get_material_index()];
                 mat.bind_all();
                 if (mat.metallic.get_handle() == 0)

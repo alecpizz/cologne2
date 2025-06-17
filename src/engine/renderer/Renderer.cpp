@@ -36,6 +36,10 @@ namespace cologne
 
     void Renderer::init_shaders()
     {
+        for (auto& shader : shaders)
+        {
+            shader.second.cleanup();
+        }
         shaders.clear();
         shaders["lit"] = Shader(RESOURCES_PATH "shaders/lit.vert",
                                 RESOURCES_PATH "shaders/lit.frag");
@@ -71,6 +75,7 @@ namespace cologne
                                             RESOURCES_PATH "shaders/particle_render.frag");
         shaders["particle_sim"] = Shader(RESOURCES_PATH "shaders/particle_sim.comp");
 
+        //bloom
         shaders["downsample"] = Shader(RESOURCES_PATH "shaders/quad.vert",
                                        RESOURCES_PATH "shaders/bloom/downsample.frag");
         shaders["upsample"] = Shader(RESOURCES_PATH "shaders/quad.vert",
@@ -78,6 +83,12 @@ namespace cologne
 
         shaders["point_shadow"] = Shader(RESOURCES_PATH "shaders/shadows/point_shadow.vert",
                                          RESOURCES_PATH "shaders/shadows/point_shadow.frag");
+        //outline
+        shaders["outline_mask"] = Shader(RESOURCES_PATH "shaders/outline/outline_mask.vert",
+                                         RESOURCES_PATH "shaders/outline/outline_mask.frag");
+        shaders["outline"] = Shader(RESOURCES_PATH "shaders/outline/outline.vert",
+                                    RESOURCES_PATH "shaders/outline/outline.frag");
+        shaders["outline_composite"] = Shader(RESOURCES_PATH "shaders/outline/outline_composite.comp");
     }
 
     void Renderer::init_ssbos()
@@ -110,6 +121,7 @@ namespace cologne
         framebuffers["output"] = FrameBuffer();
         framebuffers["dir_shadow"] = FrameBuffer();
         framebuffers["output"] = FrameBuffer();
+        framebuffers["outline"] = FrameBuffer();
     }
 
     void Renderer::submit_light(Light light)
@@ -125,6 +137,16 @@ namespace cologne
     void Renderer::submit_skinned_render_item(SkinnedRenderItem item)
     {
         _skinned_render_items.emplace_back(item);
+    }
+
+    void Renderer::submit_outline_render_item(RenderItem item)
+    {
+        _outline_render_items.emplace_back(item);
+    }
+
+    void Renderer::submit_skinned_outline_render_item(SkinnedRenderItem item)
+    {
+        _outline_skinned_render_items.emplace_back(item);
     }
 
     FrameBuffer *Renderer::get_framebuffer_by_name(const char *name)
@@ -254,19 +276,13 @@ namespace cologne
         update_ssbos();
         voxelize_scene();
         geometry_pass();
+        skybox_pass();
         indirect_pass();
         bloom_pass();
         lit_pass();
-        skybox_pass();
         draw_fps();
         debug_voxel_pass();
-        if (_light_debug_visuals)
-        {
-            for (auto &light: _lights)
-            {
-                draw_sphere(light.position, light.radius, light.color);
-            }
-        }
+        outline_pass();
         auto fbo = get_framebuffer_by_name("output");
         fbo->bind();
         debug_renderer->present();
@@ -278,6 +294,8 @@ namespace cologne
         _render_items.clear();
         _skinned_render_items.clear();
         _lights.clear();
+        _outline_render_items.clear();
+        _outline_skinned_render_items.clear();
     }
 
     void Renderer::window_resized(uint32_t width, uint32_t height)
@@ -289,6 +307,7 @@ namespace cologne
         get_framebuffer_by_name("output")->resize(width, height);
         get_framebuffer_by_name("voxel_back")->resize(width, height);
         get_framebuffer_by_name("voxel_front")->resize(width, height);
+        get_framebuffer_by_name("outline")->resize(width, height);
         // render_scene(*Engine::get_scene());
     }
 
@@ -350,6 +369,7 @@ namespace cologne
         init_voxels();
         init_indirect();
         init_gbuffer();
+        init_outline();
         glDisable(GL_CULL_FACE);
         init_skybox(RESOURCES_PATH "HDR_blue_local_star.hdr");
         init_radiance();

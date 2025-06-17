@@ -9,7 +9,7 @@
 #include <engine/core/Engine.h>
 #include <engine/physics/Physics.h>
 #include <engine/util/FileUtil.h>
-#include <engine/scripts/CameraController.h>
+#include <engine/scripts/EditorCameraController.h>
 #include <engine/scripts/PlayerController.h>
 #include <engine/util/DebugScope.h>
 #include <engine/util/Frustum.h>
@@ -54,7 +54,7 @@ namespace cologne
         revolver.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("Rig|Rig|MK_ReloadFull"));
 
         auto camera = create_entity("camera");
-        auto& c = camera.add_component<CameraComponent>();
+        auto &c = camera.add_component<CameraComponent>();
         c.primary = true;
 
         Entity viewModel = create_entity("viewmodel");
@@ -109,9 +109,9 @@ namespace cologne
         point_light2.get_component<TransformComponent>().position = glm::vec3(6.0f, 3.4, 5.0f);
 
         Entity scene_camera = create_entity("Scene Camera");
-        auto& cam = scene_camera.add_component<CameraComponent>();
+        auto &cam = scene_camera.add_component<CameraComponent>();
         cam.primary = false;
-        scene_camera.add_component<NativeScriptComponent>().bind<CameraController>();
+        scene_camera.add_component<NativeScriptComponent>().bind<EditorCameraController>();
 
 
         re_calculate_bounds();
@@ -312,7 +312,7 @@ namespace cologne
 
     Entity Scene::get_primary_camera()
     {
-        for (auto entity : _registry.view<CameraComponent>())
+        for (auto entity: _registry.view<CameraComponent>())
         {
             Entity e = {entity, this};
             if (e.get_component<CameraComponent>().primary)
@@ -325,7 +325,7 @@ namespace cologne
 
     Entity Scene::get_scene_camera()
     {
-        for (auto entity : _registry.view<CameraComponent>())
+        for (auto entity: _registry.view<CameraComponent>())
         {
             Entity e = {entity, this};
             if (!e.get_component<CameraComponent>().primary)
@@ -334,5 +334,13 @@ namespace cologne
             }
         }
         return {};
+    }
+
+    void Scene::copy_scene_camera_to_primary_camera()
+    {
+        Entity scene_cam = get_scene_camera();
+        Entity game_cam = get_primary_camera();
+        if (!scene_cam || !game_cam) return;
+        scene_cam.get_component<TransformComponent>().position = game_cam.get_component<TransformComponent>().position;
     }
 }

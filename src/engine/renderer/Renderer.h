@@ -45,6 +45,8 @@ namespace cologne
 
         void submit_render_item(RenderItem item);
         void submit_skinned_render_item(SkinnedRenderItem item);
+        void submit_outline_render_item(RenderItem item);
+        void submit_skinned_outline_render_item(SkinnedRenderItem item);
 
         void reload_shaders();
 
@@ -78,7 +80,7 @@ namespace cologne
 
         void render_cube(int32_t count = 1);
 
-        void render_quad();
+        void render_quad(int32_t count = 1);
 
         void init_shadow();
 
@@ -126,12 +128,18 @@ namespace cologne
 
         void init_brdf();
 
+        void init_outline();
+
+        void outline_pass();
+
         static FrameBuffer* get_framebuffer_by_name(const char* name);
         SSBO* get_ssbo_by_name(const char* name);
 
         std::vector<Texture> _shadow_maps;
         std::vector<RenderItem> _render_items;
         std::vector<SkinnedRenderItem> _skinned_render_items;
+        std::vector<RenderItem> _outline_render_items;
+        std::vector<SkinnedRenderItem> _outline_skinned_render_items;
         std::vector<Light> _lights;
 
         //Textures
