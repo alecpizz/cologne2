@@ -19,11 +19,6 @@ namespace cologne
         auto width = Engine::get_window()->get_width();
         auto height = Engine::get_window()->get_height();
         auto fbo = get_framebuffer_by_name("gbuffer");
-        if (fbo->is_valid())
-        {
-            fbo->resize(width, height);
-            return;
-        }
         fbo->create("gbuffer", width, height);
         fbo->bind();
         fbo->create_attachment("position", GL_RGBA16F, GL_NEAREST, GL_NEAREST);

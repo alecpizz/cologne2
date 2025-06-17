@@ -61,6 +61,7 @@ namespace cologne
     std::vector<BoolCmd> bool_cmds;
     std::vector<ButtonCmd> button_cmds;
     bool active = false;
+    bool was_game_mode = true;
     ImVec2 prev_viewport_size = ImVec2(1280, 720);
 
     bool Editor::in_edit_mode()
@@ -74,6 +75,7 @@ namespace cologne
         //do something with edit mode here
         if (active)
         {
+            was_game_mode = true;
             Engine::get_scene()->copy_scene_camera_to_primary_camera();
             Engine::get_window()->show_mouse();
         }
@@ -96,6 +98,7 @@ namespace cologne
     Editor::Editor()
     {
         active = false;
+        was_game_mode = true;
         cologne::DebugScope scope(__PRETTY_FUNCTION__);
         ImGui::CreateContext();
         imguiThemes::green();
@@ -282,7 +285,7 @@ namespace cologne
                 item.transform = _selected_entity.get_component<TransformComponent>();
                 if (_selected_entity.has_component<AnimatorComponent>())
                 {
-                    auto& anim = _selected_entity.get_component<AnimatorComponent>();
+                    auto &anim = _selected_entity.get_component<AnimatorComponent>();
                     item.bones = anim.get_bones();
                 }
                 Engine::get_renderer()->submit_skinned_outline_render_item(item);
@@ -363,9 +366,19 @@ namespace cologne
         ImGui::Begin("Game View");
         ImGui::Text("Game rendered here");
         ImVec2 viewport_size = ImGui::GetContentRegionAvail();
-        if (prev_viewport_size.x != viewport_size.x || prev_viewport_size.y != viewport_size.y)
+        if (static_cast<int>(prev_viewport_size.x) != static_cast<int>(viewport_size.x) || static_cast<int>(
+                prev_viewport_size.y) != static_cast<int>(viewport_size.y))
         {
-            Engine::get_event_manager()->invoke_resize(viewport_size.x, viewport_size.y);
+            if (was_game_mode)
+            {
+                was_game_mode = false;
+            }
+            else
+            {
+                LOG_INFO("VIEWPORT CHANGED (%f %f) (%f %f)", prev_viewport_size.x, prev_viewport_size.y,
+                         viewport_size.x, viewport_size.y);
+                Engine::get_event_manager()->invoke_resize(viewport_size.x, viewport_size.y);
+            }
             prev_viewport_size = viewport_size;
         }
         ImVec2 mouse_pos = ImGui::GetMousePos();

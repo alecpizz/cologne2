@@ -18,7 +18,6 @@ out vec4 WorldPosition;
 
 void main()
 {
-    //    mat4 rotView = mat4(mat3(view));
     LocalPosition = position;
     mat4 rotView = mat4(mat3(view));
     vec4 clipPos = projection * rotView * vec4(position, 1.0);

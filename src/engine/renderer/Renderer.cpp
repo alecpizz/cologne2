@@ -301,9 +301,9 @@ namespace cologne
     void Renderer::window_resized(uint32_t width, uint32_t height)
     {
         //regen framebuffers here
-        init_gbuffer();
         init_bloom();
         init_indirect(width, height);
+        get_framebuffer_by_name("gbuffer")->resize(width, height);
         get_framebuffer_by_name("output")->resize(width, height);
         get_framebuffer_by_name("voxel_back")->resize(width, height);
         get_framebuffer_by_name("voxel_front")->resize(width, height);
