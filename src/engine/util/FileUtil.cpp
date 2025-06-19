@@ -310,7 +310,7 @@ namespace cologne::FileUtil
 
         for (size_t i = 0; i < scene->mNumAnimations; i++)
         {
-            result_data.animations.emplace_back(scene->mAnimations[i], scene,
+            result_data.animations.emplace_back(result_data.name, scene->mAnimations[i], scene,
                 result_data.bone_map, result_data.bone_count);
         }
         importer.FreeScene();

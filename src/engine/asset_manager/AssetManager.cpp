@@ -35,6 +35,7 @@ namespace cologne::AssetManager
         {
             animation_index_map[animations[i].get_name()] = i;
         }
+        print_all();
     }
 
     void find_file_paths()

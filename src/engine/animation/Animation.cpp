@@ -10,10 +10,10 @@
 //
 namespace cologne
 {
-    Animation::Animation(const aiAnimation *animation, const aiScene *scene,
+    Animation::Animation(const std::string& base_name, const aiAnimation *animation, const aiScene *scene,
                          std::unordered_map<std::string, BoneInfo> &bone_map, int &bone_count)
     {
-        _name = animation->mName.C_Str();
+        _name = base_name + "_" + animation->mName.C_Str();
         _duration = static_cast<float>(animation->mDuration);
         _ticks_per_second = static_cast<int>(animation->mTicksPerSecond);
         read_bone_hierarchy(_root_node, scene->mRootNode);
