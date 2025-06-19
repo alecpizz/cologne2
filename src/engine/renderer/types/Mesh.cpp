@@ -1,5 +1,7 @@
 ﻿#include "Mesh.h"
 
+#include <engine/Types.h>
+
 
 namespace cologne
 {
@@ -42,6 +44,12 @@ namespace cologne
 
     }
 
+    Mesh::Mesh(const MeshData &mesh_data) :
+        Mesh(mesh_data.vertices, mesh_data.indices, mesh_data.material_index, mesh_data.name)
+    {
+        _inverse_bind_transform = mesh_data.inverse_bind_pose;
+    }
+
     Mesh::~Mesh()
     {
         // glDeleteBuffers(1, &_vbo);
@@ -79,5 +87,10 @@ namespace cologne
     std::string Mesh::get_name() const
     {
         return _name;
+    }
+
+    glm::mat4 Mesh::get_inverse_bind_pose() const
+    {
+        return _inverse_bind_transform;
     }
 }

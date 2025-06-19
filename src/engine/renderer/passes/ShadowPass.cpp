@@ -296,9 +296,9 @@ namespace cologne
             {
                 continue;
             }
-            shader->set_mat4("model", item.transform.get_mat4());
             for (auto &mesh: item.model->get_meshes())
             {
+                shader->set_mat4("model",  item.transform.get_mat4() * mesh.get_inverse_bind_pose());
                 Material mat = item.model->get_materials()[mesh.get_material_index()];
                 mat.albedo.bind(ALBEDO_INDEX);
                 mesh.draw();

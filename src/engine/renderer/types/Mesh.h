@@ -1,14 +1,17 @@
 ﻿#pragma once
-#include "Texture.h"
+
 #include "Vertex.h"
 #include "Mesh.h"
 
 namespace cologne
 {
+    struct MeshData;
+
     class Mesh
     {
     public:
         Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t material, const std::string& name);
+        Mesh(const MeshData& mesh_data);
         Mesh(const Mesh& mesh) = default;
         ~Mesh();
 
@@ -19,6 +22,7 @@ namespace cologne
         std::vector<Vertex> get_vertices() const;
         std::vector<uint32_t> get_indices() const;
         std::string get_name() const;
+        glm::mat4 get_inverse_bind_pose() const;
 
     private:
         std::vector<Vertex> _vertices;
@@ -29,5 +33,6 @@ namespace cologne
         uint32_t _vbo = 0;
         uint32_t _ibo = 0;
         uint32_t _vao = 0;
+        glm::mat4 _inverse_bind_transform = glm::mat4(1.0f);
     };
 }

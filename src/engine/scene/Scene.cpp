@@ -13,6 +13,7 @@
 #include <engine/scripts/PlayerController.h>
 #include <engine/util/DebugScope.h>
 #include <engine/util/Frustum.h>
+#include <engine/util/Util.h>
 
 #include "Components.h"
 #include "Entity.h"
@@ -27,7 +28,6 @@ namespace cologne
         DebugScope scope(__PRETTY_FUNCTION__);
         //Create entities
         Entity sponza = create_entity("sponza");
-        sponza.get_component<TransformComponent>().scale = glm::vec3(0.01f);
         sponza.add_component<ModelComponent>(AssetManager::get_model_index_by_name("sponza2"), false);
 
         auto model = AssetManager::get_model_by_name("sponza2");
@@ -35,8 +35,8 @@ namespace cologne
         for (auto &mesh: model->get_meshes())
         {
             Entity collider = create_entity(mesh.get_name() + "_Collider");
-            collider.get_component<TransformComponent>() = tr;
-            uint32_t body_id = Physics::create_static_mesh_collider(collider, tr, mesh.get_vertices(),
+            collider.get_component<TransformComponent>() = TransformComponent(mesh.get_inverse_bind_pose());
+            uint32_t body_id = Physics::create_static_mesh_collider(collider, collider.get_component<TransformComponent>(), mesh.get_vertices(),
                                                                     mesh.get_indices());
             collider.add_component<StaticColliderComponent>(body_id);
         }

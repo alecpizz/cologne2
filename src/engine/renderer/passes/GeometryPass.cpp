@@ -76,7 +76,6 @@ namespace cologne
             {
                 continue;
             }
-            shader->set_mat4("model", tr.get_mat4());
             shader->set_uint("entity_id", id);
             for (auto &mesh: model->get_meshes())
             {
@@ -84,6 +83,7 @@ namespace cologne
                 shader->set_float("metallic", mat.metallic_override);
                 shader->set_float("roughness", mat.roughness_override);
                 mat.bind_all();
+                shader->set_mat4("model",  tr.get_mat4() * mesh.get_inverse_bind_pose());
                 mesh.draw();
 
 

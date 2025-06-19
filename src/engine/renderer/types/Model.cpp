@@ -13,7 +13,7 @@ namespace cologne
     {
         for (auto& mesh : data.meshes)
         {
-            _meshes.emplace_back(mesh.vertices, mesh.indices, mesh.material_index, mesh.name);
+            _meshes.emplace_back(mesh);
         }
         _materials = data.materials;
         _bounds = AABB(data.aabb_min, data.aabb_max);

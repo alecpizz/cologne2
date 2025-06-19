@@ -470,8 +470,14 @@ namespace cologne::Physics
         const auto shape = body_interface.GetShape(id);
         const auto new_shape = shape->ScaleShape(glm_vec3_to_jph_vec3(transform.scale)).Get();
         body_interface.SetShape(id, new_shape, true, EActivation::DontActivate);
+        auto quat = glm_quat_to_jph_quat(transform.rotation);
+        if (!quat.IsNormalized())
+        {
+            LOG_INFO("Quat isn't normalized!");
+            quat = quat.sIdentity();
+        }
         body_interface.SetPositionAndRotation(id, glm_vec3_to_jph_vec3(transform.position),
-                                              glm_quat_to_jph_quat(transform.rotation),
+                                              quat ,
                                               EActivation::DontActivate);
         LOG_INFO("Created collider with id %d", id);
         colliders_static.push_back(id);

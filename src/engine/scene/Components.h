@@ -1,5 +1,6 @@
 #pragma once
 #include <engine/physics/Physics.h>
+#include <engine/util/Util.h>
 
 #include "ScriptableEntity.h"
 
@@ -10,6 +11,23 @@ namespace cologne
         glm::vec3 position = glm::vec3(0.0f);
         glm::quat rotation = glm::identity<glm::quat>();
         glm::vec3 scale = glm::vec3(1.0f);
+
+        TransformComponent() = default;
+        TransformComponent(glm::vec3 pos, glm::quat rot, glm::vec3 sc)
+        {
+            position = pos;
+            rotation = rot;
+            scale = sc;
+        }
+        TransformComponent(glm::mat4 mat)
+        {
+            glm::vec3 pos, s;
+            glm::quat rot;
+            Util::decompose_mat4(mat, pos, rot, s);
+            position = pos;
+            rotation = rot;
+            scale = s;
+        }
 
         glm::mat4 get_mat4() const
         {

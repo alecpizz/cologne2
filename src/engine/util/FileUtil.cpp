@@ -14,7 +14,7 @@
 
 namespace cologne::FileUtil
 {
-    void process_node(std::vector<MeshData> &meshes, const aiNode *node, const aiScene *scene);
+    void process_node(std::vector<MeshData> &meshes, const aiNode *node, const aiScene *scene, const aiMatrix4x4& parentTransform);
 
     void process_skinned_node(std::vector<SkinnedMeshData> &meshes, std::unordered_map<std::string, BoneInfo> &bone_map,
                               int &bone_counter, const aiNode *node, const aiScene *scene);
@@ -36,20 +36,22 @@ namespace cologne::FileUtil
 
     void process_materials(std::vector<Material> &mats, const aiScene *scene);
 
-    void process_node(std::vector<MeshData> &meshes, const aiNode *node, const aiScene *scene)
+    void process_node(std::vector<MeshData> &meshes, const aiNode *node, const aiScene *scene, const aiMatrix4x4& parentTransform)
     {
+        auto world_transform = parentTransform * node->mTransformation;
         for (unsigned int i = 0; i < node->mNumMeshes; i++)
         {
             // the node object only contains indices to index the actual objects in the scene.
             // the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
             aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-
-            meshes.push_back(process_mesh(mesh));
+            auto m = process_mesh(mesh);
+            m.inverse_bind_pose = Util::ai_mat4_to_glm_mat4(world_transform);
+            meshes.push_back(m);
         }
         // after we've processed all of the meshes (if any) we then recursively process each of the children nodes
         for (unsigned int i = 0; i < node->mNumChildren; i++)
         {
-            process_node(meshes, node->mChildren[i], scene);
+            process_node(meshes, node->mChildren[i], scene, world_transform);
         }
     }
 
@@ -275,10 +277,15 @@ namespace cologne::FileUtil
             return {};
         }
         ModelData result_data;
-        process_node(result_data.meshes, scene->mRootNode, scene);
+        process_node(result_data.meshes, scene->mRootNode, scene, {});
         process_materials(result_data.materials, scene);
         for (auto &mesh: result_data.meshes)
         {
+            glm::vec3 pos;
+            glm::quat rot;
+            glm::vec3 scale;
+            Util::decompose_mat4(mesh.inverse_bind_pose, pos, rot, scale);
+            LOG_INFO("Mesh decomposed to: %f %f %f", pos.x, pos.y, pos.z);
             result_data.aabb_max = glm::max(result_data.aabb_max, mesh.aabb_max);
             result_data.aabb_min = glm::min(result_data.aabb_min, mesh.aabb_min);
         }
