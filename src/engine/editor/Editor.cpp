@@ -324,14 +324,14 @@ namespace cologne
 
             if (_selected_entity.has_component<ModelComponent>())
             {
+                auto &model = _selected_entity.get_component<ModelComponent>();
+                Engine::get_renderer()->submit_outline_render_item(RenderItem(
+                    AssetManager::get_model_by_index(model.id),
+                    _selected_entity.get_component<TransformComponent>(),
+                    false,
+                    static_cast<uint32_t>(_selected_entity)));
                 if (ImGui::TreeNode("Model Info"))
                 {
-                    auto &model = _selected_entity.get_component<ModelComponent>();
-                    Engine::get_renderer()->submit_outline_render_item(RenderItem(
-                        AssetManager::get_model_by_index(model.id),
-                        _selected_entity.get_component<TransformComponent>(),
-                        false,
-                        static_cast<uint32_t>(_selected_entity)));
                     int id = static_cast<int>(model.id);
                     if (ImGui::InputInt("Model ID", &id))
                     {
@@ -349,18 +349,18 @@ namespace cologne
 
             if (_selected_entity.has_component<SkinnedModelComponent>())
             {
+                auto &model = _selected_entity.get_component<SkinnedModelComponent>();
+                SkinnedRenderItem item;
+                item.skinned_model = AssetManager::get_skinned_model_by_index(model.id);
+                item.transform = _selected_entity.get_component<TransformComponent>();
+                if (_selected_entity.has_component<AnimatorComponent>())
+                {
+                    auto &anim = _selected_entity.get_component<AnimatorComponent>();
+                    item.bones = anim.get_bones();
+                }
+                Engine::get_renderer()->submit_skinned_outline_render_item(item);
                 if (ImGui::TreeNode("Skinned Model Info"))
                 {
-                    auto &model = _selected_entity.get_component<SkinnedModelComponent>();
-                    SkinnedRenderItem item;
-                    item.skinned_model = AssetManager::get_skinned_model_by_index(model.id);
-                    item.transform = _selected_entity.get_component<TransformComponent>();
-                    if (_selected_entity.has_component<AnimatorComponent>())
-                    {
-                        auto &anim = _selected_entity.get_component<AnimatorComponent>();
-                        item.bones = anim.get_bones();
-                    }
-                    Engine::get_renderer()->submit_skinned_outline_render_item(item);
                     int id = static_cast<int>(model.id);
                     if (ImGui::InputInt("Skinned Model ID", &id))
                     {

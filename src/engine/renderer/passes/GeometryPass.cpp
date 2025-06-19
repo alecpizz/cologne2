@@ -66,6 +66,7 @@ namespace cologne
         auto fbo = get_framebuffer_by_name("gbuffer");
         fbo->bind();
         fbo->set_viewport();
+        glDisable(GL_DITHER);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         auto shader = get_shader_by_name("gbuffer");
         shader->bind();
@@ -150,5 +151,6 @@ namespace cologne
         }
 
         fbo->release();
+        glEnable(GL_DITHER);
     }
 }
