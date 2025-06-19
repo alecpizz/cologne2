@@ -51,20 +51,18 @@ namespace cologne
 
         Entity revolver = create_entity("deagle");
         revolver.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
-        revolver.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("deagle_Rig|Rig|MK_ReloadFull"));
-
-        Entity vsk = create_entity("vsk");
-        vsk.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("vsk"));
-        vsk.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("vsk_Fire"));
-        vsk.get_component<TransformComponent>().position = glm::vec3(0.0f, 0.3f, 1.0f);
+        revolver.add_component<AnimatorComponent>(
+            AssetManager::get_animation_index_by_name("deagle_Rig|Rig|MK_ReloadFull"));
 
         auto camera = create_entity("camera");
         auto &c = camera.add_component<CameraComponent>();
         c.primary = true;
 
         Entity viewModel = create_entity("viewmodel");
-        viewModel.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
-        viewModel.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("deagle_Rig|Rig|MK_Idle"));
+        viewModel.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("vsk"));
+        viewModel.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("vsk_Idle"));
+        // viewModel.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
+        // viewModel.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("deagle_Rig|Rig|MK_Idle"));
         viewModel.add_component<ViewmodelComponent>();
 
         Entity player = create_entity("player");
@@ -175,11 +173,14 @@ namespace cologne
             }
         }
 
-        auto animators = _registry.view<AnimatorComponent>();
-        for (auto entity: animators)
+        if (!Engine::in_edit_mode())
         {
-            auto &animator = _registry.get<AnimatorComponent>(entity);
-            animator.update_animation(delta_time);
+            auto animators = _registry.view<AnimatorComponent>();
+            for (auto entity: animators)
+            {
+                auto &animator = _registry.get<AnimatorComponent>(entity);
+                animator.update_animation(delta_time);
+            }
         }
 
         auto camera = !Engine::in_edit_mode() ? get_primary_camera() : get_scene_camera();

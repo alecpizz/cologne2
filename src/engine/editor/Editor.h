@@ -59,6 +59,8 @@ namespace cologne
 
         void build_settings_panel();
 
+        void build_right_click_menu(Entity e);
+
         static void build_transform_entry(TransformComponent &tr);
         Entity _selected_entity = {};
     };

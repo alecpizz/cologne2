@@ -54,7 +54,7 @@ namespace cologne
 
         Light get_directional_light() const;
 
-        void submit_camera_transform(TransformComponent tr, CameraComponent cam);
+        void submit_camera_transform(const TransformComponent &tr, CameraComponent cam);
 
         static glm::mat4 get_camera_view(TransformComponent tr);
         static glm::mat4 get_camera_projection(TransformComponent tr, CameraComponent cam);

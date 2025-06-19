@@ -341,7 +341,7 @@ namespace cologne
         return _lights[0];
     }
 
-    void Renderer::submit_camera_transform(TransformComponent tr, CameraComponent cam)
+    void Renderer::submit_camera_transform(const TransformComponent &tr, const CameraComponent cam)
     {
         _camera_transform = tr;
         _cam = cam;

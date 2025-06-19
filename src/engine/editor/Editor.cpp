@@ -62,7 +62,9 @@ namespace cologne
     std::vector<ButtonCmd> button_cmds;
     bool active = false;
     bool was_game_mode = true;
+    bool mouse_captured = false;
     ImVec2 prev_viewport_size = ImVec2(1280, 720);
+    ImGuiWindowFlags global_window_flags;
 
     bool Editor::in_edit_mode()
     {
@@ -99,8 +101,10 @@ namespace cologne
     {
         active = false;
         was_game_mode = true;
+        mouse_captured = false;
         cologne::DebugScope scope(__PRETTY_FUNCTION__);
         ImGui::CreateContext();
+        ImGui::LoadIniSettingsFromDisk(RESOURCES_PATH "editor/imgui.ini");
         imguiThemes::green();
         ImGuiIO &io = ImGui::GetIO();
         (void) io;
@@ -150,9 +154,14 @@ namespace cologne
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
                 ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-        if (!Engine::get_window()->mouse_visible())
+        if (mouse_captured)
         {
+            global_window_flags = ImGuiWindowFlags_NoInputs;
             window_flags |= ImGuiWindowFlags_NoInputs;
+        }
+        else
+        {
+            global_window_flags = ImGuiWindowFlags_None;
         }
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
         ImGui::Begin("Dock space", nullptr, window_flags);
@@ -184,7 +193,7 @@ namespace cologne
 
     void Editor::build_asset_browser()
     {
-        ImGui::Begin("Asset Browser");
+        ImGui::Begin("Asset Browser", nullptr, global_window_flags);
         if (ImGui::Button("Asset 1"))
         {
         }
@@ -197,7 +206,7 @@ namespace cologne
 
     void Editor::build_scene_graph()
     {
-        ImGui::Begin("Scene Hiearchy");
+        ImGui::Begin("Scene Hiearchy", nullptr, global_window_flags);
         if (ImGui::TreeNodeEx("Scene", ImGuiTreeNodeFlags_DefaultOpen))
         {
             for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
@@ -212,15 +221,26 @@ namespace cologne
                 {
                     ImGui::SetItemDefaultFocus();
                 }
+                if (ImGui::BeginPopupContextItem())
+                {
+                    build_right_click_menu(e);
+                    ImGui::EndPopup();
+                }
             }
             ImGui::TreePop();
+        }
+
+        if (ImGui::BeginPopupContextItem())
+        {
+            build_right_click_menu({});
+            ImGui::EndPopup();
         }
         ImGui::End();
     }
 
     void Editor::build_properties_panel()
     {
-        ImGui::Begin("Properties");
+        ImGui::Begin("Properties", nullptr, global_window_flags);
         if (_selected_entity)
         {
             ImGui::Text(_selected_entity.get_component<TagComponent>().tag.c_str());
@@ -363,8 +383,7 @@ namespace cologne
 
     void Editor::build_game_view()
     {
-        ImGui::Begin("Game View");
-        ImGui::Text("Game rendered here");
+        ImGui::Begin("Game View", nullptr, global_window_flags);
         ImVec2 viewport_size = ImGui::GetContentRegionAvail();
         if (static_cast<int>(prev_viewport_size.x) != static_cast<int>(viewport_size.x) || static_cast<int>(
                 prev_viewport_size.y) != static_cast<int>(viewport_size.y))
@@ -390,13 +409,42 @@ namespace cologne
         {
             uint32_t x = static_cast<uint32_t>(mouse_pos_relative.x);
             uint32_t y = static_cast<uint32_t>(mouse_pos_relative.y);
-            if (Input::mouse_pressed(Input::MouseButton::Left) && !ImGuizmo::IsOver())
+            if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && !ImGuizmo::IsOver())
             {
                 uint32_t id = Renderer::read_fbo_pixel("gbuffer", "entity_id", x, y);
                 if (id != entt::null)
                 {
                     _selected_entity = {static_cast<entt::entity>(id), Engine::get_scene()};
                 }
+            }
+            auto &active = Engine::get_scene()->get_scene_camera().get_component<ActiveComponent>();
+            if (ImGui::IsMouseDown(ImGuiMouseButton_Right) || ImGui::IsMouseDown(ImGuiMouseButton_Middle))
+            {
+                mouse_captured = true;
+                active.active = true;
+                Engine::get_window()->hide_mouse();
+            }
+            else
+            {
+                mouse_captured = false;
+                active.active = false;
+                Engine::get_window()->show_mouse();
+            }
+        }
+        else
+        {
+            if (!mouse_captured)
+            {
+                Engine::get_window()->show_mouse();
+                auto &active = Engine::get_scene()->get_scene_camera().get_component<ActiveComponent>();
+                active.active = false;
+            }
+            if (!ImGui::IsMouseDown(ImGuiMouseButton_Right) && !ImGui::IsMouseDown(ImGuiMouseButton_Middle))
+            {
+                mouse_captured = false;
+                auto &active = Engine::get_scene()->get_scene_camera().get_component<ActiveComponent>();
+                active.active = false;
+                Engine::get_window()->show_mouse();
             }
         }
         ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(Renderer::get_output_image())), viewport_size,
@@ -429,6 +477,7 @@ namespace cologne
             auto transform = camera.get_component<TransformComponent>();
             glm::mat4 view = Renderer::get_camera_view(transform);
             glm::mat4 proj = Renderer::get_camera_projection(transform, camera_comp);
+
             auto &tr = _selected_entity.get_component<TransformComponent>();
             //         auto& tr = Engine::get_scene()->_registry.get<TransformComponent>(entity);
             glm::mat4 mat4 = tr.get_mat4();
@@ -450,7 +499,7 @@ namespace cologne
 
     void Editor::build_settings_panel()
     {
-        ImGui::Begin("Settings");
+        ImGui::Begin("Settings", nullptr, global_window_flags);
         if (ImGui::Button("Hot reload shaders"))
         {
             Engine::get_renderer()->reload_shaders();
@@ -534,6 +583,21 @@ namespace cologne
             ImGui::EndChild();
         }
         ImGui::End();
+    }
+
+    void Editor::build_right_click_menu(Entity e)
+    {
+        if (!e)
+        {
+            ImGui::Button("there's nothin here");
+        }
+        else
+        {
+            if (ImGui::Button("entity"))
+            {
+                LOG_INFO("entity click");
+            }
+        }
     }
 
     void Editor::build_transform_entry(TransformComponent &tr)

@@ -11,44 +11,8 @@ namespace cologne
     private:
         glm::vec2 _rotation = glm::vec2(0.0f);
         bool _was_controlling = false;
-
-    protected:
-        void on_create() override
+        void free_cam(float dt)
         {
-        }
-
-        void on_destroy() override
-        {
-        }
-
-        void on_update(float dt) override
-        {
-            bool active = false;
-            if (Input::mouse_down(Input::MouseButton::Right))
-            {
-                bool prev_controlling = _was_controlling;
-                _was_controlling = true;
-                if (prev_controlling != _was_controlling)
-                {
-                    Engine::get_window()->hide_mouse();
-                }
-                active = true;
-            }
-            else
-            {
-                bool prev_controlling = _was_controlling;
-                _was_controlling = false;
-                if (prev_controlling != _was_controlling)
-                {
-                    Engine::get_window()->show_mouse();
-                }
-            }
-
-            if (!active)
-            {
-                return;
-            }
-
             auto mouse = Input::get_relative_mouse();
             constexpr float sensitivity = 30.0f;
             _rotation.x += mouse.x * sensitivity * dt;
@@ -96,6 +60,41 @@ namespace cologne
                 pos -= up * dt * speed;
             }
             get_component<TransformComponent>().position = pos;
+        }
+
+        void pan(float dt)
+        {
+            auto mouse = Input::get_relative_mouse();
+            const glm::quat target_rotation = get_component<TransformComponent>().rotation;
+            const glm::vec3 right = target_rotation * glm::vec3(1.0f, 0.0f, 0.0f);
+            const glm::vec3 up = target_rotation * glm::vec3(0.0f, 1.0f, 0.0f);
+            auto pos = get_component<TransformComponent>().position;
+            constexpr float speed = 5.0f;
+            pos += right * dt * mouse.x * speed;
+            pos += up * dt * mouse.y * speed;
+            get_component<TransformComponent>().position = pos;
+        }
+
+    protected:
+        void on_create() override
+        {
+        }
+
+        void on_destroy() override
+        {
+        }
+
+        void on_update(float dt) override
+        {
+            if (Input::mouse_down(Input::MouseButton::Middle))
+            {
+                pan(dt);
+            }
+            else
+            {
+                free_cam(dt);
+            }
+
         }
 
         RuntimeMode get_runtime_mode() override

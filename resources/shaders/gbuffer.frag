@@ -33,8 +33,9 @@ void main()
 
     gEmission = texture(texture_emission, TexCoords).rgb;
     gl_FragDepth = gl_FragCoord.z;
-    gORM.r = texture(texture_metallic, TexCoords).b + max(metallic, 0.0f);
-    gORM.g = texture(texture_roughness, TexCoords).g + max(roughness, 0.0f);
+    gORM.r = texture(texture_metallic, TexCoords).b;
+    gORM.r *= metallic;
+    gORM.g = texture(texture_roughness, TexCoords).g;
     gORM.b = texture(texture_ao, TexCoords).r;
     vec4 albedo = texture(texture_albedo, TexCoords).rgba;
     if(albedo.a < 0.5)
