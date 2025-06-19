@@ -135,9 +135,12 @@ namespace cologne
     void Scene::update(float delta_time)
     {
         //compute shaders. should do skinning here too :3
-        for (auto &particle: Engine::get_scene()->get_particles())
+        if (!Engine::in_edit_mode())
         {
-            particle.simulate();
+            for (auto &particle: Engine::get_scene()->get_particles())
+            {
+                particle.simulate();
+            }
         }
 
         //native scripting

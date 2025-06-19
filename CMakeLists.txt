@@ -114,6 +114,7 @@ else ()
 
 endif ()
 
+target_sources(imgui PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui-docking/imgui/misc/cpp/imgui_stdlib.cpp")
 target_sources("${CMAKE_PROJECT_NAME}" PRIVATE ${MY_SOURCES})
 
 

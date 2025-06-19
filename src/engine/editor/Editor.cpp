@@ -13,6 +13,8 @@
 
 #include "ImGuizmo.h"
 #include "engine/imguiThemes.h"
+#include <imgui.h>
+#include <misc/cpp/imgui_stdlib.h>
 
 namespace cologne
 {
@@ -78,7 +80,6 @@ namespace cologne
         if (active)
         {
             was_game_mode = true;
-            Engine::get_scene()->copy_scene_camera_to_primary_camera();
             Engine::get_window()->show_mouse();
         }
         else
@@ -104,7 +105,7 @@ namespace cologne
         mouse_captured = false;
         cologne::DebugScope scope(__PRETTY_FUNCTION__);
         ImGui::CreateContext();
-        ImGui::LoadIniSettingsFromDisk(RESOURCES_PATH "editor/imgui.ini");
+        ImGui::LoadIniSettingsFromDisk(RESOURCES_PATH "editor/imgui_config.ini");
         imguiThemes::green();
         ImGuiIO &io = ImGui::GetIO();
         (void) io;
@@ -185,6 +186,10 @@ namespace cologne
             }
             if (ImGui::BeginMenu("Settings"))
             {
+                if (ImGui::MenuItem("Save Layout"))
+                {
+                    ImGui::SaveIniSettingsToDisk(RESOURCES_PATH "editor/imgui_config.ini");
+                }
                 ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();
@@ -207,35 +212,66 @@ namespace cologne
     void Editor::build_scene_graph()
     {
         ImGui::Begin("Scene Hiearchy", nullptr, global_window_flags);
-        if (ImGui::TreeNodeEx("Scene", ImGuiTreeNodeFlags_DefaultOpen))
+
+        for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
         {
-            for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
+            Entity e = {entity, Engine::get_scene()};
+            auto tag = e.get_component<TagComponent>().tag;
+            auto flags = (_selected_entity == e ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+            bool opened = ImGui::TreeNodeEx((void *) (uint64_t) (uint32_t) e, flags, tag.c_str());
+            if (ImGui::IsItemClicked())
             {
-                Entity e = {entity, Engine::get_scene()};
-                bool isSelected = _selected_entity == e;
-                if (ImGui::Selectable(e.get_component<TagComponent>().tag.c_str(), isSelected))
-                {
-                    _selected_entity = e;
-                }
-                if (isSelected)
-                {
-                    ImGui::SetItemDefaultFocus();
-                }
-                if (ImGui::BeginPopupContextItem())
-                {
-                    build_right_click_menu(e);
-                    ImGui::EndPopup();
-                }
+                _selected_entity = e;
             }
-            ImGui::TreePop();
+            if (opened)
+            {
+                ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_OpenOnArrow;
+                bool opened = ImGui::TreeNodeEx((void *) 9817239, flags, tag.c_str());
+                if (opened)
+                {
+                    ImGui::TreePop();
+                }
+                ImGui::TreePop();
+            }
+            // bool isSelected = _selected_entity == e;
+            // if (ImGui::Selectable(e.get_component<TagComponent>().tag.c_str(), isSelected))
+            // {
+            //     _selected_entity = e;
+            // }
+            // if (isSelected)
+            // {
+            //     ImGui::SetItemDefaultFocus();
+            // }
         }
 
-        if (ImGui::BeginPopupContextItem())
+        if (ImGui::BeginPopupContextWindow())
         {
-            build_right_click_menu({});
+            if (ImGui::MenuItem("Create Empty Entity"))
+            {
+                Engine::get_scene()->create_entity("Empty Entity");
+            }
+            if (_selected_entity && ImGui::MenuItem("Delete Entity"))
+            {
+                Engine::get_scene()->destroy_entity(_selected_entity);
+                _selected_entity = {};
+            }
             ImGui::EndPopup();
         }
+
         ImGui::End();
+    }
+
+    template<typename T>
+    void remove_component_menu(Entity e)
+    {
+        if (ImGui::BeginPopupContextWindow("ComponentSettings"))
+        {
+            if (ImGui::MenuItem("Remove Component"))
+            {
+                e.remove_component<T>();
+            }
+            ImGui::EndPopup();
+        }
     }
 
     void Editor::build_properties_panel()
@@ -243,7 +279,9 @@ namespace cologne
         ImGui::Begin("Properties", nullptr, global_window_flags);
         if (_selected_entity)
         {
-            ImGui::Text(_selected_entity.get_component<TagComponent>().tag.c_str());
+            auto &tag = _selected_entity.get_component<TagComponent>();
+            ImGui::InputText("Tag", &tag.tag);
+
             ImGui::Text("Entity ID: %d", static_cast<uint32_t>(_selected_entity));
             ImGui::Separator();
             ImGui::Checkbox("Active", &_selected_entity.get_component<ActiveComponent>().active);
@@ -251,127 +289,212 @@ namespace cologne
             build_transform_entry(_selected_entity.get_component<TransformComponent>());
             if (_selected_entity.has_component<ViewmodelComponent>())
             {
-                ImGui::SeparatorText("View Model Config");
-                auto &vm = _selected_entity.get_component<ViewmodelComponent>();
-                ImGui::DragFloat("smoothing", &vm.smoothing, 0.1f);
-                ImGui::DragFloat("amplitude", &vm.amplitude, 0.01f);
-                ImGui::DragFloat("frequency", &vm.frequency, 0.1f);
-                ImGui::DragFloat("vertical velocity multi", &vm.vertical_velocity_multiplier, 0.01f);
-                ImGui::DragFloat("max vertical offset", &vm.max_vertical_offset, 0.01f);
-                ImGui::DragFloat("sway multiplier", &vm.sway_multiplier);
-                ImGui::DragFloat3("position offset", glm::value_ptr(vm.position_offset));
-                ImGui::DragFloat3("euler offset", glm::value_ptr(vm.euler_offset));
-                ImGui::Separator();
+                if (ImGui::TreeNode("View Model Settings"))
+                {
+                    auto &vm = _selected_entity.get_component<ViewmodelComponent>();
+                    ImGui::DragFloat("smoothing", &vm.smoothing, 0.1f);
+                    ImGui::DragFloat("amplitude", &vm.amplitude, 0.01f);
+                    ImGui::DragFloat("frequency", &vm.frequency, 0.1f);
+                    ImGui::DragFloat("vertical velocity multi", &vm.vertical_velocity_multiplier, 0.01f);
+                    ImGui::DragFloat("max vertical offset", &vm.max_vertical_offset, 0.01f);
+                    ImGui::DragFloat("sway multiplier", &vm.sway_multiplier);
+                    ImGui::DragFloat3("position offset", glm::value_ptr(vm.position_offset));
+                    ImGui::DragFloat3("euler offset", glm::value_ptr(vm.euler_offset));
+                    remove_component_menu<ViewmodelComponent>(_selected_entity);
+                    ImGui::TreePop();
+                }
             }
 
             if (_selected_entity.has_component<LightComponent>())
             {
-                ImGui::SeparatorText("Light Settings");
-                auto &light = _selected_entity.get_component<LightComponent>();
-                ImGui::DragFloat("radius", &light.radius, 0.01f);
-                ImGui::DragFloat("strength", &light.strength, 0.01f);
-                ImGui::ColorEdit3("color", glm::value_ptr(light.color), ImGuiColorEditFlags_HDR
-                                                                        | ImGuiColorEditFlags_Float);
-                ImGui::Separator();
-                Engine::get_renderer()->draw_sphere(_selected_entity.get_component<TransformComponent>().position,
-                                                    light.radius, light.color);
+                if (ImGui::TreeNode("Light Settings"))
+                {
+                    auto &light = _selected_entity.get_component<LightComponent>();
+                    ImGui::DragFloat("radius", &light.radius, 0.01f);
+                    ImGui::DragFloat("strength", &light.strength, 0.01f);
+                    ImGui::ColorEdit3("color", glm::value_ptr(light.color), ImGuiColorEditFlags_HDR
+                                                                            | ImGuiColorEditFlags_Float);
+                    Engine::get_renderer()->draw_sphere(_selected_entity.get_component<TransformComponent>().position,
+                                                        light.radius, light.color);
+
+                    remove_component_menu<LightComponent>(_selected_entity);
+                    ImGui::TreePop();
+                }
             }
 
             if (_selected_entity.has_component<ModelComponent>())
             {
-                ImGui::SeparatorText("Model Info");
-                auto &model = _selected_entity.get_component<ModelComponent>();
-                Engine::get_renderer()->submit_outline_render_item(RenderItem(
-                    AssetManager::get_model_by_index(model.id), _selected_entity.get_component<TransformComponent>(),
-                    false,
-                    static_cast<uint32_t>(_selected_entity)));
-                int id = static_cast<int>(model.id);
-                ImGui::BeginDisabled(true);
-                if (ImGui::InputInt("Model ID", &id))
+                if (ImGui::TreeNode("Model Info"))
                 {
-                    model.id = id;
+                    auto &model = _selected_entity.get_component<ModelComponent>();
+                    Engine::get_renderer()->submit_outline_render_item(RenderItem(
+                        AssetManager::get_model_by_index(model.id),
+                        _selected_entity.get_component<TransformComponent>(),
+                        false,
+                        static_cast<uint32_t>(_selected_entity)));
+                    int id = static_cast<int>(model.id);
+                    if (ImGui::InputInt("Model ID", &id))
+                    {
+                        id = glm::clamp(id, 0,
+                                        static_cast<int>(AssetManager::get_models().size()) - 1);
+                        model.id = id;
+                    }
+                    std::string model_name = AssetManager::get_model_by_index(model.id)->get_name();
+                    ImGui::Text("Name %s", model_name.c_str());
+                    ImGui::Checkbox("GI Only", &model.gi_only);
+                    remove_component_menu<ModelComponent>(_selected_entity);
+                    ImGui::TreePop();
                 }
-                ImGui::EndDisabled();
-                ImGui::Checkbox("GI Only", &model.gi_only);
-                ImGui::Separator();
             }
 
             if (_selected_entity.has_component<SkinnedModelComponent>())
             {
-                ImGui::SeparatorText("Skinned Model Info");
-                auto &model = _selected_entity.get_component<SkinnedModelComponent>();
-                SkinnedRenderItem item;
-                item.skinned_model = AssetManager::get_skinned_model_by_index(model.id);
-                item.transform = _selected_entity.get_component<TransformComponent>();
-                if (_selected_entity.has_component<AnimatorComponent>())
+                if (ImGui::TreeNode("Skinned Model Info"))
                 {
-                    auto &anim = _selected_entity.get_component<AnimatorComponent>();
-                    item.bones = anim.get_bones();
+                    auto &model = _selected_entity.get_component<SkinnedModelComponent>();
+                    SkinnedRenderItem item;
+                    item.skinned_model = AssetManager::get_skinned_model_by_index(model.id);
+                    item.transform = _selected_entity.get_component<TransformComponent>();
+                    if (_selected_entity.has_component<AnimatorComponent>())
+                    {
+                        auto &anim = _selected_entity.get_component<AnimatorComponent>();
+                        item.bones = anim.get_bones();
+                    }
+                    Engine::get_renderer()->submit_skinned_outline_render_item(item);
+                    int id = static_cast<int>(model.id);
+                    if (ImGui::InputInt("Skinned Model ID", &id))
+                    {
+                        id = glm::clamp(id, 0,
+                                        static_cast<int>(AssetManager::get_skinned_models().size()) - 1);
+                        model.id = id;
+                    }
+                    std::string model_name = AssetManager::get_skinned_model_by_index(model.id)->get_name();
+                    ImGui::Text("Name %s", model_name.c_str());
+                    remove_component_menu<SkinnedModelComponent>(_selected_entity);
+                    ImGui::TreePop();
                 }
-                Engine::get_renderer()->submit_skinned_outline_render_item(item);
-                int id = static_cast<int>(model.id);
-                ImGui::BeginDisabled(true);
-                if (ImGui::InputInt("Model ID", &id))
-                {
-                    model.id = id;
-                }
-                ImGui::EndDisabled();
-                ImGui::Separator();
             }
 
             if (_selected_entity.has_component<StaticColliderComponent>())
             {
-                ImGui::SeparatorText("Static Collider Info");
-                ImGui::BeginDisabled(true);
-                int id = static_cast<int>(_selected_entity.get_component<StaticColliderComponent>().body_id);
-                if (ImGui::InputInt("Collider Body ID", &id))
+                if (ImGui::TreeNode("Static Collider Info"))
                 {
+                    ImGui::BeginDisabled(true);
+                    int id = static_cast<int>(_selected_entity.get_component<StaticColliderComponent>().body_id);
+                    if (ImGui::InputInt("Collider Body ID", &id))
+                    {
+                    }
+                    ImGui::EndDisabled();
+                    ImGui::TreePop();
                 }
-                ImGui::EndDisabled();
-                ImGui::Separator();
             }
 
             if (_selected_entity.has_component<CameraComponent>())
             {
-                ImGui::SeparatorText("Camera");
-                auto &camera = _selected_entity.get_component<CameraComponent>();
-                float degrees = glm::degrees(camera.fov_radians);
-                if (ImGui::SliderFloat("FOV", &degrees, 30.0f, 120.0f))
+                if (ImGui::TreeNode("Camera Settings"))
                 {
-                    float radians = glm::radians(degrees);
-                    camera.fov_radians = radians;
-                }
-                ImGui::BeginDisabled(true);
+                    auto &camera = _selected_entity.get_component<CameraComponent>();
+                    float degrees = glm::degrees(camera.fov_radians);
+                    if (ImGui::SliderFloat("FOV", &degrees, 30.0f, 120.0f))
+                    {
+                        float radians = glm::radians(degrees);
+                        camera.fov_radians = radians;
+                    }
+                    ImGui::BeginDisabled(true);
 
-                ImGui::Checkbox("Primary", &camera.primary);
-                ImGui::EndDisabled();
-                ImGui::Separator();
+                    ImGui::Checkbox("Primary", &camera.primary);
+                    ImGui::EndDisabled();
+                    ImGui::TreePop();
+                }
             }
 
             if (_selected_entity.has_component<PlayerComponent>())
             {
-                auto &player = _selected_entity.get_component<PlayerComponent>();
-                ImGui::SeparatorText("Player Settings");
-                ImGui::DragFloat("Character Speed", &player.character_speed);
-                ImGui::DragFloat("Jump Speed", &player.jump_speed);
-                ImGui::Separator();
+                if (ImGui::TreeNode("Player Settings"))
+                {
+                    auto &player = _selected_entity.get_component<PlayerComponent>();
+                    ImGui::DragFloat("Character Speed", &player.character_speed);
+                    ImGui::DragFloat("Jump Speed", &player.jump_speed);
+                    remove_component_menu<PlayerComponent>(_selected_entity);
+                    ImGui::TreePop();
+                }
             }
 
             if (_selected_entity.has_component<NativeScriptComponent>())
             {
-                ImGui::SeparatorText("Native script component");
-                ImGui::TextDisabled("how should these components work lol");
-                ImGui::Separator();
+                if (ImGui::TreeNode("Native Script Component"))
+                {
+                    ImGui::TextDisabled("how should these components work lol");
+                    remove_component_menu<NativeScriptComponent>(_selected_entity);
+                    ImGui::TreePop();
+                }
             }
 
             if (_selected_entity.has_component<AnimatorComponent>())
             {
-                auto &anim = _selected_entity.get_component<AnimatorComponent>();
-                ImGui::SeparatorText("Animator");
-                float progress = anim.get_current_time();
-                float total = anim.get_current_animation().get_duration();
-                float percent = progress / total;
-                ImGui::SliderFloat("Animation Progress", &percent, 0.0f, 1.0f);
+                if (ImGui::TreeNode("Animator Settings"))
+                {
+                    auto &anim = _selected_entity.get_component<AnimatorComponent>();
+                    float progress = anim.get_current_time();
+                    float total = anim.get_current_animation().get_duration();
+                    float percent = progress / total;
+                    ImGui::SliderFloat("Animation Progress", &percent, 0.0f, 1.0f);
+                    remove_component_menu<AnimatorComponent>(_selected_entity);
+                    ImGui::TreePop();
+                }
+            }
+
+            if (ImGui::Button("Add Component"))
+            {
+                ImGui::OpenPopup("AddComponent");
+            }
+
+            if (ImGui::BeginPopup("AddComponent"))
+            {
+                if (!_selected_entity.has_component<LightComponent>() && ImGui::Button("Light Component"))
+                {
+                    _selected_entity.add_component<LightComponent>();
+                    ImGui::CloseCurrentPopup();
+                }
+
+                if (!_selected_entity.has_component<ModelComponent>() && ImGui::MenuItem("Model Component"))
+                {
+                    _selected_entity.add_component<ModelComponent>();
+                    ImGui::CloseCurrentPopup();
+                }
+
+                if (!_selected_entity.has_component<SkinnedModelComponent>() && ImGui::MenuItem(
+                        "Skinned Model Component"))
+                {
+                    _selected_entity.add_component<SkinnedModelComponent>();
+                    ImGui::CloseCurrentPopup();
+                }
+
+                if (!_selected_entity.has_component<AnimatorComponent>() && _selected_entity.has_component<
+                        SkinnedModelComponent>() && ImGui::MenuItem("Animator Component"))
+                {
+                    _selected_entity.add_component<AnimatorComponent>(
+                        AssetManager::get_first_animation_index_with_name(
+                            AssetManager::get_skinned_model_by_index(
+                                _selected_entity.get_component<SkinnedModelComponent>().id)->get_name()));
+                    ImGui::CloseCurrentPopup();
+                }
+
+                if (!_selected_entity.has_component<NativeScriptComponent>() && ImGui::BeginMenu("Native Script"))
+                {
+                    //TODO
+                    if (ImGui::MenuItem("Player Controller"))
+                    {
+                        ImGui::CloseCurrentPopup();
+                    }
+                    if (ImGui::MenuItem("Editor Camera"))
+                    {
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::EndMenu();
+                }
+
+                ImGui::EndPopup();
             }
         }
         else
@@ -585,20 +708,6 @@ namespace cologne
         ImGui::End();
     }
 
-    void Editor::build_right_click_menu(Entity e)
-    {
-        if (!e)
-        {
-            ImGui::Button("there's nothin here");
-        }
-        else
-        {
-            if (ImGui::Button("entity"))
-            {
-                LOG_INFO("entity click");
-            }
-        }
-    }
 
     void Editor::build_transform_entry(TransformComponent &tr)
     {

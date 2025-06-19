@@ -19,14 +19,15 @@ namespace cologne::AssetManager
     std::vector<SkinnedModel>& get_skinned_models();
 
     Model* get_model_by_name(const std::string& name);
-    Model* get_model_by_index(size_t idx);
-    size_t get_model_index_by_name(const std::string& name);
+    Model* get_model_by_index(int32_t idx);
+    int32_t get_model_index_by_name(const std::string& name);
 
     SkinnedModel* get_skinned_model_by_name(const std::string& name);
-    SkinnedModel* get_skinned_model_by_index(size_t idx);
-    size_t get_skinned_model_index_by_name(const std::string& name);
+    SkinnedModel* get_skinned_model_by_index(int32_t idx);
+    int32_t get_skinned_model_index_by_name(const std::string& name);
 
     Animation* get_animation_by_name(const std::string& name);
-    Animation* get_animation_by_index(size_t idx);
-    size_t get_animation_index_by_name(const std::string& name);
+    Animation* get_animation_by_index(int32_t idx);
+    int32_t get_animation_index_by_name(const std::string& name);
+    int32_t get_first_animation_index_with_name(const std::string& name);
 }

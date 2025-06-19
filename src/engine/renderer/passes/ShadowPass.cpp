@@ -33,7 +33,7 @@ namespace cologne
     glm::mat4 get_light_space_matrix(const float near_plane, const float far_plane, glm::vec3 light_dir)
     {
         const auto proj = glm::perspective(
-            glm::radians(45.0f),
+            Engine::get_scene()->get_primary_camera().get_component<CameraComponent>().fov_radians,
             (float) Engine::get_window()->get_width() / (float) Engine::get_window()->get_height(), near_plane,
             far_plane);
         const auto corners = get_frustum_corners_world_space(proj, _cam_view);

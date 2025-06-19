@@ -12,26 +12,26 @@ namespace cologne::AssetManager
     std::vector<Model> models;
     std::vector<SkinnedModel> skinned_models;
     std::vector<Animation> animations;
-    std::unordered_map<std::string, size_t> model_index_map;
-    std::unordered_map<std::string, size_t> skinned_model_index_map;
-    std::unordered_map<std::string, size_t> animation_index_map;
+    std::unordered_map<std::string, int32_t> model_index_map;
+    std::unordered_map<std::string, int32_t> skinned_model_index_map;
+    std::unordered_map<std::string, int32_t> animation_index_map;
     bool is_loading = true;
 
     void init()
     {
         DebugScope scope(__PRETTY_FUNCTION__);
         find_file_paths();
-        for (size_t i = 0; i < models.size(); i++)
+        for (int32_t i = 0; i < models.size(); i++)
         {
             model_index_map[models[i].get_name()] = i;
         }
 
-        for (size_t i = 0; i < skinned_models.size(); i++)
+        for (int32_t i = 0; i < skinned_models.size(); i++)
         {
             skinned_model_index_map[skinned_models[i].get_name()] = i;
         }
 
-        for (size_t i = 0; i < animations.size(); i++)
+        for (int32_t i = 0; i < animations.size(); i++)
         {
             animation_index_map[animations[i].get_name()] = i;
         }
@@ -162,15 +162,24 @@ namespace cologne::AssetManager
 
     Model *get_model_by_name(const std::string &name)
     {
+        auto idx = get_model_index_by_name(name);
+        if (idx == -1)
+        {
+            return nullptr;
+        }
         return &models.at(get_model_index_by_name(name));
     }
 
-    Model *get_model_by_index(size_t idx)
+    Model *get_model_by_index(int32_t idx)
     {
+        if (idx > models.size() - 1 || idx < 0)
+        {
+            return nullptr;
+        }
         return &models.at(idx);
     }
 
-    size_t get_model_index_by_name(const std::string &name)
+    int32_t get_model_index_by_name(const std::string &name)
     {
         return model_index_map[name];
     }
@@ -180,12 +189,12 @@ namespace cologne::AssetManager
         return &skinned_models.at(get_skinned_model_index_by_name(name));
     }
 
-    SkinnedModel *get_skinned_model_by_index(size_t idx)
+    SkinnedModel *get_skinned_model_by_index(int32_t idx)
     {
         return &skinned_models.at(idx);
     }
 
-    size_t get_skinned_model_index_by_name(const std::string &name)
+    int32_t get_skinned_model_index_by_name(const std::string &name)
     {
         return skinned_model_index_map[name];
     }
@@ -195,13 +204,26 @@ namespace cologne::AssetManager
         return &animations.at(animation_index_map[name]);
     }
 
-    Animation *get_animation_by_index(size_t idx)
+    Animation *get_animation_by_index(int32_t idx)
     {
         return &animations.at(idx);
     }
 
-    size_t get_animation_index_by_name(const std::string &name)
+    int32_t get_animation_index_by_name(const std::string &name)
     {
         return animation_index_map[name];
+    }
+
+    int32_t get_first_animation_index_with_name(const std::string &name)
+    {
+        for (int32_t i = 0; i < animations.size(); i++)
+        {
+            std::string anim_name = animations[i].get_name();
+            if (anim_name.starts_with(name))
+            {
+                return i;
+            }
+        }
+        return -1;
     }
 }
