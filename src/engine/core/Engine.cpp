@@ -82,10 +82,10 @@ namespace cologne
 
     bool Engine::init(uint32_t width, uint32_t height)
     {
+        Audio::init();
         _impl->debug_ui = std::unique_ptr<Editor>(new Editor());
         _impl->window = std::unique_ptr<Window>(new Window(width, height));
         Physics::init();
-        Audio::init();
         AssetManager::init();
         AssetManager::print_all();
         // Audio::add_music(RESOURCES_PATH "sounds/music2.mp3");

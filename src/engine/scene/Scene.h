@@ -1,14 +1,13 @@
 ﻿#pragma once
-#include "../animation/Animator.h"
+
 #include "../renderer/types/Model.h"
 #include "../renderer/types/Particles.h"
-#include "../renderer/types/SkinnedModel.h"
 #include <entt/entt.hpp>
-
 
 
 namespace cologne
 {
+    struct TransformComponent;
     class Entity;
     class Editor;
     class Scene
@@ -37,6 +36,8 @@ namespace cologne
         std::vector<Particles> &get_particles();
 
         Entity create_entity(const std::string& name = std::string());
+
+        void create_static_model_entities(const char* model_name, const TransformComponent &parent_transform);
 
         void destroy_entity(Entity entity);
 

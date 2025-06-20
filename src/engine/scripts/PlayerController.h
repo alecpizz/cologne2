@@ -39,11 +39,6 @@ namespace cologne
                 }
             }
 
-            if (Engine::in_edit_mode())
-            {
-                return;
-            }
-
             auto mouse = Input::get_relative_mouse();
             constexpr float sensitivity = 30.0f;
             _rotation.x += mouse.x * sensitivity * dt;
@@ -134,11 +129,6 @@ namespace cologne
 
         void move_viewmodel(float dt)
         {
-            if (Engine::in_edit_mode())
-            {
-                return;
-            }
-
             glm::vec2 mouse = Input::get_relative_mouse();
             auto &viewmodel = get_component<PlayerComponent>().viewmodel.get_component<ViewmodelComponent>();
             float mouse_x = mouse.x * viewmodel.sway_multiplier * dt;

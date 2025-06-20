@@ -15,6 +15,8 @@
 #include "ImGuizmo.h"
 #include "engine/imguiThemes.h"
 #include <imgui.h>
+#include <engine/animation/Animator.h>
+#include <engine/audio/Audio.h>
 #include <misc/cpp/imgui_stdlib.h>
 
 namespace cologne
@@ -68,6 +70,9 @@ namespace cologne
     bool mouse_captured = false;
     ImVec2 prev_viewport_size = ImVec2(1280, 720);
     ImGuiWindowFlags global_window_flags;
+    const char *move_sound = RESOURCES_PATH "sounds/menus/move.wav";
+    const char *accept_sound = RESOURCES_PATH "sounds/menus/accept.wav";
+    const char *cancel_sound = RESOURCES_PATH "sounds/menus/cancel.wav";
 
     bool Editor::in_edit_mode()
     {
@@ -124,6 +129,10 @@ namespace cologne
             style.Colors[ImGuiCol_WindowBg].w = 0.0f;
             style.Colors[ImGuiCol_DockingEmptyBg].w = 0.f;
         }
+
+        Audio::add_sound(accept_sound);
+        Audio::add_sound(cancel_sound);
+        Audio::add_sound(move_sound);
     }
 
     Editor::~Editor()
@@ -204,10 +213,12 @@ namespace cologne
         ImGui::Begin("Asset Browser", nullptr, global_window_flags);
         if (ImGui::Button("Asset 1"))
         {
+            Audio::play_sound(accept_sound, 30);
         }
         ImGui::SameLine();
         if (ImGui::Button("Asset 2"))
         {
+            Audio::play_sound(accept_sound, 30);
         }
         ImGui::End();
     }
@@ -225,7 +236,7 @@ namespace cologne
             bool opened = ImGui::TreeNodeEx((void *) (uint64_t) (uint32_t) e, flags, tag.c_str());
             if (ImGui::IsItemClicked())
             {
-                LOG_INFO("clicked");
+                Audio::play_sound(move_sound, 30);
                 _selected_entity = e;
             }
             if (opened)
@@ -269,13 +280,10 @@ namespace cologne
     template<typename T>
     void remove_component_menu(Entity e)
     {
-        if (ImGui::BeginPopupContextWindow("ComponentSettings"))
+        if (ImGui::Button("Remove Component"))
         {
-            if (ImGui::MenuItem("Remove Component"))
-            {
-                e.remove_component<T>();
-            }
-            ImGui::EndPopup();
+            e.remove_component<T>();
+            Audio::play_sound(cancel_sound, 30);
         }
     }
 
@@ -295,12 +303,14 @@ namespace cologne
 
             if (open)
             {
+                if (remove)
+                {
+                    remove_component_menu<T>(entity);
+                }
+                ImGui::Unindent();
                 ui_function(component);
+                ImGui::Indent();
                 ImGui::TreePop();
-            }
-            if (remove)
-            {
-                remove_component_menu<T>(entity);
             }
         }
     }
@@ -315,7 +325,10 @@ namespace cologne
 
             ImGui::Text("Entity ID: %d", static_cast<uint32_t>(_selected_entity));
             ImGui::Separator();
-            ImGui::Checkbox("Active", &_selected_entity.get_component<ActiveComponent>().active);
+            if (ImGui::Checkbox("Active", &_selected_entity.get_component<ActiveComponent>().active))
+            {
+                Audio::play_sound(cancel_sound, 30);
+            }
             ImGui::Text("Transform");
             build_transform_entry(_selected_entity.get_component<TransformComponent>());
             draw_component<ViewmodelComponent>("View Model", _selected_entity, true, [](auto &vm)
@@ -449,6 +462,7 @@ namespace cologne
 
             if (ImGui::Button("Add Component"))
             {
+                Audio::play_sound(move_sound, 30);
                 ImGui::OpenPopup("AddComponent");
             }
 
@@ -456,18 +470,21 @@ namespace cologne
             {
                 if (!_selected_entity.has_component<LightComponent>() && ImGui::Button("Light Component"))
                 {
+                    Audio::play_sound(accept_sound, 30);
                     _selected_entity.add_component<LightComponent>();
                     ImGui::CloseCurrentPopup();
                 }
 
                 if (!_selected_entity.has_component<ModelComponent>() && ImGui::MenuItem("Model Component"))
                 {
+                    Audio::play_sound(accept_sound, 30);
                     _selected_entity.add_component<ModelComponent>();
                     ImGui::CloseCurrentPopup();
                 }
 
                 if (!_selected_entity.has_component<MeshComponent>() && ImGui::MenuItem("Mesh Component"))
                 {
+                    Audio::play_sound(accept_sound, 30);
                     _selected_entity.add_component<MeshComponent>();
                     ImGui::CloseCurrentPopup();
                 }
@@ -475,6 +492,7 @@ namespace cologne
                 if (!_selected_entity.has_component<SkinnedModelComponent>() && ImGui::MenuItem(
                         "Skinned Model Component"))
                 {
+                    Audio::play_sound(accept_sound, 30);
                     _selected_entity.add_component<SkinnedModelComponent>();
                     ImGui::CloseCurrentPopup();
                 }
@@ -482,6 +500,7 @@ namespace cologne
                 if (!_selected_entity.has_component<AnimatorComponent>() && _selected_entity.has_component<
                         SkinnedModelComponent>() && ImGui::MenuItem("Animator Component"))
                 {
+                    Audio::play_sound(accept_sound, 30);
                     _selected_entity.add_component<AnimatorComponent>(
                         AssetManager::get_first_animation_index_with_name(
                             AssetManager::get_skinned_model_by_index(
@@ -492,12 +511,15 @@ namespace cologne
                 if (!_selected_entity.has_component<NativeScriptComponent>() && ImGui::BeginMenu("Native Script"))
                 {
                     //TODO
+                    Audio::play_sound(move_sound, 30);
                     if (ImGui::MenuItem("Player Controller"))
                     {
+                        Audio::play_sound(accept_sound, 30);
                         ImGui::CloseCurrentPopup();
                     }
                     if (ImGui::MenuItem("Editor Camera"))
                     {
+                        Audio::play_sound(accept_sound, 30);
                         ImGui::CloseCurrentPopup();
                     }
                     ImGui::EndMenu();
@@ -526,8 +548,6 @@ namespace cologne
             }
             else
             {
-                LOG_INFO("VIEWPORT CHANGED (%f %f) (%f %f)", prev_viewport_size.x, prev_viewport_size.y,
-                         viewport_size.x, viewport_size.y);
                 Engine::get_event_manager()->invoke_resize(viewport_size.x, viewport_size.y);
             }
             prev_viewport_size = viewport_size;
@@ -546,7 +566,7 @@ namespace cologne
                 uint32_t id = Renderer::read_fbo_pixel("gbuffer", "entity_id", x, y);
                 if (id != entt::null)
                 {
-                    LOG_INFO("clicked");
+                    Audio::play_sound(move_sound, 30);
                     _selected_entity = {static_cast<entt::entity>(id), Engine::get_scene()};
                 }
                 else
@@ -618,18 +638,22 @@ namespace cologne
             auto &tr = _selected_entity.get_component<TransformComponent>();
             //         auto& tr = Engine::get_scene()->_registry.get<TransformComponent>(entity);
             glm::mat4 mat4 = tr.get_mat4();
-            ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(proj),
-                                 current_operation, ImGuizmo::LOCAL, glm::value_ptr(mat4));
+            bool changed = ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(proj),
+                                                current_operation, ImGuizmo::LOCAL, glm::value_ptr(mat4));
             //
-            glm::quat orientation;
-            glm::vec3 translation;
-            glm::vec3 scale;
-            glm::vec4 persp;
-            glm::vec3 skew;
-            glm::decompose(mat4, scale, orientation, translation, skew, persp);
-            tr.position = translation;
-            tr.rotation = orientation;
-            tr.scale = scale;
+            if (changed)
+            {
+                glm::quat orientation;
+                glm::vec3 translation;
+                glm::vec3 scale;
+                glm::vec3 skew;
+                glm::vec4 persp;
+                glm::decompose(mat4, scale, orientation, translation, skew, persp);
+                tr.position = translation;
+                tr.rotation = orientation;
+                tr.scale = scale;
+                Physics::sync_transform(_selected_entity);
+            }
         }
         ImGui::End();
     }
@@ -640,6 +664,7 @@ namespace cologne
         if (ImGui::Button("Hot reload shaders"))
         {
             Engine::get_renderer()->reload_shaders();
+            Audio::play_sound(accept_sound, 30);
         }
 
         for (size_t i = 0; i < float_cmds.size(); ++i)
@@ -682,6 +707,7 @@ namespace cologne
             if (ImGui::Checkbox(bool_cmds[i].name.c_str(), &value))
             {
                 bool_cmds[i].ref = value;
+                Audio::play_sound(accept_sound, 30);
             }
             ImGui::PopID();
         }
@@ -692,11 +718,19 @@ namespace cologne
             if (ImGui::Button(button_cmds[i].name.c_str()))
             {
                 button_cmds[i].action();
+                Audio::play_sound(accept_sound, 30);
             }
             ImGui::PopID();
         }
 
-        if (ImGui::CollapsingHeader("Images"))
+        static bool was_open = false;
+        bool open = ImGui::CollapsingHeader("Images");
+        if (was_open != open)
+        {
+            Audio::play_sound(move_sound, 30);
+        }
+        was_open = open;
+        if (open)
         {
             ImGui::BeginChild("Images");
             for (size_t i = 0; i < image_cmds.size(); i++)
@@ -730,9 +764,9 @@ namespace cologne
         glm::vec3 euler = glm::eulerAngles(tr.rotation);
         euler = glm::degrees(euler);
         ImGui::DragFloat3("Rotation", glm::value_ptr(euler), 0.1f);
-        euler.x = fmodf(euler.x, 360.0f);
-        euler.y = fmodf(euler.y, 360.0f);
-        euler.z = fmodf(euler.z, 360.0f);
+        // euler.x = fmodf(euler.x, 360.0f);
+        // euler.y = fmodf(euler.y, 360.0f);
+        // euler.z = fmodf(euler.z, 360.0f);
         euler = glm::radians(euler);
         tr.rotation = glm::quat(euler);
 

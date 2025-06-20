@@ -5,6 +5,7 @@
 #include "Scene.h"
 
 #include <engine/animation/Animation.h>
+#include <engine/animation/Animator.h>
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/core/Engine.h>
 #include <engine/physics/Physics.h>
@@ -29,18 +30,7 @@ namespace cologne
         DebugScope scope(__PRETTY_FUNCTION__);
         //Create entities
 
-        auto model = AssetManager::get_model_by_name("sponza2");
-        for (auto idx: model->get_mesh_indices())
-        {
-            const auto mesh = AssetManager::get_mesh_by_index(idx);
-            Entity sub_mesh = create_entity(mesh->get_name());
-            sub_mesh.add_component<MeshComponent>(idx);
-            sub_mesh.get_component<TransformComponent>() = TransformComponent(mesh->get_inverse_bind_pose());
-            uint32_t body_id = Physics::create_static_mesh_collider(
-                sub_mesh, sub_mesh.get_component<TransformComponent>(), mesh->get_vertices(),
-                mesh->get_indices());
-            sub_mesh.add_component<StaticColliderComponent>(body_id);
-        }
+        create_static_model_entities("sponza2", {});
 
         // Entity glowCube = create_entity("glowing cube");
         // glowCube.get_component<TransformComponent>().position = glm::vec3(0.0f, 1.0f, 4.5f);
@@ -72,21 +62,10 @@ namespace cologne
         info.position = glm::vec3(-3.0f, 2.0f, 0.0f);
         player.add_component<PlayerComponent>(Physics::create_player(info), camera, viewModel);
 
-        Entity lamp = create_entity("lamp");
-        lamp.add_component<ModelComponent>(AssetManager::get_model_index_by_name("Lantern"));
-        lamp.get_component<TransformComponent>().position = glm::vec3(0.180f, 0.0f, -4.8f);
-        lamp.get_component<TransformComponent>().rotation = glm::quat(glm::radians(glm::vec3(0.0f, -90.0f, 0.0f)));
-        model = AssetManager::get_model_by_name("Lantern");
-        auto tr = lamp.get_component<TransformComponent>();
-        for (auto idx: model->get_mesh_indices())
-        {
-            const auto mesh = AssetManager::get_mesh_by_index(idx);
-            Entity collider = create_entity(mesh->get_name() + "_Collider");
-            collider.get_component<TransformComponent>() = tr;
-            uint32_t body_id = Physics::create_static_mesh_collider(collider, tr, mesh->get_vertices(),
-                                                                    mesh->get_indices());
-            collider.add_component<StaticColliderComponent>(body_id);
-        }
+        create_static_model_entities("Lantern", TransformComponent(
+                                         glm::vec3(0.180f, 0.0f, -4.8f),
+                                         glm::quat(glm::radians(glm::vec3(0.0f, -90.0f, 0.0f))),
+                                         glm::vec3(1.0f)));
 
         Entity dir_light = create_entity("directional light");
         auto &light = dir_light.add_component<LightComponent>();
@@ -117,6 +96,20 @@ namespace cologne
         auto &cam = scene_camera.add_component<CameraComponent>();
         cam.primary = false;
         scene_camera.add_component<NativeScriptComponent>().bind<EditorCameraController>();
+
+        auto view = _registry.view<TransformComponent, StaticColliderComponent, MeshComponent>();
+        for (auto entity: view)
+        {
+            Entity e = {entity, this};
+            auto &transform = _registry.get<TransformComponent>(entity);
+            auto &collider = _registry.get<StaticColliderComponent>(entity);
+            auto &mc = _registry.get<MeshComponent>(entity);
+            auto mesh = AssetManager::get_mesh_by_index(mc.mesh_idx);
+            uint32_t body_id = Physics::create_static_mesh_collider(
+                e, transform, mesh->get_vertices(),
+                mesh->get_indices());
+            collider.body_id = body_id;
+        }
 
 
         re_calculate_bounds();
@@ -267,7 +260,8 @@ namespace cologne
             {
                 continue;
             }
-            Engine::get_renderer()->submit_render_item(RenderItem(m.mesh_idx, tr, false, static_cast<uint32_t>(entity)));
+            Engine::get_renderer()->
+                    submit_render_item(RenderItem(m.mesh_idx, tr, false, static_cast<uint32_t>(entity)));
         }
 
         auto view3 = _registry.view<SkinnedModelComponent, TransformComponent, ActiveComponent>();
@@ -343,6 +337,21 @@ namespace cologne
         entity.add_component<ActiveComponent>(true);
         return entity;
     }
+
+    void Scene::create_static_model_entities(const char *model_name, const TransformComponent &parent_transform)
+    {
+        auto model = AssetManager::get_model_by_name(model_name);
+        for (auto idx: model->get_mesh_indices())
+        {
+            const auto mesh = AssetManager::get_mesh_by_index(idx);
+            Entity sub_mesh = create_entity(mesh->get_name());
+            sub_mesh.add_component<MeshComponent>(idx);
+            sub_mesh.get_component<TransformComponent>() = TransformComponent(
+                parent_transform.get_mat4() * mesh->get_inverse_bind_pose());
+            sub_mesh.add_component<StaticColliderComponent>();
+        }
+    }
+
 
     void Scene::destroy_entity(Entity entity)
     {
