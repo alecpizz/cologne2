@@ -114,7 +114,6 @@ namespace cologne
     void Renderer::voxelize_scene()
     {
         OpenGLDebugScope scope("Renderer::voxelize_scene");
-        auto scene = Engine::get_scene();
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);

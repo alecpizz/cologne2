@@ -108,12 +108,14 @@ namespace cologne
         ImGui::CreateContext();
         ImGui::LoadIniSettingsFromDisk(RESOURCES_PATH "editor/imgui_config.ini");
         imguiThemes::green();
+
         ImGuiIO &io = ImGui::GetIO();
         (void) io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
         prev_viewport_size = ImVec2(1280, 720);
+        io.FontDefault = io.Fonts->AddFontFromFileTTF(RESOURCES_PATH "fonts/Montserrat-Regular.ttf", 16.0f);
 
         ImGuiStyle &style = ImGui::GetStyle();
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -219,14 +221,16 @@ namespace cologne
             Entity e = {entity, Engine::get_scene()};
             auto tag = e.get_component<TagComponent>().tag;
             auto flags = (_selected_entity == e ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+            flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
             bool opened = ImGui::TreeNodeEx((void *) (uint64_t) (uint32_t) e, flags, tag.c_str());
             if (ImGui::IsItemClicked())
             {
+                LOG_INFO("clicked");
                 _selected_entity = e;
             }
             if (opened)
             {
-                ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_OpenOnArrow;
+                auto flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
                 bool opened = ImGui::TreeNodeEx((void *) 9817239, flags, tag.c_str());
                 if (opened)
                 {
@@ -275,6 +279,32 @@ namespace cologne
         }
     }
 
+    template<typename T, typename UIFunction>
+    static void draw_component(const std::string &name, Entity entity, bool remove, UIFunction ui_function)
+    {
+        constexpr ImGuiTreeNodeFlags tree_node_flags = ImGuiTreeNodeFlags_DefaultOpen |
+                                                       ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth |
+                                                       ImGuiTreeNodeFlags_AllowItemOverlap |
+                                                       ImGuiTreeNodeFlags_FramePadding;
+        if (entity.has_component<T>())
+        {
+            auto &component = entity.get_component<T>();
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{4, 4});
+            bool open = ImGui::TreeNodeEx((void *) typeid(T).hash_code(), tree_node_flags, name.c_str());
+            ImGui::PopStyleVar();
+
+            if (open)
+            {
+                ui_function(component);
+                ImGui::TreePop();
+            }
+            if (remove)
+            {
+                remove_component_menu<T>(entity);
+            }
+        }
+    }
+
     void Editor::build_properties_panel()
     {
         ImGui::Begin("Properties", nullptr, global_window_flags);
@@ -288,68 +318,47 @@ namespace cologne
             ImGui::Checkbox("Active", &_selected_entity.get_component<ActiveComponent>().active);
             ImGui::Text("Transform");
             build_transform_entry(_selected_entity.get_component<TransformComponent>());
-            if (_selected_entity.has_component<ViewmodelComponent>())
+            draw_component<ViewmodelComponent>("View Model", _selected_entity, true, [](auto &vm)
             {
-                if (ImGui::TreeNode("View Model Settings"))
-                {
-                    auto &vm = _selected_entity.get_component<ViewmodelComponent>();
-                    ImGui::DragFloat("smoothing", &vm.smoothing, 0.1f);
-                    ImGui::DragFloat("amplitude", &vm.amplitude, 0.01f);
-                    ImGui::DragFloat("frequency", &vm.frequency, 0.1f);
-                    ImGui::DragFloat("vertical velocity multi", &vm.vertical_velocity_multiplier, 0.01f);
-                    ImGui::DragFloat("max vertical offset", &vm.max_vertical_offset, 0.01f);
-                    ImGui::DragFloat("sway multiplier", &vm.sway_multiplier);
-                    ImGui::DragFloat3("position offset", glm::value_ptr(vm.position_offset));
-                    ImGui::DragFloat3("euler offset", glm::value_ptr(vm.euler_offset));
-                    remove_component_menu<ViewmodelComponent>(_selected_entity);
-                    ImGui::TreePop();
-                }
-            }
+                ImGui::DragFloat("smoothing", &vm.smoothing, 0.1f);
+                ImGui::DragFloat("amplitude", &vm.amplitude, 0.01f);
+                ImGui::DragFloat("frequency", &vm.frequency, 0.1f);
+                ImGui::DragFloat("vertical velocity multi", &vm.vertical_velocity_multiplier, 0.01f);
+                ImGui::DragFloat("max vertical offset", &vm.max_vertical_offset, 0.01f);
+                ImGui::DragFloat("sway multiplier", &vm.sway_multiplier);
+                ImGui::DragFloat3("position offset", glm::value_ptr(vm.position_offset));
+                ImGui::DragFloat3("euler offset", glm::value_ptr(vm.euler_offset));
+            });
 
-            if (_selected_entity.has_component<LightComponent>())
+            draw_component<LightComponent>("Light", _selected_entity, true, [this](auto &light)
             {
-                auto &light = _selected_entity.get_component<LightComponent>();
                 Engine::get_renderer()->draw_sphere(_selected_entity.get_component<TransformComponent>().position,
                                                     light.radius, light.color);
-                if (ImGui::TreeNode("Light Settings"))
-                {
-                    ImGui::DragFloat("radius", &light.radius, 0.01f);
-                    ImGui::DragFloat("strength", &light.strength, 0.01f);
-                    ImGui::ColorEdit3("color", glm::value_ptr(light.color), ImGuiColorEditFlags_HDR
-                                                                            | ImGuiColorEditFlags_Float);
+                ImGui::DragFloat("radius", &light.radius, 0.01f);
+                ImGui::DragFloat("strength", &light.strength, 0.01f);
+                ImGui::ColorEdit3("color", glm::value_ptr(light.color), ImGuiColorEditFlags_HDR
+                                                                        | ImGuiColorEditFlags_Float);
+            });
 
-                    remove_component_menu<LightComponent>(_selected_entity);
-                    ImGui::TreePop();
-                }
-            }
-
-            if (_selected_entity.has_component<MeshComponent>())
+            draw_component<MeshComponent>("Mesh", _selected_entity, true, [this](auto &mesh_comp)
             {
-                auto &mesh_comp = _selected_entity.get_component<MeshComponent>();
                 Engine::get_renderer()->submit_outline_render_item(RenderItem(mesh_comp.mesh_idx,
                                                                               _selected_entity.get_component<
                                                                                   TransformComponent>(),
                                                                               false,
                                                                               static_cast<uint32_t>(_selected_entity)));
-                if (ImGui::TreeNode("Mesh Info"))
+                int id = mesh_comp.mesh_idx;
+                if (ImGui::InputInt("Mesh ID", &id))
                 {
-                    int id = mesh_comp.mesh_idx;
-                    if (ImGui::InputInt("Mesh ID", &id))
-                    {
-                        id = glm::clamp(id, 0, static_cast<int>(AssetManager::get_meshes().size()) - 1);
-                        mesh_comp.mesh_idx = id;
-                    }
-                    std::string mesh_name = AssetManager::get_mesh_by_index(mesh_comp.mesh_idx)->get_name();
-                    ImGui::Text("Name %s", mesh_name.c_str());
-                    remove_component_menu<MeshComponent>(_selected_entity);
-                    ImGui::TreePop();
+                    id = glm::clamp(id, 0, static_cast<int>(AssetManager::get_meshes().size()) - 1);
+                    mesh_comp.mesh_idx = id;
                 }
-            }
+                std::string mesh_name = AssetManager::get_mesh_by_index(mesh_comp.mesh_idx)->get_name();
+                ImGui::Text("Name %s", mesh_name.c_str());
+            });
 
-
-            if (_selected_entity.has_component<ModelComponent>())
+            draw_component<ModelComponent>("Model", _selected_entity, true, [this](auto &model)
             {
-                auto &model = _selected_entity.get_component<ModelComponent>();
                 auto m = AssetManager::get_model_by_index(model.id);
                 for (auto idx: m->get_mesh_indices())
                 {
@@ -359,26 +368,20 @@ namespace cologne
                         false,
                         static_cast<uint32_t>(_selected_entity)));
                 }
-                if (ImGui::TreeNode("Model Info"))
+                int id = static_cast<int>(model.id);
+                if (ImGui::InputInt("Model ID", &id))
                 {
-                    int id = static_cast<int>(model.id);
-                    if (ImGui::InputInt("Model ID", &id))
-                    {
-                        id = glm::clamp(id, 0,
-                                        static_cast<int>(AssetManager::get_models().size()) - 1);
-                        model.id = id;
-                    }
-                    std::string model_name = AssetManager::get_model_by_index(model.id)->get_name();
-                    ImGui::Text("Name %s", model_name.c_str());
-                    ImGui::Checkbox("GI Only", &model.gi_only);
-                    remove_component_menu<ModelComponent>(_selected_entity);
-                    ImGui::TreePop();
+                    id = glm::clamp(id, 0,
+                                    static_cast<int>(AssetManager::get_models().size()) - 1);
+                    model.id = id;
                 }
-            }
+                std::string model_name = AssetManager::get_model_by_index(model.id)->get_name();
+                ImGui::Text("Name %s", model_name.c_str());
+                ImGui::Checkbox("GI Only", &model.gi_only);
+            });
 
-            if (_selected_entity.has_component<SkinnedModelComponent>())
+            draw_component<SkinnedModelComponent>("Skinned Model", _selected_entity, true, [this](auto &model)
             {
-                auto &model = _selected_entity.get_component<SkinnedModelComponent>();
                 SkinnedRenderItem item;
                 item.skinned_model = AssetManager::get_skinned_model_by_index(model.id);
                 item.transform = _selected_entity.get_component<TransformComponent>();
@@ -388,90 +391,61 @@ namespace cologne
                     item.bones = anim.get_bones();
                 }
                 Engine::get_renderer()->submit_skinned_outline_render_item(item);
-                if (ImGui::TreeNode("Skinned Model Info"))
+                int id = static_cast<int>(model.id);
+                if (ImGui::InputInt("Skinned Model ID", &id))
                 {
-                    int id = static_cast<int>(model.id);
-                    if (ImGui::InputInt("Skinned Model ID", &id))
-                    {
-                        id = glm::clamp(id, 0,
-                                        static_cast<int>(AssetManager::get_skinned_models().size()) - 1);
-                        model.id = id;
-                    }
-                    std::string model_name = AssetManager::get_skinned_model_by_index(model.id)->get_name();
-                    ImGui::Text("Name %s", model_name.c_str());
-                    remove_component_menu<SkinnedModelComponent>(_selected_entity);
-                    ImGui::TreePop();
+                    id = glm::clamp(id, 0,
+                                    static_cast<int>(AssetManager::get_skinned_models().size()) - 1);
+                    model.id = id;
                 }
-            }
+                std::string model_name = AssetManager::get_skinned_model_by_index(model.id)->get_name();
+                ImGui::Text("Name %s", model_name.c_str());
+            });
 
-            if (_selected_entity.has_component<StaticColliderComponent>())
+            draw_component<StaticColliderComponent>("Static Collider", _selected_entity, false, [](auto &collider)
             {
-                if (ImGui::TreeNode("Static Collider Info"))
+                ImGui::BeginDisabled(true);
+                int id = static_cast<int>(collider.body_id);
+                if (ImGui::InputInt("Collider Body ID", &id))
                 {
-                    ImGui::BeginDisabled(true);
-                    int id = static_cast<int>(_selected_entity.get_component<StaticColliderComponent>().body_id);
-                    if (ImGui::InputInt("Collider Body ID", &id))
-                    {
-                    }
-                    ImGui::EndDisabled();
-                    ImGui::TreePop();
                 }
-            }
+                ImGui::EndDisabled();
+            });
 
-            if (_selected_entity.has_component<CameraComponent>())
+            draw_component<CameraComponent>("Camera", _selected_entity, false, [](auto &camera)
             {
-                if (ImGui::TreeNode("Camera Settings"))
+                float degrees = glm::degrees(camera.fov_radians);
+                if (ImGui::SliderFloat("FOV", &degrees, 30.0f, 120.0f))
                 {
-                    auto &camera = _selected_entity.get_component<CameraComponent>();
-                    float degrees = glm::degrees(camera.fov_radians);
-                    if (ImGui::SliderFloat("FOV", &degrees, 30.0f, 120.0f))
-                    {
-                        float radians = glm::radians(degrees);
-                        camera.fov_radians = radians;
-                    }
-                    ImGui::BeginDisabled(true);
-
-                    ImGui::Checkbox("Primary", &camera.primary);
-                    ImGui::EndDisabled();
-                    ImGui::TreePop();
+                    float radians = glm::radians(degrees);
+                    camera.fov_radians = radians;
                 }
-            }
+                ImGui::BeginDisabled(true);
 
-            if (_selected_entity.has_component<PlayerComponent>())
+                ImGui::Checkbox("Primary", &camera.primary);
+                ImGui::EndDisabled();
+            });
+
+            draw_component<PlayerComponent>("Player", _selected_entity, true, [](auto &player)
             {
-                if (ImGui::TreeNode("Player Settings"))
-                {
-                    auto &player = _selected_entity.get_component<PlayerComponent>();
-                    ImGui::DragFloat("Character Speed", &player.character_speed);
-                    ImGui::DragFloat("Jump Speed", &player.jump_speed);
-                    remove_component_menu<PlayerComponent>(_selected_entity);
-                    ImGui::TreePop();
-                }
-            }
+                ImGui::DragFloat("Character Speed", &player.character_speed);
+                ImGui::DragFloat("Jump Speed", &player.jump_speed);
+            });
 
-            if (_selected_entity.has_component<NativeScriptComponent>())
-            {
-                if (ImGui::TreeNode("Native Script Component"))
-                {
-                    ImGui::TextDisabled("how should these components work lol");
-                    remove_component_menu<NativeScriptComponent>(_selected_entity);
-                    ImGui::TreePop();
-                }
-            }
 
-            if (_selected_entity.has_component<AnimatorComponent>())
+            draw_component<NativeScriptComponent>("Native Script", _selected_entity, true,
+                                                  [](auto &script)
+                                                  {
+                                                      ImGui::TextDisabled("how should these components work lol");
+                                                  });
+
+            draw_component<AnimatorComponent>("Animator", _selected_entity, true, [](auto &anim)
             {
-                if (ImGui::TreeNode("Animator Settings"))
-                {
-                    auto &anim = _selected_entity.get_component<AnimatorComponent>();
-                    float progress = anim.get_current_time();
-                    float total = anim.get_current_animation().get_duration();
-                    float percent = progress / total;
-                    ImGui::SliderFloat("Animation Progress", &percent, 0.0f, 1.0f);
-                    remove_component_menu<AnimatorComponent>(_selected_entity);
-                    ImGui::TreePop();
-                }
-            }
+                float progress = anim.get_current_time();
+                float total = anim.get_current_animation().get_duration();
+                float percent = progress / total;
+                ImGui::SliderFloat("Animation Progress", &percent, 0.0f, 1.0f);
+            });
 
             if (ImGui::Button("Add Component"))
             {
@@ -572,6 +546,7 @@ namespace cologne
                 uint32_t id = Renderer::read_fbo_pixel("gbuffer", "entity_id", x, y);
                 if (id != entt::null)
                 {
+                    LOG_INFO("clicked");
                     _selected_entity = {static_cast<entt::entity>(id), Engine::get_scene()};
                 }
                 else
