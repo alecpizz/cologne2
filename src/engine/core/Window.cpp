@@ -6,7 +6,7 @@
 
 #include <engine/util/DebugScope.h>
 
-#include "../editor/DebugUI.h"
+#include "../editor/Editor.h"
 #include <SDL3/SDL.h>
 
 namespace cologne
@@ -17,6 +17,7 @@ namespace cologne
         SDL_GLContext context = nullptr;
         uint32_t width = 0;
         uint32_t height = 0;
+        bool mouse_visible = false;
 
 
         void init(uint32_t w, uint32_t h)
@@ -74,17 +75,25 @@ namespace cologne
 
     uint32_t Window::get_width() const
     {
+        if (Editor::in_edit_mode())
+        {
+            return Editor::get_viewport_width();
+        }
         return _impl->width;
     }
 
     uint32_t Window::get_height() const
     {
+        if (Editor::in_edit_mode())
+        {
+            return Editor::get_viewport_height();
+        }
         return _impl->height;
     }
 
     glm::vec2 Window::get_dimensions() const
     {
-        return glm::vec2(_impl->width, _impl->height);
+        return glm::vec2(get_height(), get_width());
     }
 
     void Window::clear() const
@@ -127,11 +136,18 @@ namespace cologne
     void Window::hide_mouse() const
     {
         SDL_SetWindowRelativeMouseMode(_impl->window, true);
+        _impl->mouse_visible = false;
     }
 
     void Window::show_mouse() const
     {
         SDL_SetWindowRelativeMouseMode(_impl->window, false);
+        _impl->mouse_visible = true;
+    }
+
+    bool Window::mouse_visible() const
+    {
+        return _impl->mouse_visible;
     }
 
     Window::Window(uint32_t width, uint32_t height)
@@ -139,7 +155,7 @@ namespace cologne
         DebugScope scope (__PRETTY_FUNCTION__);
         _impl = new Impl();
         _impl->init(width, height);
-        hide_mouse();
+        //hide_mouse();
     }
 
     Window::~Window()

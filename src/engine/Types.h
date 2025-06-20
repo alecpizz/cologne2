@@ -12,6 +12,7 @@ namespace cologne
         glm::vec3 aabb_min = glm::vec3(std::numeric_limits<float>::max());
         glm::vec3 aabb_max = glm::vec3(std::numeric_limits<float>::min());
         uint32_t material_index;
+        glm::mat4 inverse_bind_pose = glm::mat4(1.0f);
     };
 
     struct SkinnedMeshData

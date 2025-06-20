@@ -82,7 +82,7 @@ namespace cologne
         glBindVertexArray(0);
     }
 
-    void Renderer::render_quad()
+    void Renderer::render_quad(int32_t count )
     {
         static uint32_t quad_vao = 0;
         static uint32_t quad_vbo = 0;
@@ -106,8 +106,9 @@ namespace cologne
             glEnableVertexAttribArray(1);
             glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
         }
+        if (count == 0) return;
         glBindVertexArray(quad_vao);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, count);
         glBindVertexArray(0);
     }
 }

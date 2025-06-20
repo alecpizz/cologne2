@@ -5,9 +5,10 @@
 #include "Engine.h"
 
 #include <engine/asset_manager/AssetManager.h>
+#include <engine/renderer/Renderer.h>
 
 #include "../physics/Physics.h"
-#include "../editor/DebugUI.h"
+#include "../editor/Editor.h"
 #include "engine/renderer/DebugRenderer.h"
 #include "Input.h"
 #include "../audio/Audio.h"
@@ -20,7 +21,7 @@ namespace cologne
         std::unique_ptr<Window> window = nullptr;
         std::unique_ptr<Renderer> renderer = nullptr;
         std::unique_ptr<EventManager> event_manager = nullptr;
-        std::unique_ptr<DebugUI> debug_ui = nullptr;
+        std::unique_ptr<Editor> debug_ui = nullptr;
         std::unique_ptr<Scene> scene = nullptr;
         bool running = true;
     };
@@ -74,17 +75,17 @@ namespace cologne
     }
 
 
-    DebugUI * Engine::get_debug_ui()
+    Editor * Engine::get_debug_ui()
     {
         return _instance->_impl->debug_ui.get();
     }
 
     bool Engine::init(uint32_t width, uint32_t height)
     {
-        _impl->debug_ui = std::unique_ptr<DebugUI>(new DebugUI());
+        Audio::init();
+        _impl->debug_ui = std::unique_ptr<Editor>(new Editor());
         _impl->window = std::unique_ptr<Window>(new Window(width, height));
         Physics::init();
-        Audio::init();
         AssetManager::init();
         AssetManager::print_all();
         // Audio::add_music(RESOURCES_PATH "sounds/music2.mp3");
@@ -121,5 +122,10 @@ namespace cologne
             et.update();
             Time::DeltaTime = et.elapsed;
         }
+    }
+
+    bool Engine::in_edit_mode()
+    {
+        return Editor::in_edit_mode();
     }
 } // cologne

@@ -6,42 +6,13 @@
 
 namespace cologne
 {
-    class CameraController : public ScriptableEntity
+    class EditorCameraController final : public ScriptableEntity
     {
     private:
         glm::vec2 _rotation = glm::vec2(0.0f);
-        glm::vec3 _position = glm::vec3(0.0f);
-        bool _is_free_cam = true;
-        bool _show_mouse = true;
-
-    protected:
-        void on_create() override
+        bool _was_controlling = false;
+        void free_cam(float dt)
         {
-        }
-
-        void on_destroy() override
-        {
-        }
-
-        void on_update(float dt) override
-        {
-            if (cologne::Input::key_pressed(Input::Key::Escape))
-            {
-                _show_mouse = !_show_mouse;
-                if (!_show_mouse)
-                {
-                    Engine::get_window()->show_mouse();
-                } else
-                {
-                    Engine::get_window()->hide_mouse();
-                }
-            }
-
-            if (Engine::get_event_manager()->paused())
-            {
-                return;
-            }
-
             auto mouse = Input::get_relative_mouse();
             constexpr float sensitivity = 30.0f;
             _rotation.x += mouse.x * sensitivity * dt;
@@ -58,46 +29,77 @@ namespace cologne
             glm::vec3 right = target_rotation * glm::vec3(1.0f, 0.0f, 0.0f);
             glm::vec3 up = target_rotation * glm::vec3(0.0f, 1.0f, 0.0f);
 
-            if (Input::key_pressed(Input::Key::F))
-            {
-                _is_free_cam = !_is_free_cam;
-            }
-
-            if (!_is_free_cam)
-            {
-                return;
-            }
-
             float speed = 10.0f;
             if (cologne::Input::key_down(Input::Key::LeftShift))
             {
                 speed *= 2.5f;
             }
+            auto pos = get_component<TransformComponent>().position;
             if (cologne::Input::key_down(Input::Key::W))
             {
-                _position += fwd * dt * speed;
+                pos += fwd * dt * speed;
             }
             if (cologne::Input::key_down(Input::Key::S))
             {
-                _position -= fwd * dt * speed;
+                pos -= fwd * dt * speed;
             }
             if (cologne::Input::key_down(Input::Key::A))
             {
-                _position += right * dt * speed;
+                pos += right * dt * speed;
             }
             if (cologne::Input::key_down(Input::Key::D))
             {
-                _position -= right * dt * speed;
+                pos -= right * dt * speed;
             }
-            if (cologne::Input::key_down(Input::Key::Space))
+            if (cologne::Input::key_down(Input::Key::E))
             {
-                _position += up * dt * speed;
+                pos += up * dt * speed;
             }
-            if (cologne::Input::key_down(Input::Key::LeftCtrl))
+            if (cologne::Input::key_down(Input::Key::Q))
             {
-                _position -= up * dt * speed;
+                pos -= up * dt * speed;
             }
-            get_component<TransformComponent>().position = _position;
+            get_component<TransformComponent>().position = pos;
+        }
+
+        void pan(float dt)
+        {
+            auto mouse = Input::get_relative_mouse();
+            const glm::quat target_rotation = get_component<TransformComponent>().rotation;
+            const glm::vec3 right = target_rotation * glm::vec3(1.0f, 0.0f, 0.0f);
+            const glm::vec3 up = target_rotation * glm::vec3(0.0f, 1.0f, 0.0f);
+            auto pos = get_component<TransformComponent>().position;
+            constexpr float speed = 5.0f;
+            pos += right * dt * mouse.x * speed;
+            pos += up * dt * mouse.y * speed;
+            get_component<TransformComponent>().position = pos;
+        }
+
+    protected:
+        void on_create() override
+        {
+        }
+
+        void on_destroy() override
+        {
+        }
+
+        void on_update(float dt) override
+        {
+            if (Input::mouse_down(Input::MouseButton::Middle))
+            {
+                pan(dt);
+            }
+            else
+            {
+                free_cam(dt);
+            }
+
+        }
+
+        RuntimeMode get_runtime_mode() override
+        {
+            return RuntimeMode::EDITOR_ONLY;
         }
     };
 }

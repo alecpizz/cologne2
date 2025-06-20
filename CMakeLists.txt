@@ -49,6 +49,7 @@ add_subdirectory(vendor/imgui-docking)
 add_subdirectory(vendor/assimp)
 add_subdirectory(vendor/spdlog)
 add_subdirectory(vendor/freetype)
+add_subdirectory(vendor/imguizmo)
 
 
 FetchContent_Declare(
@@ -73,6 +74,7 @@ set(INTERPROCEDURAL_OPTIMIZATION ON)
 set(USE_F16C ON)
 set(USE_FMADD ON)
 set(FLOATING_POINT_EXCEPTIONS_ENABLED OFF)
+set(JPH_ENABLE_ASSERTS OFF)
 
 if (NOT JoltPhysics_POPULATED)
     FetchContent_MakeAvailable(JoltPhysics)
@@ -113,8 +115,11 @@ else ()
 
 endif ()
 
+target_sources(imgui PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui-docking/imgui/misc/cpp/imgui_stdlib.cpp")
 target_sources("${CMAKE_PROJECT_NAME}" PRIVATE ${MY_SOURCES})
 
+target_compile_options("${CMAKE_PROJECT_NAME}" PRIVATE -fsanitize=address,undefined)
+target_link_options("${CMAKE_PROJECT_NAME}" PRIVATE -fsanitize=address,undefined)
 
 if (MSVC) # If using the VS compiler...
 
@@ -129,6 +134,6 @@ target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURC
 target_precompile_headers("${CMAKE_PROJECT_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/gpch.h")
 target_include_directories(${CMAKE_PROJECT_NAME}  PUBLIC ${JoltPhysics_SOURCE_DIR})
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm_static spdlog::spdlog_header_only
-        stb_image stb_truetype imgui SDL3-static assimp Jolt freetype SDL3_mixer-static)
+        stb_image stb_truetype imgui ImGuizmo SDL3-static assimp Jolt freetype SDL3_mixer-static)
 
 

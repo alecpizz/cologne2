@@ -12,7 +12,7 @@ namespace cologne
         compile(comp_path);
     }
 
-    Shader::Shader(const std::string&vert_path, const std::string&frag_path)
+    Shader::Shader(const char* vert_path, const char* frag_path)
     {
         compile(vert_path, frag_path, std::string());
     }
@@ -160,6 +160,40 @@ namespace cologne
         glUniform1f(_uniforms[name], value);
     }
 
+    void Shader::set_uint(const std::string &name, const uint32_t id)
+    {
+        if (!_linked)
+        {
+            return;
+        }
+        if (!_uniforms.contains(name))
+        {
+            _uniforms[name] = glGetUniformLocation(_program, name.c_str());
+        }
+        glUniform1ui(_uniforms[name], id);
+    }
+
+    void Shader::set_ivec2(const std::string &name, std::vector<glm::ivec2> vecs)
+    {
+        if (!_linked)
+        {
+            return;
+        }
+        if (!_uniforms.contains(name))
+        {
+            _uniforms[name] = glGetUniformLocation(_program, name.c_str());
+        }
+        glUniform2iv(_uniforms[name], vecs.size(), glm::value_ptr(vecs[0]));
+    }
+
+    void Shader::cleanup()
+    {
+        if (_program != 0)
+        {
+            glDeleteProgram(_program);
+        }
+    }
+
     void Shader::compile(const std::string &comp_path)
     {
         _program = glCreateProgram();
@@ -246,7 +280,7 @@ namespace cologne
             code = ss.str();
         } catch (const std::ifstream::failure &e)
         {
-            LOG_ERROR("Failed to read file %s %s", shader_path, e.what());
+            LOG_ERROR("Failed to read file %s %s", shader_path.c_str(), e.what());
         }
         uint32_t shader = glCreateShader(shader_type);
         const char* shader_code = code.c_str();

@@ -9,9 +9,7 @@
 
 */
 #pragma once
-#include "../editor/DebugUI.h"
 #include "../scene/Scene.h"
-#include "engine/renderer/Renderer.h"
 #include "Window.h"
 #include "EventManager.h"
 #include "engine/GoodGPUs.h"
@@ -19,6 +17,8 @@
 
 namespace cologne
 {
+    class Renderer;
+
     class Engine
     {
     public:
@@ -35,7 +35,7 @@ namespace cologne
         static Scene *get_scene();
 
 
-        static DebugUI *get_debug_ui();
+        static Editor *get_debug_ui();
 
         Engine(Engine &&) = delete;
 
@@ -48,6 +48,8 @@ namespace cologne
         bool init(uint32_t width, uint32_t height);
 
         void run();
+
+        static bool in_edit_mode();
 
     private:
         inline static Engine *_instance;

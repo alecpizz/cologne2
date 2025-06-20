@@ -34,6 +34,7 @@ namespace cologne
 
         void hide_mouse() const;
         void show_mouse() const;
+        bool mouse_visible() const;
 
     private:
         Window(uint32_t width, uint32_t height);

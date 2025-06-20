@@ -54,6 +54,13 @@ namespace cologne::Util
         return glm::quat(quat.w, quat.x, quat.y, quat.z);
     }
 
+    void decompose_mat4(const glm::mat4& matrix, glm::vec3 &position, glm::quat &rotation, glm::vec3 &scale)
+    {
+        static glm::vec3 skew;
+        static glm::vec4 persp;
+        glm::decompose(matrix, scale, rotation, position, skew, persp);
+    }
+
     void get_screen_to_world_ray(glm::vec2 position, glm::mat4 view, glm::mat4 proj, glm::vec3& origin, glm::vec3& dir)
     {
         int width = Engine::get_window()->get_width();

@@ -29,7 +29,6 @@ namespace cologne
         update_shadow(*shader);
 
         shader->set_int("voxel_grid_size", _voxel_data.voxel_dimensions);
-        shader->set_vec3("voxel_offset", (_voxel_data.voxel_offset));
         auto bounds = Engine::get_scene()->get_bounds();
         const glm::vec3 size = bounds.size(); //THIS IS WRONG!
         const float world_size = glm::max(size.x, glm::max(size.y, size.z));
@@ -52,6 +51,7 @@ namespace cologne
         glBindTextureUnit(5, _shadow_depth);
         glBindTextureUnit(6, _indirect_texture);
         glBindTextureUnit(7, _bloom_texture);
+        glBindTextureUnit(8, gbuffer_fbo->get_color_attachment_handle_by_name("entity_id"));
         render_quad();
         glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer_fbo->get_handle());
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, output_fbo->get_handle()); // write to output framebuffer

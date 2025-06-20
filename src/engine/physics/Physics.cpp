@@ -8,6 +8,7 @@
 #include "RaycastHitInfo.h"
 #include <engine/core/Engine.h>
 #include <engine/core/Input.h>
+#include <engine/renderer/Renderer.h>
 #include <engine/scene/Components.h>
 #include <Jolt/Jolt.h>
 #include <Jolt/Core/Factory.h>
@@ -251,32 +252,35 @@ namespace cologne::Physics
 
     void update(float dt)
     {
-        for (auto &physics_player: physics_players)
-        {
-            auto &p = physics_player.second;
-            auto &character = p.character;
-            JPH::CharacterVirtual::ExtendedUpdateSettings update_settings;
-            update_settings.mStickToFloorStepDown = -character->GetUp() * update_settings.mStickToFloorStepDown.
-                                                    Length();
-            update_settings.mWalkStairsStepUp = character->GetUp() * update_settings.mWalkStairsStepUp.Length();
-            character->ExtendedUpdate(
-                dt, character->GetUp() * physics_system.GetGravity().Length(), update_settings,
-                physics_system.GetDefaultBroadPhaseLayerFilter(1),
-                physics_system.GetDefaultLayerFilter(1),
-                {},
-                {},
-                *temp_allocator);
-
-            p.character_position = glm::vec3(character->GetPosition().GetX(), character->GetPosition().GetY(),
-                                             character->GetPosition().GetZ());
-        }
-
         if (cologne::Input::key_pressed(Input::Key::P))
         {
             drawing = !drawing;
         }
-        const int collisionSteps = 1;
-        physics_system.Update(dt, collisionSteps, temp_allocator, job_system);
+        if (!Engine::in_edit_mode())
+        {
+            for (auto &physics_player: physics_players)
+            {
+                auto &p = physics_player.second;
+                auto &character = p.character;
+                JPH::CharacterVirtual::ExtendedUpdateSettings update_settings;
+                update_settings.mStickToFloorStepDown = -character->GetUp() * update_settings.mStickToFloorStepDown.
+                                                        Length();
+                update_settings.mWalkStairsStepUp = character->GetUp() * update_settings.mWalkStairsStepUp.Length();
+                character->ExtendedUpdate(
+                    dt, character->GetUp() * physics_system.GetGravity().Length(), update_settings,
+                    physics_system.GetDefaultBroadPhaseLayerFilter(1),
+                    physics_system.GetDefaultLayerFilter(1),
+                    {},
+                    {},
+                    *temp_allocator);
+
+                p.character_position = glm::vec3(character->GetPosition().GetX(), character->GetPosition().GetY(),
+                                                 character->GetPosition().GetZ());
+            }
+            const int collisionSteps = 1;
+            physics_system.Update(dt, collisionSteps, temp_allocator, job_system);
+        }
+
         if (drawing)
         {
             BodyManager::DrawSettings draw_settings;
@@ -373,8 +377,8 @@ namespace cologne::Physics
             return;
         }
 
-        auto& player = physics_players[id];
-        auto& character = player.character;
+        auto &player = physics_players[id];
+        auto &character = player.character;
         character->SetPosition(glm_vec3_to_vec3(position));
     }
 
@@ -470,14 +474,48 @@ namespace cologne::Physics
         const auto shape = body_interface.GetShape(id);
         const auto new_shape = shape->ScaleShape(glm_vec3_to_jph_vec3(transform.scale)).Get();
         body_interface.SetShape(id, new_shape, true, EActivation::DontActivate);
+        auto quat = glm_quat_to_jph_quat(transform.rotation);
+        if (!quat.IsNormalized())
+        {
+            LOG_INFO("Quat isn't normalized!");
+            quat = quat.sIdentity();
+        }
         body_interface.SetPositionAndRotation(id, glm_vec3_to_jph_vec3(transform.position),
-                                              glm_quat_to_jph_quat(transform.rotation),
+                                              quat,
                                               EActivation::DontActivate);
         LOG_INFO("Created collider with id %d", id);
         colliders_static.push_back(id);
         physics_system.OptimizeBroadPhase();
         entity_to_collider_map[id] = entity;
         return id.GetIndexAndSequenceNumber();
+    }
+
+    void sync_transform(Entity entity)
+    {
+        if (entity.has_component<StaticColliderComponent>())
+        {
+            auto &comp = entity.get_component<StaticColliderComponent>();
+            const auto body_id = static_cast<BodyID>(comp.body_id);
+            const auto tr = entity.get_component<TransformComponent>();
+            const auto pos = glm_vec3_to_jph_vec3(tr.position);
+            auto rot = glm_quat_to_jph_quat(tr.rotation);
+            auto scale = glm_vec3_to_jph_vec3(tr.scale);
+            if (scale.IsNearZero())
+            {
+                LOG_INFO("scale too smol");
+                scale = JPH::Vec3::sOne();
+            }
+            auto &body_interface = physics_system.GetBodyInterface();
+            const auto shape = body_interface.GetShape(body_id);
+            const auto new_shape = shape->ScaleShape(scale).Get();
+            body_interface.SetShape(body_id, new_shape, true, EActivation::DontActivate);
+            if (!rot.IsNormalized())
+            {
+                LOG_INFO("Quat isn't normalized!");
+                rot = JPH::Quat::sIdentity();
+            }
+            body_interface.SetPositionAndRotation(body_id, pos, rot, EActivation::DontActivate);
+        }
     }
 
     bool raycast(glm::vec3 origin, glm::vec3 direction, float max_distance, uint32_t layers, RaycastHitInfo &info)
@@ -502,7 +540,8 @@ namespace cologne::Physics
             const Body &hit_body = lock.GetBody();
             const Vec3 normal = hit_body.GetWorldSpaceSurfaceNormal(result.mSubShapeID2, outPosition);
             info.hit_normal = jph_vec3_to_glm_vec3(normal);
-        } else
+        }
+        else
         {
             info.hit_normal = glm::vec3(0.0f, 1.0f, 0.0f);
             return false;

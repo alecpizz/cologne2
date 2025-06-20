@@ -13,10 +13,15 @@ namespace cologne::Audio
     std::unordered_map<std::string, Mix_Chunk*> sounds;
     void init()
     {
+        LOG_INFO("AUDIO INTI");
         DebugScope scope("Audio::init");
         if (!Mix_OpenAudio(0, nullptr))
         {
             LOG_ERROR("Failed to start SDL_MIXER! Error: %s", SDL_GetError());
+        }
+        else
+        {
+            LOG_INFO("Audio Mixer started succesfully");
         }
     }
 

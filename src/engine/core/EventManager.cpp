@@ -4,6 +4,9 @@
 
 #include "EventManager.h"
 
+#include <engine/editor/Editor.h>
+#include <engine/renderer/Renderer.h>
+
 #include "Engine.h"
 #include "Input.h"
 
@@ -33,9 +36,11 @@ namespace cologne
             if (event.type == SDL_EVENT_KEY_DOWN)
             {
                 Input::update_key_down(static_cast<uint32_t>(event.key.scancode));
-                if (event.key.scancode == SDL_SCANCODE_ESCAPE)
+                if (event.key.scancode == SDL_SCANCODE_TAB)
                 {
                     _impl->paused = !_impl->paused;
+                    Editor::toggle_edit_mode(_impl->paused);
+                    invoke_resize(Engine::get_window()->get_width(), Engine::get_window()->get_height());
                 }
             }
             if (event.type == SDL_EVENT_KEY_UP)
@@ -68,9 +73,10 @@ namespace cologne
         return _impl->should_quit;
     }
 
-    bool EventManager::paused() const
+    void EventManager::invoke_resize(uint32_t width, uint32_t height)
     {
-        return _impl->paused;
+        Engine::get_window()->resize();
+        Engine::get_renderer()->window_resized(width, height);
     }
 
     bool event_watch(void *data, SDL_Event *event)
@@ -79,7 +85,7 @@ namespace cologne
         {
             Engine::get_window()->resize();
             Engine::get_renderer()->window_resized(event->window.data1, event->window.data2);
-            Engine::get_window()->present();
+            // Engine::get_window()->present();
         }
         return true;
     }

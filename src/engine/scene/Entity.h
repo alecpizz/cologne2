@@ -58,6 +58,7 @@ namespace cologne
         explicit operator bool() const { return _entity_handle != entt::null; }
         explicit operator uint32_t() const { return (uint32_t(_entity_handle)); }
         operator entt::entity() const { return _entity_handle; }
+        bool operator==(const Entity & other) const {return _entity_handle == other._entity_handle;}
 
     private:
         entt::entity _entity_handle = entt::null;

@@ -25,7 +25,7 @@ namespace cologne
     public:
         Animation() = default;
 
-        Animation(const aiAnimation *animation, const aiScene *scene,
+        Animation(const std::string& base_name, const aiAnimation *animation, const aiScene *scene,
                   std::unordered_map<std::string, BoneInfo> &bone_map, int &bone_count);
 
         BoneAnimationData *find_bone(const std::string &name);

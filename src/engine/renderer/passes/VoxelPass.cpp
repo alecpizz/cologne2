@@ -1,8 +1,9 @@
-﻿#include <engine/core/Engine.h>
+﻿#include <engine/asset_manager/AssetManager.h>
+#include <engine/core/Engine.h>
 #include <engine/renderer/OpenGLDebugScope.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Shader.h>
-#include <engine/renderer/types/SSBO.h>
+#include <engine/editor/Editor.h>
 //
 // Created by alecpizz on 5/4/2025.
 //
@@ -113,7 +114,6 @@ namespace cologne
     void Renderer::voxelize_scene()
     {
         OpenGLDebugScope scope("Renderer::voxelize_scene");
-        auto scene = Engine::get_scene();
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
@@ -144,11 +144,9 @@ namespace cologne
             for (auto &item: _render_items)
             {
                 shader->set_mat4("model", item.transform.get_mat4());
-                for (auto& mesh : item.model->get_meshes())
-                {
-                    item.model->get_materials()[mesh.get_material_index()].bind_all();
-                    mesh.draw();
-                }
+                const auto mesh = AssetManager::get_mesh_by_index(item.mesh_idx);
+                AssetManager::get_material_by_index(mesh->get_material_index())->bind_all();
+                mesh->draw();
             }
         }
 

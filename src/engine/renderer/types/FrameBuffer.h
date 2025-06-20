@@ -68,6 +68,7 @@ namespace cologne
 
         uint32_t get_depth_attachment_handle() const;
 
+        uint32_t get_color_attachment_format_by_name(const char* name) const;
         uint32_t get_color_attachment_slot_by_name(const char *name) const;
 
         void blit_to_default_frame_buffer(const char *srcName, int32_t dstX0, int32_t dstY0, int32_t dstX1,

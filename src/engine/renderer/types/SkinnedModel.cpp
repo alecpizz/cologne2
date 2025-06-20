@@ -24,11 +24,6 @@ namespace cologne
 
     }
 
-    Transform &SkinnedModel::get_transform()
-    {
-        return _transform;
-    }
-
     AABB SkinnedModel::get_aabb() const
     {
         return _bounds;
@@ -44,14 +39,9 @@ namespace cologne
         return _materials.size();
     }
 
-    SkinnedMesh *SkinnedModel::get_meshes()
+    std::vector<SkinnedMesh>& SkinnedModel::get_meshes()
     {
-        return _meshes.data();
-    }
-
-    uint64_t SkinnedModel::get_num_meshes() const
-    {
-        return _meshes.size();
+        return _meshes;
     }
 
     void SkinnedModel::set_active(bool active)

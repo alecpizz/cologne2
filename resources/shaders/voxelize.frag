@@ -11,7 +11,6 @@ layout (binding = 5) uniform sampler2D texture_emission;
 layout (RGBA16F, binding = 6) uniform image3D texture_voxel;
 layout (binding = 7) uniform sampler2DArray shadow_cascades;
 layout (binding = 8) uniform sampler2D dir_shadow;
-uniform vec3 voxel_size;
 
 layout (std140) uniform LightSpaceMatrices
 {
@@ -21,6 +20,8 @@ layout (std140) uniform LightSpaceMatrices
 uniform float far_plane = 20.0f;
 uniform float cascadePlaneDistances[4];
 uniform int cascadeCount;// number of frusta - 1
+uniform vec3 grid_min;
+uniform vec3 grid_max;
 
 struct Light
 {
@@ -32,6 +33,8 @@ struct Light
     int type;
     int enabled;
     uvec2 shadow_map;
+    int padding0;
+    int padding1;
 };
 
 #define MAX_LIGHTS 8
@@ -43,7 +46,6 @@ layout (binding = 2, std430) restrict readonly buffer lights_buffer
 {
     Light lights[];
 };
-uniform mat4 view;
 
 
 in vec2 TexCoords;
@@ -143,10 +145,10 @@ float get_light_space_depth(float near, float far, vec3 light_to_sample)
 
 float point_shadow_calc(vec3 fragPos, Light light)
 {
-    vec3 lightPos = light.position.xyz * voxel_size;
+    vec3 lightPos = light.position.xyz;
     vec3 frag_to_light = fragPos - lightPos;
     float bias = 0.02f;
-    float far_plane = (light.radius );//* max(voxel_size.z, max(voxel_size.y, voxel_size.x)));
+    float far_plane = (light.radius );
     float current_depth = get_light_space_depth(1.0f, far_plane, frag_to_light);
     float shadow = texture(samplerCubeShadow(light.shadow_map), vec4(frag_to_light, current_depth));
     return shadow;
@@ -189,14 +191,13 @@ vec4 pbr()
         }
         else if (lights[i].type == POINT)
         {
-            vec3 light_pos_voxel_space = lights[i].position.xyz * voxel_size;
-            L = normalize(light_pos_voxel_space - FragPos.xyz);
-            float distance = length(light_pos_voxel_space - FragPos.xyz);
-            float dist_range = distance / (lights[i].radius * max(voxel_size.z, max(voxel_size.y, voxel_size.x)));
+            L = normalize(lights[i].position.xyz - FragPos.xyz);
+            float distance = length(lights[i].position.xyz - FragPos.xyz);
+            float dist_range = distance / (lights[i].radius);
             float falloff = pow(dist_range, 2.0f);
             float smoothing = pow(max(0.0, 1.0 - falloff), 2.0f);
             float attenuation = smoothing / (distance * distance + 1.0f);
-//            shadow = 1.0 - point_shadow_calc(FragPos.xyz, lights[i]);
+            shadow = point_shadow_calc(FragPos.xyz, lights[i]);
             radiance = lights[i].color.rgb * lights[i].strength * attenuation;
         }
         vec3 H = normalize(V + L);
@@ -224,23 +225,42 @@ vec4 pbr()
     kD *= 1.0 - metallic;
 
     vec3 ambient = vec3(0.04) * albedo;
-    vec3 emission = texture2D(texture_emission, TexCoords).rgb;
+    vec3 emission = texture2D(texture_emission, TexCoords).rgb * 10;
     vec3 color = Lo + ambient + emission;
     return vec4(color, 1.0);
 }
 
+vec3 MapRangeToAnOther(vec3 value, vec3 valueMin, vec3 valueMax, vec3 mapMin, vec3 mapMax)
+{
+    return (value - valueMin) / (valueMax - valueMin) * (mapMax - mapMin) + mapMin;
+}
+
+vec3 MapToZeroOne(vec3 value, vec3 rangeMin, vec3 rangeMax)
+{
+    return MapRangeToAnOther(value, rangeMin, rangeMax, vec3(0.0), vec3(1.0));
+}
+
+
+ivec3 WorldSpaceToVoxelImageSpace(vec3 worldPos)
+{
+    vec3 uvw = MapToZeroOne(worldPos, grid_min, grid_max);
+    ivec3 voxelPos = ivec3(uvw * imageSize(texture_voxel));
+    return voxelPos;
+}
+
 void main()
 {
-    if (!is_inside_clipspace(FragPos.xyz))
-    {
-        return;
-    }
-
-
+//    if (!is_inside_clipspace(FragPos.xyz))
+//    {
+//        return;
+//    }
+//
+//
+//
+//    vec3 voxelgrid_tex_pos = from_clipspace_to_texcoords(FragPos.xyz);
+//    ivec3 voxelgrid_resolution = imageSize(texture_voxel);
+    ivec3 voxel_pos = WorldSpaceToVoxelImageSpace(FragPos.xyz);
     vec4 color = pbr();
-
-    vec3 voxelgrid_tex_pos = from_clipspace_to_texcoords(FragPos.xyz);
-    ivec3 voxelgrid_resolution = imageSize(texture_voxel);
     //    imageStore(texture_voxel, ivec3(voxelgrid_resolution * voxelgrid_tex_pos), color);
-    imageAtomicMax(texture_voxel, ivec3(voxelgrid_resolution * voxelgrid_tex_pos), f16vec4(color));
+    imageAtomicMax(texture_voxel, voxel_pos, f16vec4(color));
 }

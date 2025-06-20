@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "engine/renderer/types/Light.h"
 #include "engine/scene/Scene.h"
 #include "types/FrameBuffer.h"
 #include "engine/renderer/types/RenderItem.h"
@@ -9,6 +8,7 @@ namespace cologne
     class Scene;
     class Shader;
     class SSBO;
+    struct Light;
 
     class Renderer
     {
@@ -45,6 +45,8 @@ namespace cologne
 
         void submit_render_item(RenderItem item);
         void submit_skinned_render_item(SkinnedRenderItem item);
+        void submit_outline_render_item(RenderItem item);
+        void submit_skinned_outline_render_item(SkinnedRenderItem item);
 
         void reload_shaders();
 
@@ -52,17 +54,17 @@ namespace cologne
 
         Light get_directional_light() const;
 
-        void submit_camera_transform(TransformComponent tr, CameraComponent cam);
+        void submit_camera_transform(const TransformComponent &tr, CameraComponent cam);
 
         static glm::mat4 get_camera_view(TransformComponent tr);
         static glm::mat4 get_camera_projection(TransformComponent tr, CameraComponent cam);
-
+        static uint32_t get_output_image();
+        static uint32_t read_fbo_pixel(const std::string& fbo_name, const std::string& attachment_name, uint32_t x, uint32_t y);
     private:
         //get me out of here!
         struct VoxelData
         {
             int32_t voxel_dimensions = 256;
-            glm::vec3 voxel_offset = glm::vec3(0.0f, -0.425f, 0.0f);
         };
 
         Renderer();
@@ -77,7 +79,7 @@ namespace cologne
 
         void render_cube(int32_t count = 1);
 
-        void render_quad();
+        void render_quad(int32_t count = 1);
 
         void init_shadow();
 
@@ -99,7 +101,7 @@ namespace cologne
 
         void init_skybox(const char *hdr_path);
 
-        void init_bloom();
+        void init_bloom(uint32_t width = 0, uint32_t height = 0);
 
         void bloom_pass();
 
@@ -110,6 +112,8 @@ namespace cologne
         void init_voxels();
 
         void init_indirect();
+
+        void init_indirect(uint32_t width, uint32_t height);
 
         void indirect_pass();
 
@@ -123,12 +127,18 @@ namespace cologne
 
         void init_brdf();
 
-        FrameBuffer* get_framebuffer_by_name(const char* name);
+        void init_outline();
+
+        void outline_pass();
+
+        static FrameBuffer* get_framebuffer_by_name(const char* name);
         SSBO* get_ssbo_by_name(const char* name);
 
         std::vector<Texture> _shadow_maps;
         std::vector<RenderItem> _render_items;
         std::vector<SkinnedRenderItem> _skinned_render_items;
+        std::vector<RenderItem> _outline_render_items;
+        std::vector<SkinnedRenderItem> _outline_skinned_render_items;
         std::vector<Light> _lights;
 
         //Textures

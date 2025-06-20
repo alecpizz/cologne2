@@ -83,4 +83,14 @@ namespace cologne
     {
         return _bone_mats;
     }
+
+    Animation & AnimatorComponent::get_current_animation() const
+    {
+        return _current_animation;
+    }
+
+    float AnimatorComponent::get_current_time() const
+    {
+        return _current_time;
+    }
 }

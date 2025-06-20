@@ -1,5 +1,6 @@
 #pragma once
 #include <engine/physics/Physics.h>
+#include <engine/util/Util.h>
 
 #include "ScriptableEntity.h"
 
@@ -10,6 +11,23 @@ namespace cologne
         glm::vec3 position = glm::vec3(0.0f);
         glm::quat rotation = glm::identity<glm::quat>();
         glm::vec3 scale = glm::vec3(1.0f);
+
+        TransformComponent() = default;
+        TransformComponent(glm::vec3 pos, glm::quat rot, glm::vec3 sc)
+        {
+            position = pos;
+            rotation = rot;
+            scale = sc;
+        }
+        TransformComponent(glm::mat4 mat)
+        {
+            glm::vec3 pos, s;
+            glm::quat rot;
+            Util::decompose_mat4(mat, pos, rot, s);
+            position = pos;
+            rotation = rot;
+            scale = s;
+        }
 
         glm::mat4 get_mat4() const
         {
@@ -46,13 +64,18 @@ namespace cologne
     struct ModelComponent
     {
         //no clue what i want in here yet lmao, maybe just an id of the list of models? then just load all of da models?
-        size_t id = 0;
+        int32_t id = 0;
         bool gi_only = false;
+    };
+
+    struct MeshComponent
+    {
+        int32_t mesh_idx = 0;
     };
 
     struct SkinnedModelComponent
     {
-        size_t id = 0;
+        int32_t id = 0;
     };
 
     struct TagComponent
@@ -68,6 +91,7 @@ namespace cologne
     struct CameraComponent
     {
         float fov_radians = glm::radians(45.0f);
+        bool primary = false;
     };
 
     struct PlayerComponent
@@ -75,6 +99,8 @@ namespace cologne
         uint32_t id = -1;
         Entity camera = {};
         Entity viewmodel = {};
+        float character_speed = 3.5f;
+        float jump_speed = 4.0f;
 
         void teleport_to_position(glm::vec3 pos)
         {

@@ -223,7 +223,7 @@ namespace cologne
 
     void FrameBuffer::bind_depth_attachment(const FrameBuffer &src_frame_buffer)
     {
-        glNamedFramebufferTexture(_handle, GL_DEPTH_ATTACHMENT, src_frame_buffer._handle, 0);
+        glNamedFramebufferTexture(_handle, GL_DEPTH_ATTACHMENT, src_frame_buffer._depth_attachment.handle, 0);
     }
 
     void FrameBuffer::bind()
@@ -404,6 +404,19 @@ namespace cologne
     uint32_t FrameBuffer::get_depth_attachment_handle() const
     {
         return _depth_attachment.handle;
+    }
+
+    uint32_t FrameBuffer::get_color_attachment_format_by_name(const char *name) const
+    {
+        for (size_t i = 0; i < _color_attachments.size(); i++)
+        {
+            if (strcmp(name, _color_attachments[i].name) == 0)
+            {
+                return _color_attachments[i].format;
+            }
+        }
+        LOG_ERROR("COULDNT FIND ATTACHMENT with name %s", name);
+        return GL_INVALID_VALUE;
     }
 
     uint32_t FrameBuffer::get_color_attachment_slot_by_name(const char *name) const

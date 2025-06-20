@@ -46,7 +46,6 @@ namespace cologne
     void TextRenderer::present()
     {
         OpenGLDebugScope scope("TextRenderer::present");
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         glEnable(GL_BLEND);
         GLint blendSrc, blendDst;

@@ -9,28 +9,18 @@
 
 namespace cologne
 {
-    Model::Model(const ModelData& data)
+    Model::Model(const std::vector<int32_t>& meshes, const std::string& name, const glm::vec3& min, const glm::vec3& max)
     {
-        for (auto& mesh : data.meshes)
-        {
-            _meshes.emplace_back(mesh.vertices, mesh.indices, mesh.material_index, mesh.name);
-        }
-        _materials = data.materials;
-        _bounds = AABB(data.aabb_min, data.aabb_max);
-        _name = data.name;
+        _mesh_indices = meshes;
+        _name = name;
+        _bounds = AABB(min, max);
     }
 
     Model::~Model()
     {
-        _meshes.clear();
-        LOG_INFO("YOU NEED TO CLEAN UP YOUR MESHES");
-        _materials.clear();
+
     }
 
-    Transform &Model::get_transform()
-    {
-        return _transform;
-    }
 
     AABB Model::get_aabb() const
     {
@@ -42,15 +32,10 @@ namespace cologne
         return _name.c_str();
     }
 
-    Material *Model::get_materials()
-    {
-        return _materials.data();
-    }
 
-
-    std::vector<Mesh>& Model::get_meshes()
+    std::vector<int32_t> & Model::get_mesh_indices()
     {
-        return _meshes;
+        return _mesh_indices;
     }
 
     void Model::set_active(bool active)

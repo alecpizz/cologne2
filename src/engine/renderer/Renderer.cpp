@@ -10,10 +10,9 @@
 #include "engine/core/Engine.h"
 #include "engine/core/Input.h"
 
-#include "engine/editor/DebugUI.h"
+#include "engine/editor/Editor.h"
 #include "OpenGLDebugScope.h"
 #include "../renderer/types/FrameBuffer.h"
-#include "../renderer/types/Light.h"
 #include "openglErrorReporting.h"
 #include "../scene/Scene.h"
 #include "../renderer/types/Shader.h"
@@ -21,6 +20,7 @@
 #include "../core/Time.h"
 #include "types/SSBO.h"
 #include "types/ViewportData.h"
+#include <engine/renderer/types/Light.h>
 
 namespace cologne
 {
@@ -36,7 +36,14 @@ namespace cologne
 
     void Renderer::init_shaders()
     {
-        shaders.clear();
+        for (auto& shader : shaders)
+        {
+            shader.second.cleanup();
+        }
+        if (!shaders.empty())
+        {
+            shaders.clear();
+        }
         shaders["lit"] = Shader(RESOURCES_PATH "shaders/lit.vert",
                                 RESOURCES_PATH "shaders/lit.frag");
 
@@ -71,6 +78,7 @@ namespace cologne
                                             RESOURCES_PATH "shaders/particle_render.frag");
         shaders["particle_sim"] = Shader(RESOURCES_PATH "shaders/particle_sim.comp");
 
+        //bloom
         shaders["downsample"] = Shader(RESOURCES_PATH "shaders/quad.vert",
                                        RESOURCES_PATH "shaders/bloom/downsample.frag");
         shaders["upsample"] = Shader(RESOURCES_PATH "shaders/quad.vert",
@@ -78,6 +86,12 @@ namespace cologne
 
         shaders["point_shadow"] = Shader(RESOURCES_PATH "shaders/shadows/point_shadow.vert",
                                          RESOURCES_PATH "shaders/shadows/point_shadow.frag");
+        //outline
+        shaders["outline_mask"] = Shader(RESOURCES_PATH "shaders/outline/outline_mask.vert",
+                                         RESOURCES_PATH "shaders/outline/outline_mask.frag");
+        shaders["outline"] = Shader(RESOURCES_PATH "shaders/outline/outline.vert",
+                                    RESOURCES_PATH "shaders/outline/outline.frag");
+        shaders["outline_composite"] = Shader(RESOURCES_PATH "shaders/outline/outline_composite.comp");
     }
 
     void Renderer::init_ssbos()
@@ -97,8 +111,8 @@ namespace cologne
         data.camera_position = glm::vec4(_camera_transform.position, 1.0f);
 
         ssbos["viewport"].update(sizeof(ViewportData), &data);
-        ssbos["viewport"].bind(1);
         ssbos["lights"].update((sizeof(Light) * _lights.size()), _lights.data());
+        ssbos["viewport"].bind(1);
         ssbos["lights"].bind(2);
     }
 
@@ -110,6 +124,7 @@ namespace cologne
         framebuffers["output"] = FrameBuffer();
         framebuffers["dir_shadow"] = FrameBuffer();
         framebuffers["output"] = FrameBuffer();
+        framebuffers["outline"] = FrameBuffer();
     }
 
     void Renderer::submit_light(Light light)
@@ -125,6 +140,16 @@ namespace cologne
     void Renderer::submit_skinned_render_item(SkinnedRenderItem item)
     {
         _skinned_render_items.emplace_back(item);
+    }
+
+    void Renderer::submit_outline_render_item(RenderItem item)
+    {
+        _outline_render_items.emplace_back(item);
+    }
+
+    void Renderer::submit_skinned_outline_render_item(SkinnedRenderItem item)
+    {
+        _outline_skinned_render_items.emplace_back(item);
     }
 
     FrameBuffer *Renderer::get_framebuffer_by_name(const char *name)
@@ -164,6 +189,29 @@ namespace cologne
                                 static_cast<float>(Engine::get_window()->get_width()) /
                                 static_cast<float>(Engine::get_window()->get_height()),
                                 0.1f, 300.0f);
+    }
+
+    uint32_t Renderer::get_output_image()
+    {
+        return get_framebuffer_by_name("output")->get_color_attachment_handle_by_name("color");
+    }
+
+    uint32_t Renderer::read_fbo_pixel(const std::string &fbo_name, const std::string &attachment_name, uint32_t x,
+                                      uint32_t y)
+    {
+        auto fbo = get_framebuffer_by_name(fbo_name.c_str());
+        if (!fbo)
+        {
+            LOG_ERROR("No framebuffeer with name %s", fbo_name.c_str());
+            return entt::null;
+        }
+        fbo->bind();
+        glReadBuffer(fbo->get_color_attachment_slot_by_name(attachment_name.c_str()));
+        uint32_t pixelData;
+        glReadPixels(x, y, 1, 1, fbo->get_color_attachment_format_by_name(attachment_name.c_str()), GL_UNSIGNED_INT,
+                     &pixelData);
+        fbo->release();
+        return pixelData;
     }
 
     Renderer::~Renderer()
@@ -231,40 +279,38 @@ namespace cologne
         update_ssbos();
         voxelize_scene();
         geometry_pass();
+        skybox_pass();
         indirect_pass();
         bloom_pass();
         lit_pass();
-        skybox_pass();
+        draw_fps();
+        outline_pass();
         auto fbo = get_framebuffer_by_name("output");
+        fbo->bind();
+        debug_renderer->present();
+        text_renderer->present();
         fbo->blit_to_default_frame_buffer("color", 0, 0,
                                           Engine::get_window()->get_width(), Engine::get_window()->get_height(),
                                           GL_COLOR_BUFFER_BIT, GL_NEAREST);
         fbo->release();
-        draw_fps();
         debug_voxel_pass();
-        if (_light_debug_visuals)
-        {
-            for (auto &light: _lights)
-            {
-                draw_sphere(light.position, light.radius, light.color);
-            }
-        }
-        debug_renderer->present();
-        text_renderer->present();
         _render_items.clear();
         _skinned_render_items.clear();
         _lights.clear();
+        _outline_render_items.clear();
+        _outline_skinned_render_items.clear();
     }
 
     void Renderer::window_resized(uint32_t width, uint32_t height)
     {
         //regen framebuffers here
-        init_gbuffer();
         init_bloom();
-        init_indirect();
+        init_indirect(width, height);
+        get_framebuffer_by_name("gbuffer")->resize(width, height);
         get_framebuffer_by_name("output")->resize(width, height);
         get_framebuffer_by_name("voxel_back")->resize(width, height);
         get_framebuffer_by_name("voxel_front")->resize(width, height);
+        get_framebuffer_by_name("outline")->resize(width, height);
         // render_scene(*Engine::get_scene());
     }
 
@@ -298,7 +344,7 @@ namespace cologne
         return _lights[0];
     }
 
-    void Renderer::submit_camera_transform(TransformComponent tr, CameraComponent cam)
+    void Renderer::submit_camera_transform(const TransformComponent &tr, const CameraComponent cam)
     {
         _camera_transform = tr;
         _cam = cam;
@@ -318,7 +364,6 @@ namespace cologne
         Engine::get_debug_ui()->add_bool_entry("Voxel Debug Visuals", _voxel_debug_visuals);
         Engine::get_debug_ui()->add_bool_entry("Indirect Lighting", _apply_indirect_lighting);
         Engine::get_debug_ui()->add_bool_entry("Light Debug Visuals", _light_debug_visuals);
-        Engine::get_debug_ui()->add_vec3_entry("Voxel Offset", _voxel_data.voxel_offset);
         init_shaders();
         init_ssbos();
         init_bloom();
@@ -326,6 +371,7 @@ namespace cologne
         init_voxels();
         init_indirect();
         init_gbuffer();
+        init_outline();
         glDisable(GL_CULL_FACE);
         init_skybox(RESOURCES_PATH "HDR_blue_local_star.hdr");
         init_radiance();

@@ -14,12 +14,13 @@ layout (binding = 1, std430) restrict readonly buffer viewportdata
 
 
 out vec3 LocalPosition;
+out vec4 WorldPosition;
 
 void main()
 {
-    //    mat4 rotView = mat4(mat3(view));
     LocalPosition = position;
     mat4 rotView = mat4(mat3(view));
     vec4 clipPos = projection * rotView * vec4(position, 1.0);
     gl_Position = clipPos.xyww;
+    WorldPosition = clipPos;
 }

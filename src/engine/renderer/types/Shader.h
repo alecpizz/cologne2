@@ -13,7 +13,7 @@ namespace cologne
 
         explicit Shader(const std::string &comp_path);
 
-        Shader(const std::string &vert_path, const std::string &frag_path);
+        Shader(const char* vert_path, const char* frag_path);
 
         Shader(const std::string &vert_path, const std::string &frag_path, const std::string &geom_path);
 
@@ -44,6 +44,12 @@ namespace cologne
         void set_mat4(const std::string &name, const std::vector<glm::mat4> &value);
 
         void set_float(const std::string &name, float value);
+
+        void set_uint(const std::string &name, uint32_t id);
+        void set_ivec2(const std::string& name, std::vector<glm::ivec2> vecs);
+
+        void cleanup();
+
 
     private:
         void compile(const std::string &comp_path);

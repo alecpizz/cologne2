@@ -3,7 +3,7 @@
 #include <engine/core/Engine.h>
 #include <engine/renderer/OpenGLDebugScope.h>
 #include <engine/renderer/types/Shader.h>
-
+#include <engine/editor/Editor.h>
 namespace cologne
 {
     const uint32_t pixel_ratio = 2;
@@ -22,6 +22,23 @@ namespace cologne
                            Engine::get_window()->get_width() / pixel_ratio, Engine::get_window()->get_height() / pixel_ratio);
         Engine::get_debug_ui()->add_image_entry("Indirect_Lighting", _indirect_texture,
             {Engine::get_window()->get_width() / pixel_ratio, Engine::get_window()->get_height() / pixel_ratio});
+    }
+
+    void Renderer::init_indirect(uint32_t width, uint32_t height)
+    {
+        if (_indirect_texture != 0)
+        {
+            glDeleteTextures(1, &_indirect_texture);
+        }
+        glCreateTextures(GL_TEXTURE_2D, 1, &_indirect_texture);
+        glTextureParameteri(_indirect_texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(_indirect_texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(_indirect_texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(_indirect_texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTextureStorage2D(_indirect_texture, 1, GL_RGBA8,
+                           width / pixel_ratio, height / pixel_ratio);
+        Engine::get_debug_ui()->add_image_entry("Indirect_Lighting", _indirect_texture,
+            {width / pixel_ratio, height / pixel_ratio});
     }
     void Renderer::indirect_pass()
     {
@@ -46,7 +63,6 @@ namespace cologne
         shader->set_vec3("grid_min", min);
         shader->set_vec3("grid_max", max);
         shader->set_float("voxel_size", voxel_size);
-        shader->set_vec3("voxel_offset", _voxel_data.voxel_offset);
         shader->set_int("voxel_grid_size", _voxel_data.voxel_dimensions);
         
         glBindImageTexture(0, _indirect_texture, 0, GL_FALSE, 0,

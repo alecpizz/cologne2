@@ -4,7 +4,6 @@
 
 #pragma once
 #include <engine/AABB.h>
-#include <engine/Transform.h>
 #include <engine/Types.h>
 
 #include "Material.h"
@@ -26,17 +25,13 @@ namespace cologne
 
         ~SkinnedModel();
 
-        Transform &get_transform();
-
         AABB get_aabb() const;
 
         Material *get_materials();
 
         uint64_t get_num_materials() const;
 
-        SkinnedMesh *get_meshes();
-
-        uint64_t get_num_meshes() const;
+        std::vector<SkinnedMesh>& get_meshes();
 
         void set_active(bool active);
 
@@ -56,7 +51,6 @@ namespace cologne
         std::vector<SkinnedMesh> _meshes;
         bool _active = true;
         bool _cast_shadows = true;
-        Transform _transform;
         AABB _bounds;
         std::string _name;
     };

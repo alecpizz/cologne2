@@ -9,10 +9,6 @@ out vec2 v_TexCoords;
 
 void main()
 {
-    float grow = 1.1;
-    vec4 P = vec4(position, 1.0);
-    P.xyz += normal * grow;
-    gl_Position = model * P;
-
+    gl_Position = model * vec4(position, 1.0);
     v_TexCoords = uv;
 }
