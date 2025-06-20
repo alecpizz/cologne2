@@ -5,6 +5,7 @@
 #include "Engine.h"
 
 #include <engine/asset_manager/AssetManager.h>
+#include <engine/renderer/Renderer.h>
 
 #include "../physics/Physics.h"
 #include "../editor/Editor.h"

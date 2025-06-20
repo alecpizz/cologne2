@@ -46,7 +46,6 @@ uniform float voxel_size = 128;
 uniform vec3 world_center = vec3(0.0f);
 uniform vec3 grid_max, grid_min;
 uniform bool indirect_lighting_active = true;
-uniform vec3 voxel_offset;
 uniform float fog_density = 0.0225;
 uniform vec3 fog_color = vec3(0.22, 0.19, 0.15);
 const int TOTAL_DIFFUSE_CONES = 6;

@@ -7,7 +7,7 @@ namespace cologne
 {
 
     Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices, uint32_t material,
-        const std::string& name)
+        const std::string& name, const glm::mat4& inverse_bind_transform, const glm::vec3& min, const glm::vec3& max)
     {
         _name = name;
         _vertices.insert(_vertices.end(), vertices.begin(), vertices.end());
@@ -41,14 +41,10 @@ namespace cologne
         glVertexArrayAttribBinding(_vao, 3, 0);
 
         _material_index = material;
-
+        _inverse_bind_transform = inverse_bind_transform;
+        _aabb = AABB(min, max);
     }
 
-    Mesh::Mesh(const MeshData &mesh_data) :
-        Mesh(mesh_data.vertices, mesh_data.indices, mesh_data.material_index, mesh_data.name)
-    {
-        _inverse_bind_transform = mesh_data.inverse_bind_pose;
-    }
 
     Mesh::~Mesh()
     {
@@ -87,6 +83,11 @@ namespace cologne
     std::string Mesh::get_name() const
     {
         return _name;
+    }
+
+    AABB Mesh::get_aabb() const
+    {
+        return _aabb;
     }
 
     glm::mat4 Mesh::get_inverse_bind_pose() const

@@ -118,6 +118,8 @@ endif ()
 target_sources(imgui PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui-docking/imgui/misc/cpp/imgui_stdlib.cpp")
 target_sources("${CMAKE_PROJECT_NAME}" PRIVATE ${MY_SOURCES})
 
+target_compile_options("${CMAKE_PROJECT_NAME}" PRIVATE -fsanitize=address,undefined)
+target_link_options("${CMAKE_PROJECT_NAME}" PRIVATE -fsanitize=address,undefined)
 
 if (MSVC) # If using the VS compiler...
 

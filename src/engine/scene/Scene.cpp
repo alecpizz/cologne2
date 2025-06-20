@@ -8,6 +8,7 @@
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/core/Engine.h>
 #include <engine/physics/Physics.h>
+#include <engine/renderer/types/Light.h>
 #include <engine/util/FileUtil.h>
 #include <engine/scripts/EditorCameraController.h>
 #include <engine/scripts/PlayerController.h>
@@ -27,18 +28,18 @@ namespace cologne
     {
         DebugScope scope(__PRETTY_FUNCTION__);
         //Create entities
-        Entity sponza = create_entity("sponza");
-        sponza.add_component<ModelComponent>(AssetManager::get_model_index_by_name("sponza2"), false);
 
         auto model = AssetManager::get_model_by_name("sponza2");
-        auto tr = sponza.get_component<TransformComponent>();
-        for (auto &mesh: model->get_meshes())
+        for (auto idx: model->get_mesh_indices())
         {
-            Entity collider = create_entity(mesh.get_name() + "_Collider");
-            collider.get_component<TransformComponent>() = TransformComponent(mesh.get_inverse_bind_pose());
-            uint32_t body_id = Physics::create_static_mesh_collider(collider, collider.get_component<TransformComponent>(), mesh.get_vertices(),
-                                                                    mesh.get_indices());
-            collider.add_component<StaticColliderComponent>(body_id);
+            const auto mesh = AssetManager::get_mesh_by_index(idx);
+            Entity sub_mesh = create_entity(mesh->get_name());
+            sub_mesh.add_component<MeshComponent>(idx);
+            sub_mesh.get_component<TransformComponent>() = TransformComponent(mesh->get_inverse_bind_pose());
+            uint32_t body_id = Physics::create_static_mesh_collider(
+                sub_mesh, sub_mesh.get_component<TransformComponent>(), mesh->get_vertices(),
+                mesh->get_indices());
+            sub_mesh.add_component<StaticColliderComponent>(body_id);
         }
 
         // Entity glowCube = create_entity("glowing cube");
@@ -76,13 +77,14 @@ namespace cologne
         lamp.get_component<TransformComponent>().position = glm::vec3(0.180f, 0.0f, -4.8f);
         lamp.get_component<TransformComponent>().rotation = glm::quat(glm::radians(glm::vec3(0.0f, -90.0f, 0.0f)));
         model = AssetManager::get_model_by_name("Lantern");
-        tr = lamp.get_component<TransformComponent>();
-        for (auto &mesh: model->get_meshes())
+        auto tr = lamp.get_component<TransformComponent>();
+        for (auto idx: model->get_mesh_indices())
         {
-            Entity collider = create_entity(mesh.get_name());
+            const auto mesh = AssetManager::get_mesh_by_index(idx);
+            Entity collider = create_entity(mesh->get_name() + "_Collider");
             collider.get_component<TransformComponent>() = tr;
-            uint32_t body_id = Physics::create_static_mesh_collider(collider, tr, mesh.get_vertices(),
-                                                                    mesh.get_indices());
+            uint32_t body_id = Physics::create_static_mesh_collider(collider, tr, mesh->get_vertices(),
+                                                                    mesh->get_indices());
             collider.add_component<StaticColliderComponent>(body_id);
         }
 
@@ -250,14 +252,29 @@ namespace cologne
                 continue;
             }
             Model *model = AssetManager::get_model_by_index(m.id);
-            Engine::get_renderer()->submit_render_item(RenderItem(model, tr, m.gi_only, static_cast<uint32_t>(entity)));
+            for (int32_t idx: model->get_mesh_indices())
+            {
+                Engine::get_renderer()->submit_render_item(
+                    RenderItem(idx, tr, m.gi_only, static_cast<uint32_t>(entity)));
+            }
         }
 
-        auto view2 = _registry.view<SkinnedModelComponent, TransformComponent, ActiveComponent>();
+        auto view2 = _registry.view<MeshComponent, TransformComponent, ActiveComponent>();
         for (auto entity: view2)
         {
+            auto [m, tr, active] = view2.get<MeshComponent, TransformComponent, ActiveComponent>(entity);
+            if (!active)
+            {
+                continue;
+            }
+            Engine::get_renderer()->submit_render_item(RenderItem(m.mesh_idx, tr, false, static_cast<uint32_t>(entity)));
+        }
+
+        auto view3 = _registry.view<SkinnedModelComponent, TransformComponent, ActiveComponent>();
+        for (auto entity: view3)
+        {
             auto [m, tr, active] =
-                    view2.get<SkinnedModelComponent, TransformComponent, ActiveComponent>(entity);
+                    view3.get<SkinnedModelComponent, TransformComponent, ActiveComponent>(entity);
             //culling step would be here probably? though for GI i dunno. might have to pack into render item
             if (!active)
             {
@@ -288,6 +305,19 @@ namespace cologne
             AABB aabb = model->get_aabb();
             aabb.min *= tr.scale;
             aabb.max *= tr.scale;
+            _scene_bounds.expand(aabb.min);
+            _scene_bounds.expand(aabb.max);
+        }
+        auto view2 = _registry.view<TransformComponent, MeshComponent>();
+        for (const auto entity: view2)
+        {
+            auto [tr, m] = view2.get<TransformComponent, MeshComponent>(entity);
+            const auto mesh = AssetManager::get_mesh_by_index(m.mesh_idx);
+            AABB aabb = mesh->get_aabb();
+            aabb.min *= tr.scale;
+            aabb.max *= tr.scale;
+            aabb.min += tr.position;
+            aabb.max += tr.position;
             _scene_bounds.expand(aabb.min);
             _scene_bounds.expand(aabb.max);
         }

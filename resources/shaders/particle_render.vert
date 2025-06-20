@@ -1,14 +1,10 @@
 ﻿#version 460 core
 
-layout (std430, binding = 0) buffer position
+layout (std430, binding = 4) buffer position
 {
     vec4 positions[];
 };
 
-layout (std430, binding = 1) buffer velocity
-{
-    vec4 velocities[];
-};
 
 layout (binding = 1, std430) restrict readonly buffer viewportdata
 {
@@ -26,7 +22,7 @@ void main()
 {
     vec4 particle_pos = positions[gl_InstanceID];
 
-    gl_Position = projection * view * particle_pos;
+    gl_Position = projection_view * particle_pos;
 
     gl_PointSize = 3.5;
 

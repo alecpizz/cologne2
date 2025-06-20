@@ -68,6 +68,11 @@ namespace cologne
         bool gi_only = false;
     };
 
+    struct MeshComponent
+    {
+        int32_t mesh_idx = 0;
+    };
+
     struct SkinnedModelComponent
     {
         int32_t id = 0;

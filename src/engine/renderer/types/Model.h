@@ -1,12 +1,5 @@
 #pragma once
-
-#include <engine/Types.h>
-
-#include "Texture.h"
-#include "Mesh.h"
-#include "Material.h"
-#include "engine/AABB.h"
-
+#include <engine/AABB.h>
 
 namespace cologne
 {
@@ -15,7 +8,7 @@ namespace cologne
     public:
         Model() = default;
 
-        explicit Model(const ModelData& data);
+        Model(const std::vector<int32_t>& meshes, const std::string& name, const glm::vec3& min, const glm::vec3& max);
 
         ~Model();
 
@@ -23,16 +16,11 @@ namespace cologne
 
         const char *get_name() const;
 
-        Material *get_materials();
-
-        uint64_t get_num_materials() const;
-
-        std::vector<Mesh>& get_meshes();
+        std::vector<int32_t>& get_mesh_indices();
 
         void set_active(bool active);
 
         void set_aabb(AABB aabb);
-
 
         bool get_gi_only() const;
 
@@ -43,8 +31,7 @@ namespace cologne
         void set_gi_only(bool b);
 
     private:
-        std::vector<Mesh> _meshes = std::vector<Mesh>();
-        std::vector<Material> _materials = std::vector<Material>();
+        std::vector<int32_t> _mesh_indices = std::vector<int32_t>();
         bool _active = true;
         bool _cast_shadows = true;
         bool _gi_only = false;

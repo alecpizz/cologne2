@@ -13,7 +13,7 @@ namespace cologne
 
         explicit Shader(const std::string &comp_path);
 
-        Shader(const std::string &vert_path, const std::string &frag_path);
+        Shader(const char* vert_path, const char* frag_path);
 
         Shader(const std::string &vert_path, const std::string &frag_path, const std::string &geom_path);
 

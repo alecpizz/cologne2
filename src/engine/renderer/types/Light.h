@@ -9,7 +9,8 @@ namespace cologne
          Point
     };
 
-    struct alignas(16) Light
+#pragma pack(push, 1)
+    struct Light
     {
         Light(LightComponent light_component, TransformComponent transform)
         {
@@ -47,4 +48,5 @@ namespace cologne
         int32_t padding0 = 0;
         int32_t padding1 = 0;
     };
+#pragma pack(pop)
 }

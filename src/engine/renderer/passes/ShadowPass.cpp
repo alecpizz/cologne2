@@ -1,7 +1,10 @@
-﻿#include <engine/core/Engine.h>
+﻿#include <engine/asset_manager/AssetManager.h>
+#include <engine/core/Engine.h>
 #include <engine/renderer/OpenGLDebugScope.h>
 #include <engine/renderer/types/Shader.h>
 #include <engine/editor/Editor.h>
+#include <engine/renderer/Renderer.h>
+#include <engine/renderer/types/Light.h>
 
 #include "spdlog/fmt/bundled/chrono.h"
 
@@ -292,17 +295,11 @@ namespace cologne
 
         for (auto &item: _render_items)
         {
-            if (!item.model->get_cast_shadows())
-            {
-                continue;
-            }
-            for (auto &mesh: item.model->get_meshes())
-            {
-                shader->set_mat4("model",  item.transform.get_mat4() * mesh.get_inverse_bind_pose());
-                Material mat = item.model->get_materials()[mesh.get_material_index()];
-                mat.albedo.bind(ALBEDO_INDEX);
-                mesh.draw();
-            }
+            const auto mesh = AssetManager::get_mesh_by_index(item.mesh_idx);
+            const auto mat = AssetManager::get_material_by_index(mesh->get_material_index());
+            shader->set_mat4("model", item.transform.get_mat4());
+            mat->albedo.bind(ALBEDO_INDEX);
+            mesh->draw();
         }
 
         shader = get_shader_by_name("shadowmap_skinned");
@@ -357,12 +354,10 @@ namespace cologne
         for (auto &item: _render_items)
         {
             shader->set_mat4("model", item.transform.get_mat4());
-            for (auto &mesh: item.model->get_meshes())
-            {
-                Material mat = item.model->get_materials()[mesh.get_material_index()];
-                mat.albedo.bind(ALBEDO_INDEX);
-                mesh.draw();
-            }
+            const auto mesh = AssetManager::get_mesh_by_index(item.mesh_idx);
+            const auto mat = AssetManager::get_material_by_index(mesh->get_material_index());
+            mat->albedo.bind(ALBEDO_INDEX);
+            mesh->draw();
         }
     }
 
@@ -400,12 +395,10 @@ namespace cologne
             for (auto &item: _render_items)
             {
                 shader->set_mat4("model", item.transform.get_mat4());
-                for (auto &mesh: item.model->get_meshes())
-                {
-                    Material mat = item.model->get_materials()[mesh.get_material_index()];
-                    mat.albedo.bind(ALBEDO_INDEX);
-                    mesh.draw(6);
-                }
+                const auto mesh = AssetManager::get_mesh_by_index(item.mesh_idx);
+                const auto mat = AssetManager::get_material_by_index(mesh->get_material_index());
+                mat->albedo.bind(ALBEDO_INDEX);
+                mesh->draw(6);
             }
 
             for (auto &item: _skinned_render_items)

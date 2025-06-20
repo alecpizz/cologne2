@@ -1,6 +1,7 @@
 ﻿//
 // Created by alecpizz on 5/3/2025.
 //
+#include <engine/asset_manager/AssetManager.h>
 #include <engine/renderer/types/SSBO.h>
 
 #include "engine/core/Engine.h"
@@ -68,6 +69,7 @@ namespace cologne
         fbo->set_viewport();
         glDisable(GL_DITHER);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        fbo->clear_attachment("entity_id", static_cast<uint32_t>(entt::null), entt::null, entt::null, entt::null);
         auto shader = get_shader_by_name("gbuffer");
         shader->bind();
 
@@ -78,25 +80,24 @@ namespace cologne
                 continue;
             }
             shader->set_uint("entity_id", id);
-            for (auto &mesh: model->get_meshes())
-            {
-                Material mat = model->get_materials()[mesh.get_material_index()];
-                shader->set_float("metallic", mat.metallic_override);
-                shader->set_float("roughness", mat.roughness_override);
-                mat.bind_all();
-                shader->set_mat4("model",  tr.get_mat4() * mesh.get_inverse_bind_pose());
-                mesh.draw();
+
+            const auto mesh = AssetManager::get_mesh_by_index(model);
+            const auto mat = AssetManager::get_material_by_index(mesh->get_material_index());
+            shader->set_float("metallic", mat->metallic_override);
+            shader->set_float("roughness", mat->roughness_override);
+            mat->bind_all();
+            shader->set_mat4("model", tr.get_mat4());
+            mesh->draw();
 
 
-                glBindTextureUnit(ALBEDO_INDEX, 0);
-                glBindTextureUnit(AO_INDEX, 0);
-                glBindTextureUnit(METALLIC_INDEX, 0);
-                glBindTextureUnit(ROUGHNESS_INDEX, 0);
-                glBindTextureUnit(NORMAL_INDEX, 0);
-                glBindTextureUnit(EMISSION_INDEX, 0);
-                shader->set_float("metallic", 1.0f);
-                shader->set_float("roughness", 1.0f);
-            }
+            glBindTextureUnit(ALBEDO_INDEX, 0);
+            glBindTextureUnit(AO_INDEX, 0);
+            glBindTextureUnit(METALLIC_INDEX, 0);
+            glBindTextureUnit(ROUGHNESS_INDEX, 0);
+            glBindTextureUnit(NORMAL_INDEX, 0);
+            glBindTextureUnit(EMISSION_INDEX, 0);
+            shader->set_float("metallic", 1.0f);
+            shader->set_float("roughness", 1.0f);
         }
 
         shader = get_shader_by_name("skinned_gbuffer");

@@ -12,9 +12,12 @@ namespace cologne::AssetManager
     std::vector<Model> models;
     std::vector<SkinnedModel> skinned_models;
     std::vector<Animation> animations;
+    std::vector<Mesh> meshes;
+    std::vector<Material> materials;
     std::unordered_map<std::string, int32_t> model_index_map;
     std::unordered_map<std::string, int32_t> skinned_model_index_map;
     std::unordered_map<std::string, int32_t> animation_index_map;
+    std::unordered_map<std::string, int32_t> mesh_index_map;
     bool is_loading = true;
 
     void init()
@@ -34,6 +37,11 @@ namespace cologne::AssetManager
         for (int32_t i = 0; i < animations.size(); i++)
         {
             animation_index_map[animations[i].get_name()] = i;
+        }
+
+        for (int32_t i =0; i < meshes.size(); i++)
+        {
+            mesh_index_map[meshes[i].get_name()] = i;
         }
         print_all();
     }
@@ -64,14 +72,39 @@ namespace cologne::AssetManager
                            return data;
                        });
         scope = DebugScope("load models");
+        //DO MESHES BEFORE MODELS
+        int32_t material_offset = 0;
+        int32_t mesh_offset = 0;
         for (auto &model_data: model_datas)
         {
-            for (auto &material: model_data.materials)
+            int32_t startingIdx = material_offset; //our current index in the big ol material buffer
+            for (Material& mat : model_data.materials)
             {
-                material.load_all();
+                materials.emplace_back(mat);
+                material_offset++; //add however many materials are in the model
             }
-            models.emplace_back(model_data);
+
+            for (MeshData& mesh : model_data.meshes)
+            {
+                mesh.material_index = startingIdx + mesh.material_index; //the material indices of each model are just offset from the starting pt
+            }
+
+            std::vector<int32_t> mesh_indices;
+            for (auto& mesh : model_data.meshes)
+            {
+                meshes.emplace_back(mesh.vertices, mesh.indices, mesh.material_index, mesh.name,
+                    mesh.inverse_bind_pose, mesh.aabb_min, mesh.aabb_max); //create a mesh
+                mesh_indices.emplace_back(mesh_offset); //add its index
+                mesh_offset++; //increment the total amount
+            }
+            models.emplace_back(mesh_indices, model_data.name, model_data.aabb_min, model_data.aabb_max); //add our model
         }
+
+        for (auto& m : materials)
+        {
+            m.load_all();
+        }
+
         for (auto &skinned_model_data: skinned_model_datas)
         {
             for (auto &material: skinned_model_data.materials)
@@ -83,25 +116,16 @@ namespace cologne::AssetManager
                               skinned_model_data.animations.begin(), skinned_model_data.animations.end());
             skinned_models.emplace_back(skinned_model_data);
         }
-        // for (auto &info: FileUtil::iterate_directory(RESOURCES_PATH "skinned_models"))
-        // {
-        //     auto model_data = FileUtil::import_skinned_model(info.path);
-        //     if (!model_data.meshes.empty())
-        //     {
-        //         animations.insert(animations.end(),
-        //                           model_data.animations.begin(), model_data.animations.end());
-        //         skinned_models.emplace_back(model_data);
-        //     }
-        // }
     }
 
     void load_model(const std::string &path)
     {
-        auto data = FileUtil::import_model(path);
-        if (!data.meshes.empty())
-        {
-            models.emplace_back(data);
-        }
+        LOG_ERROR("fuck off");
+        // auto data = FileUtil::import_model(path);
+        // if (!data.meshes.empty())
+        // {
+            // models.emplace_back(data);
+        // }
     }
 
     void load_skinned_model(const std::string &path)
@@ -118,9 +142,39 @@ namespace cologne::AssetManager
         return models;
     }
 
+    std::vector<Mesh> & get_meshes()
+    {
+        return meshes;
+    }
+
     std::vector<SkinnedModel> &get_skinned_models()
     {
         return skinned_models;
+    }
+
+    std::vector<Material> & get_materials()
+    {
+        return materials;
+    }
+
+    Material * get_material_by_index(int32_t idx)
+    {
+        return &materials[idx];
+    }
+
+    Mesh * get_mesh_by_name(const std::string &name)
+    {
+        return &meshes[get_mesh_index_by_name(name)];
+    }
+
+    Mesh * get_mesh_by_index(int32_t idx)
+    {
+        return &meshes[idx];
+    }
+
+    int32_t get_mesh_index_by_name(const std::string &name)
+    {
+        return mesh_index_map[name];
     }
 
     void print_models()

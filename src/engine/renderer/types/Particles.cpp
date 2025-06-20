@@ -5,6 +5,7 @@
 #include "Particles.h"
 #include <engine/core/Engine.h>
 #include <engine/core/Time.h>
+#include <engine/renderer/Renderer.h>
 
 #include "Shader.h"
 
@@ -76,11 +77,11 @@ namespace cologne
 
         uint32_t buffer_size = positions.size() * sizeof(glm::vec4);
 
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, _position_buffer);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, _position_buffer);
         glBufferData(GL_SHADER_STORAGE_BUFFER, buffer_size, positions.data(), GL_DYNAMIC_DRAW);
 
 
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, _velocity_buffer);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, _velocity_buffer);
         glBufferData(GL_SHADER_STORAGE_BUFFER, buffer_size, velocities.data(), GL_DYNAMIC_COPY);
 
         glGenVertexArrays(1, &_vao);
@@ -96,8 +97,8 @@ namespace cologne
             return;
         }
         shader->bind();
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, _position_buffer);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, _velocity_buffer);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, _position_buffer);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, _velocity_buffer);
         shader->set_vec3("bounds_min", (_bounds.min));
         shader->set_vec3("bounds_max", (_bounds.max));
         shader->set_int("total_particle_count", _total_particle_count);
@@ -107,14 +108,14 @@ namespace cologne
         shader->set_float("time", time);
         shader->dispatch((_total_particle_count + 127) / 128, 1, 1);
         shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, 0);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, 0);
     }
 
 
     void Particles::render()
     {
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, _position_buffer);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, _position_buffer);
 
         glBindVertexArray(_vao);
         glEnable(GL_PROGRAM_POINT_SIZE);
@@ -123,6 +124,6 @@ namespace cologne
         glBindVertexArray(0);
 
         glDisable(GL_PROGRAM_POINT_SIZE);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, 0);
     }
 }

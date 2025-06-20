@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "engine/renderer/types/Light.h"
 #include "engine/scene/Scene.h"
 #include "types/FrameBuffer.h"
 #include "engine/renderer/types/RenderItem.h"
@@ -9,6 +8,7 @@ namespace cologne
     class Scene;
     class Shader;
     class SSBO;
+    struct Light;
 
     class Renderer
     {
@@ -65,7 +65,6 @@ namespace cologne
         struct VoxelData
         {
             int32_t voxel_dimensions = 256;
-            glm::vec3 voxel_offset = glm::vec3(0.0f, -0.425f, 0.0f);
         };
 
         Renderer();

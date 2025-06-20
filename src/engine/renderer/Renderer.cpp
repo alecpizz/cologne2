@@ -13,7 +13,6 @@
 #include "engine/editor/Editor.h"
 #include "OpenGLDebugScope.h"
 #include "../renderer/types/FrameBuffer.h"
-#include "../renderer/types/Light.h"
 #include "openglErrorReporting.h"
 #include "../scene/Scene.h"
 #include "../renderer/types/Shader.h"
@@ -21,6 +20,7 @@
 #include "../core/Time.h"
 #include "types/SSBO.h"
 #include "types/ViewportData.h"
+#include <engine/renderer/types/Light.h>
 
 namespace cologne
 {
@@ -40,7 +40,10 @@ namespace cologne
         {
             shader.second.cleanup();
         }
-        shaders.clear();
+        if (!shaders.empty())
+        {
+            shaders.clear();
+        }
         shaders["lit"] = Shader(RESOURCES_PATH "shaders/lit.vert",
                                 RESOURCES_PATH "shaders/lit.frag");
 
@@ -108,8 +111,8 @@ namespace cologne
         data.camera_position = glm::vec4(_camera_transform.position, 1.0f);
 
         ssbos["viewport"].update(sizeof(ViewportData), &data);
-        ssbos["viewport"].bind(1);
         ssbos["lights"].update((sizeof(Light) * _lights.size()), _lights.data());
+        ssbos["viewport"].bind(1);
         ssbos["lights"].bind(2);
     }
 
@@ -200,7 +203,7 @@ namespace cologne
         if (!fbo)
         {
             LOG_ERROR("No framebuffeer with name %s", fbo_name.c_str());
-            return -1;
+            return entt::null;
         }
         fbo->bind();
         glReadBuffer(fbo->get_color_attachment_slot_by_name(attachment_name.c_str()));
@@ -281,7 +284,6 @@ namespace cologne
         bloom_pass();
         lit_pass();
         draw_fps();
-        debug_voxel_pass();
         outline_pass();
         auto fbo = get_framebuffer_by_name("output");
         fbo->bind();
@@ -291,6 +293,7 @@ namespace cologne
                                           Engine::get_window()->get_width(), Engine::get_window()->get_height(),
                                           GL_COLOR_BUFFER_BIT, GL_NEAREST);
         fbo->release();
+        debug_voxel_pass();
         _render_items.clear();
         _skinned_render_items.clear();
         _lights.clear();
@@ -361,7 +364,6 @@ namespace cologne
         Engine::get_debug_ui()->add_bool_entry("Voxel Debug Visuals", _voxel_debug_visuals);
         Engine::get_debug_ui()->add_bool_entry("Indirect Lighting", _apply_indirect_lighting);
         Engine::get_debug_ui()->add_bool_entry("Light Debug Visuals", _light_debug_visuals);
-        Engine::get_debug_ui()->add_vec3_entry("Voxel Offset", _voxel_data.voxel_offset);
         init_shaders();
         init_ssbos();
         init_bloom();

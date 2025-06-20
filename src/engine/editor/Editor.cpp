@@ -4,6 +4,7 @@
 
 #include "Editor.h"
 
+#include <engine/renderer/Renderer.h>
 #include <engine/animation/Animation.h>
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/core/Engine.h>
@@ -307,29 +308,57 @@ namespace cologne
 
             if (_selected_entity.has_component<LightComponent>())
             {
+                auto &light = _selected_entity.get_component<LightComponent>();
+                Engine::get_renderer()->draw_sphere(_selected_entity.get_component<TransformComponent>().position,
+                                                    light.radius, light.color);
                 if (ImGui::TreeNode("Light Settings"))
                 {
-                    auto &light = _selected_entity.get_component<LightComponent>();
                     ImGui::DragFloat("radius", &light.radius, 0.01f);
                     ImGui::DragFloat("strength", &light.strength, 0.01f);
                     ImGui::ColorEdit3("color", glm::value_ptr(light.color), ImGuiColorEditFlags_HDR
                                                                             | ImGuiColorEditFlags_Float);
-                    Engine::get_renderer()->draw_sphere(_selected_entity.get_component<TransformComponent>().position,
-                                                        light.radius, light.color);
 
                     remove_component_menu<LightComponent>(_selected_entity);
                     ImGui::TreePop();
                 }
             }
 
+            if (_selected_entity.has_component<MeshComponent>())
+            {
+                auto &mesh_comp = _selected_entity.get_component<MeshComponent>();
+                Engine::get_renderer()->submit_outline_render_item(RenderItem(mesh_comp.mesh_idx,
+                                                                              _selected_entity.get_component<
+                                                                                  TransformComponent>(),
+                                                                              false,
+                                                                              static_cast<uint32_t>(_selected_entity)));
+                if (ImGui::TreeNode("Mesh Info"))
+                {
+                    int id = mesh_comp.mesh_idx;
+                    if (ImGui::InputInt("Mesh ID", &id))
+                    {
+                        id = glm::clamp(id, 0, static_cast<int>(AssetManager::get_meshes().size()) - 1);
+                        mesh_comp.mesh_idx = id;
+                    }
+                    std::string mesh_name = AssetManager::get_mesh_by_index(mesh_comp.mesh_idx)->get_name();
+                    ImGui::Text("Name %s", mesh_name.c_str());
+                    remove_component_menu<MeshComponent>(_selected_entity);
+                    ImGui::TreePop();
+                }
+            }
+
+
             if (_selected_entity.has_component<ModelComponent>())
             {
                 auto &model = _selected_entity.get_component<ModelComponent>();
-                Engine::get_renderer()->submit_outline_render_item(RenderItem(
-                    AssetManager::get_model_by_index(model.id),
-                    _selected_entity.get_component<TransformComponent>(),
-                    false,
-                    static_cast<uint32_t>(_selected_entity)));
+                auto m = AssetManager::get_model_by_index(model.id);
+                for (auto idx: m->get_mesh_indices())
+                {
+                    Engine::get_renderer()->submit_outline_render_item(RenderItem(
+                        idx,
+                        _selected_entity.get_component<TransformComponent>(),
+                        false,
+                        static_cast<uint32_t>(_selected_entity)));
+                }
                 if (ImGui::TreeNode("Model Info"))
                 {
                     int id = static_cast<int>(model.id);
@@ -463,6 +492,12 @@ namespace cologne
                     ImGui::CloseCurrentPopup();
                 }
 
+                if (!_selected_entity.has_component<MeshComponent>() && ImGui::MenuItem("Mesh Component"))
+                {
+                    _selected_entity.add_component<MeshComponent>();
+                    ImGui::CloseCurrentPopup();
+                }
+
                 if (!_selected_entity.has_component<SkinnedModelComponent>() && ImGui::MenuItem(
                         "Skinned Model Component"))
                 {
@@ -538,6 +573,10 @@ namespace cologne
                 if (id != entt::null)
                 {
                     _selected_entity = {static_cast<entt::entity>(id), Engine::get_scene()};
+                }
+                else
+                {
+                    _selected_entity = {};
                 }
             }
             auto &active = Engine::get_scene()->get_scene_camera().get_component<ActiveComponent>();

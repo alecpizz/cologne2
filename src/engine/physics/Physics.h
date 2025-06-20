@@ -1,5 +1,5 @@
 #pragma once
-#include <engine/renderer/types/Model.h>
+#include <engine/Types.h>
 
 namespace cologne
 {

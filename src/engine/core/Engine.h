@@ -10,7 +10,6 @@
 */
 #pragma once
 #include "../scene/Scene.h"
-#include "engine/renderer/Renderer.h"
 #include "Window.h"
 #include "EventManager.h"
 #include "engine/GoodGPUs.h"
@@ -18,6 +17,8 @@
 
 namespace cologne
 {
+    class Renderer;
+
     class Engine
     {
     public:

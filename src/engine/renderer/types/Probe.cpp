@@ -169,12 +169,12 @@ namespace cologne
                 }
                 shader.set_mat4("model", item.transform.get_mat4());
 
-                for (auto& mesh : item.model->get_meshes())
-                {
-                    auto mat = item.model->get_materials()[mesh.get_material_index()];
-                    mat.bind_all();
-                    mesh.draw();
-                }
+                // for (auto& mesh : item.model->get_meshes())
+                // {
+                //     auto mat = item.model->get_materials()[mesh.get_material_index()];
+                //     mat.bind_all();
+                //     mesh.draw();
+                // }
             }
         }
 

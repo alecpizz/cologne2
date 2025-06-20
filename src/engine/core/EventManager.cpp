@@ -5,6 +5,7 @@
 #include "EventManager.h"
 
 #include <engine/editor/Editor.h>
+#include <engine/renderer/Renderer.h>
 
 #include "Engine.h"
 #include "Input.h"

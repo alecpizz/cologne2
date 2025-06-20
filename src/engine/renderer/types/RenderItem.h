@@ -11,13 +11,13 @@ namespace cologne
 {
     struct RenderItem
     {
-        Model *model = nullptr;
+        int32_t mesh_idx = 0;
         TransformComponent transform = {};
         bool gi_only = true;
         uint32_t entity_id = entt::null;
         RenderItem() = default;
-        RenderItem(Model *m, TransformComponent tr, bool gi, uint32_t id)
-            : model(m), transform(tr), gi_only(gi), entity_id(id)
+        RenderItem(int32_t idx, TransformComponent tr, bool gi, uint32_t id)
+            : mesh_idx(idx), transform(tr), gi_only(gi), entity_id(id)
         {
         }
     };

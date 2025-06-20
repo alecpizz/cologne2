@@ -2,6 +2,7 @@
 #include <engine/Types.h>
 #include <engine/audio/Audio.h>
 #include <engine/physics/Physics.h>
+#include <engine/renderer/Renderer.h>
 
 namespace cologne
 {
