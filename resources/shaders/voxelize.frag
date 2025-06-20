@@ -33,6 +33,8 @@ struct Light
     int type;
     int enabled;
     uvec2 shadow_map;
+    int padding0;
+    int padding1;
 };
 
 #define MAX_LIGHTS 8
@@ -195,7 +197,7 @@ vec4 pbr()
             float falloff = pow(dist_range, 2.0f);
             float smoothing = pow(max(0.0, 1.0 - falloff), 2.0f);
             float attenuation = smoothing / (distance * distance + 1.0f);
-//            shadow = 1.0 - point_shadow_calc(FragPos.xyz, lights[i]);
+            shadow = point_shadow_calc(FragPos.xyz, lights[i]);
             radiance = lights[i].color.rgb * lights[i].strength * attenuation;
         }
         vec3 H = normalize(V + L);
