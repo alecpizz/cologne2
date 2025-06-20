@@ -338,7 +338,7 @@ namespace cologne
         return entity;
     }
 
-    void Scene::create_static_model_entities(const char *model_name, const TransformComponent &parent_transform)
+    void Scene::create_static_model_entities(const char *model_name, const TransformComponent &parent_transform, bool create_colliders)
     {
         auto model = AssetManager::get_model_by_name(model_name);
         for (auto idx: model->get_mesh_indices())
@@ -348,7 +348,14 @@ namespace cologne
             sub_mesh.add_component<MeshComponent>(idx);
             sub_mesh.get_component<TransformComponent>() = TransformComponent(
                 parent_transform.get_mat4() * mesh->get_inverse_bind_pose());
-            sub_mesh.add_component<StaticColliderComponent>();
+            auto& col = sub_mesh.add_component<StaticColliderComponent>();
+            if (create_colliders)
+            {
+                uint32_t body_id = Physics::create_static_mesh_collider(
+                sub_mesh, sub_mesh.get_component<TransformComponent>(), mesh->get_vertices(),
+                mesh->get_indices());
+                col.body_id = body_id;
+            }
         }
     }
 

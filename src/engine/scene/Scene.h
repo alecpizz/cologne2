@@ -37,7 +37,7 @@ namespace cologne
 
         Entity create_entity(const std::string& name = std::string());
 
-        void create_static_model_entities(const char* model_name, const TransformComponent &parent_transform);
+        void create_static_model_entities(const char* model_name, const TransformComponent &parent_transform, bool create_colliders = false);
 
         void destroy_entity(Entity entity);
 

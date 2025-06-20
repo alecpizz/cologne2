@@ -499,7 +499,12 @@ namespace cologne::Physics
             const auto tr = entity.get_component<TransformComponent>();
             const auto pos = glm_vec3_to_jph_vec3(tr.position);
             auto rot = glm_quat_to_jph_quat(tr.rotation);
-            const auto scale = glm_vec3_to_jph_vec3(tr.scale);
+            auto scale = glm_vec3_to_jph_vec3(tr.scale);
+            if (scale.IsNearZero())
+            {
+                LOG_INFO("scale too smol");
+                scale = JPH::Vec3::sOne();
+            }
             auto &body_interface = physics_system.GetBodyInterface();
             const auto shape = body_interface.GetShape(body_id);
             const auto new_shape = shape->ScaleShape(scale).Get();

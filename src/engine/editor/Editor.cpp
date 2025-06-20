@@ -264,7 +264,20 @@ namespace cologne
         {
             if (ImGui::MenuItem("Create Empty Entity"))
             {
+                Audio::play_sound(accept_sound, 30);
                 Engine::get_scene()->create_entity("Empty Entity");
+            }
+            if (ImGui::BeginMenu("Create Static Model Entity"))
+            {
+                for (auto& model : AssetManager::get_models())
+                {
+                    if (ImGui::MenuItem(model.get_name()))
+                    {
+                        Audio::play_sound(accept_sound, 30);
+                        Engine::get_scene()->create_static_model_entities(model.get_name(), {}, true);
+                    }
+                }
+                ImGui::EndMenu();
             }
             if (_selected_entity && ImGui::MenuItem("Delete Entity"))
             {
