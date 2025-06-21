@@ -344,6 +344,45 @@ namespace cologne
             }
             ImGui::Text("Transform");
             build_transform_entry(_selected_entity.get_component<TransformComponent>());
+            if (_selected_entity.has_component<ParentComponent>())
+            {
+                for (auto child : _selected_entity.get_component<ParentComponent>().children)
+                {
+                    if (child.has_component<MeshComponent>())
+                    {
+                        Engine::get_renderer()->submit_outline_render_item(RenderItem(child.get_component<MeshComponent>().mesh_idx,
+                                                                             child.get_component<
+                                                                                 WorldTransformComponent>(),
+                                                                             false,
+                                                                             static_cast<uint32_t>(child)));
+                    }
+                    if (child.has_component<ModelComponent>())
+                    {
+                        auto model = AssetManager::get_model_by_index(child.get_component<ModelComponent>().id);
+                        for (auto mesh_index : model->get_mesh_indices())
+                        {
+                            Engine::get_renderer()->submit_outline_render_item(RenderItem(mesh_index,
+                                                                             child.get_component<
+                                                                                 WorldTransformComponent>(),
+                                                                             false,
+                                                                             static_cast<uint32_t>(child)));
+                        }
+                    }
+
+                    if (child.has_component<SkinnedModelComponent>())
+                    {
+                        SkinnedRenderItem item;
+                        item.skinned_model = AssetManager::get_skinned_model_by_index(child.get_component<SkinnedModelComponent>().id);
+                        item.transform = child.get_component<WorldTransformComponent>();
+                        if (child.has_component<AnimatorComponent>())
+                        {
+                            auto &anim = child.get_component<AnimatorComponent>();
+                            item.bones = anim.get_bones();
+                        }
+                        Engine::get_renderer()->submit_skinned_outline_render_item(item);
+                    }
+                }
+            }
             draw_component<ViewmodelComponent>("View Model", _selected_entity, true, [](auto &vm)
             {
                 ImGui::DragFloat("smoothing", &vm.smoothing, 0.1f);
