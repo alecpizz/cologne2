@@ -223,6 +223,7 @@ namespace cologne
         ImGui::End();
     }
 
+
     void Editor::build_scene_graph()
     {
         ImGui::Begin("Scene Hiearchy", nullptr, global_window_flags);
@@ -230,34 +231,29 @@ namespace cologne
         for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
         {
             Entity e = {entity, Engine::get_scene()};
-            auto tag = e.get_component<TagComponent>().tag;
-            auto flags = (_selected_entity == e ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
-            flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
-            bool opened = ImGui::TreeNodeEx((void *) (uint64_t) (uint32_t) e, flags, tag.c_str());
-            if (ImGui::IsItemClicked())
+            if (!e.has_component<ChildComponent>())
             {
-                Audio::play_sound(move_sound, 30);
-                _selected_entity = e;
+                draw_entity_node(e);
             }
-            if (opened)
+        }
+
+        if (ImGui::BeginDragDropTarget())
+        {
+            if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("GRAPH_ENTITY"))
             {
-                auto flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
-                bool opened = ImGui::TreeNodeEx((void *) 9817239, flags, tag.c_str());
-                if (opened)
+                uint32_t id = *(uint32_t *) payload->Data;
+                Entity found_entity = {static_cast<entt::entity>(id), Engine::get_scene()};
+
+                //remove the entity from its parent entity
+                if (found_entity.has_component<ChildComponent>())
                 {
-                    ImGui::TreePop();
+                    auto parent = found_entity.get_component<ChildComponent>().parent;
+                    auto &vec = parent.get_component<ParentComponent>().children;
+                    vec.erase(std::ranges::remove(vec, found_entity).begin(), vec.end());
+                    found_entity.remove_component<ChildComponent>();
                 }
-                ImGui::TreePop();
             }
-            // bool isSelected = _selected_entity == e;
-            // if (ImGui::Selectable(e.get_component<TagComponent>().tag.c_str(), isSelected))
-            // {
-            //     _selected_entity = e;
-            // }
-            // if (isSelected)
-            // {
-            //     ImGui::SetItemDefaultFocus();
-            // }
+            ImGui::EndDragDropTarget();
         }
 
         if (ImGui::BeginPopupContextWindow())
@@ -274,7 +270,8 @@ namespace cologne
                     if (ImGui::MenuItem(model.get_name()))
                     {
                         Audio::play_sound(accept_sound, 30);
-                        _selected_entity = Engine::get_scene()->create_static_model_entities(model.get_name(), {}, true);
+                        _selected_entity = Engine::get_scene()->
+                                create_static_model_entities(model.get_name(), {}, true);
                     }
                 }
                 ImGui::EndMenu();
@@ -288,6 +285,87 @@ namespace cologne
         }
 
         ImGui::End();
+    }
+
+
+    void Editor::draw_entity_node(Entity entity)
+    {
+        auto &tag = entity.get_component<TagComponent>();
+        ImGuiTreeNodeFlags flags = ((_selected_entity == entity) ? ImGuiTreeNodeFlags_Selected : 0) |
+                                   ImGuiTreeNodeFlags_OpenOnArrow |
+                                   ImGuiTreeNodeFlags_SpanAvailWidth;
+        bool is_child = !entity.has_component<ParentComponent>();
+        if (is_child)
+        {
+            flags |= ImGuiTreeNodeFlags_Leaf;
+        }
+        bool opened = ImGui::TreeNodeEx((void *) (uint64_t) (uint32_t) entity, flags, tag.tag.c_str());
+        if (ImGui::IsItemClicked())
+        {
+            Audio::play_sound(move_sound, 30);
+            _selected_entity = entity;
+        }
+
+        if (ImGui::BeginDragDropSource())
+        {
+            uint32_t id = static_cast<uint32_t>(entity);
+            ImGui::SetDragDropPayload("GRAPH_ENTITY", &id, sizeof(uint32_t));
+            ImGui::Text("%s", tag.tag.c_str());
+            ImGui::EndDragDropSource();
+        }
+
+        if (ImGui::BeginDragDropTarget())
+        {
+            if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("GRAPH_ENTITY"))
+            {
+                uint32_t id = *(uint32_t *) payload->Data;
+                Entity found_entity = {static_cast<entt::entity>(id), Engine::get_scene()};
+
+                bool bad_parent = found_entity.has_component<ParentComponent>() &&
+                                  entity.has_component<ChildComponent>() && entity.get_component<ChildComponent>().
+                                  parent == found_entity;
+                if (bad_parent)
+                {
+                    LOG_WARN("You cannot parent an entity to its own child!");
+                }
+                else
+                {
+                    //remove the entity from its parent entity
+                    if (found_entity.has_component<ChildComponent>())
+                    {
+                        auto parent = found_entity.get_component<ChildComponent>().parent;
+                        auto &vec = parent.get_component<ParentComponent>().children;
+                        vec.erase(std::ranges::remove(vec, found_entity).begin(), vec.end());
+                        found_entity.remove_component<ChildComponent>();
+                    }
+
+                    //add new child component to the entity
+                    found_entity.add_component<ChildComponent>(entity);
+
+                    //add a parent component to this entity
+                    if (!entity.has_component<ParentComponent>())
+                    {
+                        entity.add_component<ParentComponent>();
+                    }
+                    auto &parent_comp = entity.get_component<ParentComponent>();
+                    parent_comp.children.push_back(found_entity);
+                }
+            }
+            ImGui::EndDragDropTarget();
+        }
+
+        if (opened)
+        {
+            if (!is_child)
+            {
+                auto &children = entity.get_component<ParentComponent>().children;
+                for (auto child: children)
+                {
+                    draw_entity_node(child);
+                }
+            }
+            ImGui::TreePop();
+        }
     }
 
     template<typename T>
@@ -346,33 +424,35 @@ namespace cologne
             build_transform_entry(_selected_entity.get_component<TransformComponent>());
             if (_selected_entity.has_component<ParentComponent>())
             {
-                for (auto child : _selected_entity.get_component<ParentComponent>().children)
+                for (auto child: _selected_entity.get_component<ParentComponent>().children)
                 {
                     if (child.has_component<MeshComponent>())
                     {
-                        Engine::get_renderer()->submit_outline_render_item(RenderItem(child.get_component<MeshComponent>().mesh_idx,
-                                                                             child.get_component<
-                                                                                 WorldTransformComponent>(),
-                                                                             false,
-                                                                             static_cast<uint32_t>(child)));
+                        Engine::get_renderer()->submit_outline_render_item(RenderItem(
+                            child.get_component<MeshComponent>().mesh_idx,
+                            child.get_component<
+                                WorldTransformComponent>(),
+                            false,
+                            static_cast<uint32_t>(child)));
                     }
                     if (child.has_component<ModelComponent>())
                     {
                         auto model = AssetManager::get_model_by_index(child.get_component<ModelComponent>().id);
-                        for (auto mesh_index : model->get_mesh_indices())
+                        for (auto mesh_index: model->get_mesh_indices())
                         {
                             Engine::get_renderer()->submit_outline_render_item(RenderItem(mesh_index,
-                                                                             child.get_component<
-                                                                                 WorldTransformComponent>(),
-                                                                             false,
-                                                                             static_cast<uint32_t>(child)));
+                                child.get_component<
+                                    WorldTransformComponent>(),
+                                false,
+                                static_cast<uint32_t>(child)));
                         }
                     }
 
                     if (child.has_component<SkinnedModelComponent>())
                     {
                         SkinnedRenderItem item;
-                        item.skinned_model = AssetManager::get_skinned_model_by_index(child.get_component<SkinnedModelComponent>().id);
+                        item.skinned_model = AssetManager::get_skinned_model_by_index(
+                            child.get_component<SkinnedModelComponent>().id);
                         item.transform = child.get_component<WorldTransformComponent>();
                         if (child.has_component<AnimatorComponent>())
                         {
@@ -397,7 +477,8 @@ namespace cologne
 
             draw_component<LightComponent>("Light", _selected_entity, true, [this](auto &light)
             {
-                Engine::get_renderer()->draw_sphere(_selected_entity.get_component<TransformComponent>().position,
+                auto mat = _selected_entity.get_component<WorldTransformComponent>();
+                Engine::get_renderer()->draw_sphere(mat.transform[3],
                                                     light.radius, light.color);
                 ImGui::DragFloat("radius", &light.radius, 0.01f);
                 ImGui::DragFloat("strength", &light.strength, 0.01f);
@@ -703,8 +784,10 @@ namespace cologne
                 glm::mat4 world_mat = mat4;
                 if (_selected_entity.has_component<ChildComponent>())
                 {
-                    mat4 = glm::inverse(_selected_entity.get_component<ChildComponent>().parent.get_component<WorldTransformComponent>().
-                       transform) * mat4;
+                    mat4 = glm::inverse(
+                               _selected_entity.get_component<ChildComponent>().parent.get_component<
+                                   WorldTransformComponent>().
+                               transform) * mat4;
                 }
                 glm::quat orientation;
                 glm::vec3 translation;

@@ -191,10 +191,10 @@ namespace cologne
         Engine::get_renderer()->submit_camera_transform(tr, cm);
         cam_frustum.update(Renderer::get_camera_projection(tr, cm) * Renderer::get_camera_view(tr));
 
-        for (auto entity: _registry.view<LightComponent, TransformComponent, ActiveComponent>())
+        for (auto entity: _registry.view<LightComponent, WorldTransformComponent, ActiveComponent>())
         {
-            auto [light, transform, active] = _registry.get<LightComponent, TransformComponent,
-                ActiveComponent>(entity);
+            auto [light, transform, active] =
+                _registry.get<LightComponent, WorldTransformComponent, ActiveComponent>(entity);
             if (!active)
             {
                 continue;
@@ -204,7 +204,7 @@ namespace cologne
             // {
             //     continue;
             // }
-            Engine::get_renderer()->submit_light(Light(light, transform));
+            Engine::get_renderer()->submit_light(Light(light, TransformComponent(transform)));
         }
 
         glm::vec3 ray_start = tr.position, ray_dir = tr.get_forward();
