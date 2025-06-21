@@ -239,7 +239,7 @@ namespace cologne
 
         if (ImGui::BeginDragDropTarget())
         {
-            if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("GRAPH_ENTITY"))
+            if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("GRAPH_ENTITY", ImGuiDragDropFlags_AcceptBeforeDelivery))
             {
                 uint32_t id = *(uint32_t *) payload->Data;
                 Entity found_entity = {static_cast<entt::entity>(id), Engine::get_scene()};
@@ -251,6 +251,7 @@ namespace cologne
                     auto &vec = parent.get_component<ParentComponent>().children;
                     vec.erase(std::ranges::remove(vec, found_entity).begin(), vec.end());
                     found_entity.remove_component<ChildComponent>();
+                    LOG_INFO("REPARENTED");
                 }
             }
             ImGui::EndDragDropTarget();
