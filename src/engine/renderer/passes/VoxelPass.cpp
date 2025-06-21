@@ -143,7 +143,7 @@ namespace cologne
             shader->set_int("render_axis", idx);
             for (auto &item: _render_items)
             {
-                shader->set_mat4("model", item.transform.get_mat4());
+                shader->set_mat4("model", item.transform);
                 const auto mesh = AssetManager::get_mesh_by_index(item.mesh_idx);
                 AssetManager::get_material_by_index(mesh->get_material_index())->bind_all();
                 mesh->draw();

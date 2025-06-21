@@ -495,11 +495,14 @@ namespace cologne::Physics
         if (entity.has_component<StaticColliderComponent>())
         {
             auto &comp = entity.get_component<StaticColliderComponent>();
+            auto tr = entity.get_component<WorldTransformComponent>().transform;
             const auto body_id = static_cast<BodyID>(comp.body_id);
-            const auto tr = entity.get_component<TransformComponent>();
-            const auto pos = glm_vec3_to_jph_vec3(tr.position);
-            auto rot = glm_quat_to_jph_quat(tr.rotation);
-            auto scale = glm_vec3_to_jph_vec3(tr.scale);
+            glm::vec3 p, s;
+            glm::quat r;
+            Util::decompose_mat4(tr, p, r, s);
+            const auto pos = glm_vec3_to_jph_vec3(p);
+            auto rot = glm_quat_to_jph_quat(r);
+            auto scale = glm_vec3_to_jph_vec3(s);
             if (scale.IsNearZero())
             {
                 LOG_INFO("scale too smol");

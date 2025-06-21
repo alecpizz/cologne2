@@ -167,7 +167,7 @@ namespace cologne
                 {
                     continue;;
                 }
-                shader.set_mat4("model", item.transform.get_mat4());
+                shader.set_mat4("model", item.transform);
 
                 // for (auto& mesh : item.model->get_meshes())
                 // {

@@ -37,7 +37,8 @@ namespace cologne
 
         Entity create_entity(const std::string& name = std::string());
 
-        void create_static_model_entities(const char* model_name, const TransformComponent &parent_transform, bool create_colliders = false);
+        Entity create_static_model_entities(const char *model_name, const TransformComponent &parent_transform,
+                                            bool create_colliders = false);
 
         void destroy_entity(Entity entity);
 
@@ -46,8 +47,10 @@ namespace cologne
 
         void copy_scene_camera_to_primary_camera();
 
+        void update_transforms();
+
     private:
-        //THIS IS fucking dumb
+        void update_children(entt::entity parent);
         AABB _scene_bounds;
         std::vector<Particles> _particles;
         entt::registry _registry;

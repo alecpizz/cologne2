@@ -265,16 +265,16 @@ namespace cologne
             if (ImGui::MenuItem("Create Empty Entity"))
             {
                 Audio::play_sound(accept_sound, 30);
-                Engine::get_scene()->create_entity("Empty Entity");
+                _selected_entity = Engine::get_scene()->create_entity("Empty Entity");
             }
             if (ImGui::BeginMenu("Create Static Model Entity"))
             {
-                for (auto& model : AssetManager::get_models())
+                for (auto &model: AssetManager::get_models())
                 {
                     if (ImGui::MenuItem(model.get_name()))
                     {
                         Audio::play_sound(accept_sound, 30);
-                        Engine::get_scene()->create_static_model_entities(model.get_name(), {}, true);
+                        _selected_entity = Engine::get_scene()->create_static_model_entities(model.get_name(), {}, true);
                     }
                 }
                 ImGui::EndMenu();
@@ -370,7 +370,7 @@ namespace cologne
             {
                 Engine::get_renderer()->submit_outline_render_item(RenderItem(mesh_comp.mesh_idx,
                                                                               _selected_entity.get_component<
-                                                                                  TransformComponent>(),
+                                                                                  WorldTransformComponent>(),
                                                                               false,
                                                                               static_cast<uint32_t>(_selected_entity)));
                 int id = mesh_comp.mesh_idx;
@@ -390,7 +390,7 @@ namespace cologne
                 {
                     Engine::get_renderer()->submit_outline_render_item(RenderItem(
                         idx,
-                        _selected_entity.get_component<TransformComponent>(),
+                        _selected_entity.get_component<WorldTransformComponent>(),
                         false,
                         static_cast<uint32_t>(_selected_entity)));
                 }
@@ -410,7 +410,7 @@ namespace cologne
             {
                 SkinnedRenderItem item;
                 item.skinned_model = AssetManager::get_skinned_model_by_index(model.id);
-                item.transform = _selected_entity.get_component<TransformComponent>();
+                item.transform = _selected_entity.get_component<WorldTransformComponent>();
                 if (_selected_entity.has_component<AnimatorComponent>())
                 {
                     auto &anim = _selected_entity.get_component<AnimatorComponent>();
@@ -651,11 +651,22 @@ namespace cologne
             auto &tr = _selected_entity.get_component<TransformComponent>();
             //         auto& tr = Engine::get_scene()->_registry.get<TransformComponent>(entity);
             glm::mat4 mat4 = tr.get_mat4();
+            if (_selected_entity.has_component<ChildComponent>())
+            {
+                mat4 = _selected_entity.get_component<ChildComponent>().parent.get_component<WorldTransformComponent>().
+                       transform * mat4;
+            }
             bool changed = ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(proj),
                                                 current_operation, ImGuizmo::LOCAL, glm::value_ptr(mat4));
             //
             if (changed)
             {
+                glm::mat4 world_mat = mat4;
+                if (_selected_entity.has_component<ChildComponent>())
+                {
+                    mat4 = glm::inverse(_selected_entity.get_component<ChildComponent>().parent.get_component<WorldTransformComponent>().
+                       transform) * mat4;
+                }
                 glm::quat orientation;
                 glm::vec3 translation;
                 glm::vec3 scale;
@@ -665,7 +676,6 @@ namespace cologne
                 tr.position = translation;
                 tr.rotation = orientation;
                 tr.scale = scale;
-                Physics::sync_transform(_selected_entity);
             }
         }
         ImGui::End();

@@ -97,6 +97,10 @@ namespace cologne
         cam.primary = false;
         scene_camera.add_component<NativeScriptComponent>().bind<EditorCameraController>();
 
+        create_static_model_entities("sofa", TransformComponent(glm::vec3(-.6f, -.5f, -2.270f),
+                                                                glm::quat(glm::radians(glm::vec3(0.0f))),
+                                                                glm::vec3(1.0f)));
+
         auto view = _registry.view<TransformComponent, StaticColliderComponent, MeshComponent>();
         for (auto entity: view)
         {
@@ -203,7 +207,6 @@ namespace cologne
             Engine::get_renderer()->submit_light(Light(light, transform));
         }
 
-
         glm::vec3 ray_start = tr.position, ray_dir = tr.get_forward();
         RaycastHitInfo info;
         if (!Engine::in_edit_mode())
@@ -233,12 +236,25 @@ namespace cologne
             }
         }
 
+
+        update_transforms();
+
+        if (Engine::in_edit_mode())
+        {
+            //temp?
+            auto view = _registry.view<StaticColliderComponent, WorldTransformComponent>();
+            for (auto entity: view)
+            {
+                Entity e = {entity, this};
+                Physics::sync_transform(e);
+            }
+        }
         //submit draw calls
-        auto view = _registry.view<ModelComponent, TransformComponent, ActiveComponent>();
+        auto view = _registry.view<ModelComponent, WorldTransformComponent, ActiveComponent>();
         for (auto entity: view)
         {
             auto [m, tr, active] =
-                    view.get<ModelComponent, TransformComponent, ActiveComponent>(entity);
+                    view.get<ModelComponent, WorldTransformComponent, ActiveComponent>(entity);
             //culling step would be here probably? though for GI i dunno. might have to pack into render item
             if (!active)
             {
@@ -252,10 +268,10 @@ namespace cologne
             }
         }
 
-        auto view2 = _registry.view<MeshComponent, TransformComponent, ActiveComponent>();
+        auto view2 = _registry.view<MeshComponent, WorldTransformComponent, ActiveComponent>();
         for (auto entity: view2)
         {
-            auto [m, tr, active] = view2.get<MeshComponent, TransformComponent, ActiveComponent>(entity);
+            auto [m, tr, active] = view2.get<MeshComponent, WorldTransformComponent, ActiveComponent>(entity);
             if (!active)
             {
                 continue;
@@ -264,11 +280,11 @@ namespace cologne
                     submit_render_item(RenderItem(m.mesh_idx, tr, false, static_cast<uint32_t>(entity)));
         }
 
-        auto view3 = _registry.view<SkinnedModelComponent, TransformComponent, ActiveComponent>();
+        auto view3 = _registry.view<SkinnedModelComponent, WorldTransformComponent, ActiveComponent>();
         for (auto entity: view3)
         {
             auto [m, tr, active] =
-                    view3.get<SkinnedModelComponent, TransformComponent, ActiveComponent>(entity);
+                    view3.get<SkinnedModelComponent, WorldTransformComponent, ActiveComponent>(entity);
             //culling step would be here probably? though for GI i dunno. might have to pack into render item
             if (!active)
             {
@@ -335,33 +351,53 @@ namespace cologne
         entity.add_component<TransformComponent>();
         entity.add_component<TagComponent>(name.empty() ? "Entity" : name);
         entity.add_component<ActiveComponent>(true);
+        entity.add_component<WorldTransformComponent>();
         return entity;
     }
 
-    void Scene::create_static_model_entities(const char *model_name, const TransformComponent &parent_transform, bool create_colliders)
+    Entity Scene::create_static_model_entities(const char *model_name, const TransformComponent &parent_transform,
+                                               bool create_colliders)
     {
         auto model = AssetManager::get_model_by_name(model_name);
+        Entity parent = create_entity(std::string(model_name) + "_parent");
+        auto &parent_comp = parent.add_component<ParentComponent>();
+        parent.get_component<TransformComponent>() = parent_transform;
+        parent.get_component<WorldTransformComponent>().transform = parent_transform.get_mat4();
         for (auto idx: model->get_mesh_indices())
         {
             const auto mesh = AssetManager::get_mesh_by_index(idx);
             Entity sub_mesh = create_entity(mesh->get_name());
+            sub_mesh.add_component<ChildComponent>(parent);
+            parent_comp.children.emplace_back(sub_mesh);
             sub_mesh.add_component<MeshComponent>(idx);
-            sub_mesh.get_component<TransformComponent>() = TransformComponent(
-                parent_transform.get_mat4() * mesh->get_inverse_bind_pose());
-            auto& col = sub_mesh.add_component<StaticColliderComponent>();
+            sub_mesh.get_component<TransformComponent>() = TransformComponent(mesh->get_inverse_bind_pose());
+            sub_mesh.get_component<WorldTransformComponent>().transform =
+                    parent_transform.get_mat4() * mesh->get_inverse_bind_pose();
+            auto &col = sub_mesh.add_component<StaticColliderComponent>();
             if (create_colliders)
             {
+                TransformComponent temp = TransformComponent(
+                    parent_transform.get_mat4() * mesh->get_inverse_bind_pose());
                 uint32_t body_id = Physics::create_static_mesh_collider(
-                sub_mesh, sub_mesh.get_component<TransformComponent>(), mesh->get_vertices(),
-                mesh->get_indices());
+                    sub_mesh, temp, mesh->get_vertices(),
+                    mesh->get_indices());
                 col.body_id = body_id;
             }
+            update_transforms();
         }
+        return parent;
     }
 
 
     void Scene::destroy_entity(Entity entity)
     {
+        if (entity.has_component<ParentComponent>())
+        {
+            for (auto e: entity.get_component<ParentComponent>().children)
+            {
+                destroy_entity(e);
+            }
+        }
         _registry.destroy(entity);
     }
 
@@ -397,5 +433,41 @@ namespace cologne
         Entity game_cam = get_primary_camera();
         if (!scene_cam || !game_cam) return;
         scene_cam.get_component<TransformComponent>().position = game_cam.get_component<TransformComponent>().position;
+    }
+
+    void Scene::update_transforms()
+    {
+        for (auto entity: _registry.view<WorldTransformComponent, TransformComponent>())
+        {
+            auto &tr = _registry.get<TransformComponent>(entity);
+            auto &wd = _registry.get<WorldTransformComponent>(entity);
+            wd.transform = tr.get_mat4();
+        }
+
+        auto parent_view = _registry.view<ParentComponent>();
+        for (auto entity: parent_view)
+        {
+            update_children(entity);
+        }
+    }
+
+    void Scene::update_children(entt::entity parent)
+    {
+        auto &parent_wld = _registry.get<WorldTransformComponent>(parent);
+        auto &parent_comp = _registry.get<ParentComponent>(parent);
+
+        for (auto child: parent_comp.children)
+        {
+            if (_registry.valid(child))
+            {
+                auto &child_transform = _registry.get<TransformComponent>(child);
+                auto &child_world_transform = _registry.get<WorldTransformComponent>(child);
+                child_world_transform.transform = parent_wld.transform * child_transform.get_mat4();
+                if (_registry.any_of<ParentComponent>(child))
+                {
+                    update_children(child);
+                }
+            }
+        }
     }
 }

@@ -297,7 +297,7 @@ namespace cologne
         {
             const auto mesh = AssetManager::get_mesh_by_index(item.mesh_idx);
             const auto mat = AssetManager::get_material_by_index(mesh->get_material_index());
-            shader->set_mat4("model", item.transform.get_mat4());
+            shader->set_mat4("model", item.transform);
             mat->albedo.bind(ALBEDO_INDEX);
             mesh->draw();
         }
@@ -312,7 +312,7 @@ namespace cologne
             {
                 continue;
             }
-            shader->set_mat4("model", item.transform.get_mat4());
+            shader->set_mat4("model", item.transform);
             if (!item.bones.empty())
             {
                 shader->set_mat4("bone_matrices", item.bones);
@@ -353,7 +353,7 @@ namespace cologne
 
         for (auto &item: _render_items)
         {
-            shader->set_mat4("model", item.transform.get_mat4());
+            shader->set_mat4("model", item.transform);
             const auto mesh = AssetManager::get_mesh_by_index(item.mesh_idx);
             const auto mat = AssetManager::get_material_by_index(mesh->get_material_index());
             mat->albedo.bind(ALBEDO_INDEX);
@@ -394,7 +394,7 @@ namespace cologne
             shader->set_mat4("light_space_matrices", create_shadow_projection_matrices(position, light.radius));
             for (auto &item: _render_items)
             {
-                shader->set_mat4("model", item.transform.get_mat4());
+                shader->set_mat4("model", item.transform);
                 const auto mesh = AssetManager::get_mesh_by_index(item.mesh_idx);
                 const auto mat = AssetManager::get_material_by_index(mesh->get_material_index());
                 mat->albedo.bind(ALBEDO_INDEX);
@@ -407,7 +407,7 @@ namespace cologne
                 {
                     continue;
                 }
-                shader->set_mat4("model", item.transform.get_mat4());
+                shader->set_mat4("model", item.transform);
                 if (!item.bones.empty())
                 {
                     shader->set_bool("is_skinned", true);

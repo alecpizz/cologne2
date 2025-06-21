@@ -86,7 +86,7 @@ namespace cologne
             shader->set_float("metallic", mat->metallic_override);
             shader->set_float("roughness", mat->roughness_override);
             mat->bind_all();
-            shader->set_mat4("model", tr.get_mat4());
+            shader->set_mat4("model", tr);
             mesh->draw();
 
 
@@ -105,7 +105,7 @@ namespace cologne
 
         for (auto &[skinned_model, tr, bones, id]: _skinned_render_items)
         {
-            shader->set_mat4("model", tr.get_mat4());
+            shader->set_mat4("model", tr);
             shader->set_uint("entity_id", id);
             if (!bones.empty())
             {

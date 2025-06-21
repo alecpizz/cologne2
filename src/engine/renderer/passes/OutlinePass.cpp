@@ -76,14 +76,14 @@ namespace cologne
         //draw items into mask
         for (auto &outline_render_item: _outline_render_items)
         {
-            mask_shader->set_mat4("model", outline_render_item.transform.get_mat4());
+            mask_shader->set_mat4("model", outline_render_item.transform);
             const auto mesh = AssetManager::get_mesh_by_index(outline_render_item.mesh_idx);
             mesh->draw();
         }
 
         for (auto &item: _outline_skinned_render_items)
         {
-            mask_shader->set_mat4("model", item.transform.get_mat4());
+            mask_shader->set_mat4("model", item.transform);
             if (!item.bones.empty())
             {
                 mask_shader->set_bool("is_skinned", true);

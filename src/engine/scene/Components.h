@@ -6,6 +6,13 @@
 
 namespace cologne
 {
+    struct WorldTransformComponent
+    {
+        glm::mat4 transform;
+        operator glm::mat4 &() { return transform; }
+        operator const glm::mat4 &() const { return transform; }
+    };
+
     struct TransformComponent
     {
         glm::vec3 position = glm::vec3(0.0f);
@@ -13,12 +20,14 @@ namespace cologne
         glm::vec3 scale = glm::vec3(1.0f);
 
         TransformComponent() = default;
+
         TransformComponent(glm::vec3 pos, glm::quat rot, glm::vec3 sc)
         {
             position = pos;
             rotation = rot;
             scale = sc;
         }
+
         TransformComponent(glm::mat4 mat)
         {
             glm::vec3 pos, s;
@@ -52,6 +61,16 @@ namespace cologne
         {
             return rotation * glm::vec3(1.0f, 0.0f, 0.0f);
         }
+    };
+
+    struct ParentComponent
+    {
+        std::vector<Entity> children;
+    };
+
+    struct ChildComponent
+    {
+        Entity parent;
     };
 
     struct ActiveComponent
