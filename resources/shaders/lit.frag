@@ -3,9 +3,6 @@
 out vec4 FragColor;
 
 in vec2 TexCoords;
-//in vec3 FragPos;
-//in vec3 WorldPos;
-//in mat3 TBN;
 
 struct Light
 {

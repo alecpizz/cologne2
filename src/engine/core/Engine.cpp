@@ -144,7 +144,14 @@ namespace cologne
             {
                 auto &cmd = _impl->file_status_queue.front();
                 file_changed(cmd.first, cmd.second);
-                AssetManager::file_added(cmd.first);
+                if (cmd.second == FileStatus::CREATED)
+                {
+                    AssetManager::file_added(cmd.first);
+                }
+                if (cmd.second == FileStatus::MODIFIED)
+                {
+                    Renderer::file_changed(cmd.first);
+                }
                 _impl->file_status_queue.pop();
             }
             Input::update();

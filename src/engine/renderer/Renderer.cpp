@@ -36,7 +36,7 @@ namespace cologne
 
     void Renderer::init_shaders()
     {
-        for (auto& shader : shaders)
+        for (auto &shader: shaders)
         {
             shader.second.cleanup();
         }
@@ -189,6 +189,15 @@ namespace cologne
                                 static_cast<float>(Engine::get_window()->get_width()) /
                                 static_cast<float>(Engine::get_window()->get_height()),
                                 0.1f, 300.0f);
+    }
+
+    void Renderer::file_changed(const std::filesystem::path &path)
+    {
+        if (path.has_extension() && path.extension().string() == ".vert" || path.extension().string() == ".frag" || path
+            .extension().string() == ".comp" || path.extension().string() == ".geom")
+        {
+            Engine::get_renderer()->reload_shaders();
+        }
     }
 
     uint32_t Renderer::get_output_image()
