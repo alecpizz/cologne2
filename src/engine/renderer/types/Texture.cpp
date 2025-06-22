@@ -117,10 +117,14 @@ namespace cologne
             return;
         }
 
-        int new_width, new_height, new_channels;
+        int new_width = 0, new_height = 0, new_channels = 0;
         stbi_uc *img_data =
-            stbi_load_from_memory(_data.data(), _data.size(),
+            stbi_load_from_memory(_data.data(), static_cast<int>(_data.size()),
                 &new_width, &new_height, &new_channels, 0);
+        if (new_width > 4096 || new_height > 4096)
+        {
+            LOG_INFO("oh no");
+        }
         _width = new_width;
         _height = new_height;
         _channels = new_channels;

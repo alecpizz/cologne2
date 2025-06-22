@@ -7,12 +7,15 @@
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/renderer/Renderer.h>
 
+#include "FileWatcher.h"
 #include "../physics/Physics.h"
 #include "../editor/Editor.h"
 #include "engine/renderer/DebugRenderer.h"
 #include "Input.h"
 #include "../audio/Audio.h"
 #include "Time.h"
+#include <queue>
+#include <engine/util/FileUtil.h>
 
 namespace cologne
 {
@@ -23,6 +26,8 @@ namespace cologne
         std::unique_ptr<EventManager> event_manager = nullptr;
         std::unique_ptr<Editor> debug_ui = nullptr;
         std::unique_ptr<Scene> scene = nullptr;
+        std::unique_ptr<FileWatcher> file_watcher = nullptr;
+        std::queue<std::pair<std::filesystem::path, FileStatus> > file_status_queue;
         bool running = true;
     };
 
@@ -66,7 +71,7 @@ namespace cologne
 
     EventManager *Engine::get_event_manager()
     {
-        return  _instance->_impl->event_manager.get();
+        return _instance->_impl->event_manager.get();
     }
 
     Scene *Engine::get_scene()
@@ -75,9 +80,30 @@ namespace cologne
     }
 
 
-    Editor * Engine::get_debug_ui()
+    Editor *Engine::get_debug_ui()
     {
         return _instance->_impl->debug_ui.get();
+    }
+
+    static void file_changed(std::filesystem::path path, FileStatus status)
+    {
+        std::string status_str;
+        switch (status)
+        {
+            case FileStatus::CREATED:
+                status_str = "CREATED";
+                break;
+            case FileStatus::MODIFIED:
+                status_str = "MODIFIED";
+                break;
+            case FileStatus::ERASED:
+                status_str = "ERASED";
+                break;
+            default:
+                status_str = "";
+                break;
+        }
+        LOG_INFO("file changed %s %s", path.c_str(), status_str.c_str());
     }
 
     bool Engine::init(uint32_t width, uint32_t height)
@@ -85,6 +111,11 @@ namespace cologne
         Audio::init();
         _impl->debug_ui = std::unique_ptr<Editor>(new Editor());
         _impl->window = std::unique_ptr<Window>(new Window(width, height));
+        _impl->file_watcher = std::make_unique<FileWatcher>(
+            RESOURCES_PATH, [this](const std::filesystem::path &path, FileStatus status)
+            {
+                _impl->file_status_queue.emplace(path, status);
+            });
         Physics::init();
         AssetManager::init();
         AssetManager::print_all();
@@ -109,6 +140,13 @@ namespace cologne
         ElapsedTime et;
         while (!_impl->event_manager->should_quit())
         {
+            if (!_impl->file_status_queue.empty())
+            {
+                auto &cmd = _impl->file_status_queue.front();
+                file_changed(cmd.first, cmd.second);
+                AssetManager::file_added(cmd.first);
+                _impl->file_status_queue.pop();
+            }
             Input::update();
             _impl->event_manager->poll_events();
             _impl->scene->update(et.elapsed);

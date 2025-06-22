@@ -3,6 +3,7 @@
 #include <engine/renderer/types/Mesh.h>
 #include <engine/renderer/types/SkinnedModel.h>
 #include <engine/animation/Animation.h>
+#include <filesystem>
 
 namespace cologne::AssetManager
 {
@@ -15,6 +16,7 @@ namespace cologne::AssetManager
     void print_models();
     void print_skinned_models();
     void print_all();
+    void file_added(const std::filesystem::path& path);
     std::vector<Animation>& get_animations();
     std::vector<Model>& get_models();
     std::vector<Mesh>& get_meshes();

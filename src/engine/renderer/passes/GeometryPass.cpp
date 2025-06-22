@@ -120,15 +120,8 @@ namespace cologne
             {
                 Material &mat = skinned_model->get_materials()[mesh.get_material_index()];
                 mat.bind_all();
-                if (mat.metallic.get_handle() == 0)
-                {
-                    shader->set_float("metallic", mat.metallic_override);
-                }
-
-                if (mat.roughness.get_handle() == 0)
-                {
-                    shader->set_float("roughness", mat.metallic_override);
-                }
+                shader->set_float("metallic", mat.metallic_override);
+                shader->set_float("roughness", mat.metallic_override);
                 mesh.draw();
                 glBindTextureUnit(ALBEDO_INDEX, 0);
                 glBindTextureUnit(AO_INDEX, 0);

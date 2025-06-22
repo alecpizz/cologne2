@@ -6,6 +6,13 @@
 #include <filesystem>
 #include <engine/util/DebugScope.h>
 #include <engine/util/FileUtil.h>
+#include <algorithm>
+#include <future>
+#include <iostream>
+#include <mutex>
+#include <numeric>
+#include <string>
+#include <vector>
 
 namespace cologne::AssetManager
 {
@@ -19,6 +26,8 @@ namespace cologne::AssetManager
     std::unordered_map<std::string, int32_t> animation_index_map;
     std::unordered_map<std::string, int32_t> mesh_index_map;
     bool is_loading = true;
+    int32_t material_offset = 0;
+    int32_t mesh_offset = 0;
 
     void init()
     {
@@ -73,8 +82,7 @@ namespace cologne::AssetManager
                        });
         scope = DebugScope("load models");
         //DO MESHES BEFORE MODELS
-        int32_t material_offset = 0;
-        int32_t mesh_offset = 0;
+
         for (auto &model_data: model_datas)
         {
             int32_t startingIdx = material_offset; //our current index in the big ol material buffer
@@ -120,21 +128,62 @@ namespace cologne::AssetManager
 
     void load_model(const std::string &path)
     {
-        LOG_ERROR("fuck off");
-        // auto data = FileUtil::import_model(path);
-        // if (!data.meshes.empty())
-        // {
-            // models.emplace_back(data);
-        // }
+        std::vector<Mesh> new_meshes;
+        size_t mesh_size = meshes.size() - 1;
+        size_t model_size = models.size() - 1;
+        //TODO: don't block main thread
+
+        // auto a1 = std::async(std::launch::async, FileUtil::import_model, path);
+        // a1.wait();
+        // auto data = a1.get();
+        auto data = FileUtil::import_model(path);
+        int32_t starting_idx = material_offset;
+        for (Material& mat : data.materials)
+        {
+            materials.emplace_back(mat);
+            material_offset++; //add however many materials are in the model
+        }
+
+        for (auto& mesh : data.meshes)
+        {
+            mesh.material_index = starting_idx + mesh.material_index;
+        }
+
+        std::vector<int32_t> mesh_indices;
+        for (auto& mesh : data.meshes)
+        {
+            meshes.emplace_back(mesh.vertices, mesh.indices, mesh.material_index, mesh.name,
+                mesh.inverse_bind_pose, mesh.aabb_min, mesh.aabb_max); //create a mesh
+            mesh_indices.emplace_back(mesh_offset); //add its index
+            mesh_offset++; //increment the total amount
+        }
+
+        models.emplace_back(mesh_indices, data.name, data.aabb_min, data.aabb_max);
+
+        for (size_t i = starting_idx; i < materials.size(); i++)
+        {
+            materials[i].load_all();
+        }
+
+        model_index_map[models[model_size + 1].get_name()] = model_size + 1;
+        for (size_t i = 0; i < data.meshes.size(); i++)
+        {
+            mesh_index_map[meshes[mesh_size + i].get_name()] = mesh_size + i;
+        }
+        mesh_index_map[meshes[mesh_size + data.meshes.size()].get_name()] = mesh_size + data.meshes.size();
     }
 
     void load_skinned_model(const std::string &path)
     {
+        LOG_ERROR("implement me");
         auto data = FileUtil::import_skinned_model(path);
-        if (!data.meshes.empty())
+        for (auto &material: data.materials)
         {
-            skinned_models.emplace_back(data);
+            material.load_all();
         }
+        animations.insert(animations.end(),
+                             data.animations.begin(), data.animations.end());
+        skinned_models.emplace_back(data);
     }
 
     std::vector<Model> &get_models()
@@ -198,6 +247,21 @@ namespace cologne::AssetManager
         print_models();
         print_skinned_models();
         print_animations();
+    }
+
+    void file_added(const std::filesystem::path &path)
+    {
+        if (path.has_extension() && path.extension().string() == ".glb")
+        {
+            if (path.parent_path().filename().string() == "models")
+            {
+                load_model(path.string());
+            }
+            else if (path.parent_path().filename().string() == "skinned_models")
+            {
+                load_skinned_model(path.string());
+            }
+        }
     }
 
     void print_animations()

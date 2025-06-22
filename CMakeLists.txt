@@ -74,7 +74,7 @@ set(INTERPROCEDURAL_OPTIMIZATION ON)
 set(USE_F16C ON)
 set(USE_FMADD ON)
 set(FLOATING_POINT_EXCEPTIONS_ENABLED OFF)
-set(JPH_ENABLE_ASSERTS OFF)
+set(USE_ASSERTS OFF)
 
 if (NOT JoltPhysics_POPULATED)
     FetchContent_MakeAvailable(JoltPhysics)
@@ -88,6 +88,8 @@ if (NOT JoltPhysics_POPULATED)
         target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:Debug>:JPH_FLOATING_POINT_EXCEPTIONS_ENABLED>")
     endif ()
 endif ()
+
+target_compile_definitions(Jolt PUBLIC JPH_NO_DEBUG)
 
 
 # MY_SOURCES is defined to be a list of all the source files for my game 
@@ -114,6 +116,8 @@ else ()
     target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC PRODUCTION_BUILD=0)
 
 endif ()
+
+
 
 target_sources(imgui PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui-docking/imgui/misc/cpp/imgui_stdlib.cpp")
 target_sources("${CMAKE_PROJECT_NAME}" PRIVATE ${MY_SOURCES})
