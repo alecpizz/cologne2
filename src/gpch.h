@@ -45,6 +45,7 @@
 #include "../vendor/glm/glm/gtx/quaternion.hpp"
 #include "../vendor/glm/glm/gtx/euler_angles.hpp"
 #include "../../../vendor/glm/glm/gtc/random.hpp"
+#include "../../../vendor/glm/glm/gtx/string_cast.hpp"
 #include <stb_image/stb_image.h>
 
 

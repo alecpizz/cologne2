@@ -9,6 +9,8 @@ namespace cologne
     SSBO::SSBO(size_t size, uint32_t flags)
     {
         _flags = flags;
+        _buffer_size = 0;
+        _handle = 0;
         pre_allocate(size);
     }
 
@@ -20,8 +22,10 @@ namespace cologne
     void SSBO::pre_allocate(size_t size)
     {
         cleanup();
-        glCreateBuffers(1, &_handle);
-        glNamedBufferStorage(_handle, static_cast<GLsizeiptr>(size), nullptr, _flags);
+        glGenBuffers(1, &_handle);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _handle);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, static_cast<GLsizeiptr>(size), nullptr, _flags);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         _buffer_size = size;
     }
 
@@ -33,12 +37,11 @@ namespace cologne
         }
         if (_handle == 0 || _buffer_size < size)
         {
-            cleanup();
-            glCreateBuffers(1, &_handle);
-            glNamedBufferStorage(_handle, static_cast<GLsizeiptr>(size), nullptr, _flags);
-            _buffer_size = size;
+            pre_allocate(size);
         }
-        glNamedBufferSubData(_handle, 0, static_cast<GLsizeiptr>(size), data);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _handle);
+        glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, static_cast<GLsizeiptr>(size), data);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
     void SSBO::bind(int32_t index) const

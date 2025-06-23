@@ -61,7 +61,7 @@ namespace cologne
                                               RESOURCES_PATH "shaders/shadowmap2.geom");
         shaders["probe_debug"] = Shader(RESOURCES_PATH "shaders/probe_debug.vert",
                                         RESOURCES_PATH "shaders/probe_debug.frag");
-        shaders["probe_lit"] = Shader(RESOURCES_PATH "shaders/probe_lit.comp");
+        // shaders["probe_lit"] = Shader(RESOURCES_PATH "shaders/probe_lit.comp");
 
         shaders["voxelize"] = Shader(RESOURCES_PATH "shaders/voxelize.vert",
                                      RESOURCES_PATH "shaders/voxelize.frag");
@@ -96,8 +96,8 @@ namespace cologne
 
     void Renderer::init_ssbos()
     {
-        ssbos["lights"] = SSBO(sizeof(Light) * 8, GL_DYNAMIC_STORAGE_BIT);
-        ssbos["viewport"] = SSBO(sizeof(ViewportData), GL_DYNAMIC_STORAGE_BIT);
+        ssbos["lights"] = SSBO(sizeof(Light) * 8, GL_DYNAMIC_DRAW);
+        ssbos["viewport"] = SSBO(sizeof(ViewportData), GL_DYNAMIC_DRAW);
     }
 
     void Renderer::update_ssbos()
@@ -109,9 +109,9 @@ namespace cologne
         data.projection_view = data.projection * data.view;
         data.view_inverse = glm::inverse(data.view);
         data.camera_position = glm::vec4(_camera_transform.position, 1.0f);
-
+        data.print();
+        ssbos["lights"].update(sizeof(Light) * _lights.size(), _lights.data());
         ssbos["viewport"].update(sizeof(ViewportData), &data);
-        ssbos["lights"].update((sizeof(Light) * _lights.size()), _lights.data());
         ssbos["viewport"].bind(1);
         ssbos["lights"].bind(2);
     }
