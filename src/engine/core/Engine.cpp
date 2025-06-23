@@ -54,7 +54,7 @@ namespace cologne
 
     Engine::~Engine()
     {
-        cologne::Physics::destroy();
+        cologne::Physics::cleanup();
         cologne::Audio::destroy();
         delete _impl;
     }

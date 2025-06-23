@@ -246,7 +246,23 @@ namespace cologne
             for (auto entity: view)
             {
                 Entity e = {entity, this};
-                Physics::sync_transform(e);
+                if (e.get_component<ActiveComponent>().active)
+                {
+                    if (!e.get_component<StaticColliderComponent>().body_enabled)
+                    {
+                        Physics::enable_body(e.get_component<StaticColliderComponent>().body_id);
+                        e.get_component<StaticColliderComponent>().body_enabled = true;
+                    }
+                    Physics::sync_transform(e);
+                }
+                else
+                {
+                    if (e.get_component<StaticColliderComponent>().body_enabled)
+                    {
+                        Physics::disable_body(e.get_component<StaticColliderComponent>().body_id);
+                        e.get_component<StaticColliderComponent>().body_enabled = false;
+                    }
+                }
             }
         }
         //submit draw calls
@@ -401,6 +417,10 @@ namespace cologne
             {
                 destroy_entity(e);
             }
+        }
+        if (entity.has_component<StaticColliderComponent>())
+        {
+            Physics::destroy_body(entity.get_component<StaticColliderComponent>().body_id);
         }
         _registry.destroy(entity);
     }

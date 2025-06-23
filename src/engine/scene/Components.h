@@ -105,6 +105,7 @@ namespace cologne
     struct StaticColliderComponent
     {
         uint32_t body_id = -1;
+        bool body_enabled = true;
     };
 
     struct CameraComponent

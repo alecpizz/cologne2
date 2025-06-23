@@ -554,7 +554,7 @@ namespace cologne::Physics
     }
 
 
-    void destroy()
+    void cleanup()
     {
         physics_system.GetBodyInterface().RemoveBodies(colliders_static.data(), colliders_static.size());
         physics_system.GetBodyInterface().DestroyBodies(colliders_static.data(), colliders_static.size());
@@ -564,5 +564,21 @@ namespace cologne::Physics
         delete job_system;
         delete Factory::sInstance;
         Factory::sInstance = nullptr;
+    }
+
+    void destroy_body(uint32_t body_id)
+    {
+        disable_body(body_id);
+        physics_system.GetBodyInterface().DestroyBody(static_cast<BodyID>(body_id));
+    }
+
+    void disable_body(uint32_t body_id)
+    {
+        physics_system.GetBodyInterface().RemoveBody(static_cast<BodyID>(body_id));
+    }
+
+    void enable_body(uint32_t body_id)
+    {
+        physics_system.GetBodyInterface().AddBody(static_cast<BodyID>(body_id), EActivation::DontActivate);
     }
 }

@@ -31,5 +31,8 @@ namespace cologne::Physics
     void sync_transform(Entity entity);
     bool raycast(glm::vec3 origin, glm::vec3 direction, float max_distance, uint32_t layers, RaycastHitInfo& info);
     // void create_static_mesh_collider(Model& model);
-    void destroy();
+    void cleanup();
+    void destroy_body(uint32_t body_id);
+    void disable_body(uint32_t body_id);
+    void enable_body(uint32_t body_id);
 }
