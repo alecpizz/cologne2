@@ -68,7 +68,9 @@ namespace cologne
     bool active = false;
     bool was_game_mode = true;
     bool mouse_captured = false;
-    ImVec2 prev_viewport_size = ImVec2(1280, 720);
+#define DEFAULT_WIDTH 1600
+#define DEFAULT_HEIGHT 900
+    ImVec2 prev_viewport_size = ImVec2(DEFAULT_WIDTH, DEFAULT_HEIGHT);
     ImGuiWindowFlags global_window_flags;
     const char *move_sound = RESOURCES_PATH "sounds/menus/move.wav";
     const char *accept_sound = RESOURCES_PATH "sounds/menus/accept.wav";
@@ -104,6 +106,10 @@ namespace cologne
         return prev_viewport_size.y;
     }
 
+    ImFont *material_font = nullptr;
+    Texture folder_texture;
+    Texture icon_texture;
+
     Editor::Editor()
     {
         active = false;
@@ -114,14 +120,17 @@ namespace cologne
         ImGui::LoadIniSettingsFromDisk(RESOURCES_PATH "editor/imgui_config.ini");
         imguiThemes::green();
 
+
         ImGuiIO &io = ImGui::GetIO();
         (void) io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
-        prev_viewport_size = ImVec2(1280, 720);
+        prev_viewport_size = ImVec2(DEFAULT_WIDTH, DEFAULT_HEIGHT
+        );
         io.FontDefault = io.Fonts->AddFontFromFileTTF(RESOURCES_PATH "fonts/Montserrat-Regular.ttf", 16.0f);
-
+        material_font = io.Fonts->AddFontFromFileTTF(RESOURCES_PATH "fonts/MaterialIcons-Regular.ttf", 48.0f);
+        std::setlocale(LC_CTYPE, ".UTF8");
         ImGuiStyle &style = ImGui::GetStyle();
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
@@ -208,18 +217,80 @@ namespace cologne
         }
     }
 
+    static const std::filesystem::path assets_directory = RESOURCES_PATH;
+    static std::filesystem::path current_directory = assets_directory;
+
     void Editor::build_asset_browser()
     {
         ImGui::Begin("Asset Browser", nullptr, global_window_flags);
-        if (ImGui::Button("Asset 1"))
+        if (folder_texture.get_handle() == 0)
         {
-            Audio::play_sound(accept_sound, 30);
+            folder_texture = Texture(RESOURCES_PATH "icons/folder.png");
         }
-        ImGui::SameLine();
-        if (ImGui::Button("Asset 2"))
+
+        if (icon_texture.get_handle() == 0)
         {
-            Audio::play_sound(accept_sound, 30);
+            icon_texture = Texture(RESOURCES_PATH "icons/file.png");
         }
+
+        if (current_directory != assets_directory)
+        {
+            if (ImGui::Button("<-"))
+            {
+                current_directory = current_directory.parent_path();
+                Audio::play_sound(move_sound, 30);
+            }
+        }
+
+        static float padding = 0.6f;
+        static float thumbnail_size = 38.0f;
+        float cell_size = thumbnail_size / padding;
+
+        const float panel_width = ImGui::GetContentRegionAvail().x;
+        int column_count = static_cast<int>(panel_width / cell_size);
+        if (column_count < 1)
+        {
+            column_count = 1;
+        }
+
+        ImGui::Columns(column_count, 0, false);
+
+        for (auto &dir_entry: std::filesystem::directory_iterator(current_directory))
+        {
+            const auto &path = dir_entry.path();
+            std::string filename_str = path.filename().string();
+
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+            uint32_t handle = dir_entry.is_directory() ? folder_texture.get_handle() : icon_texture.get_handle();
+            ImGui::ImageButton(filename_str.c_str(), static_cast<ImTextureID>(static_cast<intptr_t>(handle)),
+                               {thumbnail_size, thumbnail_size}, {0, 1}, {1, 0});
+
+            if (ImGui::BeginDragDropSource())
+            {
+                std::filesystem::path relative_path(path);
+                const auto item_path = relative_path.c_str();
+                ImGui::SetDragDropPayload("ASSET_BROWSER_ENTRY", item_path, strlen(item_path) * sizeof(char));
+                ImGui::Text("%s", item_path);
+                ImGui::EndDragDropSource();
+            }
+
+            ImGui::PopStyleColor();
+            if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+            {
+                if (dir_entry.is_directory())
+                {
+                    current_directory /= path.filename();
+                    Audio::play_sound(move_sound, 30);
+                }
+            }
+            ImGui::TextWrapped(filename_str.c_str());
+            ImGui::NextColumn();
+        }
+
+        ImGui::Columns(1);
+        ImGui::SliderFloat("Thumbnail Size", &thumbnail_size, 16, 512);
+        ImGui::SliderFloat("Padding", &padding, 0, 32);
+
         ImGui::End();
     }
 
@@ -239,7 +310,8 @@ namespace cologne
 
         if (ImGui::BeginDragDropTarget())
         {
-            if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("GRAPH_ENTITY", ImGuiDragDropFlags_AcceptBeforeDelivery))
+            if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(
+                "GRAPH_ENTITY", ImGuiDragDropFlags_AcceptBeforeDelivery))
             {
                 uint32_t id = *(uint32_t *) payload->Data;
                 Entity found_entity = {static_cast<entt::entity>(id), Engine::get_scene()};
@@ -740,6 +812,31 @@ namespace cologne
         }
         ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(Renderer::get_output_image())), viewport_size,
                      ImVec2(0, 1), ImVec2(1, 0));
+
+        if (ImGui::BeginDragDropTarget())
+        {
+            if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("ASSET_BROWSER_ENTRY"))
+            {
+                const char *path = static_cast<const char *>(payload->Data);
+                LOG_INFO(" accepted file %s", path);
+                auto fs_path = std::filesystem::path(path);
+                if (!is_directory(fs_path))
+                {
+                    if (fs_path.has_extension() && fs_path.extension() == ".glb")
+                    {
+                        if (fs_path.parent_path().filename().string() == "models")
+                        {
+                            Engine::get_scene()->create_static_model_entities(fs_path.stem().c_str(), TransformComponent(), true);
+                        }
+                        else if (fs_path.parent_path().filename().string() == "skinned_models")
+                        {
+                            //todo
+                        }
+                    }
+                }
+            }
+            ImGui::EndDragDropTarget();
+        }
         static ImGuizmo::OPERATION current_operation = ImGuizmo::OPERATION::TRANSLATE;
         if (_selected_entity)
         {

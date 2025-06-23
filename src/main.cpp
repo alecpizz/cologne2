@@ -13,10 +13,13 @@ extern "C" {
 #endif
 #endif
 
+#define DEFAULT_WIDTH 1600
+#define DEFAULT_HEIGHT 900
+
 int main()
 {
     cologne::Engine engine;
-    if (!engine.init(1280, 720))
+    if (!engine.init(DEFAULT_WIDTH, DEFAULT_HEIGHT))
     {
         return -1;
     }

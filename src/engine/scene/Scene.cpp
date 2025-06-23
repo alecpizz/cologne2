@@ -359,6 +359,10 @@ namespace cologne
                                                bool create_colliders)
     {
         auto model = AssetManager::get_model_by_name(model_name);
+        if (!model)
+        {
+            return {};
+        }
         Entity parent = create_entity(std::string(model_name) + "_parent");
         auto &parent_comp = parent.add_component<ParentComponent>();
         parent.get_component<TransformComponent>() = parent_transform;
