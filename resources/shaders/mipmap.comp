@@ -3,6 +3,9 @@ layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 layout (binding = 0, rgba16f) uniform writeonly image3D image;
 layout (binding = 1, rgba16f) uniform readonly image3D last_image;
 
+layout (binding = 2, r32ui) uniform writeonly uimage3D norm_image;
+layout (binding = 3, r32ui) uniform readonly uimage3D last_norm_image;
+
 
 void main()
 {
@@ -15,13 +18,17 @@ void main()
 
     ivec3 srcCoord = destCoord * 2;
     vec4 color = vec4(0.0);
+    uint norm = 0;
     for (int y = 0; y < 2; ++y) {
         for (int x = 0; x < 2; ++x) {
             for(int z = 0; z < 2; ++z) {
                 color += imageLoad(last_image, srcCoord + ivec3(x, y, z));
+                norm += imageLoad(last_norm_image, srcCoord + ivec3(x, y, z)).r;
             }
         }
     }
     color /= 8.0;
+    norm /= 8;
     imageStore(image, destCoord, color);
+    imageStore(norm_image, destCoord, uvec4(norm));
 }

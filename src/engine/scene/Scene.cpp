@@ -379,10 +379,24 @@ namespace cologne
         {
             return {};
         }
-        Entity parent = create_entity(std::string(model_name) + "_parent");
-        auto &parent_comp = parent.add_component<ParentComponent>();
+        Entity parent = create_entity(std::string(model_name));
         parent.get_component<TransformComponent>() = parent_transform;
         parent.get_component<WorldTransformComponent>().transform = parent_transform.get_mat4();
+        if (model->get_mesh_indices().size() == 1)
+        {
+            parent.add_component<MeshComponent>(model->get_mesh_indices()[0]);
+            auto &col = parent.add_component<StaticColliderComponent>();
+            if (create_colliders)
+            {
+                auto mesh = AssetManager::get_mesh_by_index(model->get_mesh_indices()[0]);
+                uint32_t body_id = Physics::create_static_mesh_collider(
+                    parent, parent_transform, mesh->get_vertices(),
+                    mesh->get_indices());
+                col.body_id = body_id;
+            }
+            return parent;
+        }
+        auto &parent_comp = parent.add_component<ParentComponent>();
         for (auto idx: model->get_mesh_indices())
         {
             const auto mesh = AssetManager::get_mesh_by_index(idx);

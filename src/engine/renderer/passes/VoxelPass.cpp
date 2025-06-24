@@ -11,18 +11,17 @@ namespace cologne
 {
     void Renderer::init_voxels()
     {
-        glGenTextures(1, &_voxel_texture);
-        glBindTexture(GL_TEXTURE_3D, _voxel_texture);
+        //color
+        glGenTextures(1, &_voxel_texture_color);
+        glBindTexture(GL_TEXTURE_3D, _voxel_texture_color);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        // glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA8, voxel_size, voxel_size, voxel_size);
         int numVoxels = _voxel_data.voxel_dimensions * _voxel_data.voxel_dimensions * _voxel_data.voxel_dimensions;
         auto *data = new GLfloat[4 * numVoxels];
         memset(data, 0.0f, 4 * numVoxels);
-        // glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8, voxel_size, voxel_size, voxel_size, 0, GL_RGBA, GL_FLOAT, data);
         glTexStorage3D(GL_TEXTURE_3D, log2(_voxel_data.voxel_dimensions),
                        GL_RGBA16F, _voxel_data.voxel_dimensions, _voxel_data.voxel_dimensions,
                        _voxel_data.voxel_dimensions);
@@ -32,8 +31,31 @@ namespace cologne
                         GL_FLOAT, data);
         glGenerateMipmap(GL_TEXTURE_3D);
         glBindTexture(GL_TEXTURE_3D, 0);
-        delete[] data;
 
+
+        delete[] data;
+        // auto *norm_data = new GLuint[4 * numVoxels];
+        // memset(norm_data, 0, 4 * numVoxels);
+        //normals
+        glGenTextures(1, &_voxel_texture_normal);
+        glBindTexture(GL_TEXTURE_3D, _voxel_texture_normal);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        // glTexStorage3D(GL_TEXTURE_3D, 1,
+        //                GL_R16UI, _voxel_data.voxel_dimensions, _voxel_data.voxel_dimensions,
+        //                _voxel_data.voxel_dimensions);
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_R32UI, _voxel_data.voxel_dimensions, _voxel_data.voxel_dimensions,
+                     _voxel_data.voxel_dimensions, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
+        // glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0,
+        //                 _voxel_data.voxel_dimensions, _voxel_data.voxel_dimensions,
+        //                 _voxel_data.voxel_dimensions, GL_RED,
+        //                 GL_UNSIGNED_INT, norm_data);
+        glBindTexture(GL_TEXTURE_3D, 0);
+
+        // delete[] norm_data;
         auto voxel_back_fbo = get_framebuffer_by_name("voxel_back");
         auto voxel_front_fbo = get_framebuffer_by_name("voxel_front");
         voxel_back_fbo->create("voxel cube back", Engine::get_window()->get_width(),
@@ -97,15 +119,16 @@ namespace cologne
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
 
-        glBindTexture(GL_TEXTURE_3D, _voxel_texture);
+        glBindTexture(GL_TEXTURE_3D, _voxel_texture_color);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glBindTextureUnit(0, _voxel_texture);
+        glBindTextureUnit(0, _voxel_texture_color);
         glBindTextureUnit(1, voxel_back_fbo->get_color_attachment_handle_by_name("color"));
         glBindTextureUnit(2, voxel_front_fbo->get_color_attachment_handle_by_name("color"));
+        glBindTextureUnit(3, _voxel_texture_normal);
         render_quad();
 
         glEnable(GL_DEPTH_TEST);
-        glBindTexture(GL_TEXTURE_3D, _voxel_texture);
+        glBindTexture(GL_TEXTURE_3D, _voxel_texture_color);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glBindTexture(GL_TEXTURE_3D, 0);
     }
@@ -119,8 +142,8 @@ namespace cologne
         glDisable(GL_BLEND);
 
         glViewport(0, 0, _voxel_data.voxel_dimensions, _voxel_data.voxel_dimensions);
-        glClearTexImage(_voxel_texture, 0, GL_RGBA, GL_FLOAT, glm::value_ptr(glm::vec4(0.0f)));
-
+        glClearTexImage(_voxel_texture_color, 0, GL_RGBA, GL_FLOAT, glm::value_ptr(glm::vec4(0.0f)));
+        glClearTexImage(_voxel_texture_normal, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, glm::value_ptr(glm::uvec4(0)));
         auto shader = get_shader_by_name("voxelize");
         shader->bind();
         shader->set_mat4("lightSpaceMatrix", (_dir_light_space));
@@ -135,7 +158,8 @@ namespace cologne
         auto max = bounds.max;
         shader->set_vec3("grid_min", (min));
         shader->set_vec3("grid_max", (max));
-        glBindImageTexture(6, _voxel_texture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
+        glBindImageTexture(6, _voxel_texture_color, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
+        glBindImageTexture(7, _voxel_texture_normal, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
         glBindTextureUnit(8, get_framebuffer_by_name("dir_shadow")->get_depth_attachment_handle());
         // glBindTextureUnit(7, _shadow_depth);
         for (int idx = 0; idx < 3; idx++)
@@ -164,11 +188,13 @@ namespace cologne
 
 
             glBindImageTexture(0,
-                               _voxel_texture,
+                               _voxel_texture_color,
                                next,
                                GL_TRUE,
                                0, GL_WRITE_ONLY, GL_RGBA16F);
-            glBindImageTexture(1, _voxel_texture, mip, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA16F);
+            glBindImageTexture(1, _voxel_texture_color, mip, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA16F);
+            glBindImageTexture(2, _voxel_texture_normal, next, GL_TRUE, 0, GL_WRITE_ONLY, GL_R32UI);
+            glBindImageTexture(3, _voxel_texture_normal, mip, GL_TRUE, 0, GL_READ_ONLY, GL_R32UI);
             int localSize = 8;
             uint32_t x = (dest_width + localSize - 1) / localSize;
             uint32_t y = (dest_height + localSize - 1) / localSize;

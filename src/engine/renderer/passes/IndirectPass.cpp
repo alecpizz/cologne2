@@ -9,19 +9,7 @@ namespace cologne
     const uint32_t pixel_ratio = 2;
     void Renderer::init_indirect()
     {
-        if (_indirect_texture != 0)
-        {
-            glDeleteTextures(1, &_indirect_texture);
-        }
-        glCreateTextures(GL_TEXTURE_2D, 1, &_indirect_texture);
-        glTextureParameteri(_indirect_texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTextureParameteri(_indirect_texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTextureParameteri(_indirect_texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTextureParameteri(_indirect_texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTextureStorage2D(_indirect_texture, 1, GL_RGBA8,
-                           Engine::get_window()->get_width() / pixel_ratio, Engine::get_window()->get_height() / pixel_ratio);
-        Engine::get_debug_ui()->add_image_entry("Indirect_Lighting", _indirect_texture,
-            {Engine::get_window()->get_width() / pixel_ratio, Engine::get_window()->get_height() / pixel_ratio});
+        init_indirect(Engine::get_window()->get_width(), Engine::get_window()->get_height());
     }
 
     void Renderer::init_indirect(uint32_t width, uint32_t height)
@@ -67,10 +55,11 @@ namespace cologne
         
         glBindImageTexture(0, _indirect_texture, 0, GL_FALSE, 0,
             GL_WRITE_ONLY, GL_RGBA8);
-        glBindTextureUnit(1, _voxel_texture);
+        glBindTextureUnit(1, _voxel_texture_color);
         auto gbuffer = get_framebuffer_by_name("gbuffer");
         glBindTextureUnit(2, gbuffer->get_color_attachment_handle_by_name("position"));
         glBindTextureUnit(3, gbuffer->get_color_attachment_handle_by_name("normal"));
+        glBindTextureUnit(4, _voxel_texture_normal);
 
         const uint32_t work_group_size = 16;
         uint32_t width = Engine::get_window()->get_width() / pixel_ratio;

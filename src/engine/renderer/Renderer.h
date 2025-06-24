@@ -145,7 +145,8 @@ namespace cologne
 
         //Textures
         uint32_t _shadow_depth = 0;
-        uint32_t _voxel_texture = 0;
+        uint32_t _voxel_texture_color = 0;
+        uint32_t _voxel_texture_normal = 0;
         uint32_t _indirect_texture = 0;
         uint32_t _skybox_texture = 0;
         uint32_t _env_irradiance = 0;

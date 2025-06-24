@@ -38,16 +38,28 @@ namespace cologne
 
     void Shader::bind() const
     {
+        if (!_linked)
+        {
+            return;
+        }
         glUseProgram(_program);
     }
 
     void Shader::dispatch(uint32_t work_size_x, uint32_t work_size_y, uint32_t work_size_z)
     {
+        if (!_linked)
+        {
+            return;
+        }
         glDispatchCompute(work_size_x, work_size_y, work_size_z);
     }
 
     void Shader::wait()
     {
+        if (!_linked)
+        {
+            return;
+        }
         glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
     }
 
@@ -217,6 +229,8 @@ namespace cologne
             char infoLog[512];
             glGetProgramInfoLog(_program, 512, nullptr, infoLog);
             LOG_ERROR("Failed to link program %s", infoLog);
+            glDeleteShader(comp_shader);
+            return;
         }
         glDeleteShader(comp_shader);
         _linked = true;
@@ -255,6 +269,10 @@ namespace cologne
             char infoLog[512];
             glGetProgramInfoLog(_program, 512, nullptr, infoLog);
             LOG_ERROR("Failed to link program %s", infoLog);
+            glDeleteShader(vertex_shader);
+            glDeleteShader(fragment_shader);
+            glDeleteShader(geometry_shader);
+            return;
         }
         glDeleteShader(vertex_shader);
         glDeleteShader(fragment_shader);

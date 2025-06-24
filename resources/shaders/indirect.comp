@@ -5,6 +5,7 @@ layout (rgba8, binding = 0) uniform writeonly image2D output_image;
 layout (binding = 1) uniform sampler3D voxel_texture;
 layout (binding = 2) uniform sampler2D position_texture;
 layout (binding = 3) uniform sampler2D normal_texture;
+layout (binding = 4) uniform usampler3D voxel_normal_texture;
 
 #define PI 3.1415926535897932384626433832795
 
@@ -38,6 +39,7 @@ vec4 cone_trace(vec3 from, vec3 direction, float aperture)
     vec4 accumulated = vec4(0.0f);
     from += direction * voxelMinLenght;
     float distFromStart = voxelMaxLength;
+
     while (accumulated.a < 0.99f)
     {
         float coneDiameter = 2.0f * aperture * distFromStart;
@@ -53,11 +55,23 @@ vec4 cone_trace(vec3 from, vec3 direction, float aperture)
 
         vec4 samplePremult = textureLod(voxel_texture, sampleUVW, sampleLod);
         float weight = 1.0 - accumulated.a;
+
         accumulated += weight * samplePremult;
-        distFromStart += sampleDiameter * 0.16f;
+        distFromStart += sampleDiameter * 0.05f;
     }
     return accumulated;
 }
+
+vec3 decode_normal(uint data)
+{
+    uvec2 iv = uvec2( data, data>>16u ) & 65535u; vec2 v = vec2(iv)/32767.5 - 1.0;
+    vec3 nor = vec3(v, 1.0 - abs(v.x) - abs(v.y)); // Rune Stubbe's version,
+    float t = max(-nor.z,0.0);                     // much faster than original
+    nor.x += (nor.x>0.0)?-t:t;                     // implementation of this
+    nor.y += (nor.y>0.0)?-t:t;                     // technique
+    return normalize( nor );
+}
+
 
 vec4 indirect_diffuse(vec3 position, vec3 N)
 {
@@ -76,7 +90,8 @@ vec4 indirect_diffuse(vec3 position, vec3 N)
     {
         vec3 direction = T * DIFFUSE_CONE_DIRECTIONS[i].x + B * DIFFUSE_CONE_DIRECTIONS[i].z + N;
         direction = normalize(direction);
-        color += DIFFUSE_CONE_WEIGHTS[i] * cone_trace(position, direction, aperture);
+        vec4 bounce_color = DIFFUSE_CONE_WEIGHTS[i] * cone_trace(position, direction, aperture);
+        color += bounce_color;
     }
     return color;
 }
@@ -98,6 +113,8 @@ void main()
     vec4 output_color = vec4(0.0);
 
     output_color = indirect_diffuse(position, normal);
+//    output_color = output_color / (output_color + vec4(1.0));
+//    output_color = pow(output_color, vec4(1.0 / 2.2));
 
     imageStore(output_image, pixel_coord, output_color);
 }

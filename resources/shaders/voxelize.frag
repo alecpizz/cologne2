@@ -9,7 +9,7 @@ layout (binding = 3) uniform sampler2D texture_roughness;
 layout (binding = 4) uniform sampler2D texture_normal;
 layout (binding = 5) uniform sampler2D texture_emission;
 layout (RGBA16F, binding = 6) uniform image3D texture_voxel;
-layout (binding = 7) uniform sampler2DArray shadow_cascades;
+layout (r32ui, binding = 7) restrict uniform uimage3D texture_voxel_normal;
 layout (binding = 8) uniform sampler2D dir_shadow;
 
 layout (std140) uniform LightSpaceMatrices
@@ -148,7 +148,7 @@ float point_shadow_calc(vec3 fragPos, Light light)
     vec3 lightPos = light.position.xyz;
     vec3 frag_to_light = fragPos - lightPos;
     float bias = 0.02f;
-    float far_plane = (light.radius );
+    float far_plane = (light.radius);
     float current_depth = get_light_space_depth(1.0f, far_plane, frag_to_light);
     float shadow = texture(samplerCubeShadow(light.shadow_map), vec4(frag_to_light, current_depth));
     return shadow;
@@ -158,7 +158,7 @@ float point_shadow_calc(vec3 fragPos, Light light)
 vec4 pbr()
 {
     vec4 albedo_texture = texture2D(texture_albedo, TexCoords);
-    //    albedo = albedo_texture.rgb;
+//      vec3  albedo = albedo_texture.rgb;
     vec3 albedo = pow(albedo_texture.rgb, vec3(2.2));
     float metallic = texture2D(texture_metallic, TexCoords).r;
     float roughness = texture2D(texture_roughness, TexCoords).g;
@@ -224,7 +224,7 @@ vec4 pbr()
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    vec3 ambient = vec3(0.04) * albedo;
+    vec3 ambient = vec3(0.00) * albedo;
     vec3 emission = texture2D(texture_emission, TexCoords).rgb * 10;
     vec3 color = Lo + ambient + emission;
     return vec4(color, 1.0);
@@ -248,19 +248,34 @@ ivec3 WorldSpaceToVoxelImageSpace(vec3 worldPos)
     return voxelPos;
 }
 
+uint packSnorm2x8(vec2 v) { uvec2 d = uvec2(round(127.5 + v * 127.5)); return d.x | (d.y << 8u); }
+
+vec2 msign(vec2 v)
+{
+    return vec2((v.x >= 0.0) ? 1.0 : -1.0,
+    (v.y >= 0.0) ? 1.0 : -1.0);
+}
+
+uint encode_normal()
+{
+    vec3 nor = texture2D(texture_normal, TexCoords).rgb;
+    nor = nor * 2.0 - 1.0;
+    nor = normalize(TBN * nor);
+
+    nor.xy = (nor.z >= 0.0) ? nor.xy : (1.0 - abs(nor.yx)) * msign(nor.xy);
+    //return packSnorm2x16(nor.xy);
+    uvec2 d = uvec2(round(32767.5 + nor.xy * 32767.5));
+    return d.x | (d.y << 16u);
+}
+
 void main()
 {
-//    if (!is_inside_clipspace(FragPos.xyz))
-//    {
-//        return;
-//    }
-//
-//
-//
-//    vec3 voxelgrid_tex_pos = from_clipspace_to_texcoords(FragPos.xyz);
-//    ivec3 voxelgrid_resolution = imageSize(texture_voxel);
     ivec3 voxel_pos = WorldSpaceToVoxelImageSpace(FragPos.xyz);
     vec4 color = pbr();
-    //    imageStore(texture_voxel, ivec3(voxelgrid_resolution * voxelgrid_tex_pos), color);
+    color = color / (color + vec4(1.0));
+    color = pow(color, vec4(1.0 / 2.2));
+    uint normal = encode_normal();
     imageAtomicMax(texture_voxel, voxel_pos, f16vec4(color));
+//    imageAtomicMax(texture_voxel_normal, voxel_pos, (normal));
+    //    imageStore(texture_voxel_normal, voxel_pos, uvec4(normal));
 }
