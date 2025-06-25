@@ -33,8 +33,8 @@ struct Light
     int type;
     int enabled;
     uvec2 shadow_map;
-    int padding0;
-    int padding1;
+    float outer_cutoff;
+    float inner_cutoff;
 };
 
 #define MAX_LIGHTS 8
@@ -154,11 +154,20 @@ float point_shadow_calc(vec3 fragPos, Light light)
     return shadow;
 }
 
+vec3 Tonemap_ACES(const vec3 x)
+{ // Narkowicz 2015, "ACES Filmic Tone Mapping Curve"
+  const float a = 2.51;
+  const float b = 0.03;
+  const float c = 2.43;
+  const float d = 0.59;
+  const float e = 0.14;
+  return (x * (a * x + b)) / (x * (c * x + d) + e);
+}
 
 vec4 pbr()
 {
     vec4 albedo_texture = texture2D(texture_albedo, TexCoords);
-//      vec3  albedo = albedo_texture.rgb;
+    //    vec3 albedo = albedo_texture.rgb;
     vec3 albedo = pow(albedo_texture.rgb, vec3(2.2));
     float metallic = texture2D(texture_metallic, TexCoords).r;
     float roughness = texture2D(texture_roughness, TexCoords).g;
@@ -224,9 +233,17 @@ vec4 pbr()
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    vec3 ambient = vec3(0.00) * albedo;
-    vec3 emission = texture2D(texture_emission, TexCoords).rgb * 10;
+    vec3 ambient = vec3(0.02) * albedo;
+    vec3 emission = texture2D(texture_emission, TexCoords).rgb;
     vec3 color = Lo + ambient + emission;
+
+    //    color = pow(color, vec3(1.0 / 2.2));
+    //    color = color / (color + vec3(1.0));
+    //    color = mix(color, Tonemap_ACES(color), 1.0);
+    //    color = mix(color, Tonemap_ACES(color)    , 0.35);
+    //    color.r = max(color.r, emission.r);
+    //    color.g = max(color.g, emission.g);
+    //    color.b = max(color.b, emission.b);
     return vec4(color, 1.0);
 }
 
@@ -272,10 +289,10 @@ void main()
 {
     ivec3 voxel_pos = WorldSpaceToVoxelImageSpace(FragPos.xyz);
     vec4 color = pbr();
-    color = color / (color + vec4(1.0));
-    color = pow(color, vec4(1.0 / 2.2));
+//    color = color / (color + vec4(1.0));
+//    color = pow(color, vec4(1.0 / 2.2));
     uint normal = encode_normal();
     imageAtomicMax(texture_voxel, voxel_pos, f16vec4(color));
-//    imageAtomicMax(texture_voxel_normal, voxel_pos, (normal));
+    //    imageAtomicMax(texture_voxel_normal, voxel_pos, (normal));
     //    imageStore(texture_voxel_normal, voxel_pos, uvec4(normal));
 }

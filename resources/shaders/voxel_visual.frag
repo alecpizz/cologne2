@@ -70,6 +70,7 @@ void main()
         }// early exit
     }
 
-    accumulated_color.rgb = pow(accumulated_color.rgb, vec3(1.0f / 2.2f));
-    Color = accumulated_normal;
+//    accumulated_color.rgb = accumulated_color.rgb / (accumulated_color.rgb + vec3(1.0));
+//    accumulated_color.rgb = pow(accumulated_color.rgb, vec3(1.0f / 2.2f));
+    Color = accumulated_color;
 }

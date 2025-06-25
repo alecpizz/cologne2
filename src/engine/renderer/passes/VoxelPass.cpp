@@ -139,7 +139,8 @@ namespace cologne
         OpenGLDebugScope scope("Renderer::voxelize_scene");
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
-        glDisable(GL_BLEND);
+        // glDisable(GL_BLEND);
+        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
         glViewport(0, 0, _voxel_data.voxel_dimensions, _voxel_data.voxel_dimensions);
         glClearTexImage(_voxel_texture_color, 0, GL_RGBA, GL_FLOAT, glm::value_ptr(glm::vec4(0.0f)));
@@ -210,7 +211,7 @@ namespace cologne
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
 
-        // glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
         // glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());

@@ -5,8 +5,9 @@ namespace cologne
 {
     enum LightType
     {
-         Directional = 0,
-         Point
+        Directional = 0,
+        Point = 1,
+        Spot = 2
     };
 
 #pragma pack(push, 1)
@@ -25,8 +26,12 @@ namespace cologne
             radius = light_component.radius;
             type = static_cast<LightType>(light_component.type);
             active = 1;
+            outer_cutoff = glm::cos(glm::radians(light_component.outer_cutoff));
+            inner_cutoff = glm::cos(glm::radians(light_component.inner_cutoff));
         }
+
         Light() = default;
+
         Light(glm::vec3 pos, glm::vec3 direction, glm::vec3 color, float radius, float strength, LightType type)
         {
             position = glm::vec4(pos, 1.0f);
@@ -37,6 +42,7 @@ namespace cologne
             this->type = type;
             active = 1;
         }
+
         glm::vec4 direction = glm::vec4(0.0f);
         glm::vec4 position = glm::vec4(0.0f);
         glm::vec4 color = glm::vec4(1, 0.7799999713897705, 0.5289999842643738, 1.0f);
@@ -45,8 +51,8 @@ namespace cologne
         LightType type = LightType::Directional;
         int32_t active = 0;
         uint64_t shadow_handle = 0;
-        int32_t padding0 = 0;
-        int32_t padding1 = 0;
+        float outer_cutoff = 17.5f;
+        float inner_cutoff = 12.5f;
     };
 #pragma pack(pop)
 }

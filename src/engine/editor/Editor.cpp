@@ -548,11 +548,17 @@ namespace cologne
                 ImGui::DragFloat3("euler offset", glm::value_ptr(vm.euler_offset));
             });
 
-            draw_component<LightComponent>("Light", _selected_entity, true, [this](auto &light)
+            draw_component<LightComponent>("Light", _selected_entity, true, [this](LightComponent &light)
             {
                 auto mat = _selected_entity.get_component<WorldTransformComponent>();
-                Engine::get_renderer()->draw_sphere(mat.transform[3],
-                                                    light.radius, light.color);
+                if (light.type == LightComponent::Point)
+                {
+                    Engine::get_renderer()->draw_sphere(mat.transform[3],
+                                                        light.radius, light.color);
+                }
+
+                ImGui::DragFloat("outer cutoff", &light.outer_cutoff, 0.01f);
+                ImGui::DragFloat("inner cutoff", &light.inner_cutoff, 0.01f);
                 ImGui::DragFloat("radius", &light.radius, 0.01f);
                 ImGui::DragFloat("strength", &light.strength, 0.01f);
                 ImGui::ColorEdit3("color", glm::value_ptr(light.color), ImGuiColorEditFlags_HDR
@@ -826,7 +832,8 @@ namespace cologne
                     {
                         if (fs_path.parent_path().filename().string() == "models")
                         {
-                            Engine::get_scene()->create_static_model_entities(fs_path.stem().c_str(), TransformComponent(), true);
+                            Engine::get_scene()->create_static_model_entities(
+                                fs_path.stem().c_str(), TransformComponent(), true);
                         }
                         else if (fs_path.parent_path().filename().string() == "skinned_models")
                         {

@@ -14,14 +14,15 @@ struct Light
     int type;
     int enabled;
     uvec2 shadow_map;
-    int padding;
-    int padding1;
+    float outer_cutoff;
+    float inner_cutoff;
 };
 
 #define MAX_LIGHTS 8
 #define PI 3.1415926535897932384626433832795
 #define DIRECTIONAL 0
 #define POINT 1
+#define SPOT 2
 #define ISQRT2 0.707106
 #define SQRT2 1.414213
 #define MIPMAP_HARDCAP 5.4f
@@ -164,6 +165,7 @@ void main()
     vec4 albedo_texture = texture2D(gAlbedo, TexCoords).rgba;
 
     vec3 albedo = pow(albedo_texture.rgb, vec3(2.2));
+    //    vec3 albedo = albedo_texture.rgb;
     vec3 orm = texture2D(gORM, TexCoords).rgb;
     float metallic = orm.r;
     float roughness = orm.g;
@@ -205,6 +207,30 @@ void main()
             shadow = point_shadow_calculation(FragPos, lights[i]);
 
         }
+        else if (lights[i].type == SPOT)
+        {
+            L = normalize(lights[i].position.xyz - FragPos);
+            float distance = length(lights[i].position.xyz - FragPos);
+            float dist_range = distance / lights[i].radius;
+            float falloff = pow(dist_range, 2.0f);
+            float smoothing = pow(max(0.0, 1.0 - falloff), 2.0f);
+            float attenuation = smoothing / (distance * distance + 1.0f);
+
+            float theta = dot(L, -lights[i].direction.xyz);
+            float epsilon   = lights[i].inner_cutoff - lights[i].outer_cutoff;
+            float intensity = smoothstep(0.0, 1.0, (theta - lights[i].outer_cutoff) / epsilon);
+//            if(theta > cos(radians(lights[i].outer_cutoff)))
+            {
+                radiance = lights[i].color.rgb * lights[i].strength * attenuation * intensity;
+            }
+
+            //            float distance = length(lights[i].position.xyz - FragPos);
+            //            float dist_range = distance / lights[i].radius;
+            //            float falloff = pow(dist_range, 2.0f);
+            //            float smoothing = pow(max(0.0, 1.0 - falloff), 2.0f);
+            //            float attenuation = smoothing / (distance * dist_range + 1.0f);
+
+        }
         vec3 H = normalize(V + L);
 
 
@@ -225,6 +251,7 @@ void main()
     }
 
     vec3 indirect_light = vec3(0.0);
+    vec3 emission = texture2D(gEmission, TexCoords).rgb;
     if (indirect_lighting_active)
     {
         indirect_light = texture(indirect_texture, TexCoords).rgb;
@@ -233,25 +260,29 @@ void main()
         indirect_light = max(indirect_light, vec3(0));
         indirect_light *= albedo;
         indirect_light *= 0.85f;
+        //        indirect_light = max(indirect_light, emission);
     }
     else
     {
         indirect_light = vec3(0.02) * albedo;
     }
 
-    vec3 ambient = vec3(0.02) * albedo;
-    vec3 emission = texture2D(gEmission, TexCoords).rgb;
-    vec3 color = ambient + Lo + indirect_light + emission;
+    const vec3 ambient_light_color = vec3(1.0, 0.98, 0.94);
+    const float ambient_strength = 0.0005f;
+    vec3 ambient_color = albedo * ambient_light_color;
+    vec3 ambient_lighting = ambient_color * ambient_strength;
+    vec3 color = ambient_lighting + Lo + indirect_light;
 
     float dist = length(FragPos - camera_position.xyz);
     float fog_factor = 1.0 / exp((dist * fog_density) * (dist * fog_density));
     color = mix(fog_color, color, fog_factor);
-    color += texture(bloom_texture, TexCoords).rgb;
 
     color = mix(color, Tonemap_ACES(color), 1.0);
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0 / 2.2));
     color = mix(color, Tonemap_ACES(color), 0.35);
+    color += texture(bloom_texture, TexCoords).rgb;
+    color += emission;
 
     vec2 uv = TexCoords;
     vec2 coord = gl_FragCoord.xy;

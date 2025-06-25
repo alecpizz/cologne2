@@ -113,7 +113,7 @@ void main()
     vec4 output_color = vec4(0.0);
 
     output_color = indirect_diffuse(position, normal);
-//    output_color = output_color / (output_color + vec4(1.0));
+    output_color = output_color / (output_color + vec4(1.0));
 //    output_color = pow(output_color, vec4(1.0 / 2.2));
 
     imageStore(output_image, pixel_coord, output_color);

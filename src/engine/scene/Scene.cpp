@@ -63,7 +63,7 @@ namespace cologne
         player.add_component<PlayerComponent>(Physics::create_player(info), camera, viewModel);
 
         create_static_model_entities("Lantern", TransformComponent(
-                                         glm::vec3(0.180f, 0.0f, -4.8f),
+                                         glm::vec3(0.180f, -0.338f, -4.8f),
                                          glm::quat(glm::radians(glm::vec3(0.0f, -90.0f, 0.0f))),
                                          glm::vec3(1.0f)));
 
@@ -78,6 +78,11 @@ namespace cologne
                 glm::quat(glm::radians(glm::vec3(82.300, 0.0f, 0.0f)));
 
 
+        Entity spot_light = create_entity("spot light");
+        auto& lc = spot_light.add_component<LightComponent>();
+        lc.type = LightComponent::Spot;
+
+
         Entity point_light = create_entity("point light");
         auto &light2 = point_light.add_component<LightComponent>();
         light2.color = glm::vec3(1, 0.7799999713897705, 0.5289999842643738);
@@ -90,7 +95,41 @@ namespace cologne
         auto &light3 = point_light2.add_component<LightComponent>();
         light3 = light2;
         light3.color = glm::vec3(0.2f, 0.9f, 0.15f);
-        point_light2.get_component<TransformComponent>().position = glm::vec3(6.0f, 3.4, 5.0f);
+        point_light2.get_component<TransformComponent>().position = glm::vec3(6.0f, 4.580, 3.796f);
+
+        Entity point_light3 = create_entity("point light3");
+        auto& light4 = point_light3.add_component<LightComponent>();
+        light4.color = glm::vec3(0.078f, 0.656, 0.840f);
+        light4.radius = 3.13f;
+        light4.strength = 6.670f;
+        point_light3.get_component<TransformComponent>().position = glm::vec3(-6.7, 1.4, -3.979);
+
+        Entity lantern_light = create_entity("lantern light");
+        auto& light5 = lantern_light.add_component<LightComponent>();
+        light5.color = glm::vec3(1.0, 0.78, 0.529);
+        light5.radius = 3.670f;
+        lantern_light.get_component<TransformComponent>().position = glm::vec3(0.243f, 1.073f, -3.608f);
+
+        Entity evil_light = create_entity("evil light");
+        auto& light6 = evil_light.add_component<LightComponent>();
+        light6.radius = 3.670f;
+        light6.color = glm::vec3(1.0f, 0.0f, 0.0f);
+        light6.strength = 7.0f;
+        evil_light.get_component<TransformComponent>().position = glm::vec3(-4.538, 1.082, 3.635);
+
+        Entity purple_light = create_entity("purple light");
+        auto& light7 = purple_light.add_component<LightComponent>();
+        light7.radius = 4.0f;
+        light7.strength = 7.1f;
+        light7.color = glm::vec3(0.426f, 0.020f, 0.962f);
+        purple_light.get_component<TransformComponent>().position = glm::vec3(9.786, 0.487f, 0.158f);
+
+        Entity hall_light = create_entity("hall light");
+        auto& light8 = hall_light.add_component<LightComponent>();
+        light8.radius = 3.780f;
+        light8.strength = 5.910f;
+        light8.color = glm::vec3(1.0f, 0.780f, 0.529f);
+        hall_light.get_component<TransformComponent>().position = glm::vec3(2.795f, 0.419f, 3.638f);
 
         Entity scene_camera = create_entity("Scene Camera");
         auto &cam = scene_camera.add_component<CameraComponent>();

@@ -6,7 +6,7 @@
 #include <engine/editor/Editor.h>
 namespace cologne
 {
-    const uint32_t pixel_ratio = 2;
+    const uint32_t pixel_ratio = 4;
     void Renderer::init_indirect()
     {
         init_indirect(Engine::get_window()->get_width(), Engine::get_window()->get_height());

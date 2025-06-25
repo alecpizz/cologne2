@@ -145,13 +145,16 @@ namespace cologne
         enum LightType
         {
             Directional = 0,
-            Point
+            Point = 1,
+            Spot = 2
         };
 
         glm::vec3 color = glm::vec4(1, 0.7799999713897705, 0.5289999842643738, 1.0f);
         float strength = 1.0f;
         float radius = 3.0f;
         int type = LightType::Point;
+        float outer_cutoff = 0.0f;
+        float inner_cutoff = 0.0f;
     };
 
 
