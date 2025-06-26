@@ -65,8 +65,7 @@ namespace cologne
 
         shaders["voxelize"] = Shader(RESOURCES_PATH "shaders/voxelize.vert",
                                      RESOURCES_PATH "shaders/voxelize.frag");
-        shaders["voxelize_debug"] = Shader(RESOURCES_PATH "shaders/voxel_visual.vert",
-                                           RESOURCES_PATH "shaders/voxel_visual.frag");
+        shaders["voxelize_debug"] = Shader(RESOURCES_PATH "shaders/vxgi/voxel_debug.comp");
 
         shaders["world_pos_shader"] = Shader(RESOURCES_PATH "shaders/world_pos.vert",
                                              RESOURCES_PATH "shaders/world_pos.frag");
@@ -296,13 +295,13 @@ namespace cologne
         outline_pass();
         auto fbo = get_framebuffer_by_name("output");
         fbo->bind();
+        debug_voxel_pass();
         debug_renderer->present();
         text_renderer->present();
         fbo->blit_to_default_frame_buffer("color", 0, 0,
                                           Engine::get_window()->get_width(), Engine::get_window()->get_height(),
                                           GL_COLOR_BUFFER_BIT, GL_NEAREST);
         fbo->release();
-        debug_voxel_pass();
         _render_items.clear();
         _skinned_render_items.clear();
         _lights.clear();

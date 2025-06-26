@@ -219,17 +219,7 @@ void main()
             float theta = dot(L, -lights[i].direction.xyz);
             float epsilon   = lights[i].inner_cutoff - lights[i].outer_cutoff;
             float intensity = smoothstep(0.0, 1.0, (theta - lights[i].outer_cutoff) / epsilon);
-//            if(theta > cos(radians(lights[i].outer_cutoff)))
-            {
-                radiance = lights[i].color.rgb * lights[i].strength * attenuation * intensity;
-            }
-
-            //            float distance = length(lights[i].position.xyz - FragPos);
-            //            float dist_range = distance / lights[i].radius;
-            //            float falloff = pow(dist_range, 2.0f);
-            //            float smoothing = pow(max(0.0, 1.0 - falloff), 2.0f);
-            //            float attenuation = smoothing / (distance * dist_range + 1.0f);
-
+            radiance = lights[i].color.rgb * lights[i].strength * attenuation * intensity;
         }
         vec3 H = normalize(V + L);
 
@@ -261,10 +251,6 @@ void main()
         indirect_light *= albedo;
         indirect_light *= 0.85f;
         //        indirect_light = max(indirect_light, emission);
-    }
-    else
-    {
-        indirect_light = vec3(0.02) * albedo;
     }
 
     const vec3 ambient_light_color = vec3(1.0, 0.98, 0.94);

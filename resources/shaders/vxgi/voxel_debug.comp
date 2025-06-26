@@ -1,0 +1,147 @@
+#version 460 core
+
+layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout (binding = 0) restrict writeonly uniform image2D img_result;
+layout (binding = 0) uniform sampler3D voxel_texture;
+layout (binding = 1) uniform samplerCube sky_box;
+
+uniform float step_multiplier;
+uniform float cone_angle;
+uniform vec3 grid_min, grid_max;
+
+struct Ray
+{
+    vec3 origin;
+    vec3 direction;
+};
+
+struct Box
+{
+    vec3 min;
+    vec3 max;
+};
+
+layout (binding = 1, std430) restrict readonly buffer viewportdata
+{
+    mat4 projection;
+    mat4 view;
+    mat4 view_inverse;
+    mat4 projection_view;
+    vec4 camera_position;
+};
+
+bool ray_cast_box(Ray ray, Box box, out float t1, out float t2)
+{
+    t1 = -99999999.0f;
+    t2 = 99999999.0f;
+    vec3 t0s =  (box.min - ray.origin) / ray.direction;
+    vec3 t1s = (box.max - ray.origin) / ray.direction;
+
+    vec3 tsmallest = min(t0s, t1s);
+    vec3 tbiggest = max(t0s, t1s);
+
+    t1 = max(t1, max(tsmallest.x, max(tsmallest.y, max(tsmallest.z, 0.0))));
+    t2 = min(t2, min(tbiggest.x, min(tbiggest.y, tbiggest.z)));
+    return t1 <= t2;
+}
+
+vec3 world_space_direction(mat4 inverse_projection, mat4 inverse_view, vec2 ndc)
+{
+    vec4 ray_view;
+    ray_view.xy = mat2(inverse_projection) * ndc;
+    ray_view.z = -1.0;
+    ray_view.w = 0.0;
+
+    vec3 ray_world = normalize((inverse_view * ray_view).xyz);
+    return ray_world;
+}
+
+
+vec3 MapRangeToAnOther(vec3 value, vec3 valueMin, vec3 valueMax, vec3 mapMin, vec3 mapMax)
+{
+    return (value - valueMin) / (valueMax - valueMin) * (mapMax - mapMin) + mapMin;
+}
+
+vec3 MapToZeroOne(vec3 value, vec3 rangeMin, vec3 rangeMax)
+{
+    return MapRangeToAnOther(value, rangeMin, rangeMax, vec3(0.0), vec3(1.0));
+}
+
+
+vec4 trace_cone(sampler3D voxels, Ray ray, vec3 normal, float cone_angle, float step_multi, float ray_offset, float alpha_threshold)
+{
+    vec3 voxelGridWorldSpaceSize = grid_max - grid_min;
+    vec3 voxelWorldSpaceSize = voxelGridWorldSpaceSize / textureSize(voxels, 0);
+    float voxelMaxLength = max(voxelWorldSpaceSize.x, max(voxelWorldSpaceSize.y, voxelWorldSpaceSize.z));
+    float voxelMinLength = min(voxelWorldSpaceSize.x, min(voxelWorldSpaceSize.y, voxelWorldSpaceSize.z));
+    uint maxLevel = textureQueryLevels(voxels) - 1;
+    vec4 accumulatedColor = vec4(0.0);
+
+    ray.origin += normal * voxelMaxLength * ray_offset;
+
+    float distFromStart = voxelMaxLength;
+    while (accumulatedColor.a < alpha_threshold)
+    {
+        float coneDiameter = 2.0 * tan(cone_angle) * distFromStart;
+        float sampleDiameter = max(voxelMinLength, coneDiameter);
+        float sampleLod = log2(sampleDiameter / voxelMinLength);
+
+        vec3 worldPos = ray.origin + ray.direction * distFromStart;
+        vec3 sampleUVW = MapToZeroOne(worldPos, grid_min, grid_max);
+        if (any(lessThan(sampleUVW, vec3(0.0))) || any(greaterThanEqual(sampleUVW, vec3(1.0))) || sampleLod > maxLevel)
+        {
+            break;
+        }
+
+        vec4 samplePremult = textureLod(voxels, sampleUVW, sampleLod);
+
+        float weightOfSample = 1.0 - accumulatedColor.a;
+        accumulatedColor += weightOfSample * samplePremult;
+
+        distFromStart += sampleDiameter * step_multi;
+    }
+
+    return accumulatedColor;
+}
+
+vec4 trace_cone(sampler3D voxels, Ray ray, float cone_angle, float step_multi)
+{
+    const vec3 norm = vec3(0.0);
+    const float offset = 0.0f;
+    return trace_cone(voxels, ray, norm, cone_angle, step_multi, offset, 1.0);
+}
+
+void main()
+{
+    ivec2 img_coord = ivec2(gl_GlobalInvocationID.xy);
+
+    vec2 ndc = (img_coord + 0.5) / imageSize(img_result) * 2.0 - 1.0;
+
+    Ray ray;
+    ray.origin = camera_position.xyz;
+    ray.direction = world_space_direction(inverse(projection), view_inverse, ndc);
+
+    float t1, t2;
+
+    if(!(ray_cast_box(ray, Box(grid_min, grid_max), t1, t2) && t2 > 0.0))
+    {
+        vec4 sky_color = texture(sky_box, ray.direction);
+        imageStore(img_result, img_coord, sky_color);
+        return;
+    }
+
+    bool is_inside_voxel = t1 < 0.0 && t2 > 0.0;
+    if(is_inside_voxel)
+    {
+        ray.origin = camera_position.xyz;
+    }
+    else
+    {
+        ray.origin = ray.origin + ray.direction * t1;
+    }
+
+    vec4 color = trace_cone(voxel_texture, ray, 0.0, 0.16);
+    color += (1.0 - color.a) * texture(sky_box, ray.direction);
+    imageStore(img_result, img_coord, color);
+}

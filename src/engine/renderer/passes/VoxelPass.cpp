@@ -87,47 +87,30 @@ namespace cologne
 
         OpenGLDebugScope scope("Renderer::debug_voxel_pass");
 
-        Shader *world_pos_shader = get_shader_by_name("world_pos_shader");
-        world_pos_shader->bind();
-        glClearColor(0.0, 0.0, 0.0, 1.0);
-        glEnable(GL_CULL_FACE);
-        glEnable(GL_DEPTH_TEST);
-
-        glm::mat4 model = glm::mat4(1.0f);
-        world_pos_shader->set_mat4("model", (model));
-
-        auto voxel_back_fbo = get_framebuffer_by_name("voxel_back");
-        auto voxel_front_fbo = get_framebuffer_by_name("voxel_front");
-        glCullFace(GL_FRONT);
-        voxel_back_fbo->bind();
-        voxel_back_fbo->set_viewport();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        render_cube();
-
-        glCullFace(GL_BACK);
-        voxel_front_fbo->bind();
-        voxel_front_fbo->set_viewport();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        render_cube();
-
         auto voxelize_debug_shader = get_shader_by_name("voxelize_debug");
         voxelize_debug_shader->bind();
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glDisable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-
+        voxelize_debug_shader->set_float("step_multiplier", 0.4f);
+        voxelize_debug_shader->set_float("cone_angle", 0.5f);
+        auto bounds = Engine::get_scene()->get_bounds();
+        auto min = bounds.min;
+        auto max = bounds.max;
+        voxelize_debug_shader->set_vec3("grid_min", min);
+        voxelize_debug_shader->set_vec3("grid_max", max);
         glBindTexture(GL_TEXTURE_3D, _voxel_texture_color);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        auto fbo = get_framebuffer_by_name("output");
+        glBindImageTexture(0, fbo->get_color_attachment_handle_by_name("color"),
+            0,GL_FALSE, 0, GL_WRITE_ONLY,GL_RGBA16F);
         glBindTextureUnit(0, _voxel_texture_color);
-        glBindTextureUnit(1, voxel_back_fbo->get_color_attachment_handle_by_name("color"));
-        glBindTextureUnit(2, voxel_front_fbo->get_color_attachment_handle_by_name("color"));
-        glBindTextureUnit(3, _voxel_texture_normal);
-        render_quad();
+        glBindTextureUnit(1, _skybox_texture);
 
-        glEnable(GL_DEPTH_TEST);
+        const uint32_t work_group_size = 8;
+        uint32_t width = Engine::get_window()->get_width();
+        uint32_t height = Engine::get_window()->get_height();
+        uint32_t num_x = (width + work_group_size - 1) / work_group_size;
+        uint32_t num_y = (height + work_group_size - 1) / work_group_size;
+        voxelize_debug_shader->dispatch(num_x, num_y, 1);
+        voxelize_debug_shader->wait(GL_TEXTURE_FETCH_BARRIER_BIT);
         glBindTexture(GL_TEXTURE_3D, _voxel_texture_color);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glBindTexture(GL_TEXTURE_3D, 0);

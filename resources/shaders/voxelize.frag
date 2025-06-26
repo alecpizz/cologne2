@@ -41,6 +41,7 @@ struct Light
 #define PI 3.1415926535897932384626433832795
 #define DIRECTIONAL 0
 #define POINT 1
+#define SPOT 2
 
 layout (binding = 2, std430) restrict readonly buffer lights_buffer
 {
@@ -209,6 +210,21 @@ vec4 pbr()
             shadow = point_shadow_calc(FragPos.xyz, lights[i]);
             radiance = lights[i].color.rgb * lights[i].strength * attenuation;
         }
+        else if(lights[i].type == SPOT)
+        {
+            L = normalize(lights[i].position.xyz - FragPos.xyz);
+            float distance = length(lights[i].position.xyz - FragPos.xyz);
+            float dist_range = distance / lights[i].radius;
+            float falloff = pow(dist_range, 2.0f);
+            float smoothing = pow(max(0.0, 1.0 - falloff), 2.0f);
+            float attenuation = smoothing / (distance * distance + 1.0f);
+
+            float theta = dot(L, -lights[i].direction.xyz);
+            float epsilon   = lights[i].inner_cutoff - lights[i].outer_cutoff;
+            float intensity = smoothstep(0.0, 1.0, (theta - lights[i].outer_cutoff) / epsilon);
+            radiance = lights[i].color.rgb * lights[i].strength * attenuation * intensity;
+        }
+
         vec3 H = normalize(V + L);
 
 
