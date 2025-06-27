@@ -20,6 +20,7 @@ namespace cologne
     class SkinnedModel
     {
         friend class Animation;
+        friend class RagdollComponent;
     public:
         explicit SkinnedModel(const SkinnedModelData& data);
 

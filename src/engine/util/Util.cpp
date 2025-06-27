@@ -7,6 +7,10 @@
 #include "assimp/matrix4x4.h"
 #include "engine/core/Engine.h"
 
+#include "Jolt/Jolt.h"
+#include "Jolt/Math/Vec3.h"
+#include "Jolt/Math/Quat.h"
+
 namespace cologne::Util
 {
     glm::vec3 ai_vec3_to_glm_vec3(const aiVector3t<ai_real> vector)
@@ -52,6 +56,16 @@ namespace cologne::Util
     glm::quat ai_quat_to_glm_quat(aiQuaterniont<ai_real> quat)
     {
         return glm::quat(quat.w, quat.x, quat.y, quat.z);
+    }
+
+    glm::vec3 jph_vec3_to_glm_vec3(JPH::Vec3 vec)
+    {
+        return glm::vec3(vec.GetX(), vec.GetY(), vec.GetZ());
+    }
+
+    glm::quat jph_quat_to_glm_quat(JPH::Quat quat)
+    {
+        return glm::quat(quat.GetW(), quat.GetX(), quat.GetY(), quat.GetZ());
     }
 
     void decompose_mat4(const glm::mat4& matrix, glm::vec3 &position, glm::quat &rotation, glm::vec3 &scale)

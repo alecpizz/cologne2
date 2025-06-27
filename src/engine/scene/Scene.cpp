@@ -6,6 +6,7 @@
 
 #include <engine/animation/Animation.h>
 #include <engine/animation/Animator.h>
+#include <engine/animation/RagdollComponent.h>
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/core/Engine.h>
 #include <engine/physics/Physics.h>
@@ -39,6 +40,12 @@ namespace cologne
         Entity man = create_entity("man");
         man.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("man"));
         man.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("man_Idle"));
+
+        Entity ragdoll_man = create_entity("ragdoll");
+        ragdoll_man.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("man"));
+        ragdoll_man.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("man_Idle"));
+        ragdoll_man.add_component<RagdollComponent>(AssetManager::get_skinned_model_by_name("man"),
+                                                    AssetManager::get_animation_by_name("man_Idle"));
 
         Entity revolver = create_entity("deagle");
         revolver.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
@@ -79,7 +86,7 @@ namespace cologne
 
 
         Entity spot_light = create_entity("spot light");
-        auto& lc = spot_light.add_component<LightComponent>();
+        auto &lc = spot_light.add_component<LightComponent>();
         lc.type = LightComponent::Spot;
 
 
@@ -98,34 +105,34 @@ namespace cologne
         point_light2.get_component<TransformComponent>().position = glm::vec3(6.0f, 4.580, 3.796f);
 
         Entity point_light3 = create_entity("point light3");
-        auto& light4 = point_light3.add_component<LightComponent>();
+        auto &light4 = point_light3.add_component<LightComponent>();
         light4.color = glm::vec3(0.078f, 0.656, 0.840f);
         light4.radius = 3.13f;
         light4.strength = 6.670f;
         point_light3.get_component<TransformComponent>().position = glm::vec3(-6.7, 1.4, -3.979);
 
         Entity lantern_light = create_entity("lantern light");
-        auto& light5 = lantern_light.add_component<LightComponent>();
+        auto &light5 = lantern_light.add_component<LightComponent>();
         light5.color = glm::vec3(1.0, 0.78, 0.529);
         light5.radius = 3.670f;
         lantern_light.get_component<TransformComponent>().position = glm::vec3(0.243f, 1.073f, -3.608f);
 
         Entity evil_light = create_entity("evil light");
-        auto& light6 = evil_light.add_component<LightComponent>();
+        auto &light6 = evil_light.add_component<LightComponent>();
         light6.radius = 3.670f;
         light6.color = glm::vec3(1.0f, 0.0f, 0.0f);
         light6.strength = 7.0f;
         evil_light.get_component<TransformComponent>().position = glm::vec3(-4.538, 1.082, 3.635);
 
         Entity purple_light = create_entity("purple light");
-        auto& light7 = purple_light.add_component<LightComponent>();
+        auto &light7 = purple_light.add_component<LightComponent>();
         light7.radius = 4.0f;
         light7.strength = 7.1f;
         light7.color = glm::vec3(0.426f, 0.020f, 0.962f);
         purple_light.get_component<TransformComponent>().position = glm::vec3(9.786, 0.487f, 0.158f);
 
         Entity hall_light = create_entity("hall light");
-        auto& light8 = hall_light.add_component<LightComponent>();
+        auto &light8 = hall_light.add_component<LightComponent>();
         light8.radius = 3.780f;
         light8.strength = 5.910f;
         light8.color = glm::vec3(1.0f, 0.780f, 0.529f);
@@ -233,7 +240,7 @@ namespace cologne
         for (auto entity: _registry.view<LightComponent, WorldTransformComponent, ActiveComponent>())
         {
             auto [light, transform, active] =
-                _registry.get<LightComponent, WorldTransformComponent, ActiveComponent>(entity);
+                    _registry.get<LightComponent, WorldTransformComponent, ActiveComponent>(entity);
             if (!active)
             {
                 continue;
@@ -250,7 +257,7 @@ namespace cologne
         RaycastHitInfo info;
         if (!Engine::in_edit_mode())
         {
-            if (Physics::raycast(ray_start, ray_dir, 20.0f, Physics::NON_MOVING | Physics::MOVING, info))
+            if (Physics::raycast(ray_start, ray_dir, 20.0f, {Physics::NON_MOVING, Physics::MOVING}, info))
             {
                 if (Entity hit_entity = info.hit_entity)
                 {
@@ -350,6 +357,11 @@ namespace cologne
             {
                 auto &animator = _registry.get<AnimatorComponent>(entity);
                 item.bones = animator.get_bones();
+                if (_registry.all_of<RagdollComponent>(entity))
+                {
+                    auto &ragdoll = _registry.get<RagdollComponent>(entity);
+                    ragdoll.update_skinned_mesh_bones(item.bones, animator.get_current_animation().get_bone_info());
+                }
             }
             SkinnedModel *skinned_model = AssetManager::get_skinned_model_by_index(m.id);
             item.skinned_model = skinned_model;

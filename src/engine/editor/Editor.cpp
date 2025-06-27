@@ -6,6 +6,7 @@
 
 #include <engine/renderer/Renderer.h>
 #include <engine/animation/Animation.h>
+#include <engine/animation/RagdollComponent.h>
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/core/Engine.h>
 #include <engine/core/Input.h>
@@ -625,6 +626,11 @@ namespace cologne
                 }
                 std::string model_name = AssetManager::get_skinned_model_by_index(model.id)->get_name();
                 ImGui::Text("Name %s", model_name.c_str());
+            });
+
+            draw_component<RagdollComponent>("Ragdoll", _selected_entity, false, [](auto & ragdoll)
+            {
+                ImGui::InputFloat("scale", &ragdoll.scale);
             });
 
             draw_component<StaticColliderComponent>("Static Collider", _selected_entity, false, [](auto &collider)

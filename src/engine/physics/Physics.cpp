@@ -16,20 +16,19 @@
 #include <Jolt/Core/JobSystemThreadPool.h>
 #include <Jolt/Physics/PhysicsSettings.h>
 #include <Jolt/Physics/PhysicsSystem.h>
-#include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Character/Character.h>
 #include <Jolt/Physics/Character/CharacterVirtual.h>
-#include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
-#include <Jolt/Physics/Body/BodyActivationListener.h>
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 #include <Jolt/Physics/Collision/RayCast.h>
 #include <Jolt/Physics/Collision/CastResult.h>
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Physics/Collision/Shape/MeshShape.h>
 #include <Jolt/Renderer/DebugRendererSimple.h>
-
 #include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
+#include <Jolt/Physics/Ragdoll/Ragdoll.h>
+
+#include "Jolt/Physics/Constraints/SwingTwistConstraint.h"
 
 JPH_SUPPRESS_WARNINGS
 
@@ -146,12 +145,12 @@ namespace cologne::Physics
     class RayCastLayerFilter final : public ObjectLayerFilter
     {
     private:
-        uint32_t _flags;
+        std::vector<uint32_t> _layers;
 
     public:
-        explicit RayCastLayerFilter(uint32_t flags)
+        explicit RayCastLayerFilter( const std::vector<uint32_t>& layers = std::vector<uint32_t>())
         {
-            _flags = flags;
+            _layers = layers;
         }
 
         ~RayCastLayerFilter() override
@@ -160,19 +159,24 @@ namespace cologne::Physics
 
         bool ShouldCollide(ObjectLayer inLayer) const override
         {
-            if (_flags == 0)
+            if (_layers.empty())
             {
                 return true;
             }
-            uint8_t layer_byte = static_cast<uint8_t>(inLayer);
-            for (int i = 0; i < 4; i++)
+            if (std::ranges::find(_layers, inLayer) != _layers.end())
             {
-                if (static_cast<uint8_t>(_flags >> (i * 8)) == layer_byte)
-                {
-                    return true;
-                }
+                return true;
             }
             return false;
+        }
+    };
+
+    class BodyDrawFilterImpl final : public BodyDrawFilter
+    {
+    public:
+        bool ShouldDraw(const Body &inBody) const override
+        {
+            return inBody.IsActive();
         }
     };
 
@@ -201,6 +205,197 @@ namespace cologne::Physics
         }
     };
 
+    RagdollSettings *create_ragdoll_settings(glm::vec3 position)
+    {
+        // Create skeleton
+        Vec3 origin = {position.x, position.y, position.z};
+        Ref<Skeleton> skeleton = new Skeleton;
+        uint lower_body = skeleton->AddJoint("LowerBody");
+        uint mid_body = skeleton->AddJoint("MidBody", lower_body);
+        uint upper_body = skeleton->AddJoint("UpperBody", mid_body);
+        /*uint head =*/
+        skeleton->AddJoint("Head", upper_body);
+        uint upper_arm_l = skeleton->AddJoint("UpperArmL", upper_body);
+        uint upper_arm_r = skeleton->AddJoint("UpperArmR", upper_body);
+        /*uint lower_arm_l =*/
+        skeleton->AddJoint("LowerArmL", upper_arm_l);
+        /*uint lower_arm_r =*/
+        skeleton->AddJoint("LowerArmR", upper_arm_r);
+        uint upper_leg_l = skeleton->AddJoint("UpperLegL", lower_body);
+        uint upper_leg_r = skeleton->AddJoint("UpperLegR", lower_body);
+        /*uint lower_leg_l =*/
+        skeleton->AddJoint("LowerLegL", upper_leg_l);
+        /*uint lower_leg_r =*/
+        skeleton->AddJoint("LowerLegR", upper_leg_r);
+
+        // Create shapes for limbs
+        Ref<Shape> shapes[] = {
+            new CapsuleShape(0.15f, 0.10f), // Lower Body
+            new CapsuleShape(0.15f, 0.10f), // Mid Body
+            new CapsuleShape(0.15f, 0.10f), // Upper Body
+            new CapsuleShape(0.075f, 0.10f), // Head
+            new CapsuleShape(0.15f, 0.06f), // Upper Arm L
+            new CapsuleShape(0.15f, 0.06f), // Upper Arm R
+            new CapsuleShape(0.15f, 0.05f), // Lower Arm L
+            new CapsuleShape(0.15f, 0.05f), // Lower Arm R
+            new CapsuleShape(0.2f, 0.075f), // Upper Leg L
+            new CapsuleShape(0.2f, 0.075f), // Upper Leg R
+            new CapsuleShape(0.2f, 0.06f), // Lower Leg L
+            new CapsuleShape(0.2f, 0.06f), // Lower Leg R
+        };
+
+        // Positions of body parts in world space
+        RVec3 positions[] = {
+            RVec3(0, 1.15f, 0) + origin, // Lower Body
+            RVec3(0, 1.35f, 0) + origin, // Mid Body
+            RVec3(0, 1.55f, 0) + origin, // Upper Body
+            RVec3(0, 1.825f, 0) + origin, // Head
+            RVec3(-0.425f, 1.55f, 0) + origin, // Upper Arm L
+            RVec3(0.425f, 1.55f, 0) + origin, // Upper Arm R
+            RVec3(-0.8f, 1.55f, 0) + origin, // Lower Arm L
+            RVec3(0.8f, 1.55f, 0) + origin, // Lower Arm R
+            RVec3(-0.15f, 0.8f, 0) + origin, // Upper Leg L
+            RVec3(0.15f, 0.8f, 0) + origin, // Upper Leg R
+            RVec3(-0.15f, 0.3f, 0) + origin, // Lower Leg L
+            RVec3(0.15f, 0.3f, 0) + origin, // Lower Leg R
+        };
+
+        // Rotations of body parts in world space
+        Quat rotations[] = {
+            Quat::sRotation(Vec3::sAxisZ(), 0.5f * JPH_PI), // Lower Body
+            Quat::sRotation(Vec3::sAxisZ(), 0.5f * JPH_PI), // Mid Body
+            Quat::sRotation(Vec3::sAxisZ(), 0.5f * JPH_PI), // Upper Body
+            Quat::sIdentity(), // Head
+            Quat::sRotation(Vec3::sAxisZ(), 0.5f * JPH_PI), // Upper Arm L
+            Quat::sRotation(Vec3::sAxisZ(), 0.5f * JPH_PI), // Upper Arm R
+            Quat::sRotation(Vec3::sAxisZ(), 0.5f * JPH_PI), // Lower Arm L
+            Quat::sRotation(Vec3::sAxisZ(), 0.5f * JPH_PI), // Lower Arm R
+            Quat::sIdentity(), // Upper Leg L
+            Quat::sIdentity(), // Upper Leg R
+            Quat::sIdentity(), // Lower Leg L
+            Quat::sIdentity() // Lower Leg R
+        };
+
+        // World space constraint positions
+        RVec3 constraint_positions[] = {
+            RVec3::sZero() + origin, // Lower Body (unused, there's no parent)
+            RVec3(0, 1.25f, 0) + origin, // Mid Body
+            RVec3(0, 1.45f, 0) + origin, // Upper Body
+            RVec3(0, 1.65f, 0) + origin, // Head
+            RVec3(-0.225f, 1.55f, 0) + origin, // Upper Arm L
+            RVec3(0.225f, 1.55f, 0) + origin, // Upper Arm R
+            RVec3(-0.65f, 1.55f, 0) + origin, // Lower Arm L
+            RVec3(0.65f, 1.55f, 0) + origin, // Lower Arm R
+            RVec3(-0.15f, 1.05f, 0) + origin, // Upper Leg L
+            RVec3(0.15f, 1.05f, 0) + origin, // Upper Leg R
+            RVec3(-0.15f, 0.55f, 0) + origin, // Lower Leg L
+            RVec3(0.15f, 0.55f, 0) + origin, // Lower Leg R
+        };
+
+        // World space twist axis directions
+        Vec3 twist_axis[] = {
+            Vec3::sZero(), // Lower Body (unused, there's no parent)
+            Vec3::sAxisY(), // Mid Body
+            Vec3::sAxisY(), // Upper Body
+            Vec3::sAxisY(), // Head
+            -Vec3::sAxisX(), // Upper Arm L
+            Vec3::sAxisX(), // Upper Arm R
+            -Vec3::sAxisX(), // Lower Arm L
+            Vec3::sAxisX(), // Lower Arm R
+            -Vec3::sAxisY(), // Upper Leg L
+            -Vec3::sAxisY(), // Upper Leg R
+            -Vec3::sAxisY(), // Lower Leg L
+            -Vec3::sAxisY(), // Lower Leg R
+        };
+
+        // Constraint limits
+        float twist_angle[] = {
+            0.0f, // Lower Body (unused, there's no parent)
+            5.0f, // Mid Body
+            5.0f, // Upper Body
+            90.0f, // Head
+            45.0f, // Upper Arm L
+            45.0f, // Upper Arm R
+            45.0f, // Lower Arm L
+            45.0f, // Lower Arm R
+            45.0f, // Upper Leg L
+            45.0f, // Upper Leg R
+            45.0f, // Lower Leg L
+            45.0f, // Lower Leg R
+        };
+
+        float normal_angle[] = {
+            0.0f, // Lower Body (unused, there's no parent)
+            10.0f, // Mid Body
+            10.0f, // Upper Body
+            45.0f, // Head
+            90.0f, // Upper Arm L
+            90.0f, // Upper Arm R
+            0.0f, // Lower Arm L
+            0.0f, // Lower Arm R
+            45.0f, // Upper Leg L
+            45.0f, // Upper Leg R
+            0.0f, // Lower Leg L
+            0.0f, // Lower Leg R
+        };
+
+        float plane_angle[] = {
+            0.0f, // Lower Body (unused, there's no parent)
+            10.0f, // Mid Body
+            10.0f, // Upper Body
+            45.0f, // Head
+            45.0f, // Upper Arm L
+            45.0f, // Upper Arm R
+            90.0f, // Lower Arm L
+            90.0f, // Lower Arm R
+            45.0f, // Upper Leg L
+            45.0f, // Upper Leg R
+            60.0f, // Lower Leg L (cheating here, a knee is not symmetric, we should have rotated the twist axis)
+            60.0f, // Lower Leg R
+        };
+
+        // Create ragdoll settings
+        auto settings = new RagdollSettings;
+        settings->mSkeleton = skeleton;
+        settings->mParts.resize(skeleton->GetJointCount());
+        for (int p = 0; p < skeleton->GetJointCount(); ++p)
+        {
+            RagdollSettings::Part &part = settings->mParts[p];
+            part.SetShape(shapes[p]);
+            part.mPosition = positions[p];
+            part.mRotation = rotations[p];
+            part.mMotionType = EMotionType::Dynamic;
+            part.mObjectLayer = Layers::MOVING;
+
+            // First part is the root, doesn't have a parent and doesn't have a constraint
+            if (p > 0)
+            {
+                auto constraint = new SwingTwistConstraintSettings;
+                constraint->mDrawConstraintSize = 0.1f;
+                constraint->mPosition1 = constraint->mPosition2 = constraint_positions[p];
+                constraint->mTwistAxis1 = constraint->mTwistAxis2 = twist_axis[p];
+                constraint->mPlaneAxis1 = constraint->mPlaneAxis2 = Vec3::sAxisZ();
+                constraint->mTwistMinAngle = -DegreesToRadians(twist_angle[p]);
+                constraint->mTwistMaxAngle = DegreesToRadians(twist_angle[p]);
+                constraint->mNormalHalfConeAngle = DegreesToRadians(normal_angle[p]);
+                constraint->mPlaneHalfConeAngle = DegreesToRadians(plane_angle[p]);
+                part.mToParent = constraint;
+            }
+        }
+
+        // Optional: Stabilize the inertia of the limbs
+        settings->Stabilize();
+
+        // Disable parent child collisions so that we don't get collisions between constrained bodies
+        settings->DisableParentChildCollisions();
+
+        // Calculate the map needed for GetBodyIndexToConstraintIndex()
+        settings->CalculateBodyIndexToConstraintIndex();
+
+        return settings;
+    }
+
+
     struct PhysicsPlayer
     {
         JPH::RefConst<JPH::Shape> standing_shape;
@@ -219,9 +414,27 @@ namespace cologne::Physics
     PhysicsSystem physics_system;
     PhysDebugRenderer *debug_renderer = nullptr;
     std::vector<JPH::BodyID> colliders_static;
+    std::vector<JPH::Ragdoll*> ragdolls;
     std::unordered_map<JPH::BodyID, Entity> entity_to_collider_map;
     std::unordered_map<uint32_t, PhysicsPlayer> physics_players;
+    BodyDrawFilterImpl body_draw_filter;
     bool drawing = false;
+    Ragdoll *ragdoll = nullptr;
+    float accumulation_time = 0.0f;
+
+    Ragdoll* create_ragdoll(glm::vec3 position)
+    {
+        Ref settings = create_ragdoll_settings(position);
+        auto ragdoll = settings->CreateRagdoll(0, 0, &physics_system);
+        ragdoll->AddToPhysicsSystem(EActivation::Activate);
+        ragdolls.emplace_back(ragdoll);
+        return ragdoll;
+    }
+
+    JPH::BodyInterface & get_body_interface()
+    {
+        return physics_system.GetBodyInterface();
+    }
 
 
     void init()
@@ -246,7 +459,6 @@ namespace cologne::Physics
 
         auto &body_interface = physics_system.GetBodyInterface();
         debug_renderer = new PhysDebugRenderer();
-
         physics_system.OptimizeBroadPhase();
     }
 
@@ -278,7 +490,14 @@ namespace cologne::Physics
                                                  character->GetPosition().GetZ());
             }
             const int collisionSteps = 1;
-            physics_system.Update(dt, collisionSteps, temp_allocator, job_system);
+            accumulation_time += dt;
+            constexpr float fixed_delta_time = 1.0 / 60;
+            //physics updates
+            while (accumulation_time >= fixed_delta_time)
+            {
+                physics_system.Update(fixed_delta_time, collisionSteps, temp_allocator, job_system);
+                accumulation_time -= fixed_delta_time;
+            }
         }
 
         if (drawing)
@@ -286,7 +505,7 @@ namespace cologne::Physics
             BodyManager::DrawSettings draw_settings;
             draw_settings.mDrawShape = true;
             draw_settings.mDrawShapeWireframe = true;
-            physics_system.DrawBodies(draw_settings, debug_renderer);
+            physics_system.DrawBodies(draw_settings, debug_renderer, &body_draw_filter);
         }
     }
 
@@ -521,7 +740,7 @@ namespace cologne::Physics
         }
     }
 
-    bool raycast(glm::vec3 origin, glm::vec3 direction, float max_distance, uint32_t layers, RaycastHitInfo &info)
+    bool raycast(glm::vec3 origin, glm::vec3 direction, float max_distance, const std::vector<uint32_t>& layers, RaycastHitInfo &info)
     {
         RRayCast cast(glm_vec3_to_jph_vec3(origin), glm_vec3_to_jph_vec3(direction * max_distance));
         RayCastResult result{};

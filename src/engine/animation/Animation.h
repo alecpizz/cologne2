@@ -40,6 +40,7 @@ namespace cologne
 
         void read_missing_bones(const aiAnimation *animation, std::unordered_map<std::string, BoneInfo> &bone_map,
                                 int &bone_count);
+        std::unordered_map<std::string, BoneInfo>& get_bone_info();
 
     private:
         void read_bone_hierarchy(Node &dest, const aiNode *src);

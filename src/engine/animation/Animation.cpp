@@ -10,7 +10,7 @@
 //
 namespace cologne
 {
-    Animation::Animation(const std::string& base_name, const aiAnimation *animation, const aiScene *scene,
+    Animation::Animation(const std::string &base_name, const aiAnimation *animation, const aiScene *scene,
                          std::unordered_map<std::string, BoneInfo> &bone_map, int &bone_count)
     {
         _name = base_name + "_" + animation->mName.C_Str();
@@ -74,6 +74,11 @@ namespace cologne
         }
 
         _bone_info_map = model_bone_info;
+    }
+
+    std::unordered_map<std::string, BoneInfo> &Animation::get_bone_info()
+    {
+        return _bone_info_map;
     }
 
     void Animation::read_bone_hierarchy(Node &dest, const aiNode *src)
