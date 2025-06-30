@@ -1,6 +1,13 @@
 #pragma once
+#include "animation/AnimationClip.h"
+#include "animation/Skeleton.h"
 #include "renderer/types/Material.h"
 #include "renderer/types/Vertex.h"
+
+namespace cologne
+{
+    class Skeleton;
+}
 
 namespace cologne
 {
@@ -37,6 +44,7 @@ namespace cologne
     struct BoneInfo;
     class Animation;
 
+    class Skeleton;
     struct SkinnedModelData
     {
         std::string name;
@@ -44,10 +52,9 @@ namespace cologne
         std::vector<Material> materials;
         glm::vec3 aabb_min = glm::vec3(std::numeric_limits<float>::max());
         glm::vec3 aabb_max = glm::vec3(std::numeric_limits<float>::min());
-        std::unordered_map<std::string, BoneInfo> bone_map;
-        std::vector<Animation> animations;
-        int bone_count = 0;
+        std::vector<AnimationClip> animations;
         uint32_t material_index;
+        Skeleton skeleton;
     };
 
 

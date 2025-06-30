@@ -2,7 +2,6 @@
 #include <engine/renderer/types/Model.h>
 #include <engine/renderer/types/Mesh.h>
 #include <engine/renderer/types/SkinnedModel.h>
-#include <engine/animation/Animation.h>
 #include <filesystem>
 
 namespace cologne::AssetManager
@@ -17,7 +16,7 @@ namespace cologne::AssetManager
     void print_skinned_models();
     void print_all();
     void file_added(const std::filesystem::path& path);
-    std::vector<Animation>& get_animations();
+    std::vector<AnimationClip>& get_animations();
     std::vector<Model>& get_models();
     std::vector<Mesh>& get_meshes();
     std::vector<SkinnedModel>& get_skinned_models();
@@ -37,8 +36,8 @@ namespace cologne::AssetManager
     SkinnedModel* get_skinned_model_by_index(int32_t idx);
     int32_t get_skinned_model_index_by_name(const std::string& name);
 
-    Animation* get_animation_by_name(const std::string& name);
-    Animation* get_animation_by_index(int32_t idx);
+    AnimationClip* get_animation_by_name(const std::string& name);
+    AnimationClip* get_animation_by_index(int32_t idx);
     int32_t get_animation_index_by_name(const std::string& name);
     int32_t get_first_animation_index_with_name(const std::string& name);
 }

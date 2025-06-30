@@ -5,7 +5,7 @@
 #include "Editor.h"
 
 #include <engine/renderer/Renderer.h>
-#include <engine/animation/Animation.h>
+#include <engine/animation/AnimationClip.h>
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/core/Engine.h>
 #include <engine/core/Input.h>
@@ -15,7 +15,7 @@
 #include "ImGuizmo.h"
 #include "engine/imguiThemes.h"
 #include <imgui.h>
-#include <engine/animation/Animator.h>
+#include <engine/animation/AnimatorComponent.h>
 #include <engine/audio/Audio.h>
 #include <misc/cpp/imgui_stdlib.h>
 
@@ -530,7 +530,7 @@ namespace cologne
                         if (child.has_component<AnimatorComponent>())
                         {
                             auto &anim = child.get_component<AnimatorComponent>();
-                            item.bones = anim.get_bones();
+                            item.bones = anim.get_skinning_matrices();
                         }
                         Engine::get_renderer()->submit_skinned_outline_render_item(item);
                     }
@@ -613,7 +613,7 @@ namespace cologne
                 if (_selected_entity.has_component<AnimatorComponent>())
                 {
                     auto &anim = _selected_entity.get_component<AnimatorComponent>();
-                    item.bones = anim.get_bones();
+                    item.bones = anim.get_skinning_matrices();
                 }
                 Engine::get_renderer()->submit_skinned_outline_render_item(item);
                 int id = static_cast<int>(model.id);
@@ -664,10 +664,10 @@ namespace cologne
                                                       ImGui::TextDisabled("how should these components work lol");
                                                   });
 
-            draw_component<AnimatorComponent>("Animator", _selected_entity, true, [](auto &anim)
+            draw_component<AnimatorComponent>("Animator", _selected_entity, true, [](AnimatorComponent &anim)
             {
-                float progress = anim.get_current_time();
-                float total = anim.get_current_animation().get_duration();
+                float progress = anim.get_current_progress();
+                float total = anim.get_current_clip()->get_duration();
                 float percent = progress / total;
                 ImGui::SliderFloat("Animation Progress", &percent, 0.0f, 1.0f);
             });
@@ -713,10 +713,11 @@ namespace cologne
                         SkinnedModelComponent>() && ImGui::MenuItem("Animator Component"))
                 {
                     Audio::play_sound(accept_sound, 30);
-                    _selected_entity.add_component<AnimatorComponent>(
-                        AssetManager::get_first_animation_index_with_name(
-                            AssetManager::get_skinned_model_by_index(
-                                _selected_entity.get_component<SkinnedModelComponent>().id)->get_name()));
+                    // _selected_entity.add_component<AnimatorComponent>(
+                    //     AssetManager::get_first_animation_index_with_name(
+                    //         AssetManager::get_skinned_model_by_index(
+                    //             _selected_entity.get_component<SkinnedModelComponent>().id)->get_name()));
+                    LOG_WARN("NOT IMPLEMENTED");
                     ImGui::CloseCurrentPopup();
                 }
 

@@ -19,7 +19,6 @@ namespace cologne
 
     class SkinnedModel
     {
-        friend class Animation;
     public:
         explicit SkinnedModel(const SkinnedModelData& data);
 
@@ -43,10 +42,10 @@ namespace cologne
 
         bool get_cast_shadows() const;
         void set_cast_shadows(bool b);
+        const Skeleton& get_skeleton() const;
 
     private:
-        std::unordered_map<std::string, BoneInfo> _bone_info_map;
-        int _bone_count = 0;
+        Skeleton _skeleton;
         std::vector<Material> _materials;
         std::vector<SkinnedMesh> _meshes;
         bool _active = true;

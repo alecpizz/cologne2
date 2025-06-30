@@ -25,7 +25,8 @@ namespace cologne
     class BoneAnimationData
     {
     public:
-        BoneAnimationData(const std::string& name, int id, const aiNodeAnim* channel);
+        BoneAnimationData() = default;
+        BoneAnimationData(const std::string& name, const aiNodeAnim* channel);
         void update(float animation_time);
         glm::mat4 get_transform() const;
         std::string get_name() const;
@@ -44,6 +45,5 @@ namespace cologne
         std::vector<AnimationKeyScale> _scales;
         glm::mat4 _transform;
         std::string _name;
-        int _id;
     };
 }

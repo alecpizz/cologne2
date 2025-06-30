@@ -9,8 +9,8 @@
 
 namespace cologne
 {
-    BoneAnimationData::BoneAnimationData(const std::string &name, const int id, const aiNodeAnim *channel)
-        : _transform(1.0f), _name(name), _id(id)
+    BoneAnimationData::BoneAnimationData(const std::string &name, const aiNodeAnim *channel)
+        : _transform(1.0f), _name(name)
     {
         for (size_t i = 0; i < channel->mNumPositionKeys; i++)
         {
@@ -36,6 +36,19 @@ namespace cologne
 
     void BoneAnimationData::update(float animation_time)
     {
+        if (_positions.size() == 1)
+        {
+
+        }
+        if (_rotations.size() == 1)
+        {
+
+        }
+
+        if (_scales.size() == 1)
+        {
+
+        }
         const glm::mat4 translation = interpolate_position(animation_time);
         const glm::mat4 rotation = interpolate_rotation(animation_time);
         const glm::mat4 scale = interpolate_scale(animation_time);
@@ -50,11 +63,6 @@ namespace cologne
     std::string BoneAnimationData::get_name() const
     {
         return _name;
-    }
-
-    int BoneAnimationData::get_id() const
-    {
-        return _id;
     }
 
     int BoneAnimationData::get_position_idx(float time)

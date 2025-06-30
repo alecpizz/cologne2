@@ -4,8 +4,7 @@
 
 #include "Scene.h"
 
-#include <engine/animation/Animation.h>
-#include <engine/animation/Animator.h>
+#include <engine/animation/AnimatorComponent.h>
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/core/Engine.h>
 #include <engine/physics/Physics.h>
@@ -38,12 +37,14 @@ namespace cologne
 
         Entity man = create_entity("man");
         man.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("man"));
-        man.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("man_Idle"));
+        AnimatorComponent& anim = man.add_component<AnimatorComponent>(*AssetManager::get_skinned_model_by_name("man"));
+        anim.play_animation(AssetManager::get_animation_by_name("man_Idle"));
 
         Entity revolver = create_entity("deagle");
         revolver.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
-        revolver.add_component<AnimatorComponent>(
-            AssetManager::get_animation_index_by_name("deagle_Rig|Rig|MK_ReloadFull"));
+        AnimatorComponent& anim2 = revolver.add_component<AnimatorComponent>(
+            *AssetManager::get_skinned_model_by_name("deagle"));
+        anim2.play_animation(AssetManager::get_animation_by_name("deagle_Rig|Rig|MK_ReloadFull"));
 
         auto camera = create_entity("camera");
         auto &c = camera.add_component<CameraComponent>();
@@ -51,7 +52,8 @@ namespace cologne
 
         Entity viewModel = create_entity("viewmodel");
         viewModel.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("vsk"));
-        viewModel.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("vsk_Idle"));
+        auto& anim3 = viewModel.add_component<AnimatorComponent>(*AssetManager::get_skinned_model_by_name("vsk"));
+        anim3.play_animation(AssetManager::get_animation_by_name("vsk_Idle"));
         // viewModel.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
         // viewModel.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("deagle_Rig|Rig|MK_Idle"));
         viewModel.add_component<ViewmodelComponent>();
@@ -216,9 +218,13 @@ namespace cologne
 
         if (!Engine::in_edit_mode())
         {
-            auto animators = _registry.view<AnimatorComponent>();
+            auto animators = _registry.view<AnimatorComponent, ActiveComponent>();
             for (auto entity: animators)
             {
+                if (!_registry.get<ActiveComponent>(entity).active)
+                {
+                    continue;
+                }
                 auto &animator = _registry.get<AnimatorComponent>(entity);
                 animator.update_animation(delta_time);
             }
@@ -349,7 +355,7 @@ namespace cologne
             if (_registry.all_of<AnimatorComponent>(entity))
             {
                 auto &animator = _registry.get<AnimatorComponent>(entity);
-                item.bones = animator.get_bones();
+                item.bones = animator.get_skinning_matrices();
             }
             SkinnedModel *skinned_model = AssetManager::get_skinned_model_by_index(m.id);
             item.skinned_model = skinned_model;

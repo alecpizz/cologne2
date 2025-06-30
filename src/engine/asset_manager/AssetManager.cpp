@@ -7,10 +7,6 @@
 #include <engine/util/DebugScope.h>
 #include <engine/util/FileUtil.h>
 #include <algorithm>
-#include <future>
-#include <iostream>
-#include <mutex>
-#include <numeric>
 #include <string>
 #include <vector>
 
@@ -18,7 +14,7 @@ namespace cologne::AssetManager
 {
     std::vector<Model> models;
     std::vector<SkinnedModel> skinned_models;
-    std::vector<Animation> animations;
+    std::vector<AnimationClip> animations;
     std::vector<Mesh> meshes;
     std::vector<Material> materials;
     std::unordered_map<std::string, int32_t> model_index_map;
@@ -272,7 +268,7 @@ namespace cologne::AssetManager
         }
     }
 
-    std::vector<Animation> &get_animations()
+    std::vector<AnimationClip> &get_animations()
     {
         return animations;
     }
@@ -317,12 +313,12 @@ namespace cologne::AssetManager
         return skinned_model_index_map[name];
     }
 
-    Animation *get_animation_by_name(const std::string &name)
+    AnimationClip *get_animation_by_name(const std::string &name)
     {
         return &animations.at(animation_index_map[name]);
     }
 
-    Animation *get_animation_by_index(int32_t idx)
+    AnimationClip *get_animation_by_index(int32_t idx)
     {
         return &animations.at(idx);
     }

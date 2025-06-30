@@ -8,8 +8,7 @@ namespace cologne
 {
     SkinnedModel::SkinnedModel(const SkinnedModelData& data)
     {
-        _bone_info_map = data.bone_map;
-        _bone_count = data.bone_count;
+        _skeleton = data.skeleton;
         _materials = data.materials;
         _bounds = AABB(data.aabb_min, data.aabb_max);
         for (auto& mesh : data.meshes)
@@ -72,5 +71,10 @@ namespace cologne
     void SkinnedModel::set_cast_shadows(bool b)
     {
         _cast_shadows = b;
+    }
+
+    const Skeleton & SkinnedModel::get_skeleton() const
+    {
+        return _skeleton;
     }
 }

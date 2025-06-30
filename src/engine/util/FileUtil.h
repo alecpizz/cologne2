@@ -1,6 +1,5 @@
 #pragma once
 #include <engine/Types.h>
-#include <engine/animation/Animation.h>
 #include <filesystem>
 
 namespace cologne::FileUtil
