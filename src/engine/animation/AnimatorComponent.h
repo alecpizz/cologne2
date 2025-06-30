@@ -18,6 +18,7 @@ namespace cologne
     public:
         explicit AnimatorComponent(const SkinnedModel& model);
         explicit AnimatorComponent(const Skeleton& skeleton);
+        explicit AnimatorComponent(const std::string& model_name);
         void update_animation(float dt);
         void play_animation(AnimationClip* clip);
         const std::vector<glm::mat4> get_skinning_matrices() const;

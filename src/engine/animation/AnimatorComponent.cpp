@@ -4,6 +4,7 @@
 
 #include "AnimatorComponent.h"
 
+#include <engine/asset_manager/AssetManager.h>
 #include <engine/renderer/types/SkinnedModel.h>
 
 #include "AnimationClip.h"
@@ -19,6 +20,16 @@ namespace cologne
     }
 
     AnimatorComponent::AnimatorComponent(const Skeleton &skeleton) : _skeleton(skeleton), _pose(skeleton)
+    {
+        _current_time = 0.0f;
+        _current_clip = nullptr;
+    }
+
+    AnimatorComponent::AnimatorComponent(const std::string &model_name) : _skeleton(
+                                                                              AssetManager::get_skinned_model_by_name(
+                                                                                  model_name)->get_skeleton()),
+                                                                          _pose(AssetManager::get_skinned_model_by_name(
+                                                                              model_name)->get_skeleton())
     {
         _current_time = 0.0f;
         _current_clip = nullptr;

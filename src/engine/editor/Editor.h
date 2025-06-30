@@ -61,8 +61,18 @@ namespace cologne
 
         void draw_entity_node(Entity entity);
 
+        const char *_move_sound = RESOURCES_PATH "sounds/menus/move.wav";
+        const char *_accept_sound = RESOURCES_PATH "sounds/menus/accept.wav";
+        const char *_cancel_sound = RESOURCES_PATH "sounds/menus/cancel.wav";
+        uint32_t _global_window_flags = 0;
+        bool _mouse_captured = false;
+        inline static bool _was_game_mode;
+#define DEFAULT_WIDTH 1600
+#define DEFAULT_HEIGHT 900
+        inline static ImVec2 _prev_viewport_size;
 
         static void build_transform_entry(TransformComponent &tr);
+
         Entity _selected_entity = {};
     };
 }
