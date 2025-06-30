@@ -5,6 +5,7 @@
 namespace cologne::Input
 {
     glm::vec2 _mouse_motion = {0.0f, 0.0f};
+    glm::vec2 _scroll = {0.0f, 0.0f};
     std::unordered_map<Key, bool> _key_down_map;
     std::unordered_map<Key, bool> _key_pressed_map;
     std::unordered_map<Key, bool> _key_pressed_last_frame_map;
@@ -141,6 +142,8 @@ namespace cologne::Input
     {
         _mouse_motion.x = 0.0f;
         _mouse_motion.y = 0.0f;
+        _scroll.x = 0.0f;
+        _scroll.y = 0.0f;
         for (auto key_down_map: _key_pressed_map)
         {
             _key_pressed_map[key_down_map.first] = false;
@@ -219,9 +222,20 @@ namespace cologne::Input
         }
     }
 
+    void update_mouse_scroll(float x, float y)
+    {
+        _scroll.x = x;
+        _scroll.y = y;
+    }
+
     glm::vec2 get_relative_mouse()
     {
         return _mouse_motion;
+    }
+
+    glm::vec2 get_scroll()
+    {
+        return _scroll;
     }
 
     bool key_pressed(Key key)

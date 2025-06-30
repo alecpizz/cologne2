@@ -162,7 +162,7 @@ namespace cologne
             _impl->debug_ui->clear();
             _impl->window->clear();
             _impl->renderer->render_scene();
-            _impl->debug_ui->present();
+            _impl->debug_ui->present(et.elapsed);
             _impl->window->present();
             et.update();
             Time::DeltaTime = et.elapsed;

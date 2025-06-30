@@ -53,9 +53,13 @@ namespace cologne::Input
 
     void update_key_down(uint32_t scan_code);
 
+    void update_mouse_scroll(float x, float y);
+
     bool key_pressed(Key key);
 
     bool key_down(Key key);
 
     glm::vec2 get_relative_mouse();
+
+    glm::vec2 get_scroll();
 }

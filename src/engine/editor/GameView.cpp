@@ -11,7 +11,7 @@
 
 namespace cologne
 {
-    void Editor::build_game_view()
+    void Editor::build_game_view(float dt)
     {
         ImGui::Begin("Game View", nullptr, _global_window_flags);
         ImVec2 viewport_size = ImGui::GetContentRegionAvail();
@@ -109,6 +109,16 @@ namespace cologne
             ImGui::EndDragDropTarget();
         }
         static ImGuizmo::OPERATION current_operation = ImGuizmo::OPERATION::TRANSLATE;
+
+        if (ImGui::IsWindowHovered() && !Input::mouse_down(Input::MouseButton::Right))
+        {
+            const float scroll_speed = 5.0f;
+            float scroll = Input::get_scroll().y * dt * scroll_speed;
+            auto camera = Engine::get_scene()->get_scene_camera();
+            auto &cam_transform = camera.get_component<TransformComponent>();
+            cam_transform.position = cam_transform.position + cam_transform.get_forward() * scroll;
+        }
+
         if (_selected_entity)
         {
             ImGuizmo::SetOrthographic(false);
@@ -129,6 +139,13 @@ namespace cologne
                 else if (Input::key_pressed(Input::Key::R))
                 {
                     current_operation = ImGuizmo::OPERATION::SCALE;
+                }
+                else if (Input::key_pressed(Input::Key::F))
+                {
+                    auto camera = Engine::get_scene()->get_scene_camera();
+                    auto &cam_transform = camera.get_component<TransformComponent>();
+                    auto &entity_transform = _selected_entity.get_component<TransformComponent>();
+                    cam_transform.position = entity_transform.position - cam_transform.get_forward() * 0.5f;
                 }
             }
             auto camera = Engine::get_scene()->get_scene_camera();

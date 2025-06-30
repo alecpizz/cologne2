@@ -51,6 +51,12 @@ namespace cologne
             {
                 Input::update_mouse(event.motion.xrel, event.motion.yrel);
             }
+            if (event.type == SDL_EVENT_MOUSE_WHEEL)
+            {
+                float x = event.wheel.x;
+                float y= event.wheel.y;
+                Input::update_mouse_scroll(x, y);
+            }
             if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
             {
                 Input::update_mouse_down(event.button.button);

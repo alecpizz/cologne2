@@ -17,11 +17,7 @@
 
 namespace cologne
 {
-
     bool active = false;
-
-
-
 
     bool Editor::in_edit_mode()
     {
@@ -163,7 +159,7 @@ namespace cologne
         }
     }
 
-    void Editor::present()
+    void Editor::present(float dt)
     {
         if (active)
         {
@@ -173,7 +169,7 @@ namespace cologne
             build_properties_panel();
             build_settings_panel();
             build_asset_browser();
-            build_game_view();
+            build_game_view(dt);
             ImGui::End();
             ImGui::PopStyleColor();
         }
