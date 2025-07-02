@@ -15,6 +15,18 @@ namespace cologne
         return -1;
     }
 
+    const Bone *Skeleton::find_bone_with_content(const std::string &content) const
+    {
+        for (auto &bone: _bones)
+        {
+            if (bone.name.find(content) != std::string::npos)
+            {
+                return &bone;
+            }
+        }
+        return nullptr;
+    }
+
     const std::vector<Bone> &Skeleton::get_bones() const
     {
         return _bones;

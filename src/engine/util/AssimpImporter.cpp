@@ -273,8 +273,8 @@ namespace cologne::FileUtil
             node_rep.inverse_bind_pose = Util::ai_mat4_to_glm_mat4(boneData->mOffsetMatrix);
         }
 
+        int new_idx = out_skeleton._bones.size();
         out_skeleton._bones.push_back(node_rep);
-        int new_idx = out_skeleton._bones.size() - 1;
         out_skeleton._bone_name_to_index[node_name] = new_idx;
 
         for (unsigned int i = 0; i < node->mNumChildren; ++i)

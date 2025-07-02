@@ -17,9 +17,33 @@ layout (binding = 2) uniform sampler2D texture_metallic;
 layout (binding = 3) uniform sampler2D texture_roughness;
 layout (binding = 4) uniform sampler2D texture_normal;
 layout (binding = 5) uniform sampler2D texture_emission;
+
+layout (binding = 1, std430) restrict readonly buffer viewportdata
+{
+    mat4 projection;
+    mat4 view;
+    mat4 view_inverse;
+    mat4 projection_view;
+    vec4 camera_position;
+};
+
 uniform float metallic = -1.0f;
 uniform float roughness = -1.0f;
 uniform uint entity_id = 0;
+
+vec4 dither_float(vec4 in_pos, vec4 screen_position)
+{
+    vec2 uv = screen_position.xy * vec2(1600, 900);
+    float DITHER_THRESHOLDS[16] =
+    {
+    1.0 / 17.0, 9.0 / 17.0, 3.0 / 17.0, 11.0 / 17.0,
+    13.0 / 17.0, 5.0 / 17.0, 15.0 / 17.0, 7.0 / 17.0,
+    4.0 / 17.0, 12.0 / 17.0, 2.0 / 17.0, 10.0 / 17.0,
+    16.0 / 17.0, 8.0 / 17.0, 14.0 / 17.0, 6.0 / 17.0
+    };
+    uint idx = (uint(uv.x) % 4) * 4 + uint(uv.y) % 4;
+    return in_pos - DITHER_THRESHOLDS[idx];
+}
 
 void main()
 {
@@ -38,7 +62,18 @@ void main()
     gORM.g = texture(texture_roughness, TexCoords).g;
     gORM.b = texture(texture_ao, TexCoords).r;
     vec4 albedo = texture(texture_albedo, TexCoords).rgba;
-    if(albedo.a < 0.5)
+
+    bool allow_dither = false;
+    if (allow_dither)
+    {
+        float distance = distance(camera_position.xyz, gPosition.xyz);
+        distance -= 0.0001f;
+        vec4 dither = dither_float(vec4(distance, distance, distance, distance), gPosition);
+        dither *= albedo.a;
+        albedo.a = dither.a;
+    }
+
+    if (albedo.a < 0.5)
     {
         discard;
     }

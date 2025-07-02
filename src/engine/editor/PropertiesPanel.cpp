@@ -244,6 +244,18 @@ namespace cologne
                 float progress = anim.get_current_progress();
                 float total = anim.get_current_clip()->get_duration();
                 float percent = progress / total;
+                bool is_ragdoll = anim.get_current_state() == AnimatorComponent::State::RAGDOLLING;
+                if (ImGui::Button(is_ragdoll ? "To Animated" : "To Ragdoll"))
+                {
+                    if (is_ragdoll)
+                    {
+                        anim.to_kinematic();
+                    }
+                    else
+                    {
+                        anim.to_ragdoll();
+                    }
+                }
                 ImGui::SliderFloat("Animation Progress", &percent, 0.0f, 1.0f);
             });
 
