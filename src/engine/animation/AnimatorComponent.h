@@ -30,8 +30,10 @@ namespace cologne
         explicit AnimatorComponent(const SkinnedModel& model);
         explicit AnimatorComponent(const Skeleton& skeleton);
         explicit AnimatorComponent(const std::string& model_name);
-        void create_ragdoll(const RagdollCreateInfo& info);
-        void update(float dt);
+        AnimatorComponent(const AnimatorComponent&);
+        AnimatorComponent(AnimatorComponent&&);
+        void create_ragdoll();
+        void update(float dt, glm::mat4 transform);
         void play_animation(AnimationClip* clip);
         void to_ragdoll();
         void to_kinematic();
@@ -42,8 +44,9 @@ namespace cologne
     private:
         State _current_state = State::ANIMATING;
         void update_animation(float dt);
-        void update_pose_from_ragdoll();
-        uint32_t _ragdoll_id = 0;
+        void update_pose_from_ragdoll(const glm::mat4& transform);
+        void sync_ragdoll_to_animation(const glm::mat4& transform);
+        int32_t _ragdoll_id = -1;
         std::unordered_map<std::string, uint32_t> _bone_to_ragdoll_map = std::unordered_map<std::string, uint32_t>();
         const Skeleton& _skeleton;
         SkeletonPose _pose;

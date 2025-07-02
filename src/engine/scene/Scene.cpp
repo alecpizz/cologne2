@@ -39,27 +39,8 @@ namespace cologne
         man.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("man"));
         AnimatorComponent& anim = man.add_component<AnimatorComponent>("man");
         anim.play_animation(AssetManager::get_animation_by_name("man_Idle"));
-        auto& skeleton = AssetManager::get_skinned_model_by_name("man")->get_skeleton();
-        RagdollCreateInfo ragdoll_create_info;
-        ragdoll_create_info.hips_name = skeleton.find_bone_with_content("Hips")->name;
-        ragdoll_create_info.lower_spine_name = skeleton.find_bone_with_content("Spine")->name;
-        ragdoll_create_info.middle_spine_name = skeleton.find_bone_with_content("Spine1")->name;
-        ragdoll_create_info.upper_spine_name = skeleton.find_bone_with_content("Spine2")->name;
-        ragdoll_create_info.head_name = skeleton.find_bone_with_content("Head")->name;
-        ragdoll_create_info.left_arm_name = skeleton.find_bone_with_content("LeftArm")->name;
-        ragdoll_create_info.left_fore_arm_name = skeleton.find_bone_with_content("LeftForeArm")->name;
-        ragdoll_create_info.left_hand_name = skeleton.find_bone_with_content("LeftHand")->name;
-        ragdoll_create_info.right_arm_name = skeleton.find_bone_with_content("RightArm")->name;
-        ragdoll_create_info.right_fore_arm_name = skeleton.find_bone_with_content("RightForeArm")->name;
-        ragdoll_create_info.right_hand_name = skeleton.find_bone_with_content("RightHand")->name;
-        ragdoll_create_info.left_up_leg_name = skeleton.find_bone_with_content("LeftUpLeg")->name;
-        ragdoll_create_info.left_leg_name = skeleton.find_bone_with_content("LeftLeg")->name;
-        ragdoll_create_info.left_foot_name = skeleton.find_bone_with_content("LeftFoot")->name;
-        ragdoll_create_info.right_up_leg_name = skeleton.find_bone_with_content("RightUpLeg")->name;
-        ragdoll_create_info.right_leg_name = skeleton.find_bone_with_content("RightLeg")->name;
-        ragdoll_create_info.right_foot_name = skeleton.find_bone_with_content("RightFoot")->name;
-        ragdoll_create_info.position = glm::vec3(0.0f);
-        anim.create_ragdoll(ragdoll_create_info);
+        anim.create_ragdoll();
+        anim.to_ragdoll();
 
         Entity revolver = create_entity("deagle");
         revolver.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
@@ -246,7 +227,7 @@ namespace cologne
                     continue;
                 }
                 auto &animator = _registry.get<AnimatorComponent>(entity);
-                animator.update(delta_time);
+                animator.update(delta_time, _registry.get<WorldTransformComponent>(entity));
             }
         }
 

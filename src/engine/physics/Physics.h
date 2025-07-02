@@ -56,6 +56,9 @@ namespace cologne::Physics
     void enable_body(uint32_t body_id);
 
     uint32_t create_ragdoll(std::unordered_map<std::string, uint32_t> &out_map, const RagdollCreateInfo &info);
-
+    uint32_t create_ragdoll(std::unordered_map<std::string, uint32_t> &out_map, const Skeleton& skeleton, const std::vector<glm::mat4>& global_bind_transforms);
+    void make_ragdoll_kinematic(uint32_t ragdoll_id);
+    void make_ragdoll_active(uint32_t ragdoll_id);
+    void sync_ragdoll(uint32_t ragdoll_id, const std::unordered_map<std::string, glm::mat4>& ragdoll_transforms);
     glm::mat4 get_rigidbody_transform(uint32_t body_id);
 }

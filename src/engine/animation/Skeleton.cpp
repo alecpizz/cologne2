@@ -15,6 +15,18 @@ namespace cologne
         return -1;
     }
 
+    int Skeleton::try_find_bone_index(const std::string &content) const
+    {
+        for (int i = 0; i < _bones.size(); i++)
+        {
+            if (_bones[i].name.find(content) != std::string::npos)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     const Bone *Skeleton::find_bone_with_content(const std::string &content) const
     {
         for (auto &bone: _bones)

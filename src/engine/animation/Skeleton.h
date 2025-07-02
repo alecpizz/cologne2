@@ -20,6 +20,7 @@ namespace cologne
         Skeleton() = default;
 
         int find_bone_index(const std::string &name) const;
+        int try_find_bone_index(const std::string& content) const;
 
         const Bone *find_bone_with_content(const std::string &content) const;
 

@@ -11,12 +11,6 @@
 
 namespace cologne
 {
-    struct BoneInfo
-    {
-        int id;
-        glm::mat4 offset;
-    };
-
     class SkinnedModel
     {
     public:

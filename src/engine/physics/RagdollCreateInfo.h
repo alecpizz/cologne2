@@ -2,6 +2,14 @@
 
 namespace cologne
 {
+    struct BoneInfo
+    {
+        std::string name;
+        glm::vec3 world_space_position = glm::vec3(0.0f);
+        glm::quat world_space_rotation = glm::quat(0.0f, 0.0f, 0.0f, 1.0f);
+        glm::vec3 constraint_pivot_position = glm::vec3(0.0f);
+    };
+
     struct RagdollCreateInfo
     {
         glm::vec3 position;
