@@ -7,6 +7,11 @@
 
 namespace cologne
 {
+    class Entity;
+}
+
+namespace cologne
+{
     struct RagdollCreateInfo;
 }
 
@@ -32,7 +37,7 @@ namespace cologne
         explicit AnimatorComponent(const std::string& model_name);
         AnimatorComponent(const AnimatorComponent&);
         AnimatorComponent(AnimatorComponent&&);
-        void create_ragdoll();
+        void create_ragdoll(Entity entity_id);
         void update(float dt, glm::mat4 transform);
         void play_animation(AnimationClip* clip);
         void to_ragdoll();

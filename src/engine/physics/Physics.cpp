@@ -1210,33 +1210,7 @@ namespace cologne::Physics
         physics_system.GetBodyInterface().AddBody(static_cast<BodyID>(body_id), EActivation::DontActivate);
     }
 
-    uint32_t create_ragdoll(std::unordered_map<std::string, uint32_t> &out_map, const RagdollCreateInfo &info)
-    {
-        Ref<RagdollSettings> settings = create_ragdoll_settings(info);
-        auto ragdoll = settings->CreateRagdoll(0, 0, &physics_system);
-        ragdoll->AddToPhysicsSystem(EActivation::Activate); //?
-        ragdolls.emplace_back(ragdoll);
-        out_map[info.hips_name] = ragdoll->GetBodyID(0).GetIndexAndSequenceNumber();
-        out_map[info.lower_spine_name] = ragdoll->GetBodyID(1).GetIndexAndSequenceNumber();
-        out_map[info.middle_spine_name] = ragdoll->GetBodyID(2).GetIndexAndSequenceNumber();
-        out_map[info.upper_spine_name] = ragdoll->GetBodyID(3).GetIndexAndSequenceNumber();
-        out_map[info.head_name] = ragdoll->GetBodyID(4).GetIndexAndSequenceNumber();
-        out_map[info.left_arm_name] = ragdoll->GetBodyID(5).GetIndexAndSequenceNumber();
-        out_map[info.right_arm_name] = ragdoll->GetBodyID(6).GetIndexAndSequenceNumber();
-        out_map[info.left_fore_arm_name] = ragdoll->GetBodyID(7).GetIndexAndSequenceNumber();
-        out_map[info.right_fore_arm_name] = ragdoll->GetBodyID(8).GetIndexAndSequenceNumber();
-        out_map[info.left_hand_name] = ragdoll->GetBodyID(9).GetIndexAndSequenceNumber();
-        out_map[info.right_hand_name] = ragdoll->GetBodyID(10).GetIndexAndSequenceNumber();
-        out_map[info.left_up_leg_name] = ragdoll->GetBodyID(11).GetIndexAndSequenceNumber();
-        out_map[info.right_up_leg_name] = ragdoll->GetBodyID(12).GetIndexAndSequenceNumber();
-        out_map[info.left_leg_name] = ragdoll->GetBodyID(13).GetIndexAndSequenceNumber();
-        out_map[info.right_leg_name] = ragdoll->GetBodyID(14).GetIndexAndSequenceNumber();
-        out_map[info.left_foot_name] = ragdoll->GetBodyID(15).GetIndexAndSequenceNumber();
-        out_map[info.right_foot_name] = ragdoll->GetBodyID(16).GetIndexAndSequenceNumber();
-        return ragdolls.size() - 1;
-    }
-
-    uint32_t create_ragdoll(std::unordered_map<std::string, uint32_t> &out_map, const Skeleton &skeleton,
+    uint32_t create_ragdoll(Entity entity, std::unordered_map<std::string, uint32_t> &out_map, const Skeleton &skeleton,
                             const std::vector<glm::mat4> &global_bind_transforms)
     {
         Ref<RagdollSettings> settings = create_ragdoll_settings(skeleton, global_bind_transforms);
@@ -1248,6 +1222,7 @@ namespace cologne::Physics
         {
             out_map[settings->GetSkeleton()->GetJoint(i).mName.c_str()] = ragdoll->GetBodyID(i).
                     GetIndexAndSequenceNumber();
+            entity_to_collider_map[ragdoll->GetBodyID(i)] = entity;
         }
         return size;
     }

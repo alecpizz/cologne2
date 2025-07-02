@@ -39,7 +39,7 @@ namespace cologne
         man.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("man"));
         AnimatorComponent& anim = man.add_component<AnimatorComponent>("man");
         anim.play_animation(AssetManager::get_animation_by_name("man_Idle"));
-        anim.create_ragdoll();
+        anim.create_ragdoll(man);
         anim.to_ragdoll();
 
         Entity revolver = create_entity("deagle");

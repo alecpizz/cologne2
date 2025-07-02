@@ -58,7 +58,7 @@ namespace cologne
         _current_time = other._current_time;
     }
 
-    void AnimatorComponent::create_ragdoll()
+    void AnimatorComponent::create_ragdoll(Entity entity_id)
     {
         SkeletonPose pose(_skeleton);
         for (size_t i = 0; i < _skeleton.get_bone_count(); i++)
@@ -66,7 +66,7 @@ namespace cologne
             pose._local_transforms[i] = _skeleton.get_bones()[i].local_bind_transform;
         }
         pose.update_skinning_matrices(_skeleton);
-        _ragdoll_id = Physics::create_ragdoll(_bone_to_ragdoll_map, _skeleton, pose._global_transforms);
+        _ragdoll_id = Physics::create_ragdoll(entity_id, _bone_to_ragdoll_map, _skeleton, pose._global_transforms);
     }
 
     void AnimatorComponent::update(float dt, glm::mat4 transform)
