@@ -114,26 +114,31 @@ namespace cologne
         bool primary = false;
     };
 
+#define PLAYER_COMPONENT_FIELDS(V) \
+    V(float, gravity,  9.8f * 2.0f)\
+    V(float, move_speed, 5.0f)\
+    V(float, run_acceleration, 7.0f)\
+    V(float, run_deceleration, 3.0f)\
+    V(float, air_acceleration, 2.0f)\
+    V(float, air_deceleration, 2.0f)\
+    V(float, air_control, 0.1f)\
+    V(float, side_strafe_acceleration, 15.0f)\
+    V(float, side_strafe_speed, 1.0f)\
+    V(float, jump_speed, 7.0f)\
+    V(float, friction, 6.0f)\
+    V(float, maxStepVelocity, 12.5)\
+    V(float, minStepVelocity, 2.50f)\
+    V(float, minStepInterval, 0.150f)\
+    V(float, maxStepInterval, 1.250f)\
+
     struct PlayerComponent
     {
         uint32_t id = -1;
         Entity camera = {};
         Entity viewmodel = {};
-        float gravity = 9.8f * 2.0f;
-        float move_speed = 5.0f;
-        float run_acceleration = 7.0f;
-        float run_deceleration = 3.0f;
-        float air_acceleration = 2.0f;
-        float air_deceleration = 2.0f;
-        float air_control = 0.1f;
-        float side_strafe_acceleration = 15.0f;
-        float side_strafe_speed = 1.0f;
-        float jump_speed = 7.0f;
-        float friction = 6.0f;
-        float maxStepVelocity = 12.5;
-        float minStepVelocity = 2.50f;
-        float minStepInterval = 0.150f;
-        float maxStepInterval = 1.250f;
+#define DEFINE_MEMBER(type, name, ...) type name = __VA_ARGS__;
+        PLAYER_COMPONENT_FIELDS(DEFINE_MEMBER)
+#undef DEFINE_MEMBER
         void teleport_to_position(glm::vec3 pos)
         {
             cologne::Physics::teleport_player(id, pos);

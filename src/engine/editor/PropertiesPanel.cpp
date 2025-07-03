@@ -234,21 +234,10 @@ namespace cologne
 
             draw_component<PlayerComponent>("Player", _selected_entity, true, [](PlayerComponent &player)
             {
-                ImGui::DragFloat("Gravity", &player.gravity);
-                ImGui::DragFloat("Move Speed", &player.move_speed);
-                ImGui::DragFloat("Run Accel", &player.run_acceleration);
-                ImGui::DragFloat("Run Decel", &player.run_deceleration);
-                ImGui::DragFloat("Air Accel", &player.air_acceleration);
-                ImGui::DragFloat("Air Decel", &player.air_deceleration);
-                ImGui::DragFloat("Air Control", &player.air_control);
-                ImGui::DragFloat("Side Strafe Accel", &player.side_strafe_acceleration);
-                ImGui::DragFloat("Side Strafe Speed", &player.side_strafe_speed);
-                ImGui::DragFloat("Jump Speed", &player.jump_speed);
-                ImGui::DragFloat("Friction", &player.friction);
-                ImGui::DragFloat("maxStepVelocity",  &player.maxStepVelocity);
-                ImGui::DragFloat("minStepVelocity",  &player.minStepVelocity);
-                ImGui::DragFloat("minStepInterval",  &player.minStepInterval);
-                ImGui::DragFloat("maxStepInterval",  &player.maxStepInterval);
+#define IMGUI_WIDGET(type, name, ...) \
+                ImGui::DragFloat(#name, &player.name);
+                PLAYER_COMPONENT_FIELDS(IMGUI_WIDGET)
+#undef IMGUI_WIDGET
             });
 
 
