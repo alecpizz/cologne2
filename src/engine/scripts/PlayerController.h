@@ -14,12 +14,16 @@ namespace cologne
         bool _is_free_cam = false;
         bool _show_mouse = false;
         bool _allow_sliding = true;
-        bool _was_grounded;
-        bool _grounded;
+        bool _was_grounded = false;
+        bool _grounded = true;
         glm::vec3 _desired_velocity;
         bool _footstep_played = false;
         float _bob_time = 0.0f;
         float _bob_offset = 0.0f;
+        glm::vec3 _velocity = glm::vec3(0.0f);
+        bool _jump_queued = false;
+        float _step_timer = 0.0f;
+        float _step_time = .01f;
 
         //view model stuff
         float _time = 0.0f;
@@ -97,33 +101,48 @@ namespace cologne
             }
         }
 
+        float inverse_lerp(float a, float b, float v)
+        {
+            return (v - a) / (b - a);
+        }
+
+        float lerp(float a, float b, float t)
+        {
+            return (1.0f - t) * a + b * t;
+        }
+
+        float remap(float in_min, float in_max, float out_min, float out_max, float v)
+        {
+            float t = inverse_lerp(in_min, in_max, v);
+            return lerp(out_min, out_max, t);
+        }
+
         void play_footstep(float dt)
         {
-            auto vel = Physics::get_player_velocity(get_component<PlayerComponent>().id);
+            if (!_grounded)
+            {
+                return;
+            }
+            auto vel = _velocity;
             vel.y = 0.0f;
-            if (glm::abs(vel.x) < 0.1f && glm::abs(vel.z) < 0.1f)
+            auto speed = glm::length(vel);
+            auto player_comp = get_component<PlayerComponent>();
+            if (speed < player_comp.minStepVelocity)
             {
                 return;
             }
 
-            _bob_time += dt;
-            _bob_offset = glm::sin(_bob_time * 4.5f * get_component<PlayerComponent>().character_speed) * 0.05f;
-            if (_bob_offset < -0.04f && !_footstep_played && _grounded)
+            auto next_step_time = remap(player_comp.minStepVelocity, player_comp.maxStepVelocity, player_comp.minStepInterval, player_comp.maxStepInterval, speed);
+            if (_step_timer > _step_time)
             {
+                _step_time = next_step_time;
+                _step_timer = 0.0f;
                 auto idx = rand() % 4;
-                Audio::play_sound(_footstep_sounds[idx].c_str(), 30);
-                _footstep_played = true;
+                Audio::play_sound(_footstep_sounds[idx].c_str(), glm::linearRand(25, 35));
             }
-            if (_bob_offset > 0.0f)
+            else
             {
-                _footstep_played = false;
-            }
-
-            if (_grounded && !_was_grounded)
-            {
-                auto idx = rand() % 4;
-                Audio::play_sound(_footstep_sounds[idx].c_str(), 30);
-                _bob_time = 0.0f;
+                _step_timer += dt;
             }
         }
 
@@ -178,6 +197,149 @@ namespace cologne
             get_component<PlayerComponent>().viewmodel.get_component<TransformComponent>().rotation = orientation;
         }
 
+        void apply_friction(float t, float dt)
+        {
+            glm::vec3 v = _velocity;
+            v.y = 0.0f;
+            float speed = length(v);
+            float drop = 0.0f;
+            if (_grounded)
+            {
+                float control = speed < get_component<PlayerComponent>().run_deceleration ? get_component<PlayerComponent>().run_deceleration : speed;
+                drop = control * get_component<PlayerComponent>().friction * dt * t;
+            }
+
+            float new_speed = speed - drop;
+            if (new_speed < 0.0f)
+            {
+                new_speed = 0.0f;
+            }
+            if (new_speed > 0.0f)
+            {
+                new_speed /= speed;
+            }
+
+            _velocity.x *= new_speed;
+            _velocity.z *= new_speed;
+        }
+
+        void acceleration(glm::vec3 goal_dir, float goal_speed, float accel, float dt)
+        {
+            float current_speed = glm::dot(_velocity, goal_dir);
+            float add_speed = goal_speed - current_speed;
+            if (add_speed <= 0)
+            {
+                return;
+            }
+
+            float accel_speed = accel * dt * goal_speed;
+            if (accel_speed > add_speed)
+            {
+                accel_speed = add_speed;
+            }
+            _velocity.x += accel_speed * goal_dir.x;
+            _velocity.z += accel_speed * goal_dir.z;
+        }
+
+        void ground_move(glm::vec3 movement_input, float dt)
+        {
+            apply_friction(!_jump_queued ? 1.0f : 0.0f, dt);
+            if (length2(movement_input) != 0.0f)
+            {
+                movement_input = normalize(movement_input);
+            }
+            float goal_speed = length(movement_input) * get_component<PlayerComponent>().move_speed;
+            acceleration(movement_input, goal_speed, get_component<PlayerComponent>().run_acceleration, dt);
+            _velocity.y = -get_component<PlayerComponent>().gravity * dt;
+            if (_jump_queued)
+            {
+                _velocity.y = get_component<PlayerComponent>().jump_speed;
+                _jump_queued = false;
+            }
+            else
+            {
+                //slope correct here
+            }
+        }
+
+        void air_move(glm::vec3 movement_input, bool strafing_only, float dt)
+        {
+            float accel;
+            float wish_speed = glm::length(movement_input);
+            wish_speed *= get_component<PlayerComponent>().move_speed;
+            if (length(movement_input) != 0.0f)
+            {
+                movement_input = normalize(movement_input);
+            }
+
+            float wish_speed2 = wish_speed;
+            if (glm::dot(_velocity, movement_input) < 0)
+            {
+                accel = get_component<PlayerComponent>().air_deceleration;
+            }
+            else
+            {
+                accel = get_component<PlayerComponent>().air_acceleration;
+            }
+
+            if (strafing_only)
+            {
+                if (wish_speed > get_component<PlayerComponent>().side_strafe_speed)
+                {
+                    wish_speed = get_component<PlayerComponent>().side_strafe_speed;
+                }
+                accel = get_component<PlayerComponent>().side_strafe_acceleration;
+            }
+            acceleration(movement_input, wish_speed, accel, dt);
+            if (get_component<PlayerComponent>().air_control > 0)
+            {
+                air_control(movement_input, wish_speed2, !strafing_only, dt);
+            }
+            _velocity.y -= get_component<PlayerComponent>().gravity * dt;
+        }
+
+        void air_control(glm::vec3 movement_input, float target_speed, bool only_forward, float dt)
+        {
+            if (!only_forward || glm::abs(target_speed) < 0.0001f)
+            {
+                return;
+            }
+
+            float z_speed = _velocity.y;
+            _velocity.y = 0.0f;
+
+            float speed = length(_velocity);
+            if (speed != 0.0f)
+            {
+                _velocity = glm::normalize(_velocity);
+            }
+
+            float dot = glm::dot(_velocity, movement_input);
+            float k = 32;
+            k *= get_component<PlayerComponent>().air_control * dot * dot * dt;
+
+            if (dot > 0)
+            {
+                _velocity *= speed * glm::length(movement_input) * k;
+                _velocity = glm::normalize(_velocity);
+            }
+            _velocity.x *= speed;
+            _velocity.y = z_speed;
+            _velocity.z *= speed;
+        }
+
+        void queue_jump()
+        {
+            if (Input::key_pressed(Input::Key::Space))
+            {
+                _jump_queued = true;
+            }
+            if (!Input::key_pressed(Input::Key::Space))
+            {
+                _jump_queued = false;
+            }
+        }
+
     protected:
         void on_create() override
         {
@@ -225,11 +387,10 @@ namespace cologne
             {
                 y += 1.0f;
             }
-            bool jump = cologne::Input::key_pressed(cologne::Input::Key::Space);
+            queue_jump();
             bool crouch = cologne::Input::key_pressed(cologne::Input::Key::LeftCtrl);
 
             glm::vec3 movement = glm::vec3(-y, 0.0f, x);
-
             movement = get_component<PlayerComponent>().camera.get_component<TransformComponent>().rotation * movement;
             movement.y = 0.0f;
             if (abs(movement.x) > 0.0f || abs(movement.y) > 0.0f)
@@ -237,46 +398,29 @@ namespace cologne
                 movement = glm::normalize(movement);
             }
 
-            _desired_velocity = movement * get_component<PlayerComponent>().character_speed;
-
-            if (Physics::player_is_supported(get_component<PlayerComponent>().id))
-            {
-                _allow_sliding = movement.length() > 0.0f;
-            } else
-            {
-                _allow_sliding = false;
-            }
 
             glm::quat up_rotation = glm::quat(glm::vec3(0.0f));
             glm::vec3 up = up_rotation * glm::vec3(0.0f, 1.0f, 0.0f);
 
-            glm::vec3 current_vertical_velocity = glm::dot(Physics::get_player_velocity(
-                                                               get_component<PlayerComponent>().id), up) * up;
-            glm::vec3 ground_velocity = Physics::get_player_ground_velocity(get_component<PlayerComponent>().id);
-            glm::vec3 new_velocity = glm::vec3(0.0f);
 
-            bool moving_towards_ground = current_vertical_velocity.y - ground_velocity.y < 0.1f;
+
             _was_grounded = _grounded;
             _grounded = Physics::player_is_grounded(get_component<PlayerComponent>().id);
-            if (_grounded && !Physics::slope_to_steep_for_player(get_component<PlayerComponent>().id))
+            if (_grounded)
             {
-                new_velocity = ground_velocity;
-                if (jump && moving_towards_ground)
-                {
-                    new_velocity += get_component<PlayerComponent>().jump_speed * up;
-                }
-            } else
-            {
-                new_velocity = current_vertical_velocity;
+                ground_move(movement, dt);
             }
-
-            new_velocity += (up_rotation * Physics::get_gravity() * dt);
-            new_velocity += up_rotation * _desired_velocity;
+            else
+            {
+                //air move
+                bool strafing_only = y == 0 && x != 0;
+                air_move(movement, !strafing_only, dt);
+            }
 
             PlayerMovementCommand cmd;
             cmd.up = up;
             cmd.rotation = up_rotation;
-            cmd.movement = new_velocity;
+            cmd.movement = _velocity;
 
             Physics::move_player(get_component<PlayerComponent>().id, cmd);
 

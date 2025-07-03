@@ -132,7 +132,7 @@ namespace cologne
                     Engine::get_renderer()->draw_sphere(mat.transform[3],
                                                         light.radius, light.color);
                 }
-                const char* items[] = {"DIRECTIONAL", "POINT", "SPOT"};
+                const char *items[] = {"DIRECTIONAL", "POINT", "SPOT"};
                 ImGui::Combo("LIGHT TYPE", &light.type, items, 3);
                 if (light.type == LightComponent::Spot)
                 {
@@ -232,10 +232,23 @@ namespace cologne
                 ImGui::EndDisabled();
             });
 
-            draw_component<PlayerComponent>("Player", _selected_entity, true, [](auto &player)
+            draw_component<PlayerComponent>("Player", _selected_entity, true, [](PlayerComponent &player)
             {
-                ImGui::DragFloat("Character Speed", &player.character_speed);
+                ImGui::DragFloat("Gravity", &player.gravity);
+                ImGui::DragFloat("Move Speed", &player.move_speed);
+                ImGui::DragFloat("Run Accel", &player.run_acceleration);
+                ImGui::DragFloat("Run Decel", &player.run_deceleration);
+                ImGui::DragFloat("Air Accel", &player.air_acceleration);
+                ImGui::DragFloat("Air Decel", &player.air_deceleration);
+                ImGui::DragFloat("Air Control", &player.air_control);
+                ImGui::DragFloat("Side Strafe Accel", &player.side_strafe_acceleration);
+                ImGui::DragFloat("Side Strafe Speed", &player.side_strafe_speed);
                 ImGui::DragFloat("Jump Speed", &player.jump_speed);
+                ImGui::DragFloat("Friction", &player.friction);
+                ImGui::DragFloat("maxStepVelocity",  &player.maxStepVelocity);
+                ImGui::DragFloat("minStepVelocity",  &player.minStepVelocity);
+                ImGui::DragFloat("minStepInterval",  &player.minStepInterval);
+                ImGui::DragFloat("maxStepInterval",  &player.maxStepInterval);
             });
 
 

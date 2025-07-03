@@ -119,9 +119,21 @@ namespace cologne
         uint32_t id = -1;
         Entity camera = {};
         Entity viewmodel = {};
-        float character_speed = 3.5f;
-        float jump_speed = 4.0f;
-
+        float gravity = 9.8f * 2.0f;
+        float move_speed = 5.0f;
+        float run_acceleration = 7.0f;
+        float run_deceleration = 3.0f;
+        float air_acceleration = 2.0f;
+        float air_deceleration = 2.0f;
+        float air_control = 0.1f;
+        float side_strafe_acceleration = 15.0f;
+        float side_strafe_speed = 1.0f;
+        float jump_speed = 7.0f;
+        float friction = 6.0f;
+        float maxStepVelocity = 12.5;
+        float minStepVelocity = 2.50f;
+        float minStepInterval = 0.150f;
+        float maxStepInterval = 1.250f;
         void teleport_to_position(glm::vec3 pos)
         {
             cologne::Physics::teleport_player(id, pos);
@@ -135,9 +147,9 @@ namespace cologne
         float sway_multiplier = 100.0f;
         float smoothing = 8.0f;
         float amplitude = 0.01f;
-        float frequency = 15.0f;
+        float frequency = 12.0f;
         float vertical_velocity_multiplier = 0.01f;
-        float max_vertical_offset = 0.05f;
+        float max_vertical_offset = 0.07f;
     };
 
     struct LightComponent
