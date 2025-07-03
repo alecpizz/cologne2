@@ -146,6 +146,10 @@ float get_light_space_depth(float near, float far, vec3 light_to_sample)
 
 float point_shadow_calc(vec3 fragPos, Light light)
 {
+    if(light.shadow_map == uvec2(0.0))
+    {
+        return 1.0f;
+    }
     vec3 lightPos = light.position.xyz;
     vec3 frag_to_light = fragPos - lightPos;
     float bias = 0.02f;
@@ -251,7 +255,7 @@ vec4 pbr()
 
     vec3 ambient = vec3(0.02) * albedo;
     vec3 emission = texture2D(texture_emission, TexCoords).rgb;
-    vec3 color = Lo + ambient + emission;
+    vec3 color = Lo   + ambient + emission;
 
     //    color = pow(color, vec3(1.0 / 2.2));
     //    color = color / (color + vec3(1.0));

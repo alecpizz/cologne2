@@ -28,6 +28,10 @@ namespace cologne
             active = 1;
             outer_cutoff = glm::cos(glm::radians(light_component.outer_cutoff));
             inner_cutoff = glm::cos(glm::radians(light_component.inner_cutoff));
+            if (light_component.cast_shadows)
+            {
+                shadow_handle = 1;
+            }
         }
 
         Light() = default;

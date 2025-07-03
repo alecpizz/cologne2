@@ -71,30 +71,13 @@ namespace cologne
 
     void AnimatorComponent::update(float dt, glm::mat4 transform)
     {
-        //TEMP
-        if (Input::key_pressed(Input::Key::R))
-        {
-            if (_current_state == State::ANIMATING)
-            {
-                to_ragdoll();
-            }
-            else
-            {
-                to_kinematic();
-            }
-        }
-
         if (_current_state == State::ANIMATING)
         {
             update_animation(dt);
-            if (_ragdoll_id != -1)
-            {
-                sync_ragdoll_to_animation(transform);
-            }
+            sync_ragdoll_to_animation(transform);
         }
         else
         {
-            //ragdoll shit
             update_pose_from_ragdoll(transform);
         }
     }
@@ -126,8 +109,12 @@ namespace cologne
         _pose.update_skinning_matrices(_skeleton);
     }
 
-    void AnimatorComponent::update_pose_from_ragdoll(const glm::mat4& transform)
+    void AnimatorComponent::update_pose_from_ragdoll(const glm::mat4 &transform)
     {
+        if (_ragdoll_id == -1)
+        {
+            return;
+        }
         glm::mat4 inverse_entity_transform = glm::inverse(transform);
 
         for (int i = 0; i < _skeleton.get_bone_count(); i++)
@@ -141,7 +128,8 @@ namespace cologne
 
             if (_bone_to_ragdoll_map.contains(node_name))
             {
-                global_transform = inverse_entity_transform * Physics::get_rigidbody_transform(_bone_to_ragdoll_map[node_name]);
+                global_transform = inverse_entity_transform * Physics::get_rigidbody_transform(
+                                       _bone_to_ragdoll_map[node_name]);
             }
 
             _pose._global_transforms[i] = global_transform;
@@ -151,6 +139,10 @@ namespace cologne
 
     void AnimatorComponent::sync_ragdoll_to_animation(const glm::mat4 &transform)
     {
+        if (_ragdoll_id == -1)
+        {
+            return;
+        }
         std::unordered_map<std::string, glm::mat4> ragdoll_transforms(_bone_to_ragdoll_map.size());
         for (auto &pair: _bone_to_ragdoll_map)
         {

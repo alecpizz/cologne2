@@ -379,6 +379,11 @@ namespace cologne
             {
                 break;
             }
+            if (light.shadow_handle != 1)
+            {
+                light.shadow_handle = 0;
+                continue;
+            }
             light.shadow_handle = _shadow_maps[counter].get_bindless_handle();
 
             glViewport(0, 0, _shadow_maps[counter].get_width(),

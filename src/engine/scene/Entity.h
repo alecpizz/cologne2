@@ -26,6 +26,16 @@ namespace cologne
         }
 
         template<typename T, typename... Args>
+        T &get_or_add_component(Args &&... args)
+        {
+            if (has_component<T>())
+            {
+                return get_component<T>();
+            }
+            return _scene->_registry.emplace<T>(_entity_handle, std::forward<Args>(args)...);
+        }
+
+        template<typename T, typename... Args>
         T &add_component(Args &&... args)
         {
             if (has_component<T>())

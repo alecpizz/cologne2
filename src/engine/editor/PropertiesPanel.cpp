@@ -10,6 +10,7 @@
 #include <imgui.h>
 #include <engine/animation/AnimatorComponent.h>
 #include <engine/audio/Audio.h>
+#include <engine/renderer/types/Light.h>
 #include <misc/cpp/imgui_stdlib.h>
 
 #include "Editor.h"
@@ -131,13 +132,18 @@ namespace cologne
                     Engine::get_renderer()->draw_sphere(mat.transform[3],
                                                         light.radius, light.color);
                 }
-
-                ImGui::DragFloat("outer cutoff", &light.outer_cutoff, 0.01f);
-                ImGui::DragFloat("inner cutoff", &light.inner_cutoff, 0.01f);
+                const char* items[] = {"DIRECTIONAL", "POINT", "SPOT"};
+                ImGui::Combo("LIGHT TYPE", &light.type, items, 3);
+                if (light.type == LightComponent::Spot)
+                {
+                    ImGui::DragFloat("outer cutoff", &light.outer_cutoff, 0.01f);
+                    ImGui::DragFloat("inner cutoff", &light.inner_cutoff, 0.01f);
+                }
                 ImGui::DragFloat("radius", &light.radius, 0.01f);
                 ImGui::DragFloat("strength", &light.strength, 0.01f);
                 ImGui::ColorEdit3("color", glm::value_ptr(light.color), ImGuiColorEditFlags_HDR
                                                                         | ImGuiColorEditFlags_Float);
+                ImGui::Checkbox("CAST SHADOWS", &light.cast_shadows);
             });
 
             draw_component<MeshComponent>("Mesh", _selected_entity, true, [this](auto &mesh_comp)

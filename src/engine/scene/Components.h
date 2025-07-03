@@ -153,8 +153,9 @@ namespace cologne
         float strength = 1.0f;
         float radius = 3.0f;
         int type = LightType::Point;
-        float outer_cutoff = 0.0f;
-        float inner_cutoff = 0.0f;
+        float outer_cutoff = 17.5f;
+        float inner_cutoff = 12.5f;
+        bool cast_shadows = false;
     };
 
 

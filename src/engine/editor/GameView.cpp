@@ -144,8 +144,8 @@ namespace cologne
                 {
                     auto camera = Engine::get_scene()->get_scene_camera();
                     auto &cam_transform = camera.get_component<TransformComponent>();
-                    auto &entity_transform = _selected_entity.get_component<TransformComponent>();
-                    cam_transform.position = entity_transform.position - cam_transform.get_forward() * 0.5f;
+                    auto &entity_transform = _selected_entity.get_component<WorldTransformComponent>();
+                    cam_transform.position = glm::vec3(entity_transform.transform[3]) - cam_transform.get_forward() * 0.5f;
                 }
             }
             auto camera = Engine::get_scene()->get_scene_camera();
