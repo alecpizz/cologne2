@@ -43,7 +43,24 @@ namespace cologne
                 if (id != entt::null)
                 {
                     Audio::play_sound(_move_sound, 30);
-                    _selected_entity = {static_cast<entt::entity>(id), Engine::get_scene()};
+                    Entity temp = {static_cast<entt::entity>(id), Engine::get_scene()};
+
+                    if (temp.has_component<ChildComponent>())
+                    {
+                        auto comp = temp.get_component<ChildComponent>();
+                        if (comp.parent == _selected_entity)
+                        {
+                            _selected_entity = temp;
+                        }
+                        else
+                        {
+                            _selected_entity = comp.parent;
+                        }
+                    }
+                    else
+                    {
+                        _selected_entity = temp;
+                    }
                 }
                 else
                 {
@@ -145,7 +162,8 @@ namespace cologne
                     auto camera = Engine::get_scene()->get_scene_camera();
                     auto &cam_transform = camera.get_component<TransformComponent>();
                     auto &entity_transform = _selected_entity.get_component<WorldTransformComponent>();
-                    cam_transform.position = glm::vec3(entity_transform.transform[3]) - cam_transform.get_forward() * 0.5f;
+                    cam_transform.position = glm::vec3(entity_transform.transform[3]) - cam_transform.get_forward() *
+                                             0.5f;
                 }
             }
             auto camera = Engine::get_scene()->get_scene_camera();
