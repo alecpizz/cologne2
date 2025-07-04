@@ -36,16 +36,20 @@ namespace cologne
         // glowCube.add_component<ModelComponent>(AssetManager::get_model_index_by_name("glowCube"), true);
 
         Entity man = create_entity("man");
+        man.get_component<TransformComponent>().rotation =
+            glm::quat(glm::vec3(0.0f, glm::radians(-90.0f), 0.0f));
+        man.get_component<TransformComponent>().position.y -= 0.25f;
+        auto enemy = man.add_component<EnemyComponent>();
+        Audio::add_sound(enemy.hurt_sound.c_str()); //todo: have asset manager do this
         man.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("man"));
-        AnimatorComponent& anim = man.add_component<AnimatorComponent>("man");
-        anim.play_animation(AssetManager::get_animation_by_name("man_Idle"));
+        AnimatorComponent &anim = man.add_component<AnimatorComponent>("man");
+        anim.play_base_animation(AssetManager::get_animation_by_name("man_Idle"));
         anim.create_ragdoll(man);
-        anim.to_ragdoll();
 
         Entity revolver = create_entity("deagle");
         revolver.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
-        AnimatorComponent& anim2 = revolver.add_component<AnimatorComponent>("deagle");
-        anim2.play_animation(AssetManager::get_animation_by_name("deagle_Rig|Rig|MK_ReloadFull"));
+        AnimatorComponent &anim2 = revolver.add_component<AnimatorComponent>("deagle");
+        anim2.play_base_animation(AssetManager::get_animation_by_name("deagle_Rig|Rig|MK_ReloadFull"));
 
         auto camera = create_entity("camera");
         auto &c = camera.add_component<CameraComponent>();
@@ -53,8 +57,8 @@ namespace cologne
 
         Entity viewModel = create_entity("viewmodel");
         viewModel.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("vsk"));
-        auto& anim3 = viewModel.add_component<AnimatorComponent>("vsk");
-        anim3.play_animation(AssetManager::get_animation_by_name("vsk_Idle"));
+        auto &anim3 = viewModel.add_component<AnimatorComponent>("vsk");
+        anim3.play_base_animation(AssetManager::get_animation_by_name("vsk_Idle"));
         // viewModel.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
         // viewModel.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("deagle_Rig|Rig|MK_Idle"));
         viewModel.add_component<ViewmodelComponent>();
@@ -78,11 +82,11 @@ namespace cologne
         light.type = 0;
         dir_light.get_component<TransformComponent>().position = glm::vec3(0.790f, 18.867f, 0.024f);
         dir_light.get_component<TransformComponent>().rotation =
-                glm::quat(glm::radians(glm::vec3(82.300, 0.0f, 0.0f)));
+                glm::quat(glm::radians(glm::vec3(88.500, 0.0f, 0.0f)));
 
 
         Entity spot_light = create_entity("spot light");
-        auto& lc = spot_light.add_component<LightComponent>();
+        auto &lc = spot_light.add_component<LightComponent>();
         lc.type = LightComponent::Spot;
 
 
@@ -101,34 +105,34 @@ namespace cologne
         point_light2.get_component<TransformComponent>().position = glm::vec3(6.0f, 4.580, 3.796f);
 
         Entity point_light3 = create_entity("point light3");
-        auto& light4 = point_light3.add_component<LightComponent>();
+        auto &light4 = point_light3.add_component<LightComponent>();
         light4.color = glm::vec3(0.078f, 0.656, 0.840f);
         light4.radius = 3.13f;
         light4.strength = 6.670f;
         point_light3.get_component<TransformComponent>().position = glm::vec3(-6.7, 1.4, -3.979);
 
         Entity lantern_light = create_entity("lantern light");
-        auto& light5 = lantern_light.add_component<LightComponent>();
+        auto &light5 = lantern_light.add_component<LightComponent>();
         light5.color = glm::vec3(1.0, 0.78, 0.529);
         light5.radius = 3.670f;
         lantern_light.get_component<TransformComponent>().position = glm::vec3(0.243f, 1.073f, -3.608f);
 
         Entity evil_light = create_entity("evil light");
-        auto& light6 = evil_light.add_component<LightComponent>();
+        auto &light6 = evil_light.add_component<LightComponent>();
         light6.radius = 3.670f;
         light6.color = glm::vec3(1.0f, 0.0f, 0.0f);
         light6.strength = 7.0f;
         evil_light.get_component<TransformComponent>().position = glm::vec3(-4.538, 1.082, 3.635);
 
         Entity purple_light = create_entity("purple light");
-        auto& light7 = purple_light.add_component<LightComponent>();
+        auto &light7 = purple_light.add_component<LightComponent>();
         light7.radius = 4.0f;
         light7.strength = 7.1f;
         light7.color = glm::vec3(0.426f, 0.020f, 0.962f);
         purple_light.get_component<TransformComponent>().position = glm::vec3(9.786, 0.487f, 0.158f);
 
         Entity hall_light = create_entity("hall light");
-        auto& light8 = hall_light.add_component<LightComponent>();
+        auto &light8 = hall_light.add_component<LightComponent>();
         light8.radius = 3.780f;
         light8.strength = 5.910f;
         light8.color = glm::vec3(1.0f, 0.780f, 0.529f);
@@ -219,6 +223,41 @@ namespace cologne
 
         if (!Engine::in_edit_mode())
         {
+            auto bullets = _registry.view<BulletComponent>();
+            RaycastHitInfo info;
+            for (auto ent: bullets)
+            {
+                auto &bullet = _registry.get<BulletComponent>(ent);
+                if (Physics::raycast(bullet.position, bullet.direction, 20.0f, Physics::NON_MOVING | Physics::MOVING,
+                                     info))
+                {
+                    if (info.hit_entity)
+                    {
+                        if (info.hit_entity.has_component<EnemyComponent>())
+                        {
+                            auto &enemy = info.hit_entity.get_component<EnemyComponent>();
+                            enemy.health -= bullet.damage;
+                            Audio::play_sound(enemy.hurt_sound.c_str(), 40);
+                            if (enemy.health <= 0)
+                            {
+                                enemy.dead = true;
+                                if (info.hit_entity.has_component<AnimatorComponent>())
+                                {
+                                    info.hit_entity.get_component<AnimatorComponent>().to_ragdoll();
+                                    info.hit_entity.get_component<AnimatorComponent>().take_ragdoll_hit(info.hit_point, info.hit_normal);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (auto entt: bullets)
+            {
+                destroy_entity({entt, this});
+            }
+
+
             auto animators = _registry.view<AnimatorComponent, ActiveComponent>();
             for (auto entity: animators)
             {
@@ -240,7 +279,7 @@ namespace cologne
         for (auto entity: _registry.view<LightComponent, WorldTransformComponent, ActiveComponent>())
         {
             auto [light, transform, active] =
-                _registry.get<LightComponent, WorldTransformComponent, ActiveComponent>(entity);
+                    _registry.get<LightComponent, WorldTransformComponent, ActiveComponent>(entity);
             if (!active)
             {
                 continue;
@@ -526,6 +565,13 @@ namespace cologne
         {
             update_children(entity);
         }
+    }
+
+    void Scene::create_bullet(glm::vec3 pos, glm::vec3 dir, float damage)
+    {
+        static int bullet_count = 0;
+        Entity e = create_entity("bullet" + bullet_count++);
+        e.add_component<BulletComponent>(pos, dir, damage);
     }
 
     void Scene::update_children(entt::entity parent)

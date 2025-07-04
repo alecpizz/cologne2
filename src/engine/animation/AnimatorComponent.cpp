@@ -39,25 +39,6 @@ namespace cologne
         _current_clip = nullptr;
     }
 
-    AnimatorComponent::AnimatorComponent(const AnimatorComponent &other) : _skeleton(other._skeleton),
-                                                                           _pose(other._pose)
-    {
-        _current_state = other._current_state;
-        _ragdoll_id = other._ragdoll_id;
-        _bone_to_ragdoll_map = other._bone_to_ragdoll_map;
-        _current_clip = other._current_clip;
-        _current_time = other._current_time;
-    }
-
-    AnimatorComponent::AnimatorComponent(AnimatorComponent &&other) : _skeleton(other._skeleton), _pose(other._pose)
-    {
-        _current_state = other._current_state;
-        _ragdoll_id = other._ragdoll_id;
-        _bone_to_ragdoll_map = other._bone_to_ragdoll_map;
-        _current_clip = other._current_clip;
-        _current_time = other._current_time;
-    }
-
     void AnimatorComponent::create_ragdoll(Entity entity_id)
     {
         SkeletonPose pose(_skeleton);
@@ -67,6 +48,7 @@ namespace cologne
         }
         pose.update_skinning_matrices(_skeleton);
         _ragdoll_id = Physics::create_ragdoll(entity_id, _bone_to_ragdoll_map, _skeleton, pose._global_transforms);
+        Physics::make_ragdoll_kinematic(_ragdoll_id);
     }
 
     void AnimatorComponent::update(float dt, glm::mat4 transform)
@@ -90,6 +72,15 @@ namespace cologne
         }
 
         _current_time += _current_clip->get_ticks_per_second() * dt;
+        if (_is_playing_one_shot)
+        {
+            if (_current_time >= _current_clip->get_duration())
+            {
+                //done playing the animation
+                _current_clip = _base_clip;
+                _current_time = 0.0f;
+            }
+        }
         _current_time = std::fmod(_current_time, _current_clip->get_duration());
 
         const auto &bones = _skeleton.get_bones();
@@ -152,9 +143,17 @@ namespace cologne
         Physics::sync_ragdoll(_ragdoll_id, ragdoll_transforms);
     }
 
-    void AnimatorComponent::play_animation(AnimationClip *clip)
+    void AnimatorComponent::play_base_animation(AnimationClip *clip)
     {
         _current_clip = clip;
+        _base_clip = clip;
+        _current_time = 0.0f;
+    }
+
+    void AnimatorComponent::play_one_shot_animation(AnimationClip *clip)
+    {
+        _current_clip = clip;
+        _is_playing_one_shot = true;
         _current_time = 0.0f;
     }
 
@@ -186,6 +185,11 @@ namespace cologne
         Physics::make_ragdoll_kinematic(_ragdoll_id);
     }
 
+    int AnimatorComponent::get_current_key_frame_idx() const
+    {
+        return 0;
+    }
+
     const std::vector<glm::mat4> AnimatorComponent::get_skinning_matrices() const
     {
         return _pose.get_skinning_matrices();
@@ -204,5 +208,31 @@ namespace cologne
     AnimatorComponent::State AnimatorComponent::get_current_state() const
     {
         return _current_state;
+    }
+
+    void AnimatorComponent::take_ragdoll_hit(glm::vec3 point, glm::vec3 normal)
+    {
+        if (_ragdoll_id == -1)
+        {
+            return;
+        }
+        if (_current_state != State::RAGDOLLING)
+        {
+            return;
+        }
+
+        uint32_t closest_body = 0;
+        float dist = std::numeric_limits<float>::max();
+        for (auto pair : _bone_to_ragdoll_map)
+        {
+            auto transform = Physics::get_rigidbody_transform(pair.second);
+            float distance = glm::distance(glm::vec3(transform[3]), point);
+            if (distance < dist)
+            {
+                closest_body = pair.second;
+                dist = distance;
+            }
+        }
+        Physics::add_impulse_force_at_position(closest_body, point, -normal * 200.0f);
     }
 }

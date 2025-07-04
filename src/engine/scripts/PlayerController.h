@@ -24,7 +24,16 @@ namespace cologne
         bool _jump_queued = false;
         float _step_timer = 0.0f;
         float _step_time = .01f;
-
+        float _rpm = 60.0f / 200.0f;
+        float _reload_time = 0.25f;
+        float _shot_timer = 0.0f;
+        int _max_ammo = 10;
+        int _current_ammo = 0;
+        float _gun_time = 0.0f;
+        bool _is_firing = false;
+        bool _is_reloading = false;
+        const char *shoot_sound = RESOURCES_PATH "sounds/vsk_fire.ogg";
+        const char *reload_sound = RESOURCES_PATH "sounds/vsk_reload_empty.ogg";
         //view model stuff
         float _time = 0.0f;
         TransformComponent _prev_transform;
@@ -37,7 +46,8 @@ namespace cologne
                 if (_show_mouse)
                 {
                     Engine::get_window()->show_mouse();
-                } else
+                }
+                else
                 {
                     Engine::get_window()->hide_mouse();
                 }
@@ -132,7 +142,8 @@ namespace cologne
                 return;
             }
 
-            auto next_step_time = remap(player_comp.minStepVelocity, player_comp.maxStepVelocity, player_comp.minStepInterval, player_comp.maxStepInterval, speed);
+            auto next_step_time = remap(player_comp.minStepVelocity, player_comp.maxStepVelocity,
+                                        player_comp.minStepInterval, player_comp.maxStepInterval, speed);
             if (_step_timer > _step_time)
             {
                 _step_time = next_step_time;
@@ -166,7 +177,8 @@ namespace cologne
             if (glm::length2(velocity) > 0.0f)
             {
                 _time += dt;
-            } else
+            }
+            else
             {
                 _time = 0.0f;
             }
@@ -205,7 +217,9 @@ namespace cologne
             float drop = 0.0f;
             if (_grounded)
             {
-                float control = speed < get_component<PlayerComponent>().run_deceleration ? get_component<PlayerComponent>().run_deceleration : speed;
+                float control = speed < get_component<PlayerComponent>().run_deceleration
+                                    ? get_component<PlayerComponent>().run_deceleration
+                                    : speed;
                 drop = control * get_component<PlayerComponent>().friction * dt * t;
             }
 
@@ -340,6 +354,56 @@ namespace cologne
             }
         }
 
+        void update_gun(float dt)
+        {
+            if (_shot_timer < _gun_time)
+            {
+                _shot_timer += dt;
+            }
+            else
+            {
+                _is_firing = false;
+                _is_reloading = false;
+            }
+
+            if (!_is_firing && !_is_reloading)
+            {
+                if (Input::mouse_pressed(Input::MouseButton::Left) && _current_ammo > 0)
+                {
+                    LOG_INFO("Bang");
+                    Entity vm = get_component<PlayerComponent>().viewmodel;
+                    auto &anim = vm.get_component<AnimatorComponent>();
+                    anim.play_one_shot_animation(AssetManager::get_animation_by_name("vsk_Fire"));
+                    Audio::play_sound(shoot_sound, 30);
+                    auto cam = get_component<PlayerComponent>().camera;
+                    auto tr = cam.get_component<TransformComponent>();
+                    Engine::get_scene()->create_bullet(tr.position, tr.get_forward(), 25);
+                    _shot_timer = 0.0f;
+                    _gun_time = _rpm;
+                    _current_ammo--;
+                    _is_firing = true;
+                }
+
+                if (Input::key_pressed(Input::Key::R) && _current_ammo < _max_ammo)
+                {
+                    LOG_INFO("RELOADING!");
+                    _shot_timer = 0.0f;
+                    _gun_time = _reload_time;
+                    Entity vm = get_component<PlayerComponent>().viewmodel;
+                    auto &anim = vm.get_component<AnimatorComponent>();
+                    anim.play_one_shot_animation(AssetManager::get_animation_by_name("vsk_Reload_Full"));
+                    Audio::play_sound(reload_sound, 20);
+                    _is_reloading = true;
+                    _current_ammo = _max_ammo;
+                }
+            }
+
+            std::string text = (std::string("Ammo ") + std::to_string(_current_ammo) + "/" + std::to_string(_max_ammo));
+            Engine::get_renderer()->draw_text(text.c_str(),
+                                              glm::vec3(Engine::get_window()->get_width() - (text.length() * 48.0f),
+                                                        660.0f, 0.0f), glm::vec4(1.0f), 0.6f);
+        }
+
     protected:
         void on_create() override
         {
@@ -351,7 +415,11 @@ namespace cologne
             {
                 Audio::add_sound(footstep_sound.c_str());
             }
-
+            auto anim = AssetManager::get_animation_by_name("vsk_Reload_Full");
+            _reload_time = anim->get_duration() / anim->get_ticks_per_second();
+            Audio::add_sound(shoot_sound);
+            Audio::add_sound(reload_sound);
+            _current_ammo = _max_ammo;
         }
 
         void on_destroy() override
@@ -403,7 +471,6 @@ namespace cologne
             glm::vec3 up = up_rotation * glm::vec3(0.0f, 1.0f, 0.0f);
 
 
-
             _was_grounded = _grounded;
             _grounded = Physics::player_is_grounded(get_component<PlayerComponent>().id);
             if (_grounded)
@@ -430,6 +497,7 @@ namespace cologne
             glm::vec3 camera_pos = player_pos + glm::vec3(0.0f, 1.45f, 0.0f);
             get_component<PlayerComponent>().camera.get_component<TransformComponent>().position = camera_pos;
             get_component<TransformComponent>().position = player_pos;
+            update_gun(dt);
             move_viewmodel(dt);
         }
 

@@ -35,17 +35,20 @@ namespace cologne
         explicit AnimatorComponent(const SkinnedModel& model);
         explicit AnimatorComponent(const Skeleton& skeleton);
         explicit AnimatorComponent(const std::string& model_name);
-        AnimatorComponent(const AnimatorComponent&);
-        AnimatorComponent(AnimatorComponent&&);
         void create_ragdoll(Entity entity_id);
         void update(float dt, glm::mat4 transform);
-        void play_animation(AnimationClip* clip);
+        void play_base_animation(AnimationClip* clip);
+        void play_one_shot_animation(AnimationClip* clip);
         void to_ragdoll();
         void to_kinematic();
+        int get_current_key_frame_idx() const;
         const std::vector<glm::mat4> get_skinning_matrices() const;
         float get_current_progress() const;
         AnimationClip* get_current_clip() const;
         State get_current_state() const;
+
+        void take_ragdoll_hit(glm::vec3 point, glm::vec3 normal);
+
     private:
         State _current_state = State::ANIMATING;
         void update_animation(float dt);
@@ -56,6 +59,8 @@ namespace cologne
         const Skeleton& _skeleton;
         SkeletonPose _pose;
         AnimationClip* _current_clip = nullptr;
+        AnimationClip* _base_clip = nullptr;
         float _current_time = 0.0f;
+        bool _is_playing_one_shot = false;
     };
 }

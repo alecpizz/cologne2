@@ -1,4 +1,5 @@
 #pragma once
+#include <engine/audio/Audio.h>
 #include <engine/physics/Physics.h>
 #include <engine/util/Util.h>
 
@@ -147,7 +148,7 @@ namespace cologne
 
     struct ViewmodelComponent
     {
-        glm::vec3 position_offset = glm::vec3(0.045, -0.270, -0.255);
+        glm::vec3 position_offset = glm::vec3(0.045, -0.270, -0.2);
         glm::vec3 euler_offset = glm::vec3(0.0f, 180.0f, 0.0f);
         float sway_multiplier = 100.0f;
         float smoothing = 8.0f;
@@ -155,6 +156,20 @@ namespace cologne
         float frequency = 12.0f;
         float vertical_velocity_multiplier = 0.01f;
         float max_vertical_offset = 0.07f;
+    };
+
+    struct EnemyComponent
+    {
+        float health = 100.0f;
+        bool dead = false;
+        std::string hurt_sound = RESOURCES_PATH "sounds/enemy_hurt.mp3";
+    };
+
+    struct BulletComponent
+    {
+        glm::vec3 position;
+        glm::vec3 direction;
+        float damage;
     };
 
     struct LightComponent

@@ -959,6 +959,17 @@ namespace cologne::Physics
         physics_system.GetBodyInterface().DestroyBody(static_cast<BodyID>(body_id));
     }
 
+    void add_impulse_force_at_position(uint32_t body_id, glm::vec3 position, glm::vec3 force)
+    {
+        BodyID id(body_id);
+        if (id.IsInvalid())
+        {
+            return;
+        }
+
+        physics_system.GetBodyInterface().AddImpulse(id, glm_vec3_to_jph_vec3(force), glm_vec3_to_jph_vec3(position));
+    }
+
     void disable_body(uint32_t body_id)
     {
         physics_system.GetBodyInterface().RemoveBody(static_cast<BodyID>(body_id));

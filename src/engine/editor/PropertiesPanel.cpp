@@ -159,8 +159,9 @@ namespace cologne
                     id = glm::clamp(id, 0, static_cast<int>(AssetManager::get_meshes().size()) - 1);
                     mesh_comp.mesh_idx = id;
                 }
-                std::string mesh_name = AssetManager::get_mesh_by_index(mesh_comp.mesh_idx)->get_name();
-                ImGui::Text("Name %s", mesh_name.c_str());
+                auto mesh = AssetManager::get_mesh_by_index(mesh_comp.mesh_idx);
+                std::string mesh_name = mesh->get_name();
+                ImGui::Text("Name %s Material %d", mesh_name.c_str(), mesh->get_material_index());
             });
 
             draw_component<ModelComponent>("Model", _selected_entity, true, [this](auto &model)

@@ -34,6 +34,8 @@ namespace cologne
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
             SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+            SDL_SetCurrentThreadPriority(SDL_THREAD_PRIORITY_HIGH);
+
             //no point in doing msaa when there's deferred rendering
             // SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
             // SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
@@ -62,8 +64,6 @@ namespace cologne
                 SDL_DestroyWindow(window);
                 SDL_Quit();
             }
-
-
 
             ImGui_ImplSDL3_InitForOpenGL(window, context);
             ImGui_ImplOpenGL3_Init("#version 460");

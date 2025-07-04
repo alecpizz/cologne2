@@ -47,6 +47,11 @@ vec4 dither_float(vec4 in_pos, vec4 screen_position)
 
 void main()
 {
+    vec4 albedo = texture(texture_albedo, TexCoords).rgba;
+    if (albedo.a < 0.5)
+    {
+        discard;
+    }
     gEntityId = entity_id;
     gPosition = vec4(FragPos, 1.0);
     vec3 N = texture2D(texture_normal, TexCoords).rgb;
@@ -61,7 +66,6 @@ void main()
     gORM.r *= metallic;
     gORM.g = texture(texture_roughness, TexCoords).g;
     gORM.b = texture(texture_ao, TexCoords).r;
-    vec4 albedo = texture(texture_albedo, TexCoords).rgba;
 
     bool allow_dither = false;
     if (allow_dither)
@@ -73,9 +77,5 @@ void main()
         albedo.a = dither.a;
     }
 
-    if (albedo.a < 0.5)
-    {
-        discard;
-    }
     gAlbedo.rgba = albedo;
 }

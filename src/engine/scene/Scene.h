@@ -49,6 +49,8 @@ namespace cologne
 
         void update_transforms();
 
+        void create_bullet(glm::vec3 pos, glm::vec3 dir, float damage);
+
     private:
         void update_children(entt::entity parent);
         AABB _scene_bounds;
