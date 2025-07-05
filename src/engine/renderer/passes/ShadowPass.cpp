@@ -11,134 +11,18 @@
 
 namespace cologne
 {
-    std::vector<float> shadowCascadeLevels;
-    uint32_t shadow_fbo = 0;
+    size_t light_counter = 0;
     uint32_t point_shadow_fbo = 0;
-    uint32_t shadow_cascade_ubo = 0;
-    uint32_t shadow_size = 4096;
     uint32_t dir_shadow_size = 1024;
-    float zMulti = 10.0f;
     float shadow_near = 0.1f;
     float shadow_far = 1200.0f;
     float point_shadow_near = 1.0f;
-    glm::vec3 _dir_shadow_offset = glm::vec3(0.0f);
     glm::mat4 _cam_view;
     glm::mat4 _cam_proj;
 
-    glm::mat4 get_light_space_matrix(const float near_plane, const float far_plane, glm::vec3 light_dir);
+    uint32_t create_point_shadow_texture();
 
-    std::vector<glm::mat4> get_light_space_matrices(glm::vec3 light_dir);
-
-    std::vector<glm::vec4> get_frustum_corners_world_space(const glm::mat4 &proj, const glm::mat4 &view);
-
-    std::vector<glm::vec4> get_frustum_corners_world_space(const glm::mat4 &proj_view);
-
-    glm::mat4 get_light_space_matrix(const float near_plane, const float far_plane, glm::vec3 light_dir)
-    {
-        const auto proj = glm::perspective(
-            Engine::get_scene()->get_primary_camera().get_component<CameraComponent>().fov_radians,
-            (float) Engine::get_window()->get_width() / (float) Engine::get_window()->get_height(), near_plane,
-            far_plane);
-        const auto corners = get_frustum_corners_world_space(proj, _cam_view);
-
-        glm::vec3 center = glm::vec3(0, 0, 0);
-        for (const auto &v: corners)
-        {
-            center += glm::vec3(v);
-        }
-        center /= corners.size();
-        const auto lightView = glm::lookAt(center - light_dir, center, glm::vec3(0.0f, 1.0f, 0.0f));
-
-        float minX = std::numeric_limits<float>::max();
-        float maxX = std::numeric_limits<float>::lowest();
-        float minY = std::numeric_limits<float>::max();
-        float maxY = std::numeric_limits<float>::lowest();
-        float minZ = std::numeric_limits<float>::max();
-        float maxZ = std::numeric_limits<float>::lowest();
-        for (const auto &v: corners)
-        {
-            const auto trf = lightView * v;
-            minX = std::min(minX, trf.x);
-            maxX = std::max(maxX, trf.x);
-            minY = std::min(minY, trf.y);
-            maxY = std::max(maxY, trf.y);
-            minZ = std::min(minZ, trf.z);
-            maxZ = std::max(maxZ, trf.z);
-        }
-
-        // Tune this parameter according to the scene
-        if (minZ < 0)
-        {
-            minZ *= zMulti;
-        }
-        else
-        {
-            minZ /= zMulti;
-        }
-        if (maxZ < 0)
-        {
-            maxZ /= zMulti;
-        }
-        else
-        {
-            maxZ *= zMulti;
-        }
-
-        const glm::mat4 lightProjection = glm::ortho(minX, maxX, minY, maxY, minZ, maxZ);
-        return lightProjection * lightView;
-    }
-
-    std::vector<glm::mat4> get_light_space_matrices(glm::vec3 light_dir)
-    {
-        std::vector<glm::mat4> ret;
-        for (size_t i = 0; i < shadowCascadeLevels.size() + 1; ++i)
-        {
-            if (i == 0)
-            {
-                ret.push_back(get_light_space_matrix(shadow_near, shadowCascadeLevels[i], light_dir));
-            }
-            else if (i < shadowCascadeLevels.size())
-            {
-                ret.push_back(get_light_space_matrix(shadowCascadeLevels[i - 1],
-                                                     shadowCascadeLevels[i], light_dir));
-            }
-            else
-            {
-                ret.push_back(get_light_space_matrix(shadowCascadeLevels[i - 1], shadow_far, light_dir));
-            }
-        }
-        return ret;
-    }
-
-
-    std::vector<glm::vec4> get_frustum_corners_world_space(const glm::mat4 &proj, const glm::mat4 &view)
-    {
-        return get_frustum_corners_world_space(proj * view);
-    }
-
-    std::vector<glm::vec4> get_frustum_corners_world_space(const glm::mat4 &proj_view)
-    {
-        const auto inv = glm::inverse(proj_view);
-
-        std::vector<glm::vec4> frustumCorners;
-        for (unsigned int x = 0; x < 2; ++x)
-        {
-            for (unsigned int y = 0; y < 2; ++y)
-            {
-                for (unsigned int z = 0; z < 2; ++z)
-                {
-                    const glm::vec4 pt = inv * glm::vec4(2.0f * x - 1.0f, 2.0f * y - 1.0f, 2.0f * z - 1.0f, 1.0f);
-                    frustumCorners.push_back(pt / pt.w);
-                }
-            }
-        }
-
-        return frustumCorners;
-    }
-
-    uint32_t create_shadow_texture();
-
-    uint32_t create_shadow_texture()
+    uint32_t create_point_shadow_texture()
     {
         uint32_t handle_result = 0;
         glGenTextures(1, &handle_result);
@@ -159,6 +43,22 @@ namespace cologne
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+        return handle_result;
+    }
+
+    uint32_t create_dir_shadow_texture()
+    {
+        uint32_t handle_result = 0;
+        glGenTextures(1, &handle_result);
+        glBindTexture(GL_TEXTURE_2D, handle_result);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 4096,
+            4096, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
         return handle_result;
     }
 
@@ -190,56 +90,14 @@ namespace cologne
 
     void Renderer::init_shadow()
     {
-        shadowCascadeLevels.push_back(shadow_far / 50.0f);
-        shadowCascadeLevels.push_back(shadow_far / 25.0f);
-        shadowCascadeLevels.push_back(shadow_far / 10.0f);
-        shadowCascadeLevels.push_back(shadow_far / 2.0f);
-
-        glGenFramebuffers(1, &shadow_fbo);
-        glGenTextures(1, &_shadow_depth);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, _shadow_depth);
-
-        int32_t cascade_amount = static_cast<int32_t>(shadowCascadeLevels.size()) + 1;
-
-        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT32F, shadow_size, shadow_size,
-                     cascade_amount, 0,
-                     GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        constexpr float white[] = {1.0f, 1.0f, 1.0f, 1.0f};
-
-        glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, white);
-
-
-        glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, _shadow_depth, 0);
-        glDrawBuffer(GL_NONE);
-        glReadBuffer(GL_NONE);
-
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        auto texture = Texture(create_dir_shadow_texture(), 4096, 4096, 1);
+        texture.make_resident();
+        _shadow_maps.emplace_back(texture);
+        Engine::get_debug_ui()->add_image_entry("dir_shadow", _shadow_maps[0].get_handle(),
+                                                glm::vec2(1024));
+        for (size_t i = 0; i < 7; i++)
         {
-            LOG_ERROR("Framebuffer is not complete!");
-            return;
-        }
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-        glGenBuffers(1, &shadow_cascade_ubo);
-        glBindBuffer(GL_UNIFORM_BUFFER, shadow_cascade_ubo);
-        glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4x4) * 16, nullptr, GL_STATIC_DRAW);
-        glBindBufferBase(GL_UNIFORM_BUFFER, 0, shadow_cascade_ubo);
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-        auto dir_shadow_fbo = get_framebuffer_by_name("dir_shadow");
-        dir_shadow_fbo->create("dir_shadow_fbo", dir_shadow_size, dir_shadow_size);
-        dir_shadow_fbo->create_depth_attachment(GL_DEPTH_COMPONENT16, GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_BORDER);
-        dir_shadow_fbo->set_empty();
-
-        for (size_t i = 0; i < 8; i++)
-        {
-            auto texture = Texture(create_shadow_texture(), 1024, 1024, 1);
+            auto texture = Texture(create_point_shadow_texture(), 1024, 1024, 1);
             texture.make_resident();
             _shadow_maps.emplace_back(texture);
         }
@@ -252,130 +110,24 @@ namespace cologne
         glReadBuffer(GL_NONE);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        Engine::get_debug_ui()->add_image_entry("dir_shadow", dir_shadow_fbo->get_depth_attachment_handle(),
-                                                glm::vec2(dir_shadow_size));
-        Engine::get_debug_ui()->add_float_entry("point shadow near_plane", point_shadow_near);
+        Engine::get_debug_ui()->add_float_entry("shadow near_plane", shadow_near);
+        Engine::get_debug_ui()->add_float_entry("shadow far_plane", shadow_far);
     }
 
-    void Renderer::update_shadow(Shader &shader)
+    void Renderer::dir_shadow_pass()
     {
-        shader.bind();
-        for (size_t i = 0; i < shadowCascadeLevels.size(); i++)
-        {
-            shader.set_float(std::string("cascadePlaneDistances[" + std::to_string(i) + "]").c_str(),
-                             shadowCascadeLevels[i]);
-        }
-        shader.set_float("far_plane", shadow_far);
-        shader.set_int("cascadeCount", shadowCascadeLevels.size());
-    }
-
-    void Renderer::cascaded_shadow_map_pass()
-    {
-        OpenGLDebugScope scope("Renderer::csm_pass");
-        _cam_view = get_camera_view(_camera_transform);
-        auto light = get_directional_light();
-        shadowCascadeLevels[0] = (shadow_far / 50.0f);
-        shadowCascadeLevels[1] = (shadow_far / 25.0f);
-        shadowCascadeLevels[2] = (shadow_far / 10.0f);
-        shadowCascadeLevels[3] = (shadow_far / 2.0f);
-        const auto light_matrices = get_light_space_matrices(light.direction);
-        glBindBuffer(GL_UNIFORM_BUFFER, shadow_cascade_ubo);
-        for (size_t i = 0; i < light_matrices.size(); i++)
-        {
-            glBufferSubData(GL_UNIFORM_BUFFER, i * sizeof(glm::mat4x4), sizeof(glm::mat4x4), &light_matrices[i]);
-        }
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
-        auto shader = get_shader_by_name("shadowmap");
-        shader->bind();
-        shader->set_vec3("light.direction", (light.direction));
-        glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
-        glViewport(0, 0, shadow_size, shadow_size);
-        glClear(GL_DEPTH_BUFFER_BIT);
-
-
-        for (auto &item: _render_items)
-        {
-            const auto mesh = AssetManager::get_mesh_by_index(item.mesh_idx);
-            const auto mat = AssetManager::get_material_by_index(mesh->get_material_index());
-            shader->set_mat4("model", item.transform);
-            mat->albedo.bind(ALBEDO_INDEX);
-            mesh->draw();
-        }
-
-        shader = get_shader_by_name("shadowmap_skinned");
-        shader->bind();
-        shader->set_vec3("light.direction", (light.direction));
-
-        for (auto &item: _skinned_render_items)
-        {
-            if (!item.skinned_model->get_cast_shadows())
-            {
-                continue;
-            }
-            shader->set_mat4("model", item.transform);
-            if (!item.bones.empty())
-            {
-                shader->set_mat4("bone_matrices", item.bones);
-            }
-            else
-            {
-                static std::vector<glm::mat4> empty_bones(200, glm::mat4(1.0f));
-                shader->set_mat4("bone_matrices", empty_bones);
-            }
-
-            for (auto &mesh: item.skinned_model->get_meshes())
-            {
-                Material &mat = item.skinned_model->get_materials()[mesh.get_material_index()];
-                mat.albedo.bind(ALBEDO_INDEX);
-                mesh.draw();
-            }
-        }
-    }
-
-    void Renderer::dumb_voxel_extra_dir_shadow_pass()
-    {
-        //voxel shadow
-        OpenGLDebugScope scope("Renderer::dumb_voxel_shadow_pass");
-        auto dir_shadow_fbo = get_framebuffer_by_name("dir_shadow");
-        dir_shadow_fbo->bind();
-        dir_shadow_fbo->set_viewport();
-        glClear(GL_DEPTH_BUFFER_BIT);
+        glBindFramebuffer(GL_FRAMEBUFFER, point_shadow_fbo);
+        OpenGLDebugScope scope("Renderer::dir_shadow_pass");
         auto shader = get_shader_by_name("dir_shadow");
         shader->bind();
-        glm::mat4 light_projection = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, shadow_near, shadow_far);
-        auto dir_light = get_directional_light();
-        glm::vec3 center = dir_light.position;
-        glm::mat4 light_view = glm::lookAt(center, (center + (glm::normalize(glm::vec3(dir_light.direction)) * 5.0f)),
-                                           glm::vec3(0.0, 1.0, 0.0));
-        glm::mat4 light_space = light_projection * light_view;
-        _dir_light_space = light_space;
-        shader->set_mat4("lightSpaceMatrix", (_dir_light_space));
 
-        for (auto &item: _render_items)
-        {
-            shader->set_mat4("model", item.transform);
-            const auto mesh = AssetManager::get_mesh_by_index(item.mesh_idx);
-            const auto mat = AssetManager::get_material_by_index(mesh->get_material_index());
-            mat->albedo.bind(ALBEDO_INDEX);
-            mesh->draw();
-        }
-    }
-
-    void Renderer::point_shadow_pass()
-    {
-        OpenGLDebugScope scope("Renderer::point_shadow_pass");
-        auto shader = get_shader_by_name("point_shadow");
-        shader->bind();
-        glBindFramebuffer(GL_FRAMEBUFFER, point_shadow_fbo);
-
-        size_t counter = 0;
         for (auto &light: _lights)
         {
-            if (light.type != Point)
+            if (light.type != Directional)
             {
                 continue;
             }
-            if (counter > _shadow_maps.size() - 1)
+            if (light_counter > _shadow_maps.size() - 1)
             {
                 break;
             }
@@ -384,16 +136,122 @@ namespace cologne
                 light.shadow_handle = 0;
                 continue;
             }
-            light.shadow_handle = _shadow_maps[counter].get_bindless_handle();
+            light.shadow_handle = _shadow_maps[light_counter].get_bindless_handle();
 
-            glViewport(0, 0, _shadow_maps[counter].get_width(),
-                       _shadow_maps[counter].get_height());
+            glViewport(0, 0, _shadow_maps[light_counter].get_width(),
+                       _shadow_maps[light_counter].get_height());
             glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                 _shadow_maps[counter].get_handle(), 0);
+                                 _shadow_maps[light_counter].get_handle(), 0);
             glDrawBuffer(GL_NONE);
             glReadBuffer(GL_NONE);
             glClear(GL_DEPTH_BUFFER_BIT);
-            counter++;
+            light_counter++;
+
+
+            glm::mat4 light_projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, shadow_near, shadow_far);
+            glm::vec3 center = light.position;
+            glm::mat4 light_view = glm::lookAt(center, (center + (glm::normalize(glm::vec3(light.direction)) * 5.0f)),
+                                               glm::vec3(0.0, 1.0, 0.0));
+            glm::mat4 light_space = light_projection * light_view;
+            light.light_space_matrix = light_space;
+            shader->set_mat4("lightSpaceMatrix", light_space);
+
+            for (auto &item: _render_items)
+            {
+                shader->set_mat4("model", item.transform);
+                const auto mesh = AssetManager::get_mesh_by_index(item.mesh_idx);
+                const auto mat = AssetManager::get_material_by_index(mesh->get_material_index());
+                mat->albedo.bind(ALBEDO_INDEX);
+                mesh->draw();
+            }
+
+            for (auto &item: _skinned_render_items)
+            {
+                if (!item.skinned_model->get_cast_shadows())
+                {
+                    continue;
+                }
+                shader->set_mat4("model", item.transform);
+                if (!item.bones.empty())
+                {
+                    shader->set_bool("is_skinned", true);
+                    shader->set_mat4("bone_matrices", item.bones);
+                }
+                else
+                {
+                    shader->set_bool("is_skinned", false);
+                }
+
+                for (auto &mesh: item.skinned_model->get_meshes())
+                {
+                    Material &mat = item.skinned_model->get_materials()[mesh.get_material_index()];
+                    mat.albedo.bind(ALBEDO_INDEX);
+                    mesh.draw();
+                }
+            }
+        }
+    }
+
+    void Renderer::dumb_voxel_extra_dir_shadow_pass()
+    {
+        // //voxel shadow
+        // OpenGLDebugScope scope("Renderer::dir shadow pass");
+        // auto dir_shadow_fbo = get_framebuffer_by_name("dir_shadow");
+        // dir_shadow_fbo->bind();
+        // dir_shadow_fbo->set_viewport();
+        // glClear(GL_DEPTH_BUFFER_BIT);
+        // auto shader = get_shader_by_name("dir_shadow");
+        // shader->bind();
+        // glm::mat4 light_projection = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, shadow_near, shadow_far);
+        // auto dir_light = get_directional_light();
+        // glm::vec3 center = dir_light.position;
+        // glm::mat4 light_view = glm::lookAt(center, (center + (glm::normalize(glm::vec3(dir_light.direction)) * 5.0f)),
+        //                                    glm::vec3(0.0, 1.0, 0.0));
+        // glm::mat4 light_space = light_projection * light_view;
+        // shader->set_mat4("lightSpaceMatrix", (light_space));
+        //
+        // for (auto &item: _render_items)
+        // {
+        //     shader->set_mat4("model", item.transform);
+        //     const auto mesh = AssetManager::get_mesh_by_index(item.mesh_idx);
+        //     const auto mat = AssetManager::get_material_by_index(mesh->get_material_index());
+        //     mat->albedo.bind(ALBEDO_INDEX);
+        //     mesh->draw();
+        // }
+    }
+
+    void Renderer::point_shadow_pass()
+    {
+        OpenGLDebugScope scope("Renderer::point_shadow_pass");
+        auto shader = get_shader_by_name("point_shadow");
+        shader->bind();
+
+
+        for (auto &light: _lights)
+        {
+            if (light.type != Point)
+            {
+                continue;
+            }
+            if (light_counter > _shadow_maps.size() - 1)
+            {
+                break;
+            }
+            if (light.shadow_handle != 1)
+            {
+                light.shadow_handle = 0;
+                continue;
+            }
+            light.shadow_handle = _shadow_maps[light_counter].get_bindless_handle();
+
+            glViewport(0, 0, _shadow_maps[light_counter].get_width(),
+                       _shadow_maps[light_counter].get_height());
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                 _shadow_maps[light_counter].get_handle(), 0);
+            glDrawBuffer(GL_NONE);
+            glReadBuffer(GL_NONE);
+            glClear(GL_DEPTH_BUFFER_BIT);
+            light_counter++;
             glm::vec3 position = light.position;
             shader->set_vec3("light_position", position);
             shader->set_mat4("light_space_matrices", create_shadow_projection_matrices(position, light.radius));
@@ -438,11 +296,8 @@ namespace cologne
         OpenGLDebugScope scope("Renderer::shadow_pass");
         glCullFace(GL_FRONT);
         glEnable(GL_DEPTH_CLAMP);
-
-        cascaded_shadow_map_pass();
-
-        dumb_voxel_extra_dir_shadow_pass();
-
+        light_counter = 0;
+        dir_shadow_pass();
         point_shadow_pass();
 
         glCullFace(GL_BACK);

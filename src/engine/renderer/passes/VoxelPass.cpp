@@ -130,9 +130,6 @@ namespace cologne
         glClearTexImage(_voxel_texture_normal, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, glm::value_ptr(glm::uvec4(0)));
         auto shader = get_shader_by_name("voxelize");
         shader->bind();
-        shader->set_mat4("lightSpaceMatrix", (_dir_light_space));
-        shader->set_mat4("projection", (glm::ortho(-1.0f, 1.0f, -1.0f,
-                                                   1.0f, -1.0f, 1.0f)));
         auto size = Engine::get_scene()->get_bounds().size();
         const float offset = 2.0f - 0.1f;
         glm::vec3 scale = glm::vec3(offset / fabs(size.x), offset / fabs(size.y), offset / fabs(size.z));
@@ -144,7 +141,6 @@ namespace cologne
         shader->set_vec3("grid_max", (max));
         glBindImageTexture(6, _voxel_texture_color, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
         glBindImageTexture(7, _voxel_texture_normal, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
-        glBindTextureUnit(8, get_framebuffer_by_name("dir_shadow")->get_depth_attachment_handle());
         // glBindTextureUnit(7, _shadow_depth);
         for (int idx = 0; idx < 3; idx++)
         {

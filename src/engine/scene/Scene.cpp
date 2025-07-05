@@ -79,7 +79,8 @@ namespace cologne
         light.color = glm::vec3(1, 0.864, 0.709);
         light.radius = 6.0f;
         light.strength = 2.0f;
-        light.type = 0;
+        light.cast_shadows = true;
+        light.type = Directional;
         dir_light.get_component<TransformComponent>().position = glm::vec3(0.790f, 18.867f, 0.024f);
         dir_light.get_component<TransformComponent>().rotation =
                 glm::quat(glm::radians(glm::vec3(88.500, 0.0f, 0.0f)));
@@ -308,7 +309,6 @@ namespace cologne
                                                       glm::vec3(0.0f, 450.0f, 0.0f),
                                                       glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), .6f);
                 }
-                static int light_count = 0;
                 Engine::get_renderer()->draw_line(info.hit_point, info.hit_point + info.hit_normal * 0.1f,
                                                   glm::max(info.hit_normal, glm::vec3(0.1f, 0.1f, 0.1f)));
             }

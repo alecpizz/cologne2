@@ -10,16 +10,7 @@ layout (binding = 4) uniform sampler2D texture_normal;
 layout (binding = 5) uniform sampler2D texture_emission;
 layout (RGBA16F, binding = 6) uniform image3D texture_voxel;
 layout (r32ui, binding = 7) restrict uniform uimage3D texture_voxel_normal;
-layout (binding = 8) uniform sampler2D dir_shadow;
 
-layout (std140) uniform LightSpaceMatrices
-{
-    mat4 lightSpaceMatrices[16];
-};
-
-uniform float far_plane = 20.0f;
-uniform float cascadePlaneDistances[4];
-uniform int cascadeCount;// number of frusta - 1
 uniform vec3 grid_min;
 uniform vec3 grid_max;
 
@@ -35,6 +26,7 @@ struct Light
     uvec2 shadow_map;
     float outer_cutoff;
     float inner_cutoff;
+    mat4 light_space_matrix;
 };
 
 #define MAX_LIGHTS 8
@@ -52,7 +44,7 @@ layout (binding = 2, std430) restrict readonly buffer lights_buffer
 in vec2 TexCoords;
 in vec4 FragPos;
 in mat3 TBN;
-in vec4 FragPosLightSpace;
+in vec4 FragPosLightSpace[8];
 
 bool is_inside_clipspace(const vec3 p)
 {
@@ -107,7 +99,7 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
-float shadow_calculation2(vec4 fragPosLightSpace)
+float shadow_calculation2(Light light, vec4 fragPosLightSpace)
 {
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
@@ -115,8 +107,8 @@ float shadow_calculation2(vec4 fragPosLightSpace)
     {
         return 0.0;
     }
-    float closestDepth = texture(dir_shadow, projCoords.xy).r;
     float currentDepth = projCoords.z;
+    float closestDepth = texture(sampler2D(light.shadow_map), projCoords.xy).r;
     float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
     return shadow;
 }
@@ -201,7 +193,7 @@ vec4 pbr()
         {
             L = normalize(-lights[i].direction.xyz);
             radiance = lights[i].color.rgb * lights[i].strength * 4.0f;
-            shadow = 1.0 - shadow_calculation2(FragPosLightSpace);
+            shadow = 1.0 - shadow_calculation2(lights[i], lights[i].light_space_matrix * FragPos);
         }
         else if (lights[i].type == POINT)
         {

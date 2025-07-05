@@ -53,8 +53,6 @@ namespace cologne
 
         Shader *get_shader_by_name(const char *name);
 
-        Light get_directional_light() const;
-
         void submit_camera_transform(const TransformComponent &tr, CameraComponent cam);
 
         static glm::mat4 get_camera_view(TransformComponent tr);
@@ -85,11 +83,9 @@ namespace cologne
 
         void init_shadow();
 
+        void dir_shadow_pass();
+
         void shadow_pass();
-
-        void update_shadow(Shader &shader);
-
-        void cascaded_shadow_map_pass();
 
         void dumb_voxel_extra_dir_shadow_pass();
 
@@ -158,7 +154,6 @@ namespace cologne
         bool _voxel_debug_visuals = false;
         bool _light_debug_visuals = false;
         //misc
-        glm::mat4 _dir_light_space;
         TransformComponent _camera_transform;
         CameraComponent _cam;
         VoxelData _voxel_data;

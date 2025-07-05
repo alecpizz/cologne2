@@ -12,9 +12,9 @@ layout (binding = 1, std430) restrict readonly buffer viewportdata
     mat4 view;
     mat4 view_inverse;
     mat4 projection_view;
+    mat4 projection_view_inverse;
     vec4 camera_position;
 };
-
 
 out vec3 FragPos;
 

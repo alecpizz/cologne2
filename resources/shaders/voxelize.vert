@@ -5,9 +5,7 @@ layout (location = 2) in vec2 uv;
 layout (location = 3) in vec3 tangent;
 
 uniform mat4 model;
-uniform mat4 projection;
 uniform vec3 voxel_size;
-uniform mat4 lightSpaceMatrix;
 uniform int render_axis;
 
 uniform vec3 grid_min;
@@ -16,7 +14,27 @@ uniform vec3 grid_max;
 out vec4 FragPos;
 out vec2 TexCoords;
 out mat3 TBN;
-out vec4 FragPosLightSpace;
+struct Light
+{
+    vec4 direction;
+    vec4 position;
+    vec4 color;
+    float strength;
+    float radius;
+    int type;
+    int enabled;
+    uvec2 shadow_map;
+    float outer_cutoff;
+    float inner_cutoff;
+    mat4 light_space_matrix;
+};
+
+layout (binding = 2, std430) restrict readonly buffer lights_buffer
+{
+    Light lights[];
+};
+
+out vec4 FragPosLightSpace[8];
 
 vec3 MapRangeToAnOther(vec3 value, vec3 valueMin, vec3 valueMax, vec3 mapMin, vec3 mapMax)
 {
@@ -31,7 +49,10 @@ vec3 MapToZeroOne(vec3 value, vec3 rangeMin, vec3 rangeMax)
 void main()
 {
     vec4 pos = model * vec4(position, 1.0f);
-    FragPosLightSpace = lightSpaceMatrix * vec4(pos.xyz, 1.0);
+    for(int i = 0; i < lights.length(); i++)
+    {
+        FragPosLightSpace[i] = lights[i].light_space_matrix * vec4(pos.xyz, 1.0f);
+    }
     TexCoords = uv;
     pos = vec4((pos.xyz), 1.0f);
     mat3 normalMatrix = transpose(inverse(mat3(model)));

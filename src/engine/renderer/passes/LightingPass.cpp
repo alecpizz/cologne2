@@ -6,7 +6,6 @@
 #include <engine/renderer/OpenGLDebugScope.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Shader.h>
-#include <engine/renderer/types/SSBO.h>
 
 
 namespace cologne
@@ -26,7 +25,6 @@ namespace cologne
         // env_irradiance.bind(IRRADIANCE_INDEX);
         // env_prefilter.bind(PREFILTER_INDEX);
         // env_brdf.bind(BRDF_INDEX);
-        update_shadow(*shader);
 
         shader->set_int("voxel_grid_size", _voxel_data.voxel_dimensions);
         auto bounds = Engine::get_scene()->get_bounds();

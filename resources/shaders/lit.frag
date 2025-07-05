@@ -16,6 +16,7 @@ struct Light
     uvec2 shadow_map;
     float outer_cutoff;
     float inner_cutoff;
+    mat4 light_space_matrix;
 };
 
 #define MAX_LIGHTS 8
@@ -23,10 +24,7 @@ struct Light
 #define DIRECTIONAL 0
 #define POINT 1
 #define SPOT 2
-#define ISQRT2 0.707106
-#define SQRT2 1.414213
-#define MIPMAP_HARDCAP 5.4f
-#define DIFFUSE_INDIRECT_FACTOR 0.52f
+
 
 uniform float time = 0.0f;
 
@@ -46,20 +44,6 @@ uniform vec3 grid_max, grid_min;
 uniform bool indirect_lighting_active = true;
 uniform float fog_density = 0.0225;
 uniform vec3 fog_color = vec3(0.22, 0.19, 0.15);
-const int TOTAL_DIFFUSE_CONES = 6;
-const vec3 DIFFUSE_CONE_DIRECTIONS[TOTAL_DIFFUSE_CONES] = { vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.5f, 0.866025f), vec3(0.823639f, 0.5f, 0.267617f), vec3(0.509037f, 0.5f, -0.7006629f), vec3(-0.50937f, 0.5f, -0.7006629f), vec3(-0.823639f, 0.5f, 0.267617f) };
-const float DIFFUSE_CONE_WEIGHTS[TOTAL_DIFFUSE_CONES] = { PI / 4.0f,
-3.0f * PI / 20.0f,
-3.0f * PI / 20.0f,
-3.0f * PI / 20.0f,
-3.0f * PI / 20.0f,
-3.0f * PI / 20.0f };
-
-
-layout (std140) uniform LightSpaceMatrices
-{
-    mat4 lightSpaceMatrices[16];
-};
 
 layout (binding = 1, std430) restrict readonly buffer viewportdata
 {
@@ -67,6 +51,7 @@ layout (binding = 1, std430) restrict readonly buffer viewportdata
     mat4 view;
     mat4 view_inverse;
     mat4 projection_view;
+    mat4 projection_view_inverse;
     vec4 camera_position;
 };
 
@@ -77,9 +62,7 @@ layout (binding = 2, std430) restrict readonly buffer lights_buffer
 
 uniform float far_plane = 20.0f;
 uniform float ao_strength = 0.2;
-uniform int has_ao_texture = 0;
-uniform float cascadePlaneDistances[4];
-uniform int cascadeCount;// number of frusta - 1
+
 vec3 WorldPos;
 
 vec3 fresnelSchlick(float cosTheta, vec3 F0);
@@ -88,9 +71,7 @@ float distributionGGX(vec3 N, vec3 H, float roughness);
 float geometrySchlickGGX(float NdotV, float roughness);
 float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
 float klemenVisibility(vec3 L, vec3 H);
-float shadowCalculation(vec3 fragPos, vec3 n, vec3 l);
 float point_shadow_calculation(vec3 fragPos, Light light);
-vec4 texture2D_bilinear(sampler2DArray t, vec3 uv, vec3 texture_size, vec3 texel_size, int layer);
 
 vec3 sampleOffsetDirections[20] = vec3[]
 (
@@ -234,6 +215,31 @@ vec3 noise(vec2 uv, float time)
     return fract(sin(uvs * vec2(12.98989, 78.233) * time) * 43856.4533);
 }
 
+float dir_shadow_calculation(Light light, vec3 N, vec4 fragPosLightSpace)
+{
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    if (projCoords.z > 1.0)
+    {
+        return 0.0;
+    }
+    float currentDepth = projCoords.z;
+    float bias = max(0.0005 * (1.0 - dot(N, light.direction.xyz)), 0.0005);
+    sampler2DShadow shadow_map = sampler2DShadow(light.shadow_map);
+    float shadow = 0.0;
+    vec2 texel_size = 1.0f / textureSize(shadow_map, 0);
+    for (int x = -2; x <= 2; x++)
+    {
+        for (int y = -2; y <= 2; y++)
+        {
+            float closestDepth = texture(sampler2DShadow(light.shadow_map), vec3(projCoords.xy + vec2(x, y) * texel_size, currentDepth)).r;
+            shadow += currentDepth > closestDepth ? 1.0f : 0.0f;
+        }
+    }
+        shadow /= 25.0f;
+
+    return shadow;
+}
 
 void main()
 {
@@ -270,7 +276,7 @@ void main()
         {
             L = normalize(-lights[i].direction.xyz);
             radiance = lights[i].color.rgb * lights[i].strength;
-            shadow = 1.0 - shadowCalculation(FragPos, N, L);
+            shadow = 1.0 - dir_shadow_calculation(lights[i], N, lights[i].light_space_matrix * vec4(FragPos, 1.0));
         }
         else if (lights[i].type == POINT)
         {
@@ -441,76 +447,4 @@ float point_shadow_calculation(vec3 fragPos, Light light)
     float current_depth = get_light_space_depth(1.0f, light.radius, frag_to_light * (1.0 - bias));
     float shadow = texture(samplerCubeShadow(light.shadow_map), vec4(frag_to_light, current_depth));
     return shadow;
-}
-
-float shadowCalculation(vec3 fragPos, vec3 n, vec3 l)
-{
-    vec4 fragPosViewSpace = view * vec4(fragPos, 1.0);
-    float depthValue = abs(fragPosViewSpace.z);
-
-    vec4 csmClipSpaceZFar = vec4(cascadePlaneDistances[0],
-    cascadePlaneDistances[1], cascadePlaneDistances[2], cascadePlaneDistances[3]);
-    vec4 res = step(csmClipSpaceZFar, vec4(depthValue));
-    int layer = int(res.x + res.y + res.z + res.w);
-
-    vec4 fragPosLightSpace = lightSpaceMatrices[layer] * vec4(fragPos, 1.0);
-    // perform perspective divide
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    // transform to [0,1] range
-    projCoords = projCoords * 0.5 + 0.5;
-
-    // get depth of current fragment from light's perspective
-    float currentDepth = projCoords.z;
-
-    // keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
-    if (currentDepth > 1.0)
-    {
-        return 0.0;
-    }
-    // calculate bias (based on depth map resolution and slope)
-    vec3 normal = normalize(n);
-    float bias = max(0.05 * (1.0 - dot(normal, l)), 0.005);
-    const float biasModifier = 0.5f;
-    if (layer == cascadeCount)
-    {
-        bias *= 1 / (far_plane * biasModifier);
-    }
-    else
-    {
-        bias *= 1 / (cascadePlaneDistances[layer] * biasModifier);
-    }
-
-    // PCF
-    float shadow = 0.0;
-    vec2 texture_size = vec2(textureSize(shadow_cascades, 0));
-    vec2 texelSize = 1.0 / texture_size;
-    for (int x = -2; x <= 2; ++x)
-    {
-        for (int y = -2; y <= 2; ++y)
-        {
-            float pcfDepth = texture(shadow_cascades, vec3(projCoords.xy + vec2(x, y) * texelSize, layer)).r;
-            //            float pcfDepth2 = texture2D_bilinear(shadow_cascades,
-            //                                                 vec3(projCoords.xy + vec2(x, y) * texelSize, layer),
-            //                                                 vec3(texture_size.x, texture_size.y, 0.0),
-            //                                                 vec3(texelSize, 0.0),
-            //                                                 layer).x;
-            shadow += (currentDepth - bias) > pcfDepth ? 1.0 : 0.0;
-        }
-    }
-    shadow /= 25.0;
-
-    return shadow;
-}
-
-vec4 texture2D_bilinear(sampler2DArray t, vec3 uv, vec3 texture_size, vec3 texel_size, int layer)
-{
-    vec3 f = fract(uv * texture_size);
-    uv += (0.5 - f) * texel_size;
-    vec4 tl = texture(t, uv, layer);
-    vec4 tr = texture(t, uv + vec3(texel_size.x, 0.0, 0.0), layer);
-    vec4 bl = texture(t, uv + vec3(0.0, texel_size.y, 0.0));
-    vec4 br = texture(t, uv + vec3(texel_size.x, texel_size.y, 0.0), layer);
-    vec4 tA = mix(tl, tr, f.x);
-    vec4 tB = mix(bl, br, f.x);
-    return mix(tA, tB, f.y);
 }

@@ -36,9 +36,9 @@ namespace cologne
 
     void Renderer::init_shaders()
     {
-        for (auto &shader: shaders)
+        for (auto &shader: shaders | std::views::values)
         {
-            shader.second.cleanup();
+            shader.cleanup();
         }
         if (!shaders.empty())
         {
@@ -70,8 +70,8 @@ namespace cologne
         shaders["world_pos_shader"] = Shader(RESOURCES_PATH "shaders/world_pos.vert",
                                              RESOURCES_PATH "shaders/world_pos.frag");
         shaders["mipmap"] = Shader(RESOURCES_PATH "shaders/mipmap.comp");
-        shaders["dir_shadow"] = Shader(RESOURCES_PATH "shaders/dir_shadow.vert",
-                                       RESOURCES_PATH "shaders/dir_shadow.frag");
+        shaders["dir_shadow"] = Shader(RESOURCES_PATH "shaders/shadows/dir_shadow.vert",
+                                       RESOURCES_PATH "shaders/shadows/dir_shadow.frag");
         shaders["indirect"] = Shader(RESOURCES_PATH "shaders/indirect.comp");
         shaders["particle_render"] = Shader(RESOURCES_PATH "shaders/particle_render.vert",
                                             RESOURCES_PATH "shaders/particle_render.frag");
@@ -108,6 +108,7 @@ namespace cologne
         data.projection_view = data.projection * data.view;
         data.view_inverse = glm::inverse(data.view);
         data.camera_position = glm::vec4(_camera_transform.position, 1.0f);
+        data.projection_view_inverse = glm::inverse(data.projection_view);
         data.print();
         ssbos["lights"].update(sizeof(Light) * _lights.size(), _lights.data());
         ssbos["viewport"].update(sizeof(ViewportData), &data);
@@ -121,7 +122,6 @@ namespace cologne
         framebuffers["voxel_front"] = FrameBuffer();
         framebuffers["voxel_back"] = FrameBuffer();
         framebuffers["output"] = FrameBuffer();
-        framebuffers["dir_shadow"] = FrameBuffer();
         framebuffers["output"] = FrameBuffer();
         framebuffers["outline"] = FrameBuffer();
     }
@@ -325,7 +325,6 @@ namespace cologne
     void Renderer::reload_shaders()
     {
         init_shaders();
-        update_shadow(*get_shader_by_name("lit"));
         LOG_INFO("RELOADED SHADERS");
     }
 
@@ -338,18 +337,6 @@ namespace cologne
             return nullptr;
         }
         return &shaders[n];
-    }
-
-    Light Renderer::get_directional_light() const
-    {
-        for (auto &light: _lights)
-        {
-            if (light.type == LightType::Directional)
-            {
-                return light;
-            }
-        }
-        return _lights[0];
     }
 
     void Renderer::submit_camera_transform(const TransformComponent &tr, const CameraComponent cam)

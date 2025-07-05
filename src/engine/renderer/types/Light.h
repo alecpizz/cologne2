@@ -57,6 +57,7 @@ namespace cologne
         uint64_t shadow_handle = 0;
         float outer_cutoff = 17.5f;
         float inner_cutoff = 12.5f;
+        glm::mat4 light_space_matrix = glm::mat4(1.0f);
     };
 #pragma pack(pop)
 }
