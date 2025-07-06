@@ -74,7 +74,7 @@ float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
 float klemenVisibility(vec3 L, vec3 H);
 float point_shadow_calculation(vec3 fragPos, Light light);
 
-vec3 sampleOffsetDirections[20] = vec3[]
+const vec3 shadow_offsets[20] = vec3[]
 (
 vec3(1, 1, 1), vec3(1, -1, 1), vec3(-1, -1, 1), vec3(-1, 1, 1),
 vec3(1, 1, -1), vec3(1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
@@ -449,8 +449,15 @@ float point_shadow_calculation(vec3 fragPos, Light light)
     }
     vec3 lightPos = light.position.xyz;
     vec3 frag_to_light = fragPos - lightPos;
-    float bias = 0.05;
-    float current_depth = get_light_space_depth(1.0f, light.radius, frag_to_light * (1.0 - bias));
-    float shadow = texture(samplerCubeShadow(light.shadow_map), vec4(frag_to_light, current_depth));
+    float bias = 0.005;
+    float disk_radius = 0.05;
+    float shadow = 0.0f;
+    for(int i = 0; i < 20; i++)
+    {
+        vec3 samplePos = (frag_to_light + shadow_offsets[i] * disk_radius);
+        float depth = get_light_space_depth(1.0f, light.radius, samplePos * (1.0 - bias));
+        shadow += texture(samplerCubeShadow(light.shadow_map), vec4(samplePos, depth));
+    }
+    shadow /= 20;
     return shadow;
 }
