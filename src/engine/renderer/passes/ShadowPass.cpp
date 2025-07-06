@@ -52,7 +52,7 @@ namespace cologne
         glGenTextures(1, &handle_result);
         glBindTexture(GL_TEXTURE_2D, handle_result);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 4096,
-            4096, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+                     4096, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -123,7 +123,7 @@ namespace cologne
 
         for (auto &light: _lights)
         {
-            if (light.type != Directional)
+            if (light.type != Directional && light.type != Spot)
             {
                 continue;
             }
@@ -148,10 +148,19 @@ namespace cologne
             light_counter++;
 
 
-            glm::mat4 light_projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, shadow_near, shadow_far);
+            glm::mat4 light_projection;
+            if (light.type == Directional)
+            {
+                light_projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, shadow_near, shadow_far);
+            }
+            else
+            {
+                light_projection = glm::perspective(glm::radians(90.0f), 1.0f, shadow_near, shadow_far);
+            }
             glm::vec3 center = light.position;
-            glm::mat4 light_view = glm::lookAt(center, (center + (glm::normalize(glm::vec3(light.direction)) * 5.0f)),
-                                               glm::vec3(0.0, 1.0, 0.0));
+            glm::mat4 light_view = glm::lookAt(
+                center, (center + (glm::normalize(glm::vec3(light.direction)) * 5.0f)),
+                glm::vec3(0.0, 1.0, 0.0));
             glm::mat4 light_space = light_projection * light_view;
             light.light_space_matrix = light_space;
             shader->set_mat4("lightSpaceMatrix", light_space);

@@ -74,17 +74,6 @@ namespace cologne
                                          glm::quat(glm::radians(glm::vec3(0.0f, -90.0f, 0.0f))),
                                          glm::vec3(1.0f)));
 
-        Entity dir_light = create_entity("directional light");
-        auto &light = dir_light.add_component<LightComponent>();
-        light.color = glm::vec3(1, 0.864, 0.709);
-        light.radius = 6.0f;
-        light.strength = 2.0f;
-        light.cast_shadows = true;
-        light.type = Directional;
-        dir_light.get_component<TransformComponent>().position = glm::vec3(0.790f, 18.867f, 0.024f);
-        dir_light.get_component<TransformComponent>().rotation =
-                glm::quat(glm::radians(glm::vec3(88.500, 0.0f, 0.0f)));
-
 
         Entity spot_light = create_entity("spot light");
         auto &lc = spot_light.add_component<LightComponent>();
@@ -138,6 +127,18 @@ namespace cologne
         light8.strength = 5.910f;
         light8.color = glm::vec3(1.0f, 0.780f, 0.529f);
         hall_light.get_component<TransformComponent>().position = glm::vec3(2.795f, 0.419f, 3.638f);
+
+        Entity dir_light = create_entity("directional light");
+        auto &light = dir_light.add_component<LightComponent>();
+        light.color = glm::vec3(1, 0.864, 0.709);
+        light.radius = 6.0f;
+        light.strength = 2.0f;
+        light.cast_shadows = true;
+        light.type = Directional;
+        dir_light.get_component<TransformComponent>().position = glm::vec3(0.790f, 18.867f, 0.024f);
+        dir_light.get_component<TransformComponent>().rotation =
+                glm::quat(glm::radians(glm::vec3(88.500, 0.0f, 0.0f)));
+
 
         Entity scene_camera = create_entity("Scene Camera");
         auto &cam = scene_camera.add_component<CameraComponent>();

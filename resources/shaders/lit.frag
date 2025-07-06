@@ -44,6 +44,7 @@ uniform vec3 grid_max, grid_min;
 uniform bool indirect_lighting_active = true;
 uniform float fog_density = 0.0225;
 uniform vec3 fog_color = vec3(0.22, 0.19, 0.15);
+uniform int num_lights = 8;
 
 layout (binding = 1, std430) restrict readonly buffer viewportdata
 {
@@ -215,8 +216,12 @@ vec3 noise(vec2 uv, float time)
     return fract(sin(uvs * vec2(12.98989, 78.233) * time) * 43856.4533);
 }
 
-float dir_shadow_calculation(Light light, vec3 N, vec4 fragPosLightSpace)
+float dir_shadow_calculation(Light light, vec3 N, vec4 fragPosLightSpace, float bias_scale)
 {
+    if(light.shadow_map == uvec2(0))
+    {
+        return 0.0;
+    }
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
     if (projCoords.z > 1.0)
@@ -224,7 +229,7 @@ float dir_shadow_calculation(Light light, vec3 N, vec4 fragPosLightSpace)
         return 0.0;
     }
     float currentDepth = projCoords.z;
-    float bias = max(0.0005 * (1.0 - dot(N, light.direction.xyz)), 0.0005);
+    float bias = max(bias_scale * (1.0 - dot(N, light.direction.xyz)), bias_scale);
     sampler2DShadow shadow_map = sampler2DShadow(light.shadow_map);
     float shadow = 0.0;
     vec2 texel_size = 1.0f / textureSize(shadow_map, 0);
@@ -233,7 +238,7 @@ float dir_shadow_calculation(Light light, vec3 N, vec4 fragPosLightSpace)
         for (int y = -2; y <= 2; y++)
         {
             float closestDepth = texture(sampler2DShadow(light.shadow_map), vec3(projCoords.xy + vec2(x, y) * texel_size, currentDepth)).r;
-            shadow += currentDepth > closestDepth ? 1.0f : 0.0f;
+            shadow += currentDepth - bias > closestDepth ? 1.0f : 0.0f;
         }
     }
         shadow /= 25.0f;
@@ -263,7 +268,7 @@ void main()
 
     vec3 Lo = vec3(0.0);
 
-    for (int i = 0; i < lights.length(); i++)
+    for (int i = 0; i < num_lights; i++)
     {
         if (lights[i].enabled == 0)
         {
@@ -276,7 +281,7 @@ void main()
         {
             L = normalize(-lights[i].direction.xyz);
             radiance = lights[i].color.rgb * lights[i].strength;
-            shadow = 1.0 - dir_shadow_calculation(lights[i], N, lights[i].light_space_matrix * vec4(FragPos, 1.0));
+            shadow = 1.0 - dir_shadow_calculation(lights[i], N, lights[i].light_space_matrix * vec4(FragPos, 1.0), 0.0005f);
         }
         else if (lights[i].type == POINT)
         {
@@ -303,6 +308,7 @@ void main()
             float epsilon = lights[i].inner_cutoff - lights[i].outer_cutoff;
             float intensity = smoothstep(0.0, 1.0, (theta - lights[i].outer_cutoff) / epsilon);
             radiance = lights[i].color.rgb * lights[i].strength * attenuation * intensity;
+            shadow = 1.0 - dir_shadow_calculation(lights[i], N, lights[i].light_space_matrix * vec4(FragPos, 1.0), 0.00025f);
         }
         vec3 H = normalize(V + L);
 

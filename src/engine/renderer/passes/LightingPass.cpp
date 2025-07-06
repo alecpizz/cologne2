@@ -6,7 +6,7 @@
 #include <engine/renderer/OpenGLDebugScope.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Shader.h>
-
+#include <engine/renderer/types/Light.h>
 
 namespace cologne
 {
@@ -37,6 +37,7 @@ namespace cologne
         auto max = bounds.max;
         shader->set_vec3("grid_min", (min));
         shader->set_vec3("grid_max", (max));
+        shader->set_int("num_lights", _lights.size());
         static float time = 0.0f;
         time += Time::DeltaTime;
         shader->set_float("time", time);

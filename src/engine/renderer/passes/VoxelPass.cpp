@@ -4,6 +4,7 @@
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Shader.h>
 #include <engine/editor/Editor.h>
+#include <engine/renderer/types/Light.h>
 //
 // Created by alecpizz on 5/4/2025.
 //
@@ -130,6 +131,7 @@ namespace cologne
         glClearTexImage(_voxel_texture_normal, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, glm::value_ptr(glm::uvec4(0)));
         auto shader = get_shader_by_name("voxelize");
         shader->bind();
+        shader->set_int("num_lights", _lights.size());
         auto size = Engine::get_scene()->get_bounds().size();
         const float offset = 2.0f - 0.1f;
         glm::vec3 scale = glm::vec3(offset / fabs(size.x), offset / fabs(size.y), offset / fabs(size.z));

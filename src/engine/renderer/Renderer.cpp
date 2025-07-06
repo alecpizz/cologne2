@@ -109,7 +109,6 @@ namespace cologne
         data.view_inverse = glm::inverse(data.view);
         data.camera_position = glm::vec4(_camera_transform.position, 1.0f);
         data.projection_view_inverse = glm::inverse(data.projection_view);
-        data.print();
         ssbos["lights"].update(sizeof(Light) * _lights.size(), _lights.data());
         ssbos["viewport"].update(sizeof(ViewportData), &data);
         ssbos["viewport"].bind(1);

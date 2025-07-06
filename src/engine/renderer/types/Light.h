@@ -50,7 +50,7 @@ namespace cologne
         glm::vec4 direction = glm::vec4(0.0f);
         glm::vec4 position = glm::vec4(0.0f);
         glm::vec4 color = glm::vec4(1, 0.7799999713897705, 0.5289999842643738, 1.0f);
-        float strength = 1.0f;
+        float strength = 0.0f;
         float radius = 6.0f;
         LightType type = LightType::Directional;
         int32_t active = 0;

@@ -39,7 +39,7 @@ layout (binding = 2, std430) restrict readonly buffer lights_buffer
 {
     Light lights[];
 };
-
+uniform int num_lights = 8;
 
 in vec2 TexCoords;
 in vec4 FragPos;
@@ -99,7 +99,7 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
-float shadow_calculation2(Light light, vec4 fragPosLightSpace)
+float dir_shadow_calc(Light light, vec4 fragPosLightSpace)
 {
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
@@ -180,7 +180,7 @@ vec4 pbr()
     F0 = mix(F0, albedo, metallic);
     vec3 Lo = vec3(0.0);
 
-    for (int i = 0; i < lights.length(); i++)
+    for (int i = 0; i < num_lights; i++)
     {
         if (lights[i].enabled == 0)
         {
@@ -193,7 +193,7 @@ vec4 pbr()
         {
             L = normalize(-lights[i].direction.xyz);
             radiance = lights[i].color.rgb * lights[i].strength * 4.0f;
-            shadow = 1.0 - shadow_calculation2(lights[i], lights[i].light_space_matrix * FragPos);
+            shadow = 1.0 - dir_shadow_calc(lights[i], lights[i].light_space_matrix * FragPos);
         }
         else if (lights[i].type == POINT)
         {
@@ -219,6 +219,7 @@ vec4 pbr()
             float epsilon   = lights[i].inner_cutoff - lights[i].outer_cutoff;
             float intensity = smoothstep(0.0, 1.0, (theta - lights[i].outer_cutoff) / epsilon);
             radiance = lights[i].color.rgb * lights[i].strength * attenuation * intensity;
+            shadow = 1.0 - dir_shadow_calc(lights[i], lights[i].light_space_matrix * FragPos);
         }
 
         vec3 H = normalize(V + L);
