@@ -48,7 +48,7 @@ namespace cologne
         glBindTextureUnit(3, gbuffer_fbo->get_color_attachment_handle_by_name("orm"));
         glBindTextureUnit(4, gbuffer_fbo->get_color_attachment_handle_by_name("emission"));
         glBindTextureUnit(5, _shadow_depth);
-        glBindTextureUnit(6, _indirect_texture);
+        glBindTextureUnit(6, _indirect_texture_high_res);
         glBindTextureUnit(7, _bloom_texture);
         glBindTextureUnit(8, gbuffer_fbo->get_color_attachment_handle_by_name("entity_id"));
         render_quad();

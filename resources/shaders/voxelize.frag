@@ -247,8 +247,12 @@ vec4 pbr()
     kD *= 1.0 - metallic;
 
     vec3 ambient = vec3(0.02) * albedo;
+    const vec3 ambient_light_color = vec3(1.0, 0.98, 0.94);
+    const float ambient_strength = 0.05f;
+    vec3 ambient_color = albedo * ambient_light_color;
+    vec3 ambient_lighting = ambient_color * ambient_strength;
     vec3 emission = texture2D(texture_emission, TexCoords).rgb;
-    vec3 color = Lo   + ambient + emission;
+    vec3 color = Lo  + ambient_lighting + emission;
 
     //    color = pow(color, vec3(1.0 / 2.2));
     //    color = color / (color + vec3(1.0));

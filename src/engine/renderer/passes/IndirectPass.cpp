@@ -14,22 +14,37 @@ namespace cologne
 
     void Renderer::init_indirect(uint32_t width, uint32_t height)
     {
-        if (_indirect_texture != 0)
+        if (_indirect_texture_low_res != 0)
         {
-            glDeleteTextures(1, &_indirect_texture);
+            glDeleteTextures(1, &_indirect_texture_low_res);
         }
-        glCreateTextures(GL_TEXTURE_2D, 1, &_indirect_texture);
-        glTextureParameteri(_indirect_texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTextureParameteri(_indirect_texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTextureParameteri(_indirect_texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTextureParameteri(_indirect_texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTextureStorage2D(_indirect_texture, 1, GL_RGBA8,
+        glCreateTextures(GL_TEXTURE_2D, 1, &_indirect_texture_low_res);
+        glTextureParameteri(_indirect_texture_low_res, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(_indirect_texture_low_res, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(_indirect_texture_low_res, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(_indirect_texture_low_res, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTextureStorage2D(_indirect_texture_low_res, 1, GL_RGBA8,
                            width / pixel_ratio, height / pixel_ratio);
-        Engine::get_debug_ui()->add_image_entry("Indirect_Lighting", _indirect_texture,
+        Engine::get_debug_ui()->add_image_entry("Indirect_Lighting_Low_res", _indirect_texture_low_res,
             {width / pixel_ratio, height / pixel_ratio});
+
+
+        if (_indirect_texture_high_res != 0)
+        {
+            glDeleteTextures(1, &_indirect_texture_high_res);
+        }
+        glCreateTextures(GL_TEXTURE_2D, 1, &_indirect_texture_high_res);
+        glTextureParameteri(_indirect_texture_high_res, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(_indirect_texture_high_res, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(_indirect_texture_high_res, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(_indirect_texture_high_res, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTextureStorage2D(_indirect_texture_high_res, 1, GL_RGBA8, width, height);
+        Engine::get_debug_ui()->add_image_entry("Indirect_Lighting_high_res", _indirect_texture_high_res,
+            {width, height});
     }
     void Renderer::indirect_pass()
     {
+        //cone trace here
         if (!_apply_indirect_lighting)
         {
             return;
@@ -53,7 +68,7 @@ namespace cologne
         shader->set_float("voxel_size", voxel_size);
         shader->set_int("voxel_grid_size", _voxel_data.voxel_dimensions);
         
-        glBindImageTexture(0, _indirect_texture, 0, GL_FALSE, 0,
+        glBindImageTexture(0, _indirect_texture_low_res, 0, GL_FALSE, 0,
             GL_WRITE_ONLY, GL_RGBA8);
         glBindTextureUnit(1, _voxel_texture_color);
         auto gbuffer = get_framebuffer_by_name("gbuffer");
@@ -66,6 +81,21 @@ namespace cologne
         uint32_t height = Engine::get_window()->get_height() / pixel_ratio;
         uint32_t num_x = (width + work_group_size - 1) / work_group_size;
         uint32_t num_y = (height + work_group_size - 1) / work_group_size;
+        shader->dispatch(num_x, num_y, 1);
+        shader->wait();
+
+
+        //upsample time
+        shader = get_shader_by_name("indirect_upsample");
+        shader->bind();
+        glBindImageTexture(0, _indirect_texture_high_res, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
+        glBindTextureUnit(1, gbuffer->get_color_attachment_handle_by_name("normal"));
+        glBindTextureUnit(2, gbuffer->get_depth_attachment_handle());
+        glBindTextureUnit(3, _indirect_texture_low_res);
+        width = Engine::get_window()->get_width();
+        height = Engine::get_window()->get_height();
+        num_x = (width + work_group_size - 1) / work_group_size;
+        num_y = (height + work_group_size - 1) / work_group_size;
         shader->dispatch(num_x, num_y, 1);
         shader->wait();
     }

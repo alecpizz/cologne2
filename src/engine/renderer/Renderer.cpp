@@ -91,6 +91,7 @@ namespace cologne
         shaders["outline"] = Shader(RESOURCES_PATH "shaders/outline/outline.vert",
                                     RESOURCES_PATH "shaders/outline/outline.frag");
         shaders["outline_composite"] = Shader(RESOURCES_PATH "shaders/outline/outline_composite.comp");
+        shaders["indirect_upsample"] = Shader(RESOURCES_PATH "shaders/vxgi/indirect_upsample.comp");
     }
 
     void Renderer::init_ssbos()

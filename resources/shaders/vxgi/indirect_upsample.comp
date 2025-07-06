@@ -1,0 +1,54 @@
+#version 460 core
+
+layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+layout (rgba8, binding = 0) uniform writeonly image2D high_res_image;
+layout (binding = 1) uniform sampler2D normal_texture;
+layout (binding = 2) uniform sampler2D depth_texture;
+layout (binding = 3) uniform sampler2D low_res_image;
+const int pixel_ratio = 4;
+const float depth_falloff = 250.0f;
+    const float normal_falloff = 32.0f;
+void main()
+{
+    ivec2 pixel_coord = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 output_image_size = imageSize(high_res_image);
+    if(pixel_coord.x >= output_image_size.x || pixel_coord.y >= output_image_size.y)
+    {
+        return;
+    }
+
+    float high_res_depth = texelFetch(depth_texture, pixel_coord, 0).r;
+    vec3 high_res_normal = texelFetch(normal_texture, pixel_coord, 0).rgb;
+
+    vec4 final_color = vec4(0.0f);
+    float total_weight = 0.0f;
+
+    for(int y =-2; y <= 2; y++)
+    {
+        for(int x = -2; x <= 2; x++)
+        {
+            ivec2 low_res_coord = ivec2(pixel_coord / pixel_ratio) + ivec2(x, y);
+
+            vec4 neighbor_color = texelFetch(low_res_image, low_res_coord, 0).rgba;
+
+            ivec2 neighbor_high_res_coord = low_res_coord * pixel_ratio + ivec2(2, 2);
+            float neighbor_depth = texelFetch(depth_texture, neighbor_high_res_coord, 0).r;
+            vec3 neighbor_normal = texelFetch(normal_texture, neighbor_high_res_coord, 0).rgb;
+
+            float depth_diff = abs(high_res_depth - neighbor_depth) / high_res_depth;
+            float depth_weight = exp(-depth_falloff * depth_diff * depth_diff);
+
+            float normal_dot = dot(high_res_normal, neighbor_normal);
+            float normal_weight = pow(max(0.0, normal_dot), normal_falloff);
+
+            float final_weight = depth_weight * normal_weight;
+            final_color += neighbor_color * final_weight;
+            total_weight += final_weight;
+        }
+    }
+    if(total_weight > 0.0)
+    {
+        final_color /= total_weight;
+    }
+    imageStore(high_res_image, pixel_coord, final_color);
+}

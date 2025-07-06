@@ -346,7 +346,7 @@ void main()
     const float ambient_strength = 0.0005f;
     vec3 ambient_color = albedo * ambient_light_color;
     vec3 ambient_lighting = ambient_color * ambient_strength;
-    vec3 color = ambient_lighting + Lo + indirect_light;
+    vec3 color =  Lo + indirect_light;
 
     float dist = length(FragPos - camera_position.xyz);
     float fog_factor = 1.0 / exp((dist * fog_density) * (dist * fog_density));
