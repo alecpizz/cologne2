@@ -5,6 +5,7 @@
 #include <engine/editor/Editor.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Light.h>
+#include <engine/renderer/types/SSBO.h>
 
 #include "spdlog/fmt/bundled/chrono.h"
 
@@ -308,7 +309,7 @@ namespace cologne
         light_counter = 0;
         dir_shadow_pass();
         point_shadow_pass();
-
+        get_ssbo_by_name("lights")->update(sizeof(Light) * _lights.size(), _lights.data());
         glCullFace(GL_BACK);
         glDisable(GL_DEPTH_CLAMP);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -73,32 +73,19 @@ namespace cologne
         auto shader = get_shader_by_name("gbuffer");
         shader->bind();
 
-        for (auto &[model, tr, gi, id]: _render_items)
-        {
-            if (gi)
-            {
-                continue;
-            }
-            shader->set_uint("entity_id", id);
-
-            const auto mesh = AssetManager::get_mesh_by_index(model);
-            const auto mat = AssetManager::get_material_by_index(mesh->get_material_index());
-            shader->set_float("metallic", mat->metallic_override);
-            shader->set_float("roughness", mat->roughness_override);
-            mat->bind_all();
-            shader->set_mat4("model", tr);
-            mesh->draw();
+        //frustum cull me NOW!
+        glBindVertexArray(get_vertex_data_vao());
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, get_vertex_data_ebo());
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, get_ssbo_by_name("draw_cmds")->get_handle());
+        get_ssbo_by_name("model_matrices")->bind(4);
+        get_ssbo_by_name("materials")->bind(5);
+        //multi draw_indirect
+        glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, _render_items.size(), 0);
 
 
-            glBindTextureUnit(ALBEDO_INDEX, 0);
-            glBindTextureUnit(AO_INDEX, 0);
-            glBindTextureUnit(METALLIC_INDEX, 0);
-            glBindTextureUnit(ROUGHNESS_INDEX, 0);
-            glBindTextureUnit(NORMAL_INDEX, 0);
-            glBindTextureUnit(EMISSION_INDEX, 0);
-            shader->set_float("metallic", 1.0f);
-            shader->set_float("roughness", 1.0f);
-        }
+        glBindVertexArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 
         shader = get_shader_by_name("skinned_gbuffer");
         shader->bind();
@@ -143,6 +130,8 @@ namespace cologne
         {
             particle.render();
         }
+
+
 
         fbo->release();
         glEnable(GL_DITHER);

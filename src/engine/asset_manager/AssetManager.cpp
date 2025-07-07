@@ -9,6 +9,8 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include <engine/core/Engine.h>
+#include <engine/renderer/Renderer.h>
 
 namespace cologne::AssetManager
 {
@@ -23,7 +25,11 @@ namespace cologne::AssetManager
     std::unordered_map<std::string, int32_t> mesh_index_map;
     bool is_loading = true;
     int32_t material_offset = 0;
+    std::vector<Vertex> vertices;
+    std::vector<uint32_t> indices;
     int32_t mesh_offset = 0;
+    int32_t first_index = 0;
+    int32_t base_vertex = 0;
 
     void init()
     {
@@ -96,13 +102,20 @@ namespace cologne::AssetManager
             std::vector<int32_t> mesh_indices;
             for (auto& mesh : model_data.meshes)
             {
-                meshes.emplace_back(mesh.vertices, mesh.indices, mesh.material_index, mesh.name,
-                    mesh.inverse_bind_pose, mesh.aabb_min, mesh.aabb_max); //create a mesh
+                mesh.base_vertex = base_vertex;
+                mesh.first_index = first_index;
+                vertices.insert(vertices.end(), mesh.vertices.begin(), mesh.vertices.end());
+                indices.insert(indices.end(), mesh.indices.begin(), mesh.indices.end());
+                base_vertex += mesh.vertices.size();
+                first_index += mesh.indices.size();
+                meshes.emplace_back(mesh); //create a mesh
                 mesh_indices.emplace_back(mesh_offset); //add its index
                 mesh_offset++; //increment the total amount
             }
             models.emplace_back(mesh_indices, model_data.name, model_data.aabb_min, model_data.aabb_max); //add our model
         }
+
+        Engine::get_renderer()->upload_vertex_data(vertices, indices);
 
         for (auto& m : materials)
         {
@@ -148,14 +161,19 @@ namespace cologne::AssetManager
         std::vector<int32_t> mesh_indices;
         for (auto& mesh : data.meshes)
         {
-            meshes.emplace_back(mesh.vertices, mesh.indices, mesh.material_index, mesh.name,
-                mesh.inverse_bind_pose, mesh.aabb_min, mesh.aabb_max); //create a mesh
+            mesh.first_index = first_index;
+            mesh.base_vertex = base_vertex;
+            vertices.insert(vertices.end(), mesh.vertices.begin(), mesh.vertices.end());
+            indices.insert(indices.end(), mesh.indices.begin(), mesh.indices.end());
+            meshes.emplace_back(mesh); //create a mesh
+            base_vertex += mesh.vertices.size();
+            first_index += mesh.indices.size();
             mesh_indices.emplace_back(mesh_offset); //add its index
             mesh_offset++; //increment the total amount
         }
 
         models.emplace_back(mesh_indices, data.name, data.aabb_min, data.aabb_max);
-
+        Engine::get_renderer()->upload_vertex_data(vertices, indices);
         for (size_t i = starting_idx; i < materials.size(); i++)
         {
             materials[i].load_all();

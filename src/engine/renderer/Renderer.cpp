@@ -4,6 +4,7 @@
 
 #include "Renderer.h"
 
+#include <engine/asset_manager/AssetManager.h>
 #include <engine/util/DebugScope.h>
 
 #include "DebugRenderer.h"
@@ -98,6 +99,9 @@ namespace cologne
     {
         ssbos["lights"] = SSBO(sizeof(Light) * 8, GL_DYNAMIC_DRAW);
         ssbos["viewport"] = SSBO(sizeof(ViewportData), GL_DYNAMIC_DRAW);
+        ssbos["model_matrices"] = SSBO(sizeof(glm::mat4) * 128, GL_DYNAMIC_DRAW);
+        ssbos["draw_cmds"] = SSBO(sizeof(MultiDrawElementsCommand) * 128, GL_DYNAMIC_DRAW);
+        ssbos["materials"] = SSBO(sizeof(GPUMaterial) * 128, GL_DYNAMIC_DRAW);
     }
 
     void Renderer::update_ssbos()
@@ -110,10 +114,52 @@ namespace cologne
         data.view_inverse = glm::inverse(data.view);
         data.camera_position = glm::vec4(_camera_transform.position, 1.0f);
         data.projection_view_inverse = glm::inverse(data.projection_view);
+        static std::vector<MultiDrawElementsCommand> draw_cmds;
+        static std::vector<glm::mat4> model_matrices;
+        static std::vector<GPUMaterial> gpu_materials;
+        draw_cmds.clear();
+        gpu_materials.clear();
+        model_matrices.clear();
+        for (auto& render_item : _render_items)
+        {
+            MultiDrawElementsCommand cmd;
+            //todo: remove extra index step
+            auto mesh = AssetManager::get_mesh_by_index(render_item.mesh_idx);
+            if (!mesh)
+            {
+                continue;
+            }
+            cmd.index_count = mesh->get_indices().size();
+            cmd.instance_count = 1;
+            cmd.first_index = mesh->get_first_index();
+            cmd.base_vertex = mesh->get_base_vertex();
+            cmd.base_instance = render_item.entity_id;
+
+            draw_cmds.emplace_back(cmd);
+            model_matrices.emplace_back(render_item.transform);
+
+            //todo: also remove this extra index step
+            auto mat = AssetManager::get_material_by_index(mesh->get_material_index());
+            if (mat)
+            {
+                mat->ensure_bindless();
+                gpu_materials.emplace_back(mat->to_gpu_material());
+            }
+            else
+            {
+                gpu_materials.emplace_back();
+            }
+        }
+        ssbos["model_matrices"].update(sizeof(glm::mat4) * model_matrices.size(), model_matrices.data());
+        ssbos["draw_cmds"].update(sizeof(MultiDrawElementsCommand) * draw_cmds.size(), draw_cmds.data());
         ssbos["lights"].update(sizeof(Light) * _lights.size(), _lights.data());
         ssbos["viewport"].update(sizeof(ViewportData), &data);
+        ssbos["materials"].update(sizeof(GPUMaterial) * gpu_materials.size(), gpu_materials.data());
         ssbos["viewport"].bind(1);
         ssbos["lights"].bind(2);
+        ssbos["draw_cmds"].bind(3);
+        ssbos["model_matrices"].bind(4);
+        ssbos["materials"].bind(5);
     }
 
     void Renderer::init_framebuffers()
@@ -222,6 +268,44 @@ namespace cologne
         return pixelData;
     }
 
+    void Renderer::upload_vertex_data(std::vector<Vertex> &vertices, std::vector<uint32_t> &indices)
+    {
+        if (_vertex_data_vao != 0)
+        {
+            glDeleteVertexArrays(1, &_vertex_data_vao);
+            glDeleteBuffers(1, &_vertex_data_ebo);
+            glDeleteBuffers(1, &_vertex_data_vbo);
+        }
+
+        glCreateBuffers(1, &_vertex_data_vbo);
+        glNamedBufferStorage(_vertex_data_vbo, sizeof(Vertex) * vertices.size(), vertices.data(),
+            GL_MAP_READ_BIT);
+
+        glCreateBuffers(1, &_vertex_data_ebo);
+        glNamedBufferStorage(_vertex_data_ebo, sizeof(uint32_t) * indices.size(), indices.data(),
+            GL_MAP_READ_BIT);
+
+        glCreateVertexArrays(1, &_vertex_data_vao);
+
+        glVertexArrayVertexBuffer(_vertex_data_vao, 0, _vertex_data_vbo, 0, sizeof(Vertex));
+        glVertexArrayElementBuffer(_vertex_data_vao, _vertex_data_ebo);
+
+        glEnableVertexArrayAttrib(_vertex_data_vao, 0);
+        glEnableVertexArrayAttrib(_vertex_data_vao, 1);
+        glEnableVertexArrayAttrib(_vertex_data_vao, 2);
+        glEnableVertexArrayAttrib(_vertex_data_vao, 3);
+
+        glVertexArrayAttribFormat(_vertex_data_vao, 0, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, position));
+        glVertexArrayAttribFormat(_vertex_data_vao, 1, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, normal));
+        glVertexArrayAttribFormat(_vertex_data_vao, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, uv));
+        glVertexArrayAttribFormat(_vertex_data_vao, 3, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, tangent));
+
+        glVertexArrayAttribBinding(_vertex_data_vao, 0, 0);
+        glVertexArrayAttribBinding(_vertex_data_vao, 1, 0);
+        glVertexArrayAttribBinding(_vertex_data_vao, 2, 0);
+        glVertexArrayAttribBinding(_vertex_data_vao, 3, 0);
+    }
+
     Renderer::~Renderer()
     {
     }
@@ -283,8 +367,8 @@ namespace cologne
         {
             reload_shaders();
         }
-        shadow_pass();
         update_ssbos();
+        shadow_pass();
         voxelize_scene();
         geometry_pass();
         skybox_pass();
@@ -375,7 +459,6 @@ namespace cologne
         glEnable(GL_CULL_FACE);
 
         init_shadow();
-        voxelize_scene();
         LOG_INFO("Renderer initialized");
     }
 

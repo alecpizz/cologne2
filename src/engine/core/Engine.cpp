@@ -116,6 +116,7 @@ namespace cologne
             {
                 _impl->file_status_queue.emplace(path, status);
             });
+        _impl->renderer = std::unique_ptr<Renderer>(new Renderer());
         Physics::init();
         AssetManager::init();
         AssetManager::print_all();
@@ -123,7 +124,6 @@ namespace cologne
         // Audio::play_music(RESOURCES_PATH "sounds/music2.mp3");
         // Audio::set_music_volume(12);
         _impl->scene = std::make_unique<Scene>();
-        _impl->renderer = std::unique_ptr<Renderer>(new Renderer());
         _impl->event_manager = std::unique_ptr<EventManager>(new EventManager());
         if (_impl->window == nullptr || _impl->renderer == nullptr)
         {

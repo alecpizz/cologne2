@@ -60,6 +60,10 @@ namespace cologne
         static void file_changed(const std::filesystem::path& path);
         static uint32_t get_output_image();
         static uint32_t read_fbo_pixel(const std::string& fbo_name, const std::string& attachment_name, uint32_t x, uint32_t y);
+        void upload_vertex_data(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices);
+        uint32_t get_vertex_data_vao() {return _vertex_data_vao;}
+        uint32_t get_vertex_data_vbo() {return _vertex_data_vbo;}
+        uint32_t get_vertex_data_ebo() {return _vertex_data_ebo;}
     private:
         //get me out of here!
         struct VoxelData
@@ -140,6 +144,11 @@ namespace cologne
         std::vector<Light> _lights;
 
         //Textures
+
+        uint32_t _vertex_data_vao = 0;
+        uint32_t _vertex_data_vbo = 0;
+        uint32_t _vertex_data_ebo = 0;
+
         uint32_t _shadow_depth = 0;
         uint32_t _voxel_texture_color = 0;
         uint32_t _voxel_texture_normal = 0;

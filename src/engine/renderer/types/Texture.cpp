@@ -116,7 +116,7 @@ namespace cologne
         {
             return;
         }
-
+        stbi_set_flip_vertically_on_load(false);
         int new_width = 0, new_height = 0, new_channels = 0;
         stbi_uc *img_data =
             stbi_load_from_memory(_data.data(), static_cast<int>(_data.size()),
@@ -146,7 +146,7 @@ namespace cologne
             format = GL_RGBA;
             format_internal = GL_RGBA8;
         }
-        int32_t mips = ceil(log2(std::max(_width, _height))) + 1;
+        int32_t mips = floor(log2(std::max(_width, _height))) + 1;
         glTextureStorage2D(_handle, mips, format_internal, _width, _height);
         glTextureSubImage2D(_handle, 0, 0, 0, _width, _height, format, GL_UNSIGNED_BYTE,
                             img_data);
@@ -158,12 +158,30 @@ namespace cologne
 
     void Texture::make_resident()
     {
+        if (_handle == 0)
+        {
+            return;
+        }
+        if (_is_resident)
+        {
+            return;
+        }
         _bindless_handle = glGetTextureHandleARB(_handle);
         glMakeTextureHandleResidentARB(_bindless_handle);
+        _is_resident = true;
     }
 
     void Texture::make_non_resident()
     {
+        if (_handle == 0)
+        {
+            return;
+        }
+        if (!_is_resident)
+        {
+            return;
+        }
         glMakeTextureHandleNonResidentARB(_bindless_handle);
+        _is_resident = false;
     }
 }

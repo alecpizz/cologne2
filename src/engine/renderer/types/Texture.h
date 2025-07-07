@@ -32,6 +32,7 @@ namespace cologne
         void make_non_resident();
 
     private:
+        bool _is_resident = false;
         std::vector<unsigned char> _data;
         uint64_t _bindless_handle = 0;
         uint32_t _handle = 0;

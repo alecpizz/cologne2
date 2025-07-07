@@ -8,6 +8,8 @@ out vec3 FragPos;
 out vec2 TexCoords;
 out vec3 Normal;
 out mat3 TBN;
+out flat uint EntityID;
+out flat uint DrawID;
 
 layout (binding = 1, std430) restrict readonly buffer viewportdata
 {
@@ -19,11 +21,15 @@ layout (binding = 1, std430) restrict readonly buffer viewportdata
     vec4 camera_position;
 };
 
-
-uniform mat4 model;
+layout (binding = 4, std430) restrict readonly buffer model_mat_buffer
+{
+    mat4[] model_matrices;
+};
 
 void main()
 {
+    mat4 model = model_matrices[gl_DrawID];
+    DrawID = gl_DrawID;
     vec4 worldPos = model * vec4(position, 1.0);
     FragPos = worldPos.xyz;
     TexCoords = uv;
@@ -34,5 +40,6 @@ void main()
     vec3 B = cross(N, T);
     TBN = mat3(T, B, N);
     Normal = normalMatrix * normal;
+    EntityID = gl_BaseInstance;
     gl_Position = projection_view * worldPos;
 }

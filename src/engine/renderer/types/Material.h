@@ -1,7 +1,20 @@
 #pragma once
 #include "Texture.h"
+
 namespace cologne
 {
+    struct GPUMaterial
+    {
+        uint64_t albedo = 0;
+        uint64_t normal = 0;
+        uint64_t metallic = 0;
+        uint64_t roughness = 0;
+        uint64_t ao = 0;
+        uint64_t emission = 0;
+        float roughness_mod = 1.0f;
+        float metallic_mod = 1.0f;
+    };
+
     struct Material
     {
         Texture albedo;
@@ -29,6 +42,16 @@ namespace cologne
             emission.bind(EMISSION_INDEX);
         }
 
+        void ensure_bindless()
+        {
+            albedo.make_resident();
+            ao.make_resident();
+            metallic.make_resident();
+            roughness.make_resident();
+            normal.make_resident();
+            emission.make_resident();
+        }
+
         void load_all()
         {
             albedo.load();
@@ -37,6 +60,20 @@ namespace cologne
             roughness.load();
             normal.load();
             emission.load();
+        }
+
+        GPUMaterial to_gpu_material() const
+        {
+            return {
+                albedo.get_bindless_handle(),
+                normal.get_bindless_handle(),
+                metallic.get_bindless_handle(),
+                roughness.get_bindless_handle(),
+                ao.get_bindless_handle(),
+                emission.get_bindless_handle(),
+                roughness_override,
+                metallic_override
+            };
         }
     };
 }

@@ -20,6 +20,8 @@ namespace cologne
         glm::vec3 aabb_max = glm::vec3(std::numeric_limits<float>::min());
         uint32_t material_index;
         glm::mat4 inverse_bind_pose = glm::mat4(1.0f);
+        int32_t base_vertex = 0;
+        uint32_t first_index = 0;
     };
 
     struct SkinnedMeshData
@@ -60,7 +62,7 @@ namespace cologne
 
     struct MultiDrawElementsCommand
     {
-        uint32_t vertex_count;
+        uint32_t index_count;
         uint32_t instance_count;
         uint32_t first_index;
         uint32_t base_vertex;

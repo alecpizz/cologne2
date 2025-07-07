@@ -25,8 +25,10 @@ out vec3 FragPos;
 out vec2 TexCoords;
 out vec3 Normal;
 out mat3 TBN;
-
+out flat uint EntityID;
+out flat uint DrawID;
 uniform mat4 model;
+uniform uint entity_id;
 
 void main()
 {
@@ -60,5 +62,7 @@ void main()
     vec3 B = cross(N, T);
     TBN = mat3(T, B, N);
     Normal = normalMatrix * normal;
+    EntityID = entity_id;
+    DrawID = 0; //temp
     gl_Position = projection_view * worldPos;
 }
