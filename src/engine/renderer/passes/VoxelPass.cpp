@@ -5,6 +5,7 @@
 #include <engine/renderer/types/Shader.h>
 #include <engine/editor/Editor.h>
 #include <engine/renderer/types/Light.h>
+#include <engine/renderer/types/SSBO.h>
 //
 // Created by alecpizz on 5/4/2025.
 //
@@ -141,20 +142,30 @@ namespace cologne
         auto max = bounds.max;
         shader->set_vec3("grid_min", (min));
         shader->set_vec3("grid_max", (max));
+        get_ssbo_by_name("model_matrices")->bind(4);
+        get_ssbo_by_name("materials")->bind(5);
         glBindImageTexture(6, _voxel_texture_color, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
         glBindImageTexture(7, _voxel_texture_normal, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
         // glBindTextureUnit(7, _shadow_depth);
+
+
+        //TODO: undo frustum culling when we get here
+        //UNCULL ME
+        //UNCULL ME
+        //UNCULL ME
+        //UNCULL ME
+        //UNCULL ME
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, get_vertex_data_ebo());
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, get_ssbo_by_name("draw_cmds")->get_handle());
+        glBindVertexArray(get_vertex_data_vao());
         for (int idx = 0; idx < 3; idx++)
         {
             shader->set_int("render_axis", idx);
-            for (auto &item: _render_items)
-            {
-                shader->set_mat4("model", item.transform);
-                const auto mesh = AssetManager::get_mesh_by_index(item.mesh_idx);
-                AssetManager::get_material_by_index(mesh->get_material_index())->bind_all();
-                mesh->draw();
-            }
+            glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, _render_items.size(), 0);
         }
+        glBindVertexArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 
         auto mipmap_shader = get_shader_by_name("mipmap");
         mipmap_shader->bind();

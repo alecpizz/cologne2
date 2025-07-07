@@ -74,12 +74,16 @@ namespace cologne
         glDisable(GL_BLEND);
         mask_shader->bind();
         //draw items into mask
+        glBindVertexArray(get_vertex_data_vao());
         for (auto &outline_render_item: _outline_render_items)
         {
             mask_shader->set_mat4("model", outline_render_item.transform);
             const auto mesh = AssetManager::get_mesh_by_index(outline_render_item.mesh_idx);
-            mesh->draw();
+            glDrawElementsBaseVertex(GL_TRIANGLES, mesh->get_indices().size(), GL_UNSIGNED_INT,
+                                     reinterpret_cast<void *>(sizeof(uint32_t) * mesh->get_first_index()),
+                                     mesh->get_base_vertex());
         }
+        glBindVertexArray(0);
 
         for (auto &item: _outline_skinned_render_items)
         {

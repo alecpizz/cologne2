@@ -2,12 +2,7 @@
 #extension GL_NV_shader_atomic_fp16_vector: require
 #extension GL_NV_gpu_shader5: require
 #extension GL_ARB_bindless_texture: require
-layout (binding = 0) uniform sampler2D texture_albedo;
-layout (binding = 1) uniform sampler2D texture_ao;
-layout (binding = 2) uniform sampler2D texture_metallic;
-layout (binding = 3) uniform sampler2D texture_roughness;
-layout (binding = 4) uniform sampler2D texture_normal;
-layout (binding = 5) uniform sampler2D texture_emission;
+
 layout (RGBA16F, binding = 6) uniform image3D texture_voxel;
 layout (r32ui, binding = 7) restrict uniform uimage3D texture_voxel_normal;
 
@@ -39,12 +34,31 @@ layout (binding = 2, std430) restrict readonly buffer lights_buffer
 {
     Light lights[];
 };
+
+struct Material
+{
+    uvec2 albedo;
+    uvec2 normal;
+    uvec2 metallic;
+    uvec2 roughness;
+    uvec2 ao;
+    uvec2 emission;
+    float roughness_mod;
+    float metallic_mod;
+};
+
+layout (binding = 5, std430) restrict readonly buffer materialdata
+{
+    Material materials[];
+};
+
 uniform int num_lights = 8;
 
 in vec2 TexCoords;
 in vec4 FragPos;
 in mat3 TBN;
 in vec4 FragPosLightSpace[8];
+in flat uint DrawID;
 
 bool is_inside_clipspace(const vec3 p)
 {
@@ -163,14 +177,15 @@ vec3 Tonemap_ACES(const vec3 x)
 
 vec4 pbr()
 {
-    vec4 albedo_texture = texture2D(texture_albedo, TexCoords);
+    Material mat = materials[DrawID];
+    vec4 albedo_texture = texture2D(sampler2D(mat.albedo), TexCoords);
     //    vec3 albedo = albedo_texture.rgb;
     vec3 albedo = pow(albedo_texture.rgb, vec3(2.2));
-    float metallic = texture2D(texture_metallic, TexCoords).r;
-    float roughness = texture2D(texture_roughness, TexCoords).g;
-    float ao = texture2D(texture_ao, TexCoords).b + 0.2;
+    float metallic = texture2D(sampler2D(mat.metallic), TexCoords).r;
+    float roughness = texture2D(sampler2D(mat.roughness), TexCoords).g;
+    float ao = texture2D(sampler2D(mat.ao), TexCoords).b + 0.2;
 
-    vec3 N = texture2D(texture_normal, TexCoords).rgb;
+    vec3 N = texture2D(sampler2D(mat.normal), TexCoords).rgb;
     N = N * 2.0 - 1.0;
     N = normalize(TBN * N);
 
@@ -251,7 +266,7 @@ vec4 pbr()
     const float ambient_strength = 0.05f;
     vec3 ambient_color = albedo * ambient_light_color;
     vec3 ambient_lighting = ambient_color * ambient_strength;
-    vec3 emission = texture2D(texture_emission, TexCoords).rgb;
+    vec3 emission = texture2D(sampler2D(mat.emission), TexCoords).rgb;
     vec3 color = Lo  + ambient_lighting + emission;
 
     //    color = pow(color, vec3(1.0 / 2.2));
@@ -290,17 +305,6 @@ vec2 msign(vec2 v)
     (v.y >= 0.0) ? 1.0 : -1.0);
 }
 
-uint encode_normal()
-{
-    vec3 nor = texture2D(texture_normal, TexCoords).rgb;
-    nor = nor * 2.0 - 1.0;
-    nor = normalize(TBN * nor);
-
-    nor.xy = (nor.z >= 0.0) ? nor.xy : (1.0 - abs(nor.yx)) * msign(nor.xy);
-    //return packSnorm2x16(nor.xy);
-    uvec2 d = uvec2(round(32767.5 + nor.xy * 32767.5));
-    return d.x | (d.y << 16u);
-}
 
 void main()
 {
@@ -308,7 +312,6 @@ void main()
     vec4 color = pbr();
 //    color = color / (color + vec4(1.0));
 //    color = pow(color, vec4(1.0 / 2.2));
-    uint normal = encode_normal();
     imageAtomicMax(texture_voxel, voxel_pos, f16vec4(color));
     //    imageAtomicMax(texture_voxel_normal, voxel_pos, (normal));
     //    imageStore(texture_voxel_normal, voxel_pos, uvec4(normal));
