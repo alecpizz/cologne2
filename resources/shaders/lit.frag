@@ -36,6 +36,8 @@ layout (binding = 4) uniform sampler2D gEmission;
 layout (binding = 5) uniform sampler2DArray shadow_cascades;
 layout (binding = 6) uniform sampler2D indirect_texture;
 layout (binding = 7) uniform sampler2D bloom_texture;
+layout (binding = 8) uniform sampler2D brdf;
+layout (binding = 9) uniform samplerCube env_prefilter;
 
 uniform int voxel_grid_size;
 uniform float voxel_size = 128;
@@ -342,8 +344,13 @@ void main()
         //        indirect_light = max(indirect_light, emission);
     }
 
+    vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+    const float MAX_REFLECTION_LOD = 4.0;
+    vec3 prefilteredColor = textureLod(env_prefilter, R,  roughness * MAX_REFLECTION_LOD).rgb;
+    vec2 brdf  = texture(brdf, vec2(max(dot(N, V), 0.0), roughness)).rg;
+    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 
-    vec3 color = Lo + indirect_light;
+    vec3 color = Lo + indirect_light + specular;
     if(N.x == 0.0f && N.z == 0.0f && N.y == 0.0f)
     {
         color = albedo;
