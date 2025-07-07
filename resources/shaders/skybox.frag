@@ -1,5 +1,6 @@
 #version 460 core
 layout (location = 0) out vec4 Position;
+layout (location = 1) out vec4 gNormal;
 layout (location = 2) out vec4 FragColor;
 layout (location = 4) out vec3 gEmission;
 in vec3 LocalPosition;
@@ -15,4 +16,5 @@ void main()
     FragColor = vec4(envColor, 1.0);
     Position = WorldPosition;
     gEmission = vec3(0.0f);
+    gNormal = vec4(0.0f);
 }

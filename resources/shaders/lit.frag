@@ -342,11 +342,12 @@ void main()
         //        indirect_light = max(indirect_light, emission);
     }
 
-    const vec3 ambient_light_color = vec3(1.0, 0.98, 0.94);
-    const float ambient_strength = 0.0005f;
-    vec3 ambient_color = albedo * ambient_light_color;
-    vec3 ambient_lighting = ambient_color * ambient_strength;
-    vec3 color =  Lo + indirect_light;
+
+    vec3 color = Lo + indirect_light;
+    if(N.x == 0.0f && N.z == 0.0f && N.y == 0.0f)
+    {
+        color = albedo;
+    }
 
     float dist = length(FragPos - camera_position.xyz);
     float fog_factor = 1.0 / exp((dist * fog_density) * (dist * fog_density));

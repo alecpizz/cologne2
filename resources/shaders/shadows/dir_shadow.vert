@@ -35,6 +35,6 @@ void main()
     {
         vertex_position = vec4(position, 1.0f);
     }
-
+    vertex_position += vec4(normal, 1.0) * 0.0005f;
     gl_Position = lightSpaceMatrix * model * vec4(vertex_position.xyz, 1.0);
 }
