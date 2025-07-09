@@ -32,6 +32,8 @@ namespace cologne
         glm::vec3 aabb_min = glm::vec3(std::numeric_limits<float>::max());
         glm::vec3 aabb_max = glm::vec3(std::numeric_limits<float>::min());
         uint32_t material_index;
+        int32_t base_vertex = 0;
+        uint32_t first_index = 0;
     };
 
     struct ModelData

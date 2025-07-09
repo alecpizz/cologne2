@@ -36,7 +36,7 @@ namespace cologne
 
         void draw_aabb(glm::mat4 transform, glm::vec3 min, glm::vec3 max, glm::vec3 color);
 
-        void draw_text(const char* text, glm::vec3 position, glm::vec4 color, float size);
+        void draw_text(const char *text, glm::vec3 position, glm::vec4 color, float size);
 
         void render_scene();
 
@@ -45,8 +45,11 @@ namespace cologne
         void submit_light(Light light);
 
         void submit_render_item(RenderItem item);
+
         void submit_skinned_render_item(SkinnedRenderItem item);
+
         void submit_outline_render_item(RenderItem item);
+
         void submit_skinned_outline_render_item(SkinnedRenderItem item);
 
         void reload_shaders();
@@ -56,14 +59,29 @@ namespace cologne
         void submit_camera_transform(const TransformComponent &tr, CameraComponent cam);
 
         static glm::mat4 get_camera_view(TransformComponent tr);
+
         static glm::mat4 get_camera_projection(TransformComponent tr, CameraComponent cam);
-        static void file_changed(const std::filesystem::path& path);
+
+        static void file_changed(const std::filesystem::path &path);
+
         static uint32_t get_output_image();
-        static uint32_t read_fbo_pixel(const std::string& fbo_name, const std::string& attachment_name, uint32_t x, uint32_t y);
-        void upload_vertex_data(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices);
-        uint32_t get_vertex_data_vao() {return _vertex_data_vao;}
-        uint32_t get_vertex_data_vbo() {return _vertex_data_vbo;}
-        uint32_t get_vertex_data_ebo() {return _vertex_data_ebo;}
+
+        static uint32_t read_fbo_pixel(const std::string &fbo_name, const std::string &attachment_name, uint32_t x,
+                                       uint32_t y);
+
+        void upload_vertex_data(std::vector<Vertex> &vertices, std::vector<uint32_t> &indices);
+        void upload_weighted_vertex_data(std::vector<WeightedVertex>& vertices, std::vector<uint32_t>& indices);
+        void allocate_weighted_vertex_buffer(size_t count);
+        uint32_t get_vertex_data_vao() const { return _vertex_data_vao; }
+        uint32_t get_vertex_data_vbo() const { return _vertex_data_vbo; }
+        uint32_t get_vertex_data_ebo() const { return _vertex_data_ebo; }
+
+
+        uint32_t get_skinned_bind_pose_vbo() const { return _skinned_bind_pose_vbo; }
+        uint32_t get_skinned_bind_pose_ebo() const { return _skinned_bind_pose_ebo; }
+        uint32_t get_skinned_vbo() const { return _skinned_vbo; }
+        uint32_t get_skinned_vao() const { return _skinned_vao; }
+
     private:
         //get me out of here!
         struct VoxelData
@@ -133,8 +151,11 @@ namespace cologne
 
         void outline_pass();
 
-        static FrameBuffer* get_framebuffer_by_name(const char* name);
-        SSBO* get_ssbo_by_name(const char* name);
+        void compute_skinning_pass();
+
+        static FrameBuffer *get_framebuffer_by_name(const char *name);
+
+        SSBO *get_ssbo_by_name(const char *name);
 
         std::vector<Texture> _shadow_maps;
         std::vector<RenderItem> _render_items;
@@ -143,12 +164,17 @@ namespace cologne
         std::vector<SkinnedRenderItem> _outline_skinned_render_items;
         std::vector<Light> _lights;
 
-        //Textures
-
+        //global buffers
         uint32_t _vertex_data_vao = 0;
         uint32_t _vertex_data_vbo = 0;
         uint32_t _vertex_data_ebo = 0;
+        uint32_t _skinned_bind_pose_vbo = 0;
+        uint32_t _skinned_bind_pose_ebo = 0;
+        uint32_t _skinned_vbo = 0;
+        uint32_t _skinned_vao = 0;
+        uint32_t _skinned_vbo_size = 0;
 
+        //Textures
         uint32_t _shadow_depth = 0;
         uint32_t _voxel_texture_color = 0;
         uint32_t _voxel_texture_normal = 0;

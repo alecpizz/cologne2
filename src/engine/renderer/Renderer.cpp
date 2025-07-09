@@ -102,6 +102,7 @@ namespace cologne
         ssbos["model_matrices"] = SSBO(sizeof(glm::mat4) * 128, GL_DYNAMIC_DRAW);
         ssbos["draw_cmds"] = SSBO(sizeof(MultiDrawElementsCommand) * 128, GL_DYNAMIC_DRAW);
         ssbos["materials"] = SSBO(sizeof(GPUMaterial) * 128, GL_DYNAMIC_DRAW);
+        ssbos["skinning_transforms"] = SSBO(sizeof(glm::mat4) * 2048, GL_DYNAMIC_DRAW);
     }
 
     void Renderer::update_ssbos()
@@ -155,6 +156,7 @@ namespace cologne
         ssbos["lights"].update(sizeof(Light) * _lights.size(), _lights.data());
         ssbos["viewport"].update(sizeof(ViewportData), &data);
         ssbos["materials"].update(sizeof(GPUMaterial) * gpu_materials.size(), gpu_materials.data());
+
         ssbos["viewport"].bind(1);
         ssbos["lights"].bind(2);
         ssbos["draw_cmds"].bind(3);
@@ -306,6 +308,61 @@ namespace cologne
         glVertexArrayAttribBinding(_vertex_data_vao, 3, 0);
     }
 
+    void Renderer::upload_weighted_vertex_data(std::vector<WeightedVertex> &vertices, std::vector<uint32_t> &indices)
+    {
+        if (_skinned_bind_pose_vbo != 0)
+        {
+            glDeleteBuffers(1, &_skinned_bind_pose_vbo);
+            glDeleteBuffers(1, &_skinned_bind_pose_ebo);
+        }
+
+        glCreateBuffers(1, &_skinned_bind_pose_vbo);
+        glNamedBufferStorage(_skinned_bind_pose_vbo, sizeof(WeightedVertex) * vertices.size(), vertices.data(),
+            GL_MAP_READ_BIT);
+
+        glCreateBuffers(1, &_skinned_bind_pose_ebo);
+        glNamedBufferStorage(_skinned_bind_pose_ebo, sizeof(uint32_t) * indices.size(), indices.data(),
+            GL_MAP_READ_BIT);
+    }
+
+    void Renderer::allocate_weighted_vertex_buffer(size_t count)
+    {
+        if (_skinned_vao == 0)
+        {
+            glCreateVertexArrays(1, &_skinned_vao);
+        }
+        if (_skinned_vbo_size < count * sizeof(Vertex))
+        {
+            if (_skinned_vbo != 0)
+            {
+                glDeleteBuffers(1, &_skinned_vbo);
+            }
+
+            glCreateBuffers(1, &_skinned_vbo);
+            glNamedBufferStorage(_skinned_vbo, sizeof(Vertex) * count, nullptr, GL_MAP_READ_BIT);
+
+            glCreateVertexArrays(1, &_skinned_vao);
+
+            glVertexArrayVertexBuffer(_skinned_vao, 0, _skinned_vbo, 0, sizeof(Vertex));
+            glVertexArrayElementBuffer(_skinned_vao, _skinned_bind_pose_ebo);
+
+            glEnableVertexArrayAttrib(_skinned_vao, 0);
+            glEnableVertexArrayAttrib(_skinned_vao, 1);
+            glEnableVertexArrayAttrib(_skinned_vao, 2);
+            glEnableVertexArrayAttrib(_skinned_vao, 3);
+
+            glVertexArrayAttribFormat(_skinned_vao, 0, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, position));
+            glVertexArrayAttribFormat(_skinned_vao, 1, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, normal));
+            glVertexArrayAttribFormat(_skinned_vao, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, uv));
+            glVertexArrayAttribFormat(_skinned_vao, 3, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, tangent));
+
+            glVertexArrayAttribBinding(_skinned_vao, 0, 0);
+            glVertexArrayAttribBinding(_skinned_vao, 1, 0);
+            glVertexArrayAttribBinding(_skinned_vao, 2, 0);
+            glVertexArrayAttribBinding(_skinned_vao, 3, 0);
+        }
+    }
+
     Renderer::~Renderer()
     {
     }
@@ -368,6 +425,7 @@ namespace cologne
             reload_shaders();
         }
         update_ssbos();
+        compute_skinning_pass();
         shadow_pass();
         voxelize_scene();
         geometry_pass();

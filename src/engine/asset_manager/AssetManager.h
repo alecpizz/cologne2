@@ -28,6 +28,12 @@ namespace cologne::AssetManager
     Mesh* get_mesh_by_index(int32_t idx);
     int32_t get_mesh_index_by_name(const std::string& name);
 
+    SkinnedMesh* get_skinned_mesh_by_name(const std::string& name);
+    SkinnedMesh* get_skinned_mesh_by_index(int32_t idx);
+    int32_t get_skinned_mesh_index_by_name(const std::string& name);
+
+
+
     Model* get_model_by_name(const std::string& name);
     Model* get_model_by_index(int32_t idx);
     int32_t get_model_index_by_name(const std::string& name);

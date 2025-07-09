@@ -14,7 +14,8 @@ namespace cologne
     class SkinnedModel
     {
     public:
-        explicit SkinnedModel(const SkinnedModelData& data);
+        SkinnedModel() = default;
+        SkinnedModel(const std::vector<int32_t>& meshes, const std::string& name, const glm::vec3& min, const glm::vec3& max, const Skeleton& skeleton);
 
         ~SkinnedModel();
 
@@ -24,7 +25,7 @@ namespace cologne
 
         uint64_t get_num_materials() const;
 
-        std::vector<SkinnedMesh>& get_meshes();
+        std::vector<int32_t>& get_mesh_indices();
 
         void set_active(bool active);
 
@@ -40,8 +41,8 @@ namespace cologne
 
     private:
         Skeleton _skeleton;
+        std::vector<int32_t> _mesh_indices = std::vector<int32_t>();
         std::vector<Material> _materials;
-        std::vector<SkinnedMesh> _meshes;
         bool _active = true;
         bool _cast_shadows = true;
         AABB _bounds;

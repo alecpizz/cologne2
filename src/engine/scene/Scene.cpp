@@ -188,6 +188,17 @@ namespace cologne
             {
                 particle.simulate();
             }
+            auto animators = _registry.view<AnimatorComponent, ActiveComponent>();
+            for (auto entity: animators)
+            {
+                if (!_registry.get<ActiveComponent>(entity).active)
+                {
+                    continue;
+                }
+                auto &animator = _registry.get<AnimatorComponent>(entity);
+                animator.update(delta_time, _registry.get<WorldTransformComponent>(entity));
+
+            }
         }
 
         //native scripting
@@ -257,18 +268,6 @@ namespace cologne
             for (auto entt: bullets)
             {
                 destroy_entity({entt, this});
-            }
-
-
-            auto animators = _registry.view<AnimatorComponent, ActiveComponent>();
-            for (auto entity: animators)
-            {
-                if (!_registry.get<ActiveComponent>(entity).active)
-                {
-                    continue;
-                }
-                auto &animator = _registry.get<AnimatorComponent>(entity);
-                animator.update(delta_time, _registry.get<WorldTransformComponent>(entity));
             }
         }
 
@@ -385,17 +384,21 @@ namespace cologne
             {
                 continue;
             }
-            SkinnedRenderItem item;
+            SkinnedModel *skinned_model = AssetManager::get_skinned_model_by_index(m.id);
+            std::vector<glm::mat4> bones;
             if (_registry.all_of<AnimatorComponent>(entity))
             {
                 auto &animator = _registry.get<AnimatorComponent>(entity);
-                item.bones = animator.get_skinning_matrices();
+                bones = animator.get_skinning_matrices();
             }
-            SkinnedModel *skinned_model = AssetManager::get_skinned_model_by_index(m.id);
-            item.skinned_model = skinned_model;
-            item.transform = tr;
-            item.id = static_cast<uint32_t>(entity);
-            Engine::get_renderer()->submit_skinned_render_item(item);
+            for (int32_t mesh_index : skinned_model->get_mesh_indices())
+            {
+                SkinnedRenderItem item;
+                item.mesh_idx = mesh_index;
+                item.transform = tr;
+                item.id = static_cast<uint32_t>(entity);
+                Engine::get_renderer()->submit_skinned_render_item(item);
+            }
         }
     }
 

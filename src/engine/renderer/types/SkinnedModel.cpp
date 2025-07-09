@@ -6,21 +6,17 @@
 
 namespace cologne
 {
-    SkinnedModel::SkinnedModel(const SkinnedModelData& data)
+    SkinnedModel::SkinnedModel(const std::vector<int32_t> &meshes, const std::string &name, const glm::vec3 &min,
+                               const glm::vec3 &max, const Skeleton &skeleton)
     {
-        _skeleton = data.skeleton;
-        _materials = data.materials;
-        _bounds = AABB(data.aabb_min, data.aabb_max);
-        for (auto& mesh : data.meshes)
-        {
-            _meshes.emplace_back(mesh.vertices, mesh.indices, mesh.material_index);
-        }
-        _name = data.name;
+        _skeleton = skeleton;
+        _bounds = AABB(min, max);
+        _name = name;
+        _mesh_indices = meshes;
     }
 
     SkinnedModel::~SkinnedModel()
     {
-
     }
 
     AABB SkinnedModel::get_aabb() const
@@ -38,9 +34,9 @@ namespace cologne
         return _materials.size();
     }
 
-    std::vector<SkinnedMesh>& SkinnedModel::get_meshes()
+    std::vector<int32_t> &SkinnedModel::get_mesh_indices()
     {
-        return _meshes;
+        return _mesh_indices;
     }
 
     void SkinnedModel::set_active(bool active)
@@ -73,7 +69,7 @@ namespace cologne
         _cast_shadows = b;
     }
 
-    const Skeleton & SkinnedModel::get_skeleton() const
+    const Skeleton &SkinnedModel::get_skeleton() const
     {
         return _skeleton;
     }

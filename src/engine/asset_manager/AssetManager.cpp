@@ -18,18 +18,25 @@ namespace cologne::AssetManager
     std::vector<SkinnedModel> skinned_models;
     std::vector<AnimationClip> animations;
     std::vector<Mesh> meshes;
+    std::vector<SkinnedMesh> skinned_meshes;
     std::vector<Material> materials;
     std::unordered_map<std::string, int32_t> model_index_map;
     std::unordered_map<std::string, int32_t> skinned_model_index_map;
     std::unordered_map<std::string, int32_t> animation_index_map;
     std::unordered_map<std::string, int32_t> mesh_index_map;
+    std::unordered_map<std::string, int32_t> skinned_mesh_index_map;
     bool is_loading = true;
     int32_t material_offset = 0;
     std::vector<Vertex> vertices;
+    std::vector<WeightedVertex> weighted_vertices;
     std::vector<uint32_t> indices;
+    std::vector<uint32_t> weighted_indices;
     int32_t mesh_offset = 0;
+    int32_t skinned_mesh_offset = 0;
     int32_t first_index = 0;
     int32_t base_vertex = 0;
+    int32_t first_weighted_index = 0;
+    int32_t base_weighted_vertex = 0;
 
     void init()
     {
@@ -50,9 +57,14 @@ namespace cologne::AssetManager
             animation_index_map[animations[i].get_name()] = i;
         }
 
-        for (int32_t i =0; i < meshes.size(); i++)
+        for (int32_t i = 0; i < meshes.size(); i++)
         {
             mesh_index_map[meshes[i].get_name()] = i;
+        }
+
+        for (int32_t i = 0; i < skinned_meshes.size(); i++)
+        {
+            skinned_mesh_index_map[skinned_meshes[i].get_name()] = i;
         }
         print_all();
     }
@@ -88,19 +100,20 @@ namespace cologne::AssetManager
         for (auto &model_data: model_datas)
         {
             int32_t startingIdx = material_offset; //our current index in the big ol material buffer
-            for (Material& mat : model_data.materials)
+            for (Material &mat: model_data.materials)
             {
                 materials.emplace_back(mat);
                 material_offset++; //add however many materials are in the model
             }
 
-            for (MeshData& mesh : model_data.meshes)
+            for (MeshData &mesh: model_data.meshes)
             {
-                mesh.material_index = startingIdx + mesh.material_index; //the material indices of each model are just offset from the starting pt
+                mesh.material_index = startingIdx + mesh.material_index;
+                //the material indices of each model are just offset from the starting pt
             }
 
             std::vector<int32_t> mesh_indices;
-            for (auto& mesh : model_data.meshes)
+            for (auto &mesh: model_data.meshes)
             {
                 mesh.base_vertex = base_vertex;
                 mesh.first_index = first_index;
@@ -112,26 +125,53 @@ namespace cologne::AssetManager
                 mesh_indices.emplace_back(mesh_offset); //add its index
                 mesh_offset++; //increment the total amount
             }
-            models.emplace_back(mesh_indices, model_data.name, model_data.aabb_min, model_data.aabb_max); //add our model
+            models.emplace_back(mesh_indices, model_data.name, model_data.aabb_min, model_data.aabb_max);
+            //add our model
         }
 
         Engine::get_renderer()->upload_vertex_data(vertices, indices);
 
-        for (auto& m : materials)
-        {
-            m.load_all();
-        }
-
         for (auto &skinned_model_data: skinned_model_datas)
         {
-            for (auto &material: skinned_model_data.materials)
+            int32_t starting_idx = material_offset;
+            for (Material &mat: skinned_model_data.materials)
             {
-                material.load_all();
+                materials.emplace_back(mat);
+                material_offset++;
             }
 
+            for (SkinnedMeshData &mesh: skinned_model_data.meshes)
+            {
+                mesh.material_index = starting_idx + mesh.material_index;
+            }
+
+            std::vector<int32_t> mesh_indices;
+            for (auto &skinned_mesh: skinned_model_data.meshes)
+            {
+                skinned_mesh.base_vertex = base_weighted_vertex;
+                skinned_mesh.first_index = first_weighted_index;
+                weighted_vertices.insert(weighted_vertices.end(), skinned_mesh.vertices.begin(),
+                                         skinned_mesh.vertices.end());
+                weighted_indices.insert(weighted_indices.end(), skinned_mesh.indices.begin(),
+                                        skinned_mesh.indices.end());
+                base_weighted_vertex += skinned_mesh.vertices.size();
+                first_weighted_index += skinned_mesh.indices.size();
+                skinned_meshes.emplace_back(skinned_mesh);
+                mesh_indices.emplace_back(skinned_mesh_offset);
+                skinned_mesh_offset++;
+            }
+            skinned_models.emplace_back(mesh_indices, skinned_model_data.name, skinned_model_data.aabb_min,
+                                        skinned_model_data.aabb_max, skinned_model_data.skeleton);
             animations.insert(animations.end(),
                               skinned_model_data.animations.begin(), skinned_model_data.animations.end());
-            skinned_models.emplace_back(skinned_model_data);
+        }
+
+        Engine::get_renderer()->upload_weighted_vertex_data(weighted_vertices, indices);
+
+        //slow texture upload step.
+        for (auto &m: materials)
+        {
+            m.load_all();
         }
     }
 
@@ -147,19 +187,19 @@ namespace cologne::AssetManager
         // auto data = a1.get();
         auto data = FileUtil::import_model(path);
         int32_t starting_idx = material_offset;
-        for (Material& mat : data.materials)
+        for (Material &mat: data.materials)
         {
             materials.emplace_back(mat);
             material_offset++; //add however many materials are in the model
         }
 
-        for (auto& mesh : data.meshes)
+        for (auto &mesh: data.meshes)
         {
             mesh.material_index = starting_idx + mesh.material_index;
         }
 
         std::vector<int32_t> mesh_indices;
-        for (auto& mesh : data.meshes)
+        for (auto &mesh: data.meshes)
         {
             mesh.first_index = first_index;
             mesh.base_vertex = base_vertex;
@@ -190,14 +230,14 @@ namespace cologne::AssetManager
     void load_skinned_model(const std::string &path)
     {
         LOG_ERROR("implement me");
-        auto data = FileUtil::import_skinned_model(path);
-        for (auto &material: data.materials)
-        {
-            material.load_all();
-        }
-        animations.insert(animations.end(),
-                             data.animations.begin(), data.animations.end());
-        skinned_models.emplace_back(data);
+        // auto data = FileUtil::import_skinned_model(path);
+        // for (auto &material: data.materials)
+        // {
+        //     material.load_all();
+        // }
+        // animations.insert(animations.end(),
+        //                      data.animations.begin(), data.animations.end());
+        // skinned_models.emplace_back(data);
     }
 
     std::vector<Model> &get_models()
@@ -205,7 +245,7 @@ namespace cologne::AssetManager
         return models;
     }
 
-    std::vector<Mesh> & get_meshes()
+    std::vector<Mesh> &get_meshes()
     {
         return meshes;
     }
@@ -215,22 +255,22 @@ namespace cologne::AssetManager
         return skinned_models;
     }
 
-    std::vector<Material> & get_materials()
+    std::vector<Material> &get_materials()
     {
         return materials;
     }
 
-    Material * get_material_by_index(int32_t idx)
+    Material *get_material_by_index(int32_t idx)
     {
         return &materials[idx];
     }
 
-    Mesh * get_mesh_by_name(const std::string &name)
+    Mesh *get_mesh_by_name(const std::string &name)
     {
         return &meshes[get_mesh_index_by_name(name)];
     }
 
-    Mesh * get_mesh_by_index(int32_t idx)
+    Mesh *get_mesh_by_index(int32_t idx)
     {
         return &meshes[idx];
     }
@@ -238,6 +278,21 @@ namespace cologne::AssetManager
     int32_t get_mesh_index_by_name(const std::string &name)
     {
         return mesh_index_map[name];
+    }
+
+    SkinnedMesh *get_skinned_mesh_by_name(const std::string &name)
+    {
+        return &skinned_meshes[skinned_mesh_index_map[name]];
+    }
+
+    SkinnedMesh *get_skinned_mesh_by_index(int32_t idx)
+    {
+        return &skinned_meshes[idx];
+    }
+
+    int32_t get_skinned_mesh_index_by_name(const std::string &name)
+    {
+        return skinned_mesh_index_map[name];
     }
 
     void print_models()

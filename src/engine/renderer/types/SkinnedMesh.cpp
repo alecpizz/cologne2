@@ -4,17 +4,22 @@
 
 #include "SkinnedMesh.h"
 
+#include <engine/Types.h>
+
 namespace cologne
 {
-    SkinnedMesh::SkinnedMesh(const std::vector<WeightedVertex> &vertices, const std::vector<uint32_t> &indices, uint32_t material_idx)
+    SkinnedMesh::SkinnedMesh(const SkinnedMeshData& mesh_data)
     {
-        _indices_count = static_cast<uint32_t>(indices.size());
+        _name = mesh_data.name;
+        _vertices.insert(_vertices.end(), mesh_data.vertices.begin(), mesh_data.vertices.end());
+        _indices.insert(_indices.end(), mesh_data.indices.begin(), mesh_data.indices.end());
+        _indices_count = static_cast<uint32_t>(_indices.size());
         glCreateBuffers(1, &_vbo);
-        glNamedBufferStorage(_vbo, sizeof(WeightedVertex) * vertices.size(),
-            vertices.data(), GL_MAP_READ_BIT);
+        glNamedBufferStorage(_vbo, sizeof(WeightedVertex) * _vertices.size(),
+            _vertices.data(), GL_MAP_READ_BIT);
 
         glCreateBuffers(1, &_ibo);
-        glNamedBufferStorage(_ibo, sizeof(uint32_t) * _indices_count, indices.data(), GL_MAP_READ_BIT);
+        glNamedBufferStorage(_ibo, sizeof(uint32_t) * _indices_count, _indices.data(), GL_MAP_READ_BIT);
 
         glCreateVertexArrays(1, &_vao);
 
@@ -42,7 +47,34 @@ namespace cologne
         glVertexArrayAttribBinding(_vao, 4, 0);
         glVertexArrayAttribBinding(_vao, 5, 0);
 
-        _material_index = material_idx;
+        _material_index = mesh_data.material_index;
+        _aabb = AABB(mesh_data.aabb_min, mesh_data.aabb_max);
+        _first_index = mesh_data.first_index;
+        _base_vertex = mesh_data.base_vertex;
+    }
+
+    std::vector<WeightedVertex> SkinnedMesh::get_vertices() const
+    {
+    }
+
+    std::vector<uint32_t> SkinnedMesh::get_indices() const
+    {
+    }
+
+    std::string SkinnedMesh::get_name() const
+    {
+    }
+
+    AABB SkinnedMesh::get_aabb() const
+    {
+    }
+
+    int32_t SkinnedMesh::get_first_index()
+    {
+    }
+
+    int32_t SkinnedMesh::get_base_vertex()
+    {
     }
 
     SkinnedMesh::~SkinnedMesh()
