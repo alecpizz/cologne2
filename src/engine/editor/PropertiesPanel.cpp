@@ -99,16 +99,25 @@ namespace cologne
 
                     if (child.has_component<SkinnedModelComponent>())
                     {
-                        SkinnedRenderItem item;
-                        item.skinned_model = AssetManager::get_skinned_model_by_index(
+                        auto model = AssetManager::get_skinned_model_by_index(
                             child.get_component<SkinnedModelComponent>().id);
-                        item.transform = child.get_component<WorldTransformComponent>();
-                        if (child.has_component<AnimatorComponent>())
+                        if (model)
                         {
-                            auto &anim = child.get_component<AnimatorComponent>();
-                            item.bones = anim.get_skinning_matrices();
+                            std::vector<glm::mat4> bones = std::vector<glm::mat4>();
+                            if (child.has_component<AnimatorComponent>())
+                            {
+                                auto &anim = child.get_component<AnimatorComponent>();
+                                bones = anim.get_skinning_matrices();
+                            }
+                            for (int32_t mesh_index: model->get_mesh_indices())
+                            {
+                                SkinnedRenderItem item;
+                                item.mesh_idx = mesh_index;
+                                item.transform = child.get_component<WorldTransformComponent>();
+                                item.bones = bones;
+                                Engine::get_renderer()->submit_skinned_outline_render_item(item);
+                            }
                         }
-                        Engine::get_renderer()->submit_skinned_outline_render_item(item);
                     }
                 }
             }
@@ -189,15 +198,23 @@ namespace cologne
 
             draw_component<SkinnedModelComponent>("Skinned Model", _selected_entity, true, [this](auto &model)
             {
-                SkinnedRenderItem item;
-                item.skinned_model = AssetManager::get_skinned_model_by_index(model.id);
-                item.transform = _selected_entity.get_component<WorldTransformComponent>();
-                if (_selected_entity.has_component<AnimatorComponent>())
+                if (auto skinned_model = AssetManager::get_skinned_model_by_index(model.id))
                 {
-                    auto &anim = _selected_entity.get_component<AnimatorComponent>();
-                    item.bones = anim.get_skinning_matrices();
+                    std::vector<glm::mat4> bones = std::vector<glm::mat4>();
+                    if (_selected_entity.has_component<AnimatorComponent>())
+                    {
+                        auto &anim = _selected_entity.get_component<AnimatorComponent>();
+                        bones = anim.get_skinning_matrices();
+                    }
+                    for (int32_t mesh_index: model->get_mesh_indices())
+                    {
+                        SkinnedRenderItem item;
+                        item.mesh_idx = mesh_index;
+                        item.transform = _selected_entity.get_component<WorldTransformComponent>();
+                        item.bones = bones;
+                        Engine::get_renderer()->submit_skinned_outline_render_item(item);
+                    }
                 }
-                Engine::get_renderer()->submit_skinned_outline_render_item(item);
                 int id = static_cast<int>(model.id);
                 if (ImGui::InputInt("Skinned Model ID", &id))
                 {
