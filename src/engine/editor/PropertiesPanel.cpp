@@ -196,7 +196,7 @@ namespace cologne
                 ImGui::Checkbox("GI Only", &model.gi_only);
             });
 
-            draw_component<SkinnedModelComponent>("Skinned Model", _selected_entity, true, [this](auto &model)
+            draw_component<SkinnedModelComponent>("Skinned Model", _selected_entity, true, [this](SkinnedModelComponent &model)
             {
                 if (auto skinned_model = AssetManager::get_skinned_model_by_index(model.id))
                 {
@@ -206,7 +206,7 @@ namespace cologne
                         auto &anim = _selected_entity.get_component<AnimatorComponent>();
                         bones = anim.get_skinning_matrices();
                     }
-                    for (int32_t mesh_index: model->get_mesh_indices())
+                    for (int32_t mesh_index: skinned_model->get_mesh_indices())
                     {
                         SkinnedRenderItem item;
                         item.mesh_idx = mesh_index;

@@ -84,7 +84,7 @@ namespace cologne
                                      mesh->get_base_vertex());
         }
         glBindVertexArray(0);
-
+        glBindVertexArray(get_skinned_vao());
         for (auto &item: _outline_skinned_render_items)
         {
             mask_shader->set_mat4("model", item.transform);
@@ -93,14 +93,13 @@ namespace cologne
                 mask_shader->set_bool("is_skinned", true);
                 mask_shader->set_mat4("bone_matrices", item.bones);
             }
-            for (auto &mesh: item.skinned_model->get_meshes())
-            {
-                mesh.draw();
-            }
+            const auto mesh = AssetManager::get_skinned_mesh_by_index(item.mesh_idx);
+            glDrawElementsBaseVertex(GL_TRIANGLES, mesh->get_indices().size(), GL_UNSIGNED_INT,
+                                     reinterpret_cast<void *>(sizeof(uint32_t) * mesh->get_first_index()),
+                                     mesh->get_base_vertex());
             mask_shader->set_bool("is_skinned", false);
         }
         mask_shader->set_bool("is_skinned", false);
-
         //draw the outline a shit load
         outline_shader->bind();
         outline_shader->set_ivec2("offsets", offsets);

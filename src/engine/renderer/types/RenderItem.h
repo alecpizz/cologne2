@@ -27,6 +27,6 @@ namespace cologne
         int32_t mesh_idx = 0;
         WorldTransformComponent transform = {};
         std::vector<glm::mat4> bones;
-        uint32_t id = entt::null;
+        uint32_t entity_id = entt::null;
     };
 }

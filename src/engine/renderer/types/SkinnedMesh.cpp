@@ -55,26 +55,32 @@ namespace cologne
 
     std::vector<WeightedVertex> SkinnedMesh::get_vertices() const
     {
+        return _vertices;
     }
 
     std::vector<uint32_t> SkinnedMesh::get_indices() const
     {
+        return _indices;
     }
 
     std::string SkinnedMesh::get_name() const
     {
+        return _name;
     }
 
     AABB SkinnedMesh::get_aabb() const
     {
+        return _aabb;
     }
 
-    int32_t SkinnedMesh::get_first_index()
+    int32_t SkinnedMesh::get_first_index() const
     {
+        return _first_index;
     }
 
-    int32_t SkinnedMesh::get_base_vertex()
+    int32_t SkinnedMesh::get_base_vertex() const
     {
+        return _base_vertex;
     }
 
     SkinnedMesh::~SkinnedMesh()

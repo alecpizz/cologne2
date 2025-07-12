@@ -1,0 +1,118 @@
+#version 460 core
+
+layout (local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
+
+struct Vertex
+{
+    float position[3];
+    float normal[3];
+    float uv[2];
+    float tangent[3];
+};
+
+struct WeightedVertex
+{
+    float position[3];
+    float normal[3];
+    float uv[2];
+    float tangent[3];
+    int boneID[4];
+    float weight[4];
+};
+
+layout (std430, binding = 0) buffer outputVertexBuffer
+{
+    Vertex output_vertices[];
+};
+layout (std430, binding = 1) buffer inputVertexBuffer
+{
+    WeightedVertex input_vertices[];
+};
+
+layout (std430, set = 0, binding = 2) readonly buffer matrices
+{
+    mat4 bone_transforms[];
+};
+
+
+uniform int vertex_count;
+uniform int base_input_vertex;
+uniform int base_output_vertex;
+uniform int base_transform_index;
+
+
+void main()
+{
+    uint index = gl_GlobalInvocationID.x;
+    if (index >= vertex_count)
+    {
+        return;
+    }
+
+    float pos_x = input_vertices[index + base_input_vertex].position[0];
+    float pos_y = input_vertices[index + base_input_vertex].position[1];
+    float pos_z = input_vertices[index + base_input_vertex].position[2];
+
+    float norm_x = input_vertices[index + base_input_vertex].normal[0];
+    float norm_y = input_vertices[index + base_input_vertex].normal[1];
+    float norm_z = input_vertices[index + base_input_vertex].normal[2];
+
+    float tangent_x = input_vertices[index + base_input_vertex].tangent[0];
+    float tangent_y = input_vertices[index + base_input_vertex].tangent[1];
+    float tangent_z = input_vertices[index + base_input_vertex].tangent[2];
+
+    float u = input_vertices[index + base_input_vertex].uv[0];
+    float v = input_vertices[index + base_input_vertex].uv[1];
+
+    int bone0 = input_vertices[index + base_input_vertex].boneID[0];
+    int bone1 = input_vertices[index + base_input_vertex].boneID[1];
+    int bone2 = input_vertices[index + base_input_vertex].boneID[2];
+    int bone3 = input_vertices[index + base_input_vertex].boneID[3];
+
+    float weight0 = input_vertices[index + base_input_vertex].weight[0];
+    float weight1 = input_vertices[index + base_input_vertex].weight[1];
+    float weight2 = input_vertices[index + base_input_vertex].weight[2];
+    float weight3 = input_vertices[index + base_input_vertex].weight[3];
+
+    vec4 vertex_position = vec4(pos_x, pos_y, pos_z, 1.0f);
+    vec4 vertex_normal = vec4(norm_x, norm_y, norm_z, 0.0f);
+    vec4 vertex_tangent = vec4(tangent_x, tangent_y, tangent_z, 0.0f);
+    ivec4 boneID = ivec4(bone0, bone1, bone2, bone3);
+    vec4 weight = vec4(weight0, weight1, weight2, weight3);
+
+    vec4 totalPosition = vec4(0.0f);
+    vec4 totalNormal = vec4(0.0f);
+    vec4 totalTangent = vec4(0.0f);
+    for (int i = 0; i < 4; i++)
+    {
+        if (boneID[i] < 0)
+        {
+            continue;
+        }
+        mat4 bone = bone_transforms[base_transform_index + boneID[i]];
+        vec4 localPosition = bone * vertex_position * weight[i];
+        vec4 normal = bone * vertex_normal * weight[i];
+        vec4 tangent = bone * vertex_tangent * weight[i];
+
+        totalPosition += localPosition;
+        totalNormal += normal;
+        totalTangent += tangent;
+    }
+
+    totalNormal.xyz = normalize(totalNormal.xyz);
+
+    output_vertices[index + base_output_vertex].position[0] = vertex_position.x;
+    output_vertices[index + base_output_vertex].position[1] = vertex_position.y;
+    output_vertices[index + base_output_vertex].position[2] = vertex_position.z;
+
+    output_vertices[index + base_output_vertex].normal[0] = totalNormal.x;
+    output_vertices[index + base_output_vertex].normal[1] = totalNormal.y;
+    output_vertices[index + base_output_vertex].normal[2] = totalNormal.z;
+    
+    output_vertices[index + base_output_vertex].tangent[0] = totalTangent.x;
+    output_vertices[index + base_output_vertex].tangent[1] = totalTangent.y;
+    output_vertices[index + base_output_vertex].tangent[2] = totalTangent.z;
+
+    output_vertices[index + base_output_vertex].uv[0] = u;
+    output_vertices[index + base_output_vertex].uv[1] = v;
+}

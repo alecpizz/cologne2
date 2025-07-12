@@ -18,8 +18,8 @@ namespace cologne
         std::vector<uint32_t> get_indices() const;
         std::string get_name() const;
         AABB get_aabb() const;
-        int32_t get_first_index();
-        int32_t get_base_vertex();
+        int32_t get_first_index() const;
+        int32_t get_base_vertex() const;
         uint32_t get_material_index() const;
         void draw(int32_t count = 1) const;
     private:

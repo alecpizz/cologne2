@@ -396,7 +396,8 @@ namespace cologne
                 SkinnedRenderItem item;
                 item.mesh_idx = mesh_index;
                 item.transform = tr;
-                item.id = static_cast<uint32_t>(entity);
+                item.entity_id = static_cast<uint32_t>(entity);
+                item.bones = bones;
                 Engine::get_renderer()->submit_skinned_render_item(item);
             }
         }

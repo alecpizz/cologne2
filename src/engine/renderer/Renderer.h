@@ -162,6 +162,12 @@ namespace cologne
         std::vector<SkinnedRenderItem> _skinned_render_items;
         std::vector<RenderItem> _outline_render_items;
         std::vector<SkinnedRenderItem> _outline_skinned_render_items;
+        std::vector<MultiDrawElementsCommand> _render_cmds;
+        std::vector<MultiDrawElementsCommand> _skinned_render_cmds;
+        std::vector<glm::mat4> _model_matrices;
+        std::vector<glm::mat4> _skinning_transforms;
+        std::vector<glm::mat4> _skinned_model_matrices;
+        std::vector<GPUMaterial> _gpu_materials;
         std::vector<Light> _lights;
 
         //global buffers

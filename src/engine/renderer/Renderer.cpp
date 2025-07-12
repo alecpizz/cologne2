@@ -93,6 +93,7 @@ namespace cologne
                                     RESOURCES_PATH "shaders/outline/outline.frag");
         shaders["outline_composite"] = Shader(RESOURCES_PATH "shaders/outline/outline_composite.comp");
         shaders["indirect_upsample"] = Shader(RESOURCES_PATH "shaders/vxgi/indirect_upsample.comp");
+        shaders["compute_skinning"] = Shader(RESOURCES_PATH "shaders/skinning.comp");
     }
 
     void Renderer::init_ssbos()
@@ -100,7 +101,9 @@ namespace cologne
         ssbos["lights"] = SSBO(sizeof(Light) * 8, GL_DYNAMIC_DRAW);
         ssbos["viewport"] = SSBO(sizeof(ViewportData), GL_DYNAMIC_DRAW);
         ssbos["model_matrices"] = SSBO(sizeof(glm::mat4) * 128, GL_DYNAMIC_DRAW);
+        ssbos["skinned_model_matrices"] = SSBO(sizeof(glm::mat4) * 128, GL_DYNAMIC_DRAW);
         ssbos["draw_cmds"] = SSBO(sizeof(MultiDrawElementsCommand) * 128, GL_DYNAMIC_DRAW);
+        ssbos["skinned_draw_cmds"] = SSBO(sizeof(MultiDrawElementsCommand) * 128, GL_DYNAMIC_DRAW);
         ssbos["materials"] = SSBO(sizeof(GPUMaterial) * 128, GL_DYNAMIC_DRAW);
         ssbos["skinning_transforms"] = SSBO(sizeof(glm::mat4) * 2048, GL_DYNAMIC_DRAW);
     }
@@ -115,47 +118,16 @@ namespace cologne
         data.view_inverse = glm::inverse(data.view);
         data.camera_position = glm::vec4(_camera_transform.position, 1.0f);
         data.projection_view_inverse = glm::inverse(data.projection_view);
-        static std::vector<MultiDrawElementsCommand> draw_cmds;
-        static std::vector<glm::mat4> model_matrices;
-        static std::vector<GPUMaterial> gpu_materials;
-        draw_cmds.clear();
-        gpu_materials.clear();
-        model_matrices.clear();
-        for (auto& render_item : _render_items)
-        {
-            MultiDrawElementsCommand cmd;
-            //todo: remove extra index step
-            auto mesh = AssetManager::get_mesh_by_index(render_item.mesh_idx);
-            if (!mesh)
-            {
-                continue;
-            }
-            cmd.index_count = mesh->get_indices().size();
-            cmd.instance_count = 1;
-            cmd.first_index = mesh->get_first_index();
-            cmd.base_vertex = mesh->get_base_vertex();
-            cmd.base_instance = render_item.entity_id;
 
-            draw_cmds.emplace_back(cmd);
-            model_matrices.emplace_back(render_item.transform);
-
-            //todo: also remove this extra index step
-            auto mat = AssetManager::get_material_by_index(mesh->get_material_index());
-            if (mat)
-            {
-                mat->ensure_bindless();
-                gpu_materials.emplace_back(mat->to_gpu_material());
-            }
-            else
-            {
-                gpu_materials.emplace_back();
-            }
-        }
-        ssbos["model_matrices"].update(sizeof(glm::mat4) * model_matrices.size(), model_matrices.data());
-        ssbos["draw_cmds"].update(sizeof(MultiDrawElementsCommand) * draw_cmds.size(), draw_cmds.data());
+        ssbos["skinned_model_matrices"].update(sizeof(glm::mat4) * _skinned_model_matrices.size(), _skinned_model_matrices.data());
+        ssbos["model_matrices"].update(sizeof(glm::mat4) * _model_matrices.size(), _model_matrices.data());
+        ssbos["draw_cmds"].update(sizeof(MultiDrawElementsCommand) * _render_cmds.size(), _render_cmds.data());
+        ssbos["skinned_draw_cmds"].update(sizeof(MultiDrawElementsCommand) * _skinned_render_cmds.size(), _skinned_render_cmds.data());
         ssbos["lights"].update(sizeof(Light) * _lights.size(), _lights.data());
         ssbos["viewport"].update(sizeof(ViewportData), &data);
-        ssbos["materials"].update(sizeof(GPUMaterial) * gpu_materials.size(), gpu_materials.data());
+        ssbos["materials"].update(sizeof(GPUMaterial) * _gpu_materials.size(), _gpu_materials.data());
+        ssbos["skinning_transforms"].update(sizeof(glm::mat4) * _skinning_transforms.size(), _skinning_transforms.data());
+
 
         ssbos["viewport"].bind(1);
         ssbos["lights"].bind(2);
@@ -182,11 +154,40 @@ namespace cologne
     void Renderer::submit_render_item(RenderItem item)
     {
         _render_items.emplace_back(item);
+        MultiDrawElementsCommand cmd;
+        //todo: remove extra index step
+        auto mesh = AssetManager::get_mesh_by_index(item.mesh_idx);
+        if (!mesh)
+        {
+            return;
+        }
+        cmd.index_count = mesh->get_indices().size();
+        cmd.instance_count = 1;
+        cmd.first_index = mesh->get_first_index();
+        cmd.base_vertex = mesh->get_base_vertex();
+        cmd.base_instance = item.entity_id;
+
+        _render_cmds.emplace_back(cmd);
+        _model_matrices.emplace_back(item.transform);
+
+        //todo: also remove this extra index step
+        auto mat = AssetManager::get_material_by_index(mesh->get_material_index());
+        if (mat)
+        {
+            mat->ensure_bindless();
+            _gpu_materials.emplace_back(mat->to_gpu_material());
+        }
+        else
+        {
+            _gpu_materials.emplace_back();
+        }
     }
 
     void Renderer::submit_skinned_render_item(SkinnedRenderItem item)
     {
         _skinned_render_items.emplace_back(item);
+        _skinning_transforms.insert(_skinning_transforms.end(), item.bones.begin(), item.bones.end());
+        _skinned_model_matrices.emplace_back(item.transform);
     }
 
     void Renderer::submit_outline_render_item(RenderItem item)
@@ -281,11 +282,11 @@ namespace cologne
 
         glCreateBuffers(1, &_vertex_data_vbo);
         glNamedBufferStorage(_vertex_data_vbo, sizeof(Vertex) * vertices.size(), vertices.data(),
-            GL_MAP_READ_BIT);
+                             GL_MAP_READ_BIT);
 
         glCreateBuffers(1, &_vertex_data_ebo);
         glNamedBufferStorage(_vertex_data_ebo, sizeof(uint32_t) * indices.size(), indices.data(),
-            GL_MAP_READ_BIT);
+                             GL_MAP_READ_BIT);
 
         glCreateVertexArrays(1, &_vertex_data_vao);
 
@@ -318,11 +319,11 @@ namespace cologne
 
         glCreateBuffers(1, &_skinned_bind_pose_vbo);
         glNamedBufferStorage(_skinned_bind_pose_vbo, sizeof(WeightedVertex) * vertices.size(), vertices.data(),
-            GL_MAP_READ_BIT);
+                             GL_MAP_READ_BIT);
 
         glCreateBuffers(1, &_skinned_bind_pose_ebo);
         glNamedBufferStorage(_skinned_bind_pose_ebo, sizeof(uint32_t) * indices.size(), indices.data(),
-            GL_MAP_READ_BIT);
+                             GL_MAP_READ_BIT);
     }
 
     void Renderer::allocate_weighted_vertex_buffer(size_t count)
@@ -330,21 +331,6 @@ namespace cologne
         if (_skinned_vao == 0)
         {
             glCreateVertexArrays(1, &_skinned_vao);
-        }
-        if (_skinned_vbo_size < count * sizeof(Vertex))
-        {
-            if (_skinned_vbo != 0)
-            {
-                glDeleteBuffers(1, &_skinned_vbo);
-            }
-
-            glCreateBuffers(1, &_skinned_vbo);
-            glNamedBufferStorage(_skinned_vbo, sizeof(Vertex) * count, nullptr, GL_MAP_READ_BIT);
-
-            glCreateVertexArrays(1, &_skinned_vao);
-
-            glVertexArrayVertexBuffer(_skinned_vao, 0, _skinned_vbo, 0, sizeof(Vertex));
-            glVertexArrayElementBuffer(_skinned_vao, _skinned_bind_pose_ebo);
 
             glEnableVertexArrayAttrib(_skinned_vao, 0);
             glEnableVertexArrayAttrib(_skinned_vao, 1);
@@ -360,6 +346,24 @@ namespace cologne
             glVertexArrayAttribBinding(_skinned_vao, 1, 0);
             glVertexArrayAttribBinding(_skinned_vao, 2, 0);
             glVertexArrayAttribBinding(_skinned_vao, 3, 0);
+
+            if (_skinned_bind_pose_ebo != 0)
+            {
+                glVertexArrayElementBuffer(_skinned_vao, _skinned_bind_pose_ebo);
+            }
+        }
+        if (_skinned_vbo_size < count * sizeof(Vertex))
+        {
+            if (_skinned_vbo != 0)
+            {
+                glDeleteBuffers(1, &_skinned_vbo);
+            }
+
+            glCreateBuffers(1, &_skinned_vbo);
+            glNamedBufferStorage(_skinned_vbo, sizeof(Vertex) * count, nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+            glVertexArrayVertexBuffer(_skinned_vao, 0, _skinned_vbo, 0, sizeof(Vertex));
+            _skinned_vbo_size = count * sizeof(Vertex);
         }
     }
 
@@ -448,6 +452,12 @@ namespace cologne
         _skinned_render_items.clear();
         _lights.clear();
         _outline_render_items.clear();
+        _render_cmds.clear();
+        _skinned_render_cmds.clear();
+        _gpu_materials.clear();
+        _model_matrices.clear();
+        _skinning_transforms.clear();
+        _skinned_model_matrices.clear();
         _outline_skinned_render_items.clear();
     }
 

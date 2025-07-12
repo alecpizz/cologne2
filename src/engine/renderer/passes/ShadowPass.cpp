@@ -177,27 +177,27 @@ namespace cologne
 
             for (auto &item: _skinned_render_items)
             {
-                if (!item.skinned_model->get_cast_shadows())
-                {
-                    continue;
-                }
-                shader->set_mat4("model", item.transform);
-                if (!item.bones.empty())
-                {
-                    shader->set_bool("is_skinned", true);
-                    shader->set_mat4("bone_matrices", item.bones);
-                }
-                else
-                {
-                    shader->set_bool("is_skinned", false);
-                }
-
-                for (auto &mesh: item.skinned_model->get_meshes())
-                {
-                    Material &mat = item.skinned_model->get_materials()[mesh.get_material_index()];
-                    mat.albedo.bind(ALBEDO_INDEX);
-                    mesh.draw();
-                }
+                // if (!item.skinned_model->get_cast_shadows())
+                // {
+                //     continue;
+                // }
+                // shader->set_mat4("model", item.transform);
+                // if (!item.bones.empty())
+                // {
+                //     shader->set_bool("is_skinned", true);
+                //     shader->set_mat4("bone_matrices", item.bones);
+                // }
+                // else
+                // {
+                //     shader->set_bool("is_skinned", false);
+                // }
+                //
+                // for (auto &mesh: item.skinned_model->get_meshes())
+                // {
+                //     Material &mat = item.skinned_model->get_materials()[mesh.get_material_index()];
+                //     mat.albedo.bind(ALBEDO_INDEX);
+                //     mesh.draw();
+                // }
             }
         }
     }
@@ -276,27 +276,27 @@ namespace cologne
 
             for (auto &item: _skinned_render_items)
             {
-                if (!item.skinned_model->get_cast_shadows())
-                {
-                    continue;
-                }
-                shader->set_mat4("model", item.transform);
-                if (!item.bones.empty())
-                {
-                    shader->set_bool("is_skinned", true);
-                    shader->set_mat4("bone_matrices", item.bones);
-                }
-                else
-                {
-                    shader->set_bool("is_skinned", false);
-                }
-
-                for (auto &mesh: item.skinned_model->get_meshes())
-                {
-                    Material &mat = item.skinned_model->get_materials()[mesh.get_material_index()];
-                    mat.albedo.bind(ALBEDO_INDEX);
-                    mesh.draw(6);
-                }
+                // if (!item.skinned_model->get_cast_shadows())
+                // {
+                //     continue;
+                // }
+                // shader->set_mat4("model", item.transform);
+                // if (!item.bones.empty())
+                // {
+                //     shader->set_bool("is_skinned", true);
+                //     shader->set_mat4("bone_matrices", item.bones);
+                // }
+                // else
+                // {
+                //     shader->set_bool("is_skinned", false);
+                // }
+                //
+                // for (auto &mesh: item.skinned_model->get_meshes())
+                // {
+                //     Material &mat = item.skinned_model->get_materials()[mesh.get_material_index()];
+                //     mat.albedo.bind(ALBEDO_INDEX);
+                //     mesh.draw(6);
+                // }
             }
         }
     }
