@@ -121,6 +121,10 @@ namespace cologne
 
     void Renderer::voxelize_scene()
     {
+        if (!_apply_indirect_lighting)
+        {
+            return;
+        }
         OpenGLDebugScope scope("Renderer::voxelize_scene");
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);

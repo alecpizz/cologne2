@@ -4,6 +4,7 @@
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/core/Engine.h>
 #include <engine/editor/Editor.h>
+#include <engine/renderer/OpenGLDebugScope.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Shader.h>
 #include <engine/renderer/types/SSBO.h>
@@ -12,6 +13,7 @@ namespace cologne
 {
     void Renderer::compute_skinning_pass()
     {
+        OpenGLDebugScope scope("Renderer::compute_skinning");
         auto shader = get_shader_by_name("compute_skinning");
         auto transforms = get_ssbo_by_name("skinning_transforms");
         if (!shader)
@@ -55,6 +57,7 @@ namespace cologne
             uint32_t work_group_size = 128;
             uint32_t x = (mesh->get_vertices().size() + work_group_size - 1) / work_group_size;
             glDispatchCompute(x, 1, 1);
+            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_UNIFORM_BARRIER_BIT);
 
             MultiDrawElementsCommand cmd{};
             cmd.index_count = mesh->get_indices().size();
@@ -68,5 +71,8 @@ namespace cologne
             base_output_vertex += mesh->get_vertices().size();
             base_transform_index += render_item.bones.size();
         }
+
+        get_ssbo_by_name("skinned_draw_cmds")->update(sizeof(MultiDrawElementsCommand) * _skinned_render_cmds.size(), _skinned_render_cmds.data());
+        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_UNIFORM_BARRIER_BIT);
     }
 }

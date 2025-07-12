@@ -60,7 +60,7 @@ namespace cologne
             if (ImGui::BeginDragDropSource())
             {
                 std::filesystem::path relative_path(path);
-                const auto item_path = relative_path.c_str();
+                const auto item_path = relative_path.string().c_str();
                 ImGui::SetDragDropPayload("ASSET_BROWSER_ENTRY", item_path, strlen(item_path) * sizeof(char));
                 ImGui::Text("%s", item_path);
                 ImGui::EndDragDropSource();

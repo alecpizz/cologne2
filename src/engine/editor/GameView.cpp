@@ -114,7 +114,7 @@ namespace cologne
                         if (fs_path.parent_path().filename().string() == "models")
                         {
                             Engine::get_scene()->create_static_model_entities(
-                                fs_path.stem().c_str(), TransformComponent(), true);
+                                fs_path.stem().string().c_str(), TransformComponent(), true);
                         }
                         else if (fs_path.parent_path().filename().string() == "skinned_models")
                         {

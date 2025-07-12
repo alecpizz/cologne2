@@ -73,12 +73,12 @@ namespace cologne
         return _aabb;
     }
 
-    int32_t SkinnedMesh::get_first_index() const
+    uint32_t SkinnedMesh::get_first_index() const
     {
         return _first_index;
     }
 
-    int32_t SkinnedMesh::get_base_vertex() const
+    uint32_t SkinnedMesh::get_base_vertex() const
     {
         return _base_vertex;
     }
