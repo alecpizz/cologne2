@@ -16,15 +16,15 @@ struct WeightedVertex
     float normal[3];
     float uv[2];
     float tangent[3];
-    int boneID[4];
+    int bone_id[4];
     float weight[4];
 };
 
-layout (std430, binding = 0) buffer outputVertexBuffer
+layout (std430, binding = 0) writeonly buffer output_verts
 {
     Vertex output_vertices[];
 };
-layout (std430, binding = 1) buffer inputVertexBuffer
+layout (std430, binding = 1) readonly buffer input_verts
 {
     WeightedVertex input_vertices[];
 };
@@ -64,10 +64,10 @@ void main()
     float u = input_vertices[index + base_input_vertex].uv[0];
     float v = input_vertices[index + base_input_vertex].uv[1];
 
-    int bone0 = input_vertices[index + base_input_vertex].boneID[0];
-    int bone1 = input_vertices[index + base_input_vertex].boneID[1];
-    int bone2 = input_vertices[index + base_input_vertex].boneID[2];
-    int bone3 = input_vertices[index + base_input_vertex].boneID[3];
+    int bone0 = input_vertices[index + base_input_vertex].bone_id[0];
+    int bone1 = input_vertices[index + base_input_vertex].bone_id[1];
+    int bone2 = input_vertices[index + base_input_vertex].bone_id[2];
+    int bone3 = input_vertices[index + base_input_vertex].bone_id[3];
 
     float weight0 = input_vertices[index + base_input_vertex].weight[0];
     float weight1 = input_vertices[index + base_input_vertex].weight[1];
@@ -101,9 +101,9 @@ void main()
 
     totalNormal.xyz = normalize(totalNormal.xyz);
 
-    output_vertices[index + base_output_vertex].position[0] = vertex_position.x;
-    output_vertices[index + base_output_vertex].position[1] = vertex_position.y;
-    output_vertices[index + base_output_vertex].position[2] = vertex_position.z;
+    output_vertices[index + base_output_vertex].position[0] = totalPosition.x;
+    output_vertices[index + base_output_vertex].position[1] = totalPosition.y;
+    output_vertices[index + base_output_vertex].position[2] = totalPosition.z;
 
     output_vertices[index + base_output_vertex].normal[0] = totalNormal.x;
     output_vertices[index + base_output_vertex].normal[1] = totalNormal.y;
