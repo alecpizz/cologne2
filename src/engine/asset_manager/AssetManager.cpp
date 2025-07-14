@@ -145,7 +145,7 @@ namespace cologne::AssetManager
                 mesh.material_index = starting_idx + mesh.material_index;
             }
 
-            std::vector<int32_t> mesh_indices;
+            std::vector<int32_t> skinned_mesh_indices;
             for (auto &skinned_mesh: skinned_model_data.meshes)
             {
                 skinned_mesh.base_vertex = base_weighted_vertex;
@@ -157,16 +157,16 @@ namespace cologne::AssetManager
                 base_weighted_vertex += skinned_mesh.vertices.size();
                 first_weighted_index += skinned_mesh.indices.size();
                 skinned_meshes.emplace_back(skinned_mesh);
-                mesh_indices.emplace_back(skinned_mesh_offset);
+                skinned_mesh_indices.emplace_back(skinned_mesh_offset);
                 skinned_mesh_offset++;
             }
-            skinned_models.emplace_back(mesh_indices, skinned_model_data.name, skinned_model_data.aabb_min,
+            skinned_models.emplace_back(skinned_mesh_indices, skinned_model_data.name, skinned_model_data.aabb_min,
                                         skinned_model_data.aabb_max, skinned_model_data.skeleton);
             animations.insert(animations.end(),
                               skinned_model_data.animations.begin(), skinned_model_data.animations.end());
         }
 
-        Engine::get_renderer()->upload_weighted_vertex_data(weighted_vertices, indices);
+        Engine::get_renderer()->upload_weighted_vertex_data(weighted_vertices, weighted_indices);
 
         //slow texture upload step.
         for (auto &m: materials)

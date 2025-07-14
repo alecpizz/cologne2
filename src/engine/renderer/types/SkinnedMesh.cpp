@@ -11,8 +11,8 @@ namespace cologne
     SkinnedMesh::SkinnedMesh(const SkinnedMeshData& mesh_data)
     {
         _name = mesh_data.name;
-        _vertices.insert(_vertices.end(), mesh_data.vertices.begin(), mesh_data.vertices.end());
-        _indices.insert(_indices.end(), mesh_data.indices.begin(), mesh_data.indices.end());
+        _vertices = mesh_data.vertices;
+        _indices = mesh_data.indices;
         _indices_count = static_cast<uint32_t>(_indices.size());
         glCreateBuffers(1, &_vbo);
         glNamedBufferStorage(_vbo, sizeof(WeightedVertex) * _vertices.size(),

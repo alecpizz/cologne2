@@ -105,6 +105,7 @@ namespace cologne
         ssbos["draw_cmds"] = SSBO(sizeof(MultiDrawElementsCommand) * 128, GL_DYNAMIC_DRAW);
         ssbos["skinned_draw_cmds"] = SSBO(sizeof(MultiDrawElementsCommand) * 128, GL_DYNAMIC_DRAW);
         ssbos["materials"] = SSBO(sizeof(GPUMaterial) * 128, GL_DYNAMIC_DRAW);
+        ssbos["skinned_materials"] = SSBO(sizeof(GPUMaterial) * 128, GL_DYNAMIC_DRAW);
         ssbos["skinning_transforms"] = SSBO(sizeof(glm::mat4) * 2048, GL_DYNAMIC_DRAW);
     }
 
@@ -126,6 +127,7 @@ namespace cologne
         ssbos["lights"].update(sizeof(Light) * _lights.size(), _lights.data());
         ssbos["viewport"].update(sizeof(ViewportData), &data);
         ssbos["materials"].update(sizeof(GPUMaterial) * _gpu_materials.size(), _gpu_materials.data());
+        ssbos["skinned_materials"].update(sizeof(GPUMaterial) * _skinned_gpu_materials.size(), _skinned_gpu_materials.data());
         ssbos["skinning_transforms"].update(sizeof(glm::mat4) * _skinning_transforms.size(), _skinning_transforms.data());
 
 
@@ -185,9 +187,24 @@ namespace cologne
 
     void Renderer::submit_skinned_render_item(SkinnedRenderItem item)
     {
+        auto mesh = AssetManager::get_skinned_mesh_by_index(item.mesh_idx);
+        if (!mesh)
+        {
+            return;
+        }
         _skinned_render_items.emplace_back(item);
         _skinning_transforms.insert(_skinning_transforms.end(), item.bones.begin(), item.bones.end());
         _skinned_model_matrices.emplace_back(item.transform);
+        auto mat = AssetManager::get_material_by_index(mesh->get_material_index());
+        if (mat)
+        {
+            mat->ensure_bindless();
+            _skinned_gpu_materials.emplace_back(mat->to_gpu_material());
+        }
+        else
+        {
+            _skinned_gpu_materials.emplace_back();
+        }
     }
 
     void Renderer::submit_outline_render_item(RenderItem item)
@@ -455,6 +472,7 @@ namespace cologne
         _render_cmds.clear();
         _skinned_render_cmds.clear();
         _gpu_materials.clear();
+        _skinned_gpu_materials.clear();
         _model_matrices.clear();
         _skinning_transforms.clear();
         _skinned_model_matrices.clear();

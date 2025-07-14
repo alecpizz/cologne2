@@ -78,7 +78,7 @@ namespace cologne
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, get_vertex_data_ebo());
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, get_ssbo_by_name("draw_cmds")->get_handle());
         get_ssbo_by_name("viewport")->bind(1);
-       get_ssbo_by_name("lights")->bind(2);
+        get_ssbo_by_name("lights")->bind(2);
         get_ssbo_by_name("model_matrices")->bind(4);
         get_ssbo_by_name("materials")->bind(5);
         //multi draw_indirect
@@ -89,6 +89,7 @@ namespace cologne
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, get_skinned_bind_pose_ebo());
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, get_ssbo_by_name("skinned_draw_cmds")->get_handle());
         get_ssbo_by_name("skinned_model_matrices")->bind(4);
+        get_ssbo_by_name("skinned_materials")->bind(5);
         glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, _skinned_render_cmds.size(), 0);
 
         glBindVertexArray(0);

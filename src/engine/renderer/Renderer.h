@@ -168,6 +168,7 @@ namespace cologne
         std::vector<glm::mat4> _skinning_transforms;
         std::vector<glm::mat4> _skinned_model_matrices;
         std::vector<GPUMaterial> _gpu_materials;
+        std::vector<GPUMaterial> _skinned_gpu_materials;
         std::vector<Light> _lights;
 
         //global buffers
