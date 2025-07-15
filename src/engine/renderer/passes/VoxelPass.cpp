@@ -121,10 +121,6 @@ namespace cologne
 
     void Renderer::voxelize_scene()
     {
-        if (!_apply_indirect_lighting)
-        {
-            return;
-        }
         OpenGLDebugScope scope("Renderer::voxelize_scene");
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
@@ -134,6 +130,18 @@ namespace cologne
         glViewport(0, 0, _voxel_data.voxel_dimensions, _voxel_data.voxel_dimensions);
         glClearTexImage(_voxel_texture_color, 0, GL_RGBA, GL_FLOAT, glm::value_ptr(glm::vec4(0.0f)));
         glClearTexImage(_voxel_texture_normal, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, glm::value_ptr(glm::uvec4(0)));
+        auto cull_shader = get_shader_by_name("frustum_culling");
+        cull_shader->bind();
+        cull_shader->set_int("non_cull_amount", 1);
+        get_ssbo_by_name("draw_cmds")->bind(6);
+        const int work_group_size = 64;
+        cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
+        cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
+        get_ssbo_by_name("skinned_draw_cmds")->bind(6);
+        cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
+        cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
+
+
         auto shader = get_shader_by_name("voxelize");
         shader->bind();
         shader->set_int("num_lights", _lights.size());
@@ -146,47 +154,27 @@ namespace cologne
         auto max = bounds.max;
         shader->set_vec3("grid_min", (min));
         shader->set_vec3("grid_max", (max));
-        get_ssbo_by_name("model_matrices")->bind(4);
-        get_ssbo_by_name("materials")->bind(5);
+
         glBindImageTexture(6, _voxel_texture_color, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
         glBindImageTexture(7, _voxel_texture_normal, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
-        // glBindTextureUnit(7, _shadow_depth);
-
-
-        //TODO: undo frustum culling when we get here
-        //UNCULL ME
-        //UNCULL ME
-        //UNCULL ME
-        //UNCULL ME
-        //UNCULL ME
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, get_vertex_data_ebo());
-        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, get_ssbo_by_name("draw_cmds")->get_handle());
-        glBindVertexArray(get_vertex_data_vao());
+        get_ssbo_by_name("lights")->bind(2);
         for (int idx = 0; idx < 3; idx++)
         {
             shader->set_int("render_axis", idx);
-            glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, _render_items.size(), 0);
+            render_geometry();
+            render_skinned_geometry();
         }
+        //
+        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, get_skinned_bind_pose_ebo());
+        // glBindBuffer(GL_DRAW_INDIRECT_BUFFER, get_ssbo_by_name("skinned_draw_cmds")->get_handle());
+        // glBindVertexArray(get_skinned_vao());
+        // for (int idx = 0; idx < 3; idx++)
+        // {
+        //     shader->set_int("render_axis", idx);
+        //     glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, _skinned_render_items.size(), 0);
+        // }
+        //
 
-
-        //uUNCULL ME
-        //uUNCULL ME
-        //uUNCULL ME
-        //uUNCULL ME
-        //uUNCULL ME
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, get_skinned_bind_pose_ebo());
-        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, get_ssbo_by_name("skinned_draw_cmds")->get_handle());
-        glBindVertexArray(get_skinned_vao());
-        for (int idx = 0; idx < 3; idx++)
-        {
-            shader->set_int("render_axis", idx);
-            glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, _skinned_render_items.size(), 0);
-        }
-
-
-        glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 
         auto mipmap_shader = get_shader_by_name("mipmap");
         mipmap_shader->bind();

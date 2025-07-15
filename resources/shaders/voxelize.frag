@@ -58,7 +58,7 @@ in vec2 TexCoords;
 in vec4 FragPos;
 in mat3 TBN;
 in vec4 FragPosLightSpace[8];
-in flat uint DrawID;
+flat in uint DrawID;
 
 bool is_inside_clipspace(const vec3 p)
 {
@@ -208,7 +208,7 @@ vec4 pbr()
         {
             L = normalize(-lights[i].direction.xyz);
             radiance = lights[i].color.rgb * lights[i].strength * 4.0f;
-            shadow = 1.0 - dir_shadow_calc(lights[i], lights[i].light_space_matrix * FragPos);
+            shadow = 1.0 - dir_shadow_calc(lights[i], FragPosLightSpace[i]);
         }
         else if (lights[i].type == POINT)
         {
@@ -234,7 +234,7 @@ vec4 pbr()
             float epsilon   = lights[i].inner_cutoff - lights[i].outer_cutoff;
             float intensity = smoothstep(0.0, 1.0, (theta - lights[i].outer_cutoff) / epsilon);
             radiance = lights[i].color.rgb * lights[i].strength * attenuation * intensity;
-            shadow = 1.0 - dir_shadow_calc(lights[i], lights[i].light_space_matrix * FragPos);
+            shadow = 1.0 - dir_shadow_calc(lights[i], FragPosLightSpace[i]);
         }
 
         vec3 H = normalize(V + L);
@@ -261,7 +261,6 @@ vec4 pbr()
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    vec3 ambient = vec3(0.02) * albedo;
     const vec3 ambient_light_color = vec3(1.0, 0.98, 0.94);
     const float ambient_strength = 0.05f;
     vec3 ambient_color = albedo * ambient_light_color;

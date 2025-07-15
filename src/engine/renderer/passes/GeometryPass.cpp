@@ -80,7 +80,6 @@ namespace cologne
 
         //frustum cull me NOW!
         get_ssbo_by_name("viewport")->bind(1);
-        get_ssbo_by_name("lights")->bind(2);
 
         render_geometry();
         render_skinned_geometry();

@@ -14,13 +14,6 @@ flat in uint EntityID;
 flat in uint DrawID;
 in mat3 TBN;
 
-layout (binding = 0) uniform sampler2D texture_albedo;
-layout (binding = 1) uniform sampler2D texture_ao;
-layout (binding = 2) uniform sampler2D texture_metallic;
-layout (binding = 3) uniform sampler2D texture_roughness;
-layout (binding = 4) uniform sampler2D texture_normal;
-layout (binding = 5) uniform sampler2D texture_emission;
-
 layout (binding = 1, std430) restrict readonly buffer viewportdata
 {
     mat4 projection;
@@ -48,8 +41,6 @@ layout (binding = 5, std430) restrict readonly buffer materialdata
     Material materials[];
 };
 
-uniform float metallic = -1.0f;
-uniform float roughness = -1.0f;
 uniform uint entity_id = 0;
 
 vec4 dither_float(vec4 in_pos, vec4 screen_position)
@@ -69,51 +60,26 @@ vec4 dither_float(vec4 in_pos, vec4 screen_position)
 void main()
 {
     Material mat = materials[DrawID];
-    //temp branching
-    vec4 albedo = texture(texture_albedo, TexCoords).rgba;
-    if(mat.albedo != uvec2(0))
-    {
-        albedo = texture(sampler2D(mat.albedo), TexCoords).rgba;
-    }
+    vec4 albedo = texture(sampler2D(mat.albedo), TexCoords).rgba;
     if (albedo.a < 0.5)
     {
         discard;
     }
     gEntityId = EntityID;
     gPosition = vec4(FragPos, 1.0);
-    vec3 N = texture2D(texture_normal, TexCoords).rgb;
-    if(mat.normal != uvec2(0))
-    {
-        N = texture(sampler2D(mat.normal), TexCoords).rgb;
-    }
+    vec3 N = texture(sampler2D(mat.normal), TexCoords).rgb;
     N = N * 2.0 - 1.0;
     N = normalize(TBN * N);
     gNormal = vec4(N, 1.0);
 
-    gEmission = texture(texture_emission, TexCoords).rgb;
-    if(mat.emission != uvec2(0))
-    {
-        gEmission = texture(sampler2D(mat.emission), TexCoords).rgb;
-    }
+    gEmission = texture(sampler2D(mat.emission), TexCoords).rgb;
     gl_FragDepth = gl_FragCoord.z;
-    gORM.r = texture(texture_metallic, TexCoords).b;
-    gORM.r *= metallic;
-    if(mat.metallic != uvec2(0))
-    {
-        gORM.r = texture(sampler2D(mat.metallic), TexCoords).b;
-        gORM.r *= metallic;
-    }
+    gORM.r = texture(sampler2D(mat.metallic), TexCoords).b;
+    gORM.r *= mat.metallic_mod;
 
-    gORM.g = texture(texture_roughness, TexCoords).g;
-    if(mat.roughness != uvec2(0))
-    {
-        gORM.g = texture(sampler2D(mat.roughness), TexCoords).g;
-    }
-    gORM.b = texture(texture_ao, TexCoords).r;
-    if(mat.ao != uvec2(0))
-    {
-        gORM.b = texture(sampler2D(mat.ao), TexCoords).b;
-    }
+    gORM.g = texture(sampler2D(mat.roughness), TexCoords).g;
+
+    gORM.b = texture(sampler2D(mat.ao), TexCoords).b;
 
     bool allow_dither = false;
     if (allow_dither)

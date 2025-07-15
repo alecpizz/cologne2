@@ -57,7 +57,7 @@ void main()
     mat4 model = model_matrices[gl_DrawID];
     DrawID = gl_DrawID;
     vec4 pos = model * vec4(position, 1.0f);
-    for(int i = 0; i < 8; i++)
+    for(int i = 0; i < num_lights; i++)
     {
         FragPosLightSpace[i] = lights[i].light_space_matrix * vec4(pos.xyz, 1.0f);
     }
