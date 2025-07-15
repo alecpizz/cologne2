@@ -79,59 +79,11 @@ namespace cologne
         shader->bind();
 
         //frustum cull me NOW!
-        glBindVertexArray(get_vertex_data_vao());
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, get_vertex_data_ebo());
-        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, get_ssbo_by_name("draw_cmds")->get_handle());
         get_ssbo_by_name("viewport")->bind(1);
         get_ssbo_by_name("lights")->bind(2);
-        get_ssbo_by_name("model_matrices")->bind(4);
-        get_ssbo_by_name("materials")->bind(5);
-        //multi draw_indirect
-        glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, _render_cmds.size(), 0);
 
-
-        glBindVertexArray(get_skinned_vao());
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, get_skinned_bind_pose_ebo());
-        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, get_ssbo_by_name("skinned_draw_cmds")->get_handle());
-        get_ssbo_by_name("skinned_model_matrices")->bind(4);
-        get_ssbo_by_name("skinned_materials")->bind(5);
-        glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, _skinned_render_cmds.size(), 0);
-
-        glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
-
-        // shader = get_shader_by_name("skinned_gbuffer");
-        // shader->bind();
-        //
-        // for (auto &[skinned_model, tr, bones, id]: _skinned_render_items)
-        // {
-        //     shader->set_mat4("model", tr);
-        //     shader->set_uint("entity_id", id);
-        //     if (!bones.empty())
-        //     {
-        //         shader->set_mat4("bone_matrices", bones);
-        //     }
-        //     else
-        //     {
-        //         static std::vector<glm::mat4> empty_bones(200, glm::mat4(1.0f));
-        //         shader->set_mat4("bone_matrices", empty_bones);
-        //     }
-        //     for (auto &mesh: skinned_model->get_meshes())
-        //     {
-        //         Material &mat = skinned_model->get_materials()[mesh.get_material_index()];
-        //         mat.bind_all();
-        //         shader->set_float("metallic", mat.metallic_override);
-        //         shader->set_float("roughness", mat.metallic_override);
-        //         mesh.draw();
-        //         glBindTextureUnit(ALBEDO_INDEX, 0);
-        //         glBindTextureUnit(AO_INDEX, 0);
-        //         glBindTextureUnit(METALLIC_INDEX, 0);
-        //         glBindTextureUnit(ROUGHNESS_INDEX, 0);
-        //         glBindTextureUnit(NORMAL_INDEX, 0);
-        //         glBindTextureUnit(EMISSION_INDEX, 0);
-        //     }
-        // }
+        render_geometry();
+        render_skinned_geometry();
 
         shader = get_shader_by_name("particle_render");
         shader->bind();

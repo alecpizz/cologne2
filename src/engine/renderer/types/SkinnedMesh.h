@@ -19,7 +19,6 @@ namespace cologne
         uint32_t get_first_index() const;
         uint32_t get_base_vertex() const;
         uint32_t get_material_index() const;
-        void draw(int32_t count = 1) const;
         uint32_t get_vertex_count() const;
         uint32_t get_indices_count() const;
 
@@ -33,8 +32,5 @@ namespace cologne
         uint32_t _vertex_count = 0;
         uint32_t _base_vertex = 0;
         uint32_t _first_index = 0;
-        uint32_t _vbo = 0;
-        uint32_t _ibo = 0;
-        uint32_t _vao = 0;
     };
 }

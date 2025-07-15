@@ -46,6 +46,12 @@ namespace cologne
         anim.play_base_animation(AssetManager::get_animation_by_name("man_Idle"));
         anim.create_ragdoll(man);
 
+        Entity man2 = create_entity("man2");
+        man2.get_component<TransformComponent>().position = glm::vec3(0.0f, -0.25f, 2.5f);
+        man2.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("man"));
+        AnimatorComponent& anim3 = man2.add_component<AnimatorComponent>("man");
+        anim3.play_base_animation(AssetManager::get_animation_by_name("man_Idle"));
+
         Entity revolver = create_entity("deagle");
         revolver.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
         AnimatorComponent &anim2 = revolver.add_component<AnimatorComponent>("deagle");
@@ -57,8 +63,8 @@ namespace cologne
 
         Entity viewModel = create_entity("viewmodel");
         viewModel.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("vsk"));
-        auto &anim3 = viewModel.add_component<AnimatorComponent>("vsk");
-        anim3.play_base_animation(AssetManager::get_animation_by_name("vsk_Idle"));
+        auto &anim4 = viewModel.add_component<AnimatorComponent>("vsk");
+        anim4.play_base_animation(AssetManager::get_animation_by_name("vsk_Idle"));
         // viewModel.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
         // viewModel.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("deagle_Rig|Rig|MK_Idle"));
         viewModel.add_component<ViewmodelComponent>();

@@ -9,6 +9,7 @@
 
 namespace cologne
 {
+    struct TransformComponent;
     class Entity
     {
     public:
@@ -64,6 +65,8 @@ namespace cologne
             }
             _scene->_registry.remove<T>(_entity_handle);
         }
+
+        TransformComponent& get_transform();
 
         explicit operator bool() const { return _entity_handle != entt::null; }
         explicit operator uint32_t() const { return (uint32_t(_entity_handle)); }

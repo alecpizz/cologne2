@@ -38,7 +38,7 @@ namespace cologne
 
         void draw_text(const char *text, glm::vec3 position, glm::vec4 color, float size);
 
-        void render_scene();
+        void render_frame();
 
         void window_resized(uint32_t width, uint32_t height);
 
@@ -91,6 +91,10 @@ namespace cologne
 
         Renderer();
 
+        void render_geometry();
+
+        void render_skinned_geometry();
+
         void init();
 
         void init_shaders();
@@ -108,8 +112,6 @@ namespace cologne
         void dir_shadow_pass();
 
         void shadow_pass();
-
-        void dumb_voxel_extra_dir_shadow_pass();
 
         void point_shadow_pass();
 

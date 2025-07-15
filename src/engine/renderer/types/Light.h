@@ -10,7 +10,6 @@ namespace cologne
         Spot = 2
     };
 
-#pragma pack(push, 1)
     struct Light
     {
         Light(LightComponent light_component, TransformComponent transform)
@@ -60,5 +59,4 @@ namespace cologne
         float inner_cutoff = 12.5f;
         glm::mat4 light_space_matrix = glm::mat4(1.0f);
     };
-#pragma pack(pop)
 }

@@ -54,22 +54,10 @@ namespace cologne
                                             RESOURCES_PATH "shaders/gbuffer.frag");
         shaders["skybox"] = Shader(RESOURCES_PATH "shaders/skybox.vert",
                                    RESOURCES_PATH "shaders/skybox.frag");
-        shaders["shadowmap"] = Shader(RESOURCES_PATH "shaders/shadowmap2.vert",
-                                      RESOURCES_PATH "shaders/shadowmap2.frag",
-                                      RESOURCES_PATH "shaders/shadowmap2.geom");
-        shaders["shadowmap_skinned"] = Shader(RESOURCES_PATH "shaders/shadowmap_skinned.vert",
-                                              RESOURCES_PATH "shaders/shadowmap2.frag",
-                                              RESOURCES_PATH "shaders/shadowmap2.geom");
-        shaders["probe_debug"] = Shader(RESOURCES_PATH "shaders/probe_debug.vert",
-                                        RESOURCES_PATH "shaders/probe_debug.frag");
-        // shaders["probe_lit"] = Shader(RESOURCES_PATH "shaders/probe_lit.comp");
-
         shaders["voxelize"] = Shader(RESOURCES_PATH "shaders/voxelize.vert",
                                      RESOURCES_PATH "shaders/voxelize.frag");
         shaders["voxelize_debug"] = Shader(RESOURCES_PATH "shaders/vxgi/voxel_debug.comp");
 
-        shaders["world_pos_shader"] = Shader(RESOURCES_PATH "shaders/world_pos.vert",
-                                             RESOURCES_PATH "shaders/world_pos.frag");
         shaders["mipmap"] = Shader(RESOURCES_PATH "shaders/mipmap.comp");
         shaders["dir_shadow"] = Shader(RESOURCES_PATH "shaders/shadows/dir_shadow.vert",
                                        RESOURCES_PATH "shaders/shadows/dir_shadow.frag");
@@ -94,6 +82,7 @@ namespace cologne
         shaders["outline_composite"] = Shader(RESOURCES_PATH "shaders/outline/outline_composite.comp");
         shaders["indirect_upsample"] = Shader(RESOURCES_PATH "shaders/vxgi/indirect_upsample.comp");
         shaders["compute_skinning"] = Shader(RESOURCES_PATH "shaders/skinning.comp");
+        shaders["frustum_culling"] = Shader(RESOURCES_PATH "shaders/culling/frustum_cull.comp");
     }
 
     void Renderer::init_ssbos()
@@ -439,7 +428,7 @@ namespace cologne
                                  glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), .6f);
     }
 
-    void Renderer::render_scene()
+    void Renderer::render_frame()
     {
         if (cologne::Input::key_pressed(Input::Key::H))
         {
@@ -553,5 +542,31 @@ namespace cologne
         OpenGLDebugScope scope("initialization");
         DebugScope scope2(__PRETTY_FUNCTION__);
         init();
+    }
+
+    void Renderer::render_geometry()
+    {
+        get_ssbo_by_name("model_matrices")->bind(4);
+        get_ssbo_by_name("materials")->bind(5);
+        glBindVertexArray(get_vertex_data_vao());
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, get_vertex_data_ebo());
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, get_ssbo_by_name("draw_cmds")->get_handle());
+        glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, _render_cmds.size(), 0);
+        glBindVertexArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+    }
+
+    void Renderer::render_skinned_geometry()
+    {
+        get_ssbo_by_name("skinned_model_matrices")->bind(4);
+        glBindVertexArray(get_skinned_vao());
+        get_ssbo_by_name("skinned_materials")->bind(5);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, get_skinned_bind_pose_ebo());
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, get_ssbo_by_name("skinned_draw_cmds")->get_handle());
+        glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, _skinned_render_cmds.size(), 0);
+        glBindVertexArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
     }
 }

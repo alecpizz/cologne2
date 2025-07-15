@@ -1,0 +1,35 @@
+#version 460 core
+
+layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+
+struct DrawElementsCmd
+{
+    uint count;
+    uint instance_count;
+    uint first_index;
+    uint base_vertex;
+    uint base_instance;
+};
+
+uniform int non_cull_amount = 1;
+
+layout (binding = 4, std430) restrict readonly buffer model_mat_buffer
+{
+    mat4[] model_matrices;
+};
+
+layout (binding = 6, std430) restrict buffer draw_cmds_buffer
+{
+    DrawElementsCmd draw_cmds[];
+};
+
+void main()
+{
+    uint mesh_idx = gl_GlobalInvocationID.x;
+    if(mesh_idx >= draw_cmds.length())
+    {
+        return;
+    }
+
+    draw_cmds[mesh_idx].instance_count = non_cull_amount;
+}
