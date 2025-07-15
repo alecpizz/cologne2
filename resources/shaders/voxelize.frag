@@ -179,7 +179,6 @@ vec4 pbr()
 {
     Material mat = materials[DrawID];
     vec4 albedo_texture = texture2D(sampler2D(mat.albedo), TexCoords);
-    //    vec3 albedo = albedo_texture.rgb;
     vec3 albedo = pow(albedo_texture.rgb, vec3(2.2));
     float metallic = texture2D(sampler2D(mat.metallic), TexCoords).r;
     float roughness = texture2D(sampler2D(mat.roughness), TexCoords).g;

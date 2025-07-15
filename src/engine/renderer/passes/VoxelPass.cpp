@@ -164,18 +164,7 @@ namespace cologne
             render_geometry();
             render_skinned_geometry();
         }
-        //
-        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, get_skinned_bind_pose_ebo());
-        // glBindBuffer(GL_DRAW_INDIRECT_BUFFER, get_ssbo_by_name("skinned_draw_cmds")->get_handle());
-        // glBindVertexArray(get_skinned_vao());
-        // for (int idx = 0; idx < 3; idx++)
-        // {
-        //     shader->set_int("render_axis", idx);
-        //     glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, _skinned_render_items.size(), 0);
-        // }
-        //
-
-
+        
         auto mipmap_shader = get_shader_by_name("mipmap");
         mipmap_shader->bind();
         int current_height = _voxel_data.voxel_dimensions;

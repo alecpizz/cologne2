@@ -55,7 +55,6 @@ vec3 MapToZeroOne(vec3 value, vec3 rangeMin, vec3 rangeMax)
 void main()
 {
     mat4 model = model_matrices[gl_DrawID];
-    DrawID = gl_DrawID;
     vec4 pos = model * vec4(position, 1.0f);
     for(int i = 0; i < num_lights; i++)
     {
@@ -79,5 +78,5 @@ void main()
     {
         gl_Position = gl_Position.xzyw;
     }
-
+    DrawID = gl_DrawID;
 }

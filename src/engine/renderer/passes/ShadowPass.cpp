@@ -182,7 +182,7 @@ namespace cologne
     {
         OpenGLDebugScope scope("Renderer::point_shadow_pass");
         auto point_shadow_shader = get_shader_by_name("point_shadow");
-        // auto cull_shader = get_shader_by_name("frustum_culling");
+        auto cull_shader = get_shader_by_name("frustum_culling");
 
 
         for (auto &light: _lights)
