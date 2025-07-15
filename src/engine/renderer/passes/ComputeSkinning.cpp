@@ -32,7 +32,7 @@ namespace cologne
             {
                 continue;
             }
-            total_vertex_count += mesh->get_vertices().size();
+            total_vertex_count += mesh->get_vertex_count();
         }
         allocate_weighted_vertex_buffer(total_vertex_count);
 
@@ -49,24 +49,24 @@ namespace cologne
             {
                 continue;
             }
-            shader->set_int("vertex_count", mesh->get_vertices().size());
+            shader->set_int("vertex_count", mesh->get_vertex_count());
             shader->set_int("base_input_vertex", mesh->get_base_vertex());
             shader->set_int("base_output_vertex", base_output_vertex);
             shader->set_int("base_transform_index", base_transform_index);
 
             uint32_t work_group_size = 128;
-            uint32_t x = (mesh->get_vertices().size() + work_group_size - 1) / work_group_size;
+            uint32_t x = (mesh->get_vertex_count() + work_group_size - 1) / work_group_size;
             glDispatchCompute(x, 1, 1);
 
             MultiDrawElementsCommand cmd{};
-            cmd.index_count = mesh->get_indices().size();
+            cmd.index_count = mesh->get_indices_count();
             cmd.instance_count = 1;
             cmd.first_index = mesh->get_first_index();
             cmd.base_vertex = base_output_vertex;
             cmd.base_instance = render_item.entity_id;
             _skinned_render_cmds.emplace_back(cmd);
 
-            base_output_vertex += mesh->get_vertices().size();
+            base_output_vertex += mesh->get_vertex_count();
             base_transform_index += render_item.bones.size();
         }
 

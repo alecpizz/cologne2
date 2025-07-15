@@ -9,6 +9,7 @@ uniform int render_axis;
 
 uniform vec3 grid_min;
 uniform vec3 grid_max;
+uniform int num_lights = 8;
 
 out vec4 FragPos;
 out vec2 TexCoords;
@@ -56,7 +57,7 @@ void main()
     mat4 model = model_matrices[gl_DrawID];
     DrawID = gl_DrawID;
     vec4 pos = model * vec4(position, 1.0f);
-    for(int i = 0; i < lights.length(); i++)
+    for(int i = 0; i < 8; i++)
     {
         FragPosLightSpace[i] = lights[i].light_space_matrix * vec4(pos.xyz, 1.0f);
     }

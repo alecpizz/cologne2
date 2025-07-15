@@ -51,17 +51,9 @@ namespace cologne
         _aabb = AABB(mesh_data.aabb_min, mesh_data.aabb_max);
         _first_index = mesh_data.first_index;
         _base_vertex = mesh_data.base_vertex;
+        _vertex_count = _vertices.size();
     }
 
-    std::vector<WeightedVertex> SkinnedMesh::get_vertices() const
-    {
-        return _vertices;
-    }
-
-    std::vector<uint32_t> SkinnedMesh::get_indices() const
-    {
-        return _indices;
-    }
 
     std::string SkinnedMesh::get_name() const
     {
@@ -102,5 +94,15 @@ namespace cologne
         glBindVertexArray(_vao);
         glDrawElementsInstanced(GL_TRIANGLES, _indices_count, GL_UNSIGNED_INT, 0, count);
         glBindVertexArray(0);
+    }
+
+    uint32_t SkinnedMesh::get_vertex_count() const
+    {
+        return _vertex_count;
+    }
+
+    uint32_t SkinnedMesh::get_indices_count() const
+    {
+        return _indices_count;
     }
 }

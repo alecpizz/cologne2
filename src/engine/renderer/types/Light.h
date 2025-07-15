@@ -32,6 +32,7 @@ namespace cologne
             {
                 shadow_handle = 1;
             }
+            light_space_matrix = glm::mat4(1.0f);
         }
 
         Light() = default;

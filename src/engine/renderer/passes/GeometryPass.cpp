@@ -67,9 +67,14 @@ namespace cologne
         auto fbo = get_framebuffer_by_name("gbuffer");
         fbo->bind();
         fbo->set_viewport();
-        glDisable(GL_DITHER);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        fbo->clear_attachment("position", 0.0f, 0.0f, 0.0f, 0.0f);
+        fbo->clear_attachment("normal", 0.0f, 0.0f, 0.0f, 0.0f);
+        fbo->clear_attachment("albedo", 0, 0, 0, 0);
+        fbo->clear_attachment("orm", 0, 0, 0, 0);
+        fbo->clear_attachment("emission", 0, 0, 0, 0);
         fbo->clear_attachment("entity_id", static_cast<uint32_t>(entt::null), entt::null, entt::null, entt::null);
+        fbo->clear_depth_attachment();
         auto shader = get_shader_by_name("gbuffer");
         shader->bind();
 
@@ -143,6 +148,5 @@ namespace cologne
 
 
         fbo->release();
-        glEnable(GL_DITHER);
     }
 }

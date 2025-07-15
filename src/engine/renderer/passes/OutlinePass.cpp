@@ -79,7 +79,7 @@ namespace cologne
         {
             mask_shader->set_mat4("model", outline_render_item.transform);
             const auto mesh = AssetManager::get_mesh_by_index(outline_render_item.mesh_idx);
-            glDrawElementsBaseVertex(GL_TRIANGLES, mesh->get_indices().size(), GL_UNSIGNED_INT,
+            glDrawElementsBaseVertex(GL_TRIANGLES, mesh->get_indices_count(), GL_UNSIGNED_INT,
                                      reinterpret_cast<void *>(sizeof(uint32_t) * mesh->get_first_index()),
                                      mesh->get_base_vertex());
         }
@@ -94,7 +94,7 @@ namespace cologne
                 mask_shader->set_mat4("bone_matrices", item.bones);
             }
             const auto mesh = AssetManager::get_skinned_mesh_by_index(item.mesh_idx);
-            glDrawElementsBaseVertex(GL_TRIANGLES, mesh->get_indices().size(), GL_UNSIGNED_INT,
+            glDrawElementsBaseVertex(GL_TRIANGLES, mesh->get_indices_count(), GL_UNSIGNED_INT,
                                      reinterpret_cast<void *>(sizeof(uint32_t) * mesh->get_first_index()),
                                      mesh->get_base_vertex());
             mask_shader->set_bool("is_skinned", false);
