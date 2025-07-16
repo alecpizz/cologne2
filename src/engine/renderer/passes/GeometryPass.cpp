@@ -99,20 +99,6 @@ namespace cologne
             cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
         }
 
-
-        if (Engine::in_edit_mode())
-        {
-            for (auto& render_item : _render_items)
-            {
-                auto mesh = AssetManager::get_mesh_by_index(render_item.mesh_idx);
-                if (!mesh)
-                {
-                    return;
-                }
-                draw_aabb(render_item.transform, mesh->get_aabb().min, mesh->get_aabb().max, glm::vec3(1.0, 1.0, 0.0));
-            }
-        }
-
         auto shader = get_shader_by_name("gbuffer");
         shader->bind();
         render_geometry();

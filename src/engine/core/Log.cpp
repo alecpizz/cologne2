@@ -1,5 +1,7 @@
 ﻿#include <../../../vendor/spdlog/include/spdlog/spdlog.h>
 #include "../../../vendor/spdlog/include/spdlog/sinks/stdout_color_sinks.h"
+#include "spdlog/async.h"
+#include "spdlog/sinks/basic_file_sink.h"
 
 #define FORMAT_LOG_ENTRY( msg, formatted_msg ) \
 char formatted_msg[ 4096 ] ; \
@@ -13,12 +15,15 @@ namespace cologne
 {
     struct Log::Impl
     {
-        std::shared_ptr<spdlog::logger> logger;
+        std::shared_ptr<spdlog::async_logger> logger;
 
         void init()
         {
             spdlog::set_pattern("%^[%T] %n: %v%$");
-            logger = spdlog::stdout_color_mt("cologne");
+            spdlog::init_thread_pool(8192, 1);
+            auto stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+            logger = std::make_shared<spdlog::async_logger>("cologne", stdout_sink, spdlog::thread_pool(), spdlog::async_overflow_policy::block);
+            spdlog::register_logger(logger);
             logger->set_level(spdlog::level::trace);
         }
     };

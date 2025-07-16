@@ -10,6 +10,13 @@ namespace cologne
     class Log
     {
     public:
+        enum class Level
+        {
+            DEBUG = 0,
+            INFO,
+            WARNING,
+            ERROR
+        };
         static Log &get();
 
         ~Log();
