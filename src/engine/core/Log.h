@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#define LOG_INFO( ... )   Log::get().log_info( __VA_ARGS__ )
-#define LOG_ERROR( ... )  Log::get().log_error( __VA_ARGS__ )
-#define LOG_DEBUG( ... )     Log::get().log_debug( __VA_ARGS__ )
-#define LOG_WARN( ... )    Log::get().log_warning( __VA_ARGS__ )
+#define LOG_INFO( ... )   cologne::Log::get().log_info( __VA_ARGS__ )
+#define LOG_ERROR( ... )  cologne::Log::get().log_error( __VA_ARGS__ )
+#define LOG_DEBUG( ... )     cologne::Log::get().log_debug( __VA_ARGS__ )
+#define LOG_WARN( ... )    cologne::Log::get().log_warning( __VA_ARGS__ )
 
 namespace cologne
 {

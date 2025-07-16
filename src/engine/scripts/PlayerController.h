@@ -24,7 +24,7 @@ namespace cologne
         bool _jump_queued = false;
         float _step_timer = 0.0f;
         float _step_time = .01f;
-        float _rpm = 60.0f / 200.0f;
+        float _rpm = 60.0f / 350.0f;
         float _reload_time = 0.25f;
         float _shot_timer = 0.0f;
         int _max_ammo = 10;
