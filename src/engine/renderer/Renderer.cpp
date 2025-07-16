@@ -87,15 +87,18 @@ namespace cologne
 
     void Renderer::init_ssbos()
     {
+        const size_t default_size = 64;
         ssbos["lights"] = SSBO(sizeof(Light) * 8, GL_DYNAMIC_DRAW);
         ssbos["viewport"] = SSBO(sizeof(ViewportData), GL_DYNAMIC_DRAW);
-        ssbos["model_matrices"] = SSBO(sizeof(glm::mat4) * 128, GL_DYNAMIC_DRAW);
-        ssbos["skinned_model_matrices"] = SSBO(sizeof(glm::mat4) * 128, GL_DYNAMIC_DRAW);
-        ssbos["draw_cmds"] = SSBO(sizeof(MultiDrawElementsCommand) * 128, GL_DYNAMIC_DRAW);
-        ssbos["skinned_draw_cmds"] = SSBO(sizeof(MultiDrawElementsCommand) * 128, GL_DYNAMIC_DRAW);
-        ssbos["materials"] = SSBO(sizeof(GPUMaterial) * 128, GL_DYNAMIC_DRAW);
-        ssbos["skinned_materials"] = SSBO(sizeof(GPUMaterial) * 128, GL_DYNAMIC_DRAW);
+        ssbos["model_matrices"] = SSBO(sizeof(glm::mat4) * default_size, GL_DYNAMIC_DRAW);
+        ssbos["skinned_model_matrices"] = SSBO(sizeof(glm::mat4) * default_size, GL_DYNAMIC_DRAW);
+        ssbos["draw_cmds"] = SSBO(sizeof(MultiDrawElementsCommand) * default_size, GL_DYNAMIC_DRAW);
+        ssbos["skinned_draw_cmds"] = SSBO(sizeof(MultiDrawElementsCommand) * default_size, GL_DYNAMIC_DRAW);
+        ssbos["materials"] = SSBO(sizeof(GPUMaterial) * default_size, GL_DYNAMIC_DRAW);
+        ssbos["skinned_materials"] = SSBO(sizeof(GPUMaterial) * default_size, GL_DYNAMIC_DRAW);
         ssbos["skinning_transforms"] = SSBO(sizeof(glm::mat4) * 2048, GL_DYNAMIC_DRAW);
+        ssbos["model_aabbs"] = SSBO(sizeof(AABB) * default_size, GL_DYNAMIC_DRAW);
+        ssbos["skinned_aabbs"] = SSBO(sizeof(AABB) * default_size, GL_DYNAMIC_DRAW);
     }
 
     void Renderer::update_ssbos()
@@ -118,7 +121,8 @@ namespace cologne
         ssbos["materials"].update(sizeof(GPUMaterial) * _gpu_materials.size(), _gpu_materials.data());
         ssbos["skinned_materials"].update(sizeof(GPUMaterial) * _skinned_gpu_materials.size(), _skinned_gpu_materials.data());
         ssbos["skinning_transforms"].update(sizeof(glm::mat4) * _skinning_transforms.size(), _skinning_transforms.data());
-
+        ssbos["model_aabbs"].update(sizeof(AABB) * _model_AABBs.size(), _model_AABBs.data());
+        ssbos["skinned_aabbs"].update(sizeof(AABB) * _skinned_AABBs.size(), _skinned_AABBs.data());
 
         ssbos["viewport"].bind(1);
         ssbos["lights"].bind(2);
@@ -160,7 +164,7 @@ namespace cologne
 
         _render_cmds.emplace_back(cmd);
         _model_matrices.emplace_back(item.transform);
-
+        _model_AABBs.emplace_back(mesh->get_aabb());
         //todo: also remove this extra index step
         auto mat = AssetManager::get_material_by_index(mesh->get_material_index());
         if (mat)
@@ -184,6 +188,7 @@ namespace cologne
         _skinned_render_items.emplace_back(item);
         _skinning_transforms.insert(_skinning_transforms.end(), item.bones.begin(), item.bones.end());
         _skinned_model_matrices.emplace_back(item.transform);
+        _skinned_AABBs.emplace_back(mesh->get_aabb());
         auto mat = AssetManager::get_material_by_index(mesh->get_material_index());
         if (mat)
         {
@@ -466,6 +471,8 @@ namespace cologne
         _skinning_transforms.clear();
         _skinned_model_matrices.clear();
         _outline_skinned_render_items.clear();
+        _model_AABBs.clear();
+        _skinned_AABBs.clear();
     }
 
     void Renderer::window_resized(uint32_t width, uint32_t height)

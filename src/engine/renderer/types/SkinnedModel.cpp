@@ -10,7 +10,7 @@ namespace cologne
                                const glm::vec3 &max, const Skeleton &skeleton)
     {
         _skeleton = skeleton;
-        _bounds = AABB(min, max);
+        _bounds = AABB(glm::vec4(min, 1.0), glm::vec4(max, 1.0));
         _name = name;
         _mesh_indices = meshes;
     }

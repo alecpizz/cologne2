@@ -4,38 +4,39 @@ namespace cologne
 {
     struct AABB
     {
-        glm::vec3 min{}, max{};
+        glm::vec4 min;
+        glm::vec4 max;
 
-        AABB() : min(glm::vec3(std::numeric_limits<float>::infinity())),
+        AABB() : min(glm::vec4(std::numeric_limits<float>::infinity())),
                            max(-std::numeric_limits<float>::infinity())
         {
         }
 
-        AABB(const glm::vec3 &min, const glm::vec3 &max);
+        AABB(const glm::vec4 &min, const glm::vec4 &max);
 
         bool valid() const;
 
-        void expand(const glm::vec3 &pt);
+        void expand(const glm::vec4 &pt);
 
-        void expand(const glm::vec3 *pts, size_t count);
+        void expand(const glm::vec4 *pts, size_t count);
 
         void intersect(const AABB &o);
 
         void union_aabb(const AABB &o);
 
-        void from_center_size(const glm::vec3 &center, const glm::vec3 &size)
+        void from_center_size(const glm::vec4 &center, const glm::vec4 &size)
         {
-            glm::vec3 half = 0.5f * size;
+            glm::vec4 half = 0.5f * size;
             min = center - half;
             max = center + half;
         }
 
-        glm::vec3 center() const
+        glm::vec4 center() const
         {
             return 0.5f * (min + max);
         }
 
-        glm::vec3 size() const
+        glm::vec4 size() const
         {
             return max - min;
         }
@@ -49,13 +50,13 @@ namespace cologne
         return result;
     }
 
-    inline void AABB::expand(const glm::vec3 &pt)
+    inline void AABB::expand(const glm::vec4 &pt)
     {
         min = glm::min(min, pt);
         max = glm::max(max, pt);
     }
 
-    inline void AABB::expand(const glm::vec3 *pts, size_t count)
+    inline void AABB::expand(const glm::vec4 *pts, size_t count)
     {
         for (size_t i = 0; i < count; i++)
         {
@@ -75,7 +76,7 @@ namespace cologne
         max = glm::max(max, o.max);
     }
 
-    inline AABB::AABB(const glm::vec3 &min, const glm::vec3 &max)
+    inline AABB::AABB(const glm::vec4 &min, const glm::vec4 &max)
     {
         this->min = min;
         this->max = max;

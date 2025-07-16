@@ -11,6 +11,27 @@ struct DrawElementsCmd
     uint base_instance;
 };
 
+struct AABB
+{
+    vec4 center;
+    vec4 extents;
+};
+
+layout (binding = 1, std430) restrict readonly buffer viewportdata
+{
+    mat4 projection;
+    mat4 view;
+    mat4 view_inverse;
+    mat4 projection_view;
+    mat4 projection_view_inverse;
+    vec4 camera_position;
+};
+
+layout (binding = 2, std430) restrict readonly buffer boundsbuffer
+{
+    AABB[] aabbs;
+};
+
 uniform int non_cull_amount = 1;
 
 layout (binding = 4, std430) restrict readonly buffer model_mat_buffer

@@ -14,7 +14,7 @@ namespace cologne
         _indices_count = _indices.size();
         _material_index = mesh_data.material_index;
         _inverse_bind_transform = mesh_data.inverse_bind_pose;
-        _aabb = AABB(mesh_data.aabb_min, mesh_data.aabb_max);
+        _aabb = AABB(glm::vec4(mesh_data.aabb_min, 1.0), glm::vec4(mesh_data.aabb_max, 1.0));
         _first_index = mesh_data.first_index;
         _base_vertex = mesh_data.base_vertex;
     }

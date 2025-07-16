@@ -15,6 +15,7 @@ layout (binding = 4, std430) restrict readonly buffer model_mat_buffer
 
 
 uniform mat4 light_space_matrices[6];
+uniform int idx = 0;
 out vec4 FragPos;
 
 void main()
@@ -22,7 +23,6 @@ void main()
     mat4 model = model_matrices[gl_DrawID];
     vec4 vertex_position = vec4(position, 1.0f);
     vertex_position += vec4(normal, 1.0) * 0.0005f;
-    gl_Layer = gl_InstanceID - gl_BaseInstance;
-    FragPos = light_space_matrices[gl_Layer] * model * vertex_position;
+    FragPos = light_space_matrices[idx] * model * vertex_position;
     gl_Position = FragPos;
 }

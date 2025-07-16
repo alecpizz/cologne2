@@ -13,7 +13,7 @@ namespace cologne
     {
         _mesh_indices = meshes;
         _name = name;
-        _bounds = AABB(min, max);
+        _bounds = AABB(glm::vec4(min, 1.0), glm::vec4(max, 1.0));
     }
 
     Model::~Model()

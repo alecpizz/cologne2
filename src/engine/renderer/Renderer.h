@@ -169,6 +169,8 @@ namespace cologne
         std::vector<glm::mat4> _model_matrices;
         std::vector<glm::mat4> _skinning_transforms;
         std::vector<glm::mat4> _skinned_model_matrices;
+        std::vector<AABB> _model_AABBs;
+        std::vector<AABB> _skinned_AABBs;
         std::vector<GPUMaterial> _gpu_materials;
         std::vector<GPUMaterial> _skinned_gpu_materials;
         std::vector<Light> _lights;

@@ -43,13 +43,13 @@ namespace cologne
         return handle_result;
     }
 
-    uint32_t create_dir_shadow_texture()
+    uint32_t create_dir_shadow_texture(int32_t size)
     {
         uint32_t handle_result = 0;
         glGenTextures(1, &handle_result);
         glBindTexture(GL_TEXTURE_2D, handle_result);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 4096,
-                     4096, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, size,
+                     size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -87,17 +87,11 @@ namespace cologne
 
     void Renderer::init_shadow()
     {
-        auto texture = Texture(create_dir_shadow_texture(), 4096, 4096, 1);
+        auto texture = Texture(create_dir_shadow_texture(4096), 4096, 4096, 1);
         texture.make_resident();
         _shadow_maps.emplace_back(texture);
         Engine::get_debug_ui()->add_image_entry("dir_shadow", _shadow_maps[0].get_handle(),
                                                 glm::vec2(1024));
-        for (size_t i = 0; i < 7; i++)
-        {
-            auto texture = Texture(create_point_shadow_texture(), 1024, 1024, 1);
-            texture.make_resident();
-            _shadow_maps.emplace_back(texture);
-        }
 
         glGenFramebuffers(1, &point_shadow_fbo);
         glBindFramebuffer(GL_FRAMEBUFFER, point_shadow_fbo);
@@ -116,7 +110,7 @@ namespace cologne
         glBindFramebuffer(GL_FRAMEBUFFER, point_shadow_fbo);
         OpenGLDebugScope scope("Renderer::dir_shadow_pass");
         auto shadow_shader = get_shader_by_name("dir_shadow");
-        // auto cull_shader = get_shader_by_name("frustum_culling");
+        auto cull_shader = get_shader_by_name("frustum_culling");
 
         for (auto &light: _lights)
         {
@@ -129,9 +123,14 @@ namespace cologne
                 light.shadow_handle = 0;
                 continue;
             }
-            if (light_counter > _shadow_maps.size() - 1)
+            if (light_counter > 8)
             {
                 break;
+            }
+            if (light_counter > _shadow_maps.size() - 1)
+            {
+                auto& texture = _shadow_maps.emplace_back(create_dir_shadow_texture(1024), 1024, 1024, 1);
+                texture.make_resident();
             }
             light.shadow_handle = _shadow_maps[light_counter].get_bindless_handle();
 
@@ -160,15 +159,15 @@ namespace cologne
             glm::mat4 light_space = light_projection * light_view;
             light.light_space_matrix = light_space;
 
-            // cull_shader->bind();
-            // cull_shader->set_int("non_cull_amount", 1);
-            // get_ssbo_by_name("draw_cmds")->bind(6);
-            // const int work_group_size = 64;
-            // cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
-            // cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
-            // get_ssbo_by_name("skinned_draw_cmds")->bind(6);
-            // cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
-            // cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
+            cull_shader->bind();
+            cull_shader->set_int("non_cull_amount", 1);
+            get_ssbo_by_name("draw_cmds")->bind(6);
+            const int work_group_size = 64;
+            cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
+            cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
+            get_ssbo_by_name("skinned_draw_cmds")->bind(6);
+            cull_shader->dispatch((_skinned_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
+            cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
 
             shadow_shader->bind();
             shadow_shader->set_mat4("lightSpaceMatrix", light_space);
@@ -196,9 +195,14 @@ namespace cologne
                 light.shadow_handle = 0;
                 continue;
             }
-            if (light_counter > _shadow_maps.size() - 1)
+            if (light_counter > 8)
             {
                 break;
+            }
+            if (light_counter > _shadow_maps.size() - 1)
+            {
+                auto& texture = _shadow_maps.emplace_back(create_point_shadow_texture(), 1024, 1024, 1);
+                texture.make_resident();
             }
             light.shadow_handle = _shadow_maps[light_counter].get_bindless_handle();
 
@@ -213,7 +217,7 @@ namespace cologne
             glm::vec3 position = light.position;
 
             cull_shader->bind();
-            cull_shader->set_int("non_cull_amount", 6);
+            cull_shader->set_int("non_cull_amount", 1);
             get_ssbo_by_name("draw_cmds")->bind(6);
             const int work_group_size = 64;
             cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
@@ -224,8 +228,12 @@ namespace cologne
 
             point_shadow_shader->bind();
             point_shadow_shader->set_mat4("light_space_matrices", create_shadow_projection_matrices(position, light.radius));
-            render_geometry();
-            render_skinned_geometry();
+            for (int i = 0; i < 6; i++)
+            {
+                point_shadow_shader->set_int("idx", i);
+                render_geometry();
+                render_skinned_geometry();
+            }
         }
     }
 

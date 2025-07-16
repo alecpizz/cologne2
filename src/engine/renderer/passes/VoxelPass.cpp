@@ -164,7 +164,7 @@ namespace cologne
             render_geometry();
             render_skinned_geometry();
         }
-        
+
         auto mipmap_shader = get_shader_by_name("mipmap");
         mipmap_shader->bind();
         int current_height = _voxel_data.voxel_dimensions;

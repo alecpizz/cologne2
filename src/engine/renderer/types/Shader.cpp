@@ -78,7 +78,7 @@ namespace cologne
         {
             _uniforms[name] = glGetUniformLocation(_program, name.c_str());
         }
-        glUniform1i(_uniforms[name], static_cast<int>(value));
+        glProgramUniform1i(_program, _uniforms[name], static_cast<int>(value));
     }
 
     void Shader::set_int(const std::string&name, int32_t value)
@@ -91,7 +91,7 @@ namespace cologne
         {
             _uniforms[name] = glGetUniformLocation(_program, name.c_str());
         }
-        glUniform1i(_uniforms[name], value);
+        glProgramUniform1i(_program, _uniforms[name], value);
     }
 
     void Shader::set_vec3(const std::string &name, glm::vec3 value)
@@ -104,7 +104,7 @@ namespace cologne
         {
             _uniforms[name] = glGetUniformLocation(_program, name.c_str());
         }
-        glUniform3fv(_uniforms[name], 1, glm::value_ptr(value));
+        glProgramUniform3fv(_program, _uniforms[name], 1, glm::value_ptr(value));
     }
 
     void Shader::set_vec2(const std::string &name, glm::vec2 value)
@@ -117,7 +117,7 @@ namespace cologne
         {
             _uniforms[name] = glGetUniformLocation(_program, name.c_str());
         }
-        glUniform2fv(_uniforms[name], 1, glm::value_ptr(value));
+        glProgramUniform2fv(_program, _uniforms[name], 1, glm::value_ptr(value));
     }
 
     void Shader::set_vec4(const std::string&name, glm::vec4 value)
@@ -130,7 +130,7 @@ namespace cologne
         {
             _uniforms[name] = glGetUniformLocation(_program, name.c_str());
         }
-        glUniform4fv(_uniforms[name], 1, glm::value_ptr(value));
+        glProgramUniform4fv(_program, _uniforms[name], 1, glm::value_ptr(value));
     }
 
     void Shader::set_mat4(const std::string& name, glm::mat4 value)
@@ -143,7 +143,7 @@ namespace cologne
         {
             _uniforms[name] = glGetUniformLocation(_program, name.c_str());
         }
-        glUniformMatrix4fv(_uniforms[name], 1, GL_FALSE, glm::value_ptr(value));
+        glProgramUniformMatrix4fv(_program, _uniforms[name], 1, GL_FALSE, glm::value_ptr(value));
     }
 
     void Shader::set_mat4(const std::string &name, const std::vector<glm::mat4> &value)
@@ -156,7 +156,7 @@ namespace cologne
         {
             _uniforms[name] = glGetUniformLocation(_program, name.c_str());
         }
-        glUniformMatrix4fv(_uniforms[name], value.size(), GL_FALSE, glm::value_ptr(value[0]));
+        glProgramUniformMatrix4fv(_program, _uniforms[name], value.size(), GL_FALSE, glm::value_ptr(value[0]));
     }
 
     void Shader::set_float(const std::string&name, const float value)
@@ -169,7 +169,7 @@ namespace cologne
         {
             _uniforms[name] = glGetUniformLocation(_program, name.c_str());
         }
-        glUniform1f(_uniforms[name], value);
+        glProgramUniform1f(_program, _uniforms[name], value);
     }
 
     void Shader::set_uint(const std::string &name, const uint32_t id)
@@ -182,7 +182,7 @@ namespace cologne
         {
             _uniforms[name] = glGetUniformLocation(_program, name.c_str());
         }
-        glUniform1ui(_uniforms[name], id);
+        glProgramUniform1ui(_program, _uniforms[name], id);
     }
 
     void Shader::set_ivec2(const std::string &name, std::vector<glm::ivec2> vecs)
@@ -195,7 +195,7 @@ namespace cologne
         {
             _uniforms[name] = glGetUniformLocation(_program, name.c_str());
         }
-        glUniform2iv(_uniforms[name], vecs.size(), glm::value_ptr(vecs[0]));
+        glProgramUniform2iv(_program, _uniforms[name], vecs.size(), glm::value_ptr(vecs[0]));
     }
 
     void Shader::cleanup()
