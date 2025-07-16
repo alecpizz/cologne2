@@ -4,7 +4,7 @@ layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
 struct DrawElementsCmd
 {
-    uint count;
+    uint index_count;
     uint instance_count;
     uint first_index;
     uint base_vertex;
@@ -124,10 +124,8 @@ void main()
         return;
     }
 
-    draw_cmds[mesh_idx].instance_count = 0;
-//    uint mesh_idx = gl_GlobalInvocationID.x;
-//    AABB bounds = aabbs[mesh_idx];
-//    mat4 model = model_matrices[mesh_idx];
-//    bounds = transform_AABB(bounds, model);
-//    draw_cmds[gl_GlobalInvocationID.x].instance_count =0;// is_aabb_in_frustum(projection_view, bounds) ? 1 : 0;
+    AABB bounds = aabbs[mesh_idx];
+    mat4 model = model_matrices[mesh_idx];
+    bounds = transform_AABB(bounds, model);
+    draw_cmds[gl_GlobalInvocationID.x].instance_count = is_aabb_in_frustum(projection_view, bounds) ? 1 : 0;
 }
