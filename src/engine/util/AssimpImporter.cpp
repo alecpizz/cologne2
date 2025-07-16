@@ -309,7 +309,7 @@ namespace cologne::FileUtil
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(
             path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals |
-                  aiProcess_RemoveRedundantMaterials | aiProcess_LimitBoneWeights);
+                  aiProcess_RemoveRedundantMaterials | aiProcess_LimitBoneWeights | aiProcess_GenBoundingBoxes);
         if (!scene || !scene->mRootNode)
         {
             LOG_ERROR("ASSIMP ERROR: %s", importer.GetErrorString());

@@ -158,16 +158,28 @@ namespace cologne
         draw_line(p3, p1, color);
     }
 
-    void DebugRenderer::draw_aabb(glm::mat4 transform, glm::vec3 min, glm::vec3 max, glm::vec3 color)
+    void DebugRenderer::draw_aabb(glm::mat4 transform, glm::vec3 aabb_min, glm::vec3 aabb_max, glm::vec3 color)
     {
-        glm::vec3 FrontTopLeft = transform * glm::vec4(min.x, max.y, max.z, 1.0f);
-        glm::vec3 FrontTopRight = transform * glm::vec4(max.x, max.y, max.z, 1.0f);
-        glm::vec3 FrontBottomLeft = transform * glm::vec4(min.x, min.y, max.z, 1.0f);
-        glm::vec3 FrontBottomRight = transform * glm::vec4(max.x, min.y, max.z, 1.0f);
-        glm::vec3 BackTopLeft = transform * glm::vec4(min.x, max.y, min.z, 1.0f);
-        glm::vec3 BackTopRight = transform * glm::vec4(max.x, max.y, min.z, 1.0f);
-        glm::vec3 BackBottomLeft = transform * glm::vec4(min.x, min.y, min.z, 1.0f);
-        glm::vec3 BackBottomRight = transform * glm::vec4(max.x, min.y, min.z, 1.0f);
+        glm::vec3 center = (aabb_max + aabb_min) * 0.5f;
+        glm::vec3 extents = (aabb_max - aabb_min) * 0.5f;
+
+        glm::vec3 world_center = glm::vec3(transform * glm::vec4(center, 1.0));
+        glm::vec3 world_extents = glm::abs(extents.x * transform[0]) +
+                             glm::abs(extents.y * transform[1]) +
+                             glm::abs(extents.z * transform[2]);
+
+        glm::vec3 min = world_center - world_extents;
+        glm::vec3 max = world_center + world_extents;
+
+
+        glm::vec3 FrontTopLeft = glm::vec4(min.x, max.y, max.z, 1.0f);
+        glm::vec3 FrontTopRight = glm::vec4(max.x, max.y, max.z, 1.0f);
+        glm::vec3 FrontBottomLeft = glm::vec4(min.x, min.y, max.z, 1.0f);
+        glm::vec3 FrontBottomRight = glm::vec4(max.x, min.y, max.z, 1.0f);
+        glm::vec3 BackTopLeft = glm::vec4(min.x, max.y, min.z, 1.0f);
+        glm::vec3 BackTopRight =  glm::vec4(max.x, max.y, min.z, 1.0f);
+        glm::vec3 BackBottomLeft =  glm::vec4(min.x, min.y, min.z, 1.0f);
+        glm::vec3 BackBottomRight = glm::vec4(max.x, min.y, min.z, 1.0f);
         draw_line(FrontTopLeft, FrontTopRight, color);
         draw_line(FrontBottomLeft, FrontBottomRight, color);
         draw_line(BackTopLeft, BackTopRight, color);

@@ -83,6 +83,7 @@ namespace cologne
         shaders["indirect_upsample"] = Shader(RESOURCES_PATH "shaders/vxgi/indirect_upsample.comp");
         shaders["compute_skinning"] = Shader(RESOURCES_PATH "shaders/skinning.comp");
         shaders["frustum_culling"] = Shader(RESOURCES_PATH "shaders/culling/frustum_cull.comp");
+        shaders["clear_culling"] = Shader(RESOURCES_PATH "shaders/culling/clear_cull.comp");
     }
 
     void Renderer::init_ssbos()
@@ -247,7 +248,7 @@ namespace cologne
         return glm::perspective(cam.fov_radians,
                                 static_cast<float>(Engine::get_window()->get_width()) /
                                 static_cast<float>(Engine::get_window()->get_height()),
-                                0.1f, 300.0f);
+                                0.01f, 300.0f);
     }
 
     void Renderer::file_changed(const std::filesystem::path &path)

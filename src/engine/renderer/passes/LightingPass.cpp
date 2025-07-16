@@ -7,6 +7,7 @@
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Shader.h>
 #include <engine/renderer/types/Light.h>
+#include <engine/renderer/types/SSBO.h>
 
 namespace cologne
 {
@@ -16,6 +17,7 @@ namespace cologne
         auto shader = get_shader_by_name("lit");
         auto output_fbo = get_framebuffer_by_name("output");
         auto gbuffer_fbo = get_framebuffer_by_name("gbuffer");
+        get_ssbo_by_name("lights")->bind(2);
         output_fbo->bind();
         output_fbo->set_viewport();
         // glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());

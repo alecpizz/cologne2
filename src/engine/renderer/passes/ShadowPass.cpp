@@ -110,7 +110,6 @@ namespace cologne
         glBindFramebuffer(GL_FRAMEBUFFER, point_shadow_fbo);
         OpenGLDebugScope scope("Renderer::dir_shadow_pass");
         auto shadow_shader = get_shader_by_name("dir_shadow");
-        auto cull_shader = get_shader_by_name("frustum_culling");
 
         for (auto &light: _lights)
         {
@@ -159,15 +158,15 @@ namespace cologne
             glm::mat4 light_space = light_projection * light_view;
             light.light_space_matrix = light_space;
 
-            cull_shader->bind();
-            cull_shader->set_int("non_cull_amount", 1);
-            get_ssbo_by_name("draw_cmds")->bind(6);
-            const int work_group_size = 64;
-            cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
-            cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
-            get_ssbo_by_name("skinned_draw_cmds")->bind(6);
-            cull_shader->dispatch((_skinned_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
-            cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
+            // cull_shader->bind();
+            // cull_shader->set_int("non_cull_amount", 1);
+            // get_ssbo_by_name("draw_cmds")->bind(6);
+            // const int work_group_size = 64;
+            // cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
+            // cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
+            // get_ssbo_by_name("skinned_draw_cmds")->bind(6);
+            // cull_shader->dispatch((_skinned_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
+            // cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
 
             shadow_shader->bind();
             shadow_shader->set_mat4("lightSpaceMatrix", light_space);
@@ -181,7 +180,7 @@ namespace cologne
     {
         OpenGLDebugScope scope("Renderer::point_shadow_pass");
         auto point_shadow_shader = get_shader_by_name("point_shadow");
-        auto cull_shader = get_shader_by_name("frustum_culling");
+        // auto cull_shader = get_shader_by_name("frustum_culling");
 
 
         for (auto &light: _lights)
@@ -215,16 +214,16 @@ namespace cologne
             glClear(GL_DEPTH_BUFFER_BIT);
             light_counter++;
             glm::vec3 position = light.position;
-
-            cull_shader->bind();
-            cull_shader->set_int("non_cull_amount", 1);
-            get_ssbo_by_name("draw_cmds")->bind(6);
-            const int work_group_size = 64;
-            cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
-            cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
-            get_ssbo_by_name("skinned_draw_cmds")->bind(6);
-            cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
-            cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
+            //
+            // cull_shader->bind();
+            // cull_shader->set_int("non_cull_amount", 1);
+            // get_ssbo_by_name("draw_cmds")->bind(6);
+            // const int work_group_size = 64;
+            // cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
+            // cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
+            // get_ssbo_by_name("skinned_draw_cmds")->bind(6);
+            // cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
+            // cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
 
             point_shadow_shader->bind();
             point_shadow_shader->set_mat4("light_space_matrices", create_shadow_projection_matrices(position, light.radius));

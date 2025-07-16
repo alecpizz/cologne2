@@ -2,6 +2,7 @@
 // Created by alecpizz on 5/3/2025.
 //
 #include <engine/asset_manager/AssetManager.h>
+#include <engine/core/Input.h>
 #include <engine/renderer/types/SSBO.h>
 
 #include "engine/core/Engine.h"
@@ -60,6 +61,8 @@ namespace cologne
         fbo->release();
     }
 
+
+
     void Renderer::geometry_pass()
     {
         OpenGLDebugScope scope("Renderer::geometry_pass");
@@ -75,12 +78,59 @@ namespace cologne
         fbo->clear_attachment("emission", 0, 0, 0, 0);
         fbo->clear_attachment("entity_id", static_cast<uint32_t>(entt::null), entt::null, entt::null, entt::null);
         fbo->clear_depth_attachment();
-        auto shader = get_shader_by_name("gbuffer");
-        shader->bind();
 
         //frustum cull me NOW!
         get_ssbo_by_name("viewport")->bind(1);
+        get_ssbo_by_name("model_aabbs")->bind(2);
+        get_ssbo_by_name("model_matrices")->bind(4);
 
+        {
+            //temp
+            auto projection = get_camera_projection(Engine::get_scene()->get_primary_camera().get_transform(), Engine::get_scene()->get_primary_camera().get_component<CameraComponent>());
+            auto view = get_camera_view(Engine::get_scene()->get_primary_camera().get_transform());
+
+            auto cull_shader = get_shader_by_name("frustum_culling");
+            cull_shader->bind();
+            cull_shader->set_mat4("projection_view", projection * view);
+            cull_shader->set_int("non_cull_amount", 1);
+            cull_shader->set_int("non_cull_amount", 1);
+            get_ssbo_by_name("draw_cmds")->bind(6);
+            const int work_group_size = 64;
+            cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
+            cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
+
+
+            if (Input::key_pressed(Input::Key::C))
+            {
+                std::vector<MultiDrawElementsCommand> temp(_render_items.size());
+                glGetNamedBufferSubData(get_ssbo_by_name("draw_cmds")->get_handle(), 0, _render_items.size(), temp.data());
+
+                int cull_count = 0;
+                for (auto render_cmd : temp)
+                {
+                    if (render_cmd.instance_count == 0)
+                    {
+                        cull_count++;
+                    }
+                }
+                LOG_INFO("CULLED %d / %d", cull_count, _render_cmds.size());
+            }
+        }
+        if (Engine::in_edit_mode())
+        {
+            for (auto& render_item : _render_items)
+            {
+                auto mesh = AssetManager::get_mesh_by_index(render_item.mesh_idx);
+                if (!mesh)
+                {
+                    return;
+                }
+                draw_aabb(render_item.transform, mesh->get_aabb().min, mesh->get_aabb().max, glm::vec3(1.0, 1.0, 0.0));
+            }
+        }
+
+        auto shader = get_shader_by_name("gbuffer");
+        shader->bind();
         render_geometry();
         render_skinned_geometry();
 
@@ -97,7 +147,16 @@ namespace cologne
         }
 
 
-
         fbo->release();
+        // auto cull_shader = get_shader_by_name("clear_culling");
+        // cull_shader->bind();
+        // cull_shader->set_int("non_cull_amount", 1);
+        // get_ssbo_by_name("draw_cmds")->bind(6);
+        // const int work_group_size = 64;
+        // cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
+        // cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
+        // get_ssbo_by_name("skinned_draw_cmds")->bind(6);
+        // cull_shader->dispatch((_skinned_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
+        // cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
     }
 }

@@ -130,16 +130,16 @@ namespace cologne
         glViewport(0, 0, _voxel_data.voxel_dimensions, _voxel_data.voxel_dimensions);
         glClearTexImage(_voxel_texture_color, 0, GL_RGBA, GL_FLOAT, glm::value_ptr(glm::vec4(0.0f)));
         glClearTexImage(_voxel_texture_normal, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, glm::value_ptr(glm::uvec4(0)));
-        auto cull_shader = get_shader_by_name("frustum_culling");
-        cull_shader->bind();
-        cull_shader->set_int("non_cull_amount", 1);
-        get_ssbo_by_name("draw_cmds")->bind(6);
-        const int work_group_size = 64;
-        cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
-        cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
-        get_ssbo_by_name("skinned_draw_cmds")->bind(6);
-        cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
-        cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
+        // auto cull_shader = get_shader_by_name("clear_culling");
+        // cull_shader->bind();
+        // cull_shader->set_int("non_cull_amount", 1);
+        // get_ssbo_by_name("draw_cmds")->bind(6);
+        // const int work_group_size = 64;
+        // cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
+        // cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
+        // get_ssbo_by_name("skinned_draw_cmds")->bind(6);
+        // cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
+        // cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
 
 
         auto shader = get_shader_by_name("voxelize");
