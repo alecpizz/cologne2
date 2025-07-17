@@ -248,13 +248,14 @@ namespace cologne::FileUtil
             glm::quat rot;
             glm::vec3 scale;
             Util::decompose_mat4(mesh.inverse_bind_pose, pos, rot, scale);
-            LOG_INFO("Mesh decomposed to: %f %f %f", pos.x, pos.y, pos.z);
             result_data.aabb_max = glm::max(result_data.aabb_max, mesh.aabb_max);
             result_data.aabb_min = glm::min(result_data.aabb_min, mesh.aabb_min);
         }
         result_data.name = get_file_name(path);
         return result_data;
     }
+
+
 
     void build_skeleton_recursive(const aiNode *node, int parent_idx, Skeleton &out_skeleton,
                                   const std::unordered_map<std::string, const aiBone *> &allBones)

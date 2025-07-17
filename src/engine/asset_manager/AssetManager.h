@@ -16,6 +16,10 @@ namespace cologne::AssetManager
     void print_skinned_models();
     void print_all();
     void file_added(const std::filesystem::path& path);
+
+    void export_model(const ModelData& model_data, uint64_t export_time);
+
+
     std::vector<AnimationClip>& get_animations();
     std::vector<Model>& get_models();
     std::vector<Mesh>& get_meshes();

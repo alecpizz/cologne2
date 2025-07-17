@@ -5,6 +5,10 @@
 
 #include "Texture.h"
 
+#include <stb_dxt/stb_dxt.h>
+#include <fstream>
+#include <engine/util/FileUtil.h>
+
 namespace cologne
 {
     Texture::Texture(const char *texture_path)
@@ -110,6 +114,11 @@ namespace cologne
         return _handle != 0;
     }
 
+    bool Texture::contains_data() const
+    {
+        return !_data.empty();
+    }
+
     void Texture::load()
     {
         if (_data.empty())
@@ -183,5 +192,65 @@ namespace cologne
         }
         glMakeTextureHandleNonResidentARB(_bindless_handle);
         _is_resident = false;
+    }
+
+    void Texture::export_to_compressed(const char* path) const
+    {
+        if (_data.empty())
+        {
+            LOG_ERROR("No data to compress!");
+            return;
+        }
+        int new_width;
+        int new_height;
+        int new_channels;
+        stbi_uc *img_data =
+           stbi_load_from_memory(_data.data(), static_cast<int>(_data.size()),
+               &new_width, &new_height, &new_channels, 4);
+        if (new_width % 4 != 0 || new_height % 4 != 0)
+        {
+            //TODO: handle this
+            LOG_ERROR("Can't export texture because it isn't a multiple of four.");
+            stbi_image_free(img_data);
+            return;
+        }
+
+        int compressed_size = (new_width * new_height) / 2;
+        std::vector<uint8_t> compressed_data(compressed_size);
+        for (int y = 0; y < new_height; y += 4)
+        {
+            for (int x = 0; x < new_width; x += 4)
+            {
+                int block_x = x / 4;
+                int block_y = y / 4;
+                int blocks_per_row = new_width / 4;
+                uint8_t* dest_block = &compressed_data[(block_y * blocks_per_row + block_x) * 8];
+
+                uint8_t source_block[16 * 4];
+
+                for (int row_in_block = 0; row_in_block < 4; row_in_block++)
+                {
+                    uint8_t* source_row = img_data + ((y + row_in_block) * new_width + x) * 4;
+
+                    uint8_t* dest_row = img_data + (row_in_block * 4 * 4);
+
+                    memcpy(dest_row, source_row, 16);
+                }
+
+                stb_compress_dxt_block(dest_block, source_block, 0, STB_DXT_HIGHQUAL);
+            }
+        }
+
+        FileUtil::create_directory_recursive(path);
+        std::ofstream outfile (path, std::ios::binary);
+        if (outfile.fail())
+        {
+            LOG_ERROR("Couldn't open output file %s %s", path, strerror(errno));
+            stbi_image_free(img_data);
+            return;
+        }
+
+        outfile.write(reinterpret_cast<const char*>(compressed_data.data()), compressed_data.size());
+        outfile.close();
     }
 }

@@ -89,4 +89,38 @@ namespace cologne
         glm::quat rotation;
         glm::vec3 up;
     };
+
+#pragma pack (push, 1)
+    struct ModelCacheHeader
+    {
+        uint32_t mesh_count;
+        uint64_t time_saved;
+        glm::vec3 aabb_min;
+        glm::vec3 aabb_max;
+        std::string name;
+    };
+
+    struct MeshCacheHeader
+    {
+        std::string name;
+        uint32_t vertex_count;
+        uint32_t index_count;
+        glm::vec3 aabb_min;
+        glm::vec3 aabb_max;
+        uint32_t material_index;
+        glm::mat4 inverse_bind_pose;
+    };
+
+    struct MaterialCacheHeader
+    {
+        std::string albedo_path;
+        std::string normal_path;
+        std::string metallic_path;
+        std::string roughness_path;
+        std::string ao_path;
+        std::string emission_path;
+        float roughness_override = 1.0f;
+        float metallic_override = 1.0f;
+    };
+#pragma pack(pop)
 }

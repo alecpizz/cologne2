@@ -59,4 +59,17 @@ namespace cologne::FileUtil
         return result;
     }
 
+    bool create_directory_recursive(const std::string &directory)
+    {
+        std::filesystem::path path(directory);
+        if (!std::filesystem::create_directories(path.parent_path()))
+        {
+            if (std::filesystem::exists(path.parent_path()))
+            {
+                return true;
+            }
+            return false;
+        }
+        return true;
+    }
 }

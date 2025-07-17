@@ -26,10 +26,13 @@ namespace cologne
 
         bool is_valid() const;
 
+        bool contains_data() const;
+
         void load();
 
         void make_resident();
         void make_non_resident();
+        void export_to_compressed(const char* path) const;
 
     private:
         bool _is_resident = false;
