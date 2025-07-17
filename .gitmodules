@@ -23,3 +23,6 @@
 [submodule "vendor/imguizmo"]
 	path = vendor/imguizmo
 	url = https://github.com/alecpizz/ImGuizmo-cmake
+[submodule "vendor/libsquish"]
+	path = vendor/libsquish
+	url = https://github.com/oblivioncth/libsquish.git
