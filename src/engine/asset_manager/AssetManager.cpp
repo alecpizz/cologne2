@@ -78,7 +78,7 @@ namespace cologne::AssetManager
         std::vector<ModelData> model_datas;
         for (auto& model_path : model_paths)
         {
-            //if (!std::filesystem::exists(RESOURCES_PATH "cache/models/" + model_path.name + ".cmdl"))
+            if (!std::filesystem::exists(RESOURCES_PATH "cache/models/" + model_path.name + ".cmdl"))
             {
                 LOG_INFO("No cache for file %s found!", model_path.name.c_str());
                 const ModelData data = FileUtil::import_model(model_path.path);

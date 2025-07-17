@@ -327,16 +327,8 @@ namespace cologne
         int new_width;
         int new_height;
         int new_channels;
-        stbi_uc *img_data =
-                stbi_load_from_memory(_data.data(), static_cast<int>(_data.size()),
+        stbi_uc *img_data = stbi_load_from_memory(_data.data(), static_cast<int>(_data.size()),
                                       &new_width, &new_height, &new_channels, 4);
-        if (new_width % 4 != 0 || new_height % 4 != 0)
-        {
-            //TODO: handle this
-            LOG_ERROR("Can't export texture because it isn't a multiple of four.");
-            stbi_image_free(img_data);
-            return;
-        }
 
         int compressed_size = (new_width * new_height) / 2;
         FileUtil::create_directory_recursive(path);

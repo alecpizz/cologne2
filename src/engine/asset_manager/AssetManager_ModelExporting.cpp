@@ -23,6 +23,85 @@ namespace cologne::AssetManager
         buffer[std::min(static_cast<int>(name.length()), size - 1)] = '\0';
     }
 
+    void process_material_header(std::ofstream& file, const std::vector<Material>& materials, const std::string& model_name)
+    {
+        int i = 0;
+        for (auto &material: materials)
+        {
+            std::string path = "cache/textures/" + model_name + "/material" + std::to_string(i);
+            MaterialCacheHeader material_header;
+            if (material.albedo.contains_data())
+            {
+                copy_name(material_header.albedo_path, path + "/albedo.ctext", 512);
+            }
+            if (material.roughness.contains_data())
+            {
+                copy_name(material_header.roughness_path, path + "/roughness.ctext", 512);
+            }
+            if (material.ao.contains_data())
+            {
+                copy_name(material_header.ao_path, path + "/ao.ctext", 512);
+            }
+            if (material.emission.contains_data())
+            {
+                copy_name(material_header.emission_path, path + "/emission.ctext", 512);
+            }
+            if (material.metallic.contains_data())
+            {
+                copy_name(material_header.metallic_path, path + "/metallic.ctext", 512);
+            }
+            if (material.normal.contains_data())
+            {
+                copy_name(material_header.normal_path, path + "/normal.ctext", 512);
+            }
+            material_header.metallic_override = material.metallic_override;
+            material_header.roughness_override = material.roughness_override;
+            file.write(reinterpret_cast<const char *>(&material_header), sizeof(MaterialCacheHeader));
+            i++;
+        }
+    }
+
+    void export_material_textures(const std::vector<Material>& materials, const std::string& model_name)
+    {
+        int i = 0;
+        for (auto &material: materials)
+        {
+            std::string path = "cache/textures/" + model_name + "/material" + std::to_string(i);
+            if (material.albedo.contains_data())
+            {
+                std::string albedo_path = path + "/albedo.ctext";
+                material.albedo.export_to_compressed((RESOURCES_PATH + albedo_path).c_str());
+            }
+            if (material.roughness.contains_data())
+            {
+                std::string roughness_path = path + "/roughness.ctext";
+                material.roughness.export_to_compressed((RESOURCES_PATH + roughness_path).c_str());
+            }
+            if (material.ao.contains_data())
+            {
+                std::string ao_path = path + "/ao.ctext";
+                material.ao.export_to_compressed((RESOURCES_PATH + ao_path).c_str());
+            }
+            if (material.emission.contains_data())
+            {
+                std::string emission_path = path + "/emission.ctext";
+                material.emission.export_to_compressed((RESOURCES_PATH + emission_path).c_str());
+            }
+            if (material.metallic.contains_data())
+            {
+                std::string metallic_path = path + "/metallic.ctext";
+                material.metallic.export_to_compressed((RESOURCES_PATH + metallic_path).c_str());
+            }
+            if (material.normal.contains_data())
+            {
+                std::string normal_path = path + "/normal.ctext";
+                material.normal.export_to_compressed((RESOURCES_PATH + normal_path).c_str());
+            }
+            i++;
+        }
+
+    }
+
     void export_model(const ModelData &model_data, uint64_t export_time)
     {
         const std::string output_path = RESOURCES_PATH "cache/models/" + model_data.name + ".cmdl";
@@ -64,79 +143,9 @@ namespace cologne::AssetManager
             file.write(reinterpret_cast<const char *>(mesh.indices.data()), mesh.indices.size() * sizeof(uint32_t));
         }
         //the materials
-        int i = 0;
-        for (auto &material: model_data.materials)
-        {
-            std::string path = "cache/textures/" + model_data.name + "/material" + std::to_string(i);
-            MaterialCacheHeader material_header;
-            if (material.albedo.contains_data())
-            {
-                copy_name(material_header.albedo_path, path + "/albedo.ctext", 512);
-            }
-            if (material.roughness.contains_data())
-            {
-                copy_name(material_header.roughness_path, path + "/roughness.ctext", 512);
-            }
-            if (material.ao.contains_data())
-            {
-                copy_name(material_header.ao_path, path + "/ao.ctext", 512);
-            }
-            if (material.emission.contains_data())
-            {
-                copy_name(material_header.emission_path, path + "/emission.ctext", 512);
-            }
-            if (material.metallic.contains_data())
-            {
-                copy_name(material_header.metallic_path, path + "/metallic.ctext", 512);
-            }
-            if (material.normal.contains_data())
-            {
-                copy_name(material_header.normal_path, path + "/normal.ctext", 512);
-            }
-            material_header.metallic_override = material.metallic_override;
-            material_header.roughness_override = material.roughness_override;
-            file.write(reinterpret_cast<const char *>(&material_header), sizeof(MaterialCacheHeader));
-            i++;
-        }
+        process_material_header(file, model_data.materials, model_data.name);
         file.close();
-
-        i = 0;
-        for (auto &material: model_data.materials)
-        {
-            std::string path = "cache/textures/" + model_data.name + "/material" + std::to_string(i);
-            if (material.albedo.contains_data())
-            {
-                std::string albedo_path = path + "/albedo.ctext";
-                material.albedo.export_to_compressed((RESOURCES_PATH + albedo_path).c_str());
-            }
-            if (material.roughness.contains_data())
-            {
-                std::string roughness_path = path + "/roughness.ctext";
-                material.roughness.export_to_compressed((RESOURCES_PATH + roughness_path).c_str());
-            }
-            if (material.ao.contains_data())
-            {
-                std::string ao_path = path + "/ao.ctext";
-                material.ao.export_to_compressed((RESOURCES_PATH + ao_path).c_str());
-            }
-            if (material.emission.contains_data())
-            {
-                std::string emission_path = path + "/emission.ctext";
-                material.emission.export_to_compressed((RESOURCES_PATH + emission_path).c_str());
-            }
-            if (material.metallic.contains_data())
-            {
-                std::string metallic_path = path + "/metallic.ctext";
-                material.metallic.export_to_compressed((RESOURCES_PATH + metallic_path).c_str());
-            }
-            if (material.normal.contains_data())
-            {
-                std::string normal_path = path + "/normal.ctext";
-                material.normal.export_to_compressed((RESOURCES_PATH + normal_path).c_str());
-            }
-            i++;
-        }
-
+        export_material_textures(model_data.materials, model_data.name);
         LOG_INFO("Exported model %s!", model_data.name.c_str());
     }
 
@@ -148,7 +157,6 @@ namespace cologne::AssetManager
             LOG_ERROR("error importing model at %s", path);
             return {};
         }
-
 
         ModelCacheHeader model_header;
         file.read(reinterpret_cast<char *>(&model_header), sizeof(model_header));
