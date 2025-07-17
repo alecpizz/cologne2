@@ -57,7 +57,6 @@ namespace cologne
         glm::vec3 aabb_min = glm::vec3(std::numeric_limits<float>::max());
         glm::vec3 aabb_max = glm::vec3(std::numeric_limits<float>::min());
         std::vector<AnimationClip> animations;
-        uint32_t material_index;
         Skeleton skeleton;
     };
 
@@ -89,39 +88,4 @@ namespace cologne
         glm::quat rotation;
         glm::vec3 up;
     };
-
-#pragma pack (push, 1)
-    struct ModelCacheHeader
-    {
-        uint32_t mesh_count;
-        uint32_t material_count;
-        uint64_t time_saved;
-        glm::vec3 aabb_min;
-        glm::vec3 aabb_max;
-        char name[256];
-    };
-
-    struct MeshCacheHeader
-    {
-        char name[256];
-        uint32_t vertex_count;
-        uint32_t index_count;
-        glm::vec3 aabb_min;
-        glm::vec3 aabb_max;
-        uint32_t material_index;
-        glm::mat4 inverse_bind_pose;
-    };
-
-    struct MaterialCacheHeader
-    {
-        char albedo_path[512];
-        char normal_path[512];
-        char metallic_path[512];
-        char roughness_path[512];
-        char ao_path[512];
-        char emission_path[512];
-        float roughness_override = 1.0f;
-        float metallic_override = 1.0f;
-    };
-#pragma pack(pop)
 }

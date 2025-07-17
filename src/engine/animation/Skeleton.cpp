@@ -6,6 +6,12 @@
 
 namespace cologne
 {
+    Skeleton::Skeleton(const std::vector<Bone> &bones, const std::unordered_map<std::string, int> &bone_map)
+    {
+        _bones = bones;
+        _bone_name_to_index = bone_map;
+    }
+
     int Skeleton::find_bone_index(const std::string &name) const
     {
         if (const auto it = _bone_name_to_index.find(name); it != _bone_name_to_index.end())

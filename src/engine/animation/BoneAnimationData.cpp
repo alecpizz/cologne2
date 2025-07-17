@@ -34,21 +34,18 @@ namespace cologne
         }
     }
 
+    BoneAnimationData::BoneAnimationData(const std::string &name, const std::vector<AnimationKeyPosition> &positions,
+        const std::vector<AnimationKeyRotation> &rotations, const std::vector<AnimationKeyScale> &scales)
+    {
+        _positions = positions;
+        _rotations = rotations;
+        _scales = scales;
+        _transform = glm::mat4(1.0f);
+        _name = name;
+    }
+
     void BoneAnimationData::update(float animation_time)
     {
-        if (_positions.size() == 1)
-        {
-
-        }
-        if (_rotations.size() == 1)
-        {
-
-        }
-
-        if (_scales.size() == 1)
-        {
-
-        }
         const glm::mat4 translation = interpolate_position(animation_time);
         const glm::mat4 rotation = interpolate_rotation(animation_time);
         const glm::mat4 scale = interpolate_scale(animation_time);
@@ -155,4 +152,21 @@ namespace cologne
         glm::vec3 final_scale = glm::mix(_scales[scale_0].scale, _scales[scale_1].scale, scale_factor);
         return glm::scale(glm::mat4(1.0f), final_scale);
     }
+
+    const std::vector<AnimationKeyPosition> &BoneAnimationData::get_positions() const
+    {
+        return _positions;
+    }
+
+    const std::vector<AnimationKeyRotation> &BoneAnimationData::get_rotations() const
+    {
+        return _rotations;
+    }
+
+    const std::vector<AnimationKeyScale> &BoneAnimationData::get_scales() const
+    {
+        return _scales;
+    }
+
+
 }

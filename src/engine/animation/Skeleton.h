@@ -18,7 +18,7 @@ namespace cologne
     {
     public:
         Skeleton() = default;
-
+        Skeleton(const std::vector<Bone>& bones, const std::unordered_map<std::string, int>& bone_map);
         int find_bone_index(const std::string &name) const;
         int try_find_bone_index(const std::string& content) const;
 

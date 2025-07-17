@@ -24,6 +24,15 @@ namespace cologne
         }
     }
 
+    AnimationClip::AnimationClip(const std::string &name,
+        const std::unordered_map<std::string, BoneAnimationData> &data, float duration, int ticks)
+    {
+        _name = name;
+        _duration = duration;
+        _ticks_per_second = ticks;
+        _bone_channels = data;
+    }
+
     BoneAnimationData *AnimationClip::find_bone_channel(const std::string &name)
     {
         if (_bone_channels.contains(name))
@@ -46,5 +55,10 @@ namespace cologne
     const std::string &AnimationClip::get_name() const
     {
         return _name;
+    }
+
+    const std::unordered_map<std::string, BoneAnimationData> & AnimationClip::get_data() const
+    {
+        return _bone_channels;
     }
 }
