@@ -78,14 +78,13 @@ namespace cologne::AssetManager
         std::vector<ModelData> model_datas;
         for (auto& model_path : model_paths)
         {
-            if (!std::filesystem::exists(RESOURCES_PATH "cache/models/" + model_path.name + ".cmdl"))
+            //if (!std::filesystem::exists(RESOURCES_PATH "cache/models/" + model_path.name + ".cmdl"))
             {
                 LOG_INFO("No cache for file %s found!", model_path.name.c_str());
                 const ModelData data = FileUtil::import_model(model_path.path);
                 auto time = std::filesystem::last_write_time(model_path.path);
                 auto sys_time = std::chrono::clock_cast<std::chrono::system_clock>(time);
                 export_model(data, std::chrono::duration_cast<std::chrono::seconds>(sys_time.time_since_epoch()).count());
-                break;
             }
         }
 
@@ -94,7 +93,7 @@ namespace cologne::AssetManager
                        std::end(model_paths), std::begin(model_datas),
                        [](const FileUtil::FileInfo &file)
                        {
-                           const ModelData data = FileUtil::import_model(file.path);
+                           const ModelData data = import_model(std::string(RESOURCES_PATH "cache/models/" + file.name + ".cmdl").c_str());
                            return data;
                        });
 

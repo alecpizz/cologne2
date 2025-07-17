@@ -30,12 +30,15 @@ namespace cologne
 
         void load();
 
+        void set_path(const std::string& path) {_path = path;}
+        void load_compressed();
         void make_resident();
         void make_non_resident();
         void export_to_compressed(const char* path) const;
 
     private:
         bool _is_resident = false;
+        std::string _path;
         std::vector<unsigned char> _data;
         uint64_t _bindless_handle = 0;
         uint32_t _handle = 0;

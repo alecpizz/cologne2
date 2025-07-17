@@ -18,7 +18,7 @@ namespace cologne::AssetManager
     void file_added(const std::filesystem::path& path);
 
     void export_model(const ModelData& model_data, uint64_t export_time);
-
+    ModelData import_model(const char* path);
 
     std::vector<AnimationClip>& get_animations();
     std::vector<Model>& get_models();

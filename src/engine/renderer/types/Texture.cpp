@@ -8,9 +8,42 @@
 #include <stb_dxt/stb_dxt.h>
 #include <fstream>
 #include <engine/util/FileUtil.h>
+#include <filesystem>
 
 namespace cologne
 {
+
+#define FOURCC_DXT1 0x31545844 // Equivalent to "DXT1"
+
+    struct DDS_PIXELFORMAT {
+        uint32_t dwSize;
+        uint32_t dwFlags;
+        uint32_t dwFourCC;
+        uint32_t dwRGBBitCount;
+        uint32_t dwRBitMask;
+        uint32_t dwGBitMask;
+        uint32_t dwBBitMask;
+        uint32_t dwABitMask;
+    };
+
+    struct DDS_HEADER {
+        uint32_t           dwSize;
+        uint32_t           dwFlags;
+        uint32_t           dwHeight;
+        uint32_t           dwWidth;
+        uint32_t           dwPitchOrLinearSize;
+        uint32_t           dwDepth;
+        uint32_t           dwMipMapCount;
+        uint32_t           dwReserved1[11];
+        DDS_PIXELFORMAT    ddspf;
+        uint32_t           dwCaps;
+        uint32_t           dwCaps2;
+        uint32_t           dwCaps3;
+        uint32_t           dwCaps4;
+        uint32_t           dwReserved2;
+    };
+
+
     Texture::Texture(const char *texture_path)
     {
         glCreateTextures(GL_TEXTURE_2D, 1, &_handle);
@@ -165,6 +198,90 @@ namespace cologne
         _data.shrink_to_fit();
     }
 
+    void Texture::load_compressed()
+    {
+        if (_path.empty())
+        {
+            return;
+        }
+        std::filesystem::path f_path (_path);
+        if (_path.length() > 512)
+        {
+            LOG_WARN("PATH TOO LONG, SKIPPING");
+            return;
+        }
+        if (!std::filesystem::exists(f_path))
+        {
+            LOG_ERROR("No file found at %s", _path.c_str());
+            return;
+        }
+
+        if (!f_path.has_extension())
+        {
+            LOG_ERROR("INVALID TEXTURE EXTENSION!");
+            _data.clear();
+            _data.shrink_to_fit();
+            return;
+        }
+
+        if (f_path.extension() != ".ctext")
+        {
+            LOG_ERROR("INVALID TEXTURE EXTENSION!");
+            _data.clear();
+            _data.shrink_to_fit();
+            return;
+        }
+
+        std::ifstream file (_path, std::ios::binary);
+        if (file.fail())
+        {
+            LOG_ERROR("Couldn't open import file %s %s", _path.c_str(), strerror(errno));
+            return;
+        }
+
+        // outfile.write("DDS ", 4);
+        // outfile.write(reinterpret_cast<const char*>(&header), sizeof(header));
+        // outfile.write(reinterpret_cast<const char*>(compressed_data.data()), compressed_data.size());
+        // outfile.close();
+        char sign[4];
+        file.read(reinterpret_cast<char*>(&sign), 4);
+        if (!strcmp(sign, "DDS "))
+        {
+            LOG_ERROR("File not DDS!, got: %s", sign);
+            return;
+        }
+
+        DDS_HEADER header = {};
+        file.read(reinterpret_cast<char*>(&header), sizeof(header));
+        int new_width = header.dwWidth;
+        int new_height= header.dwHeight;
+        int channels = 4;
+        int compressed_size = header.dwPitchOrLinearSize;
+        std::vector<uint8_t> compressed_data(compressed_size);
+        file.read(reinterpret_cast<char*>(compressed_data.data()), compressed_data.size());
+        file.close();
+
+        _width = new_width;
+        _height = new_height;
+        _channels = channels;
+
+        glCreateTextures(GL_TEXTURE_2D, 1, &_handle);
+        glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTextureParameteri(_handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        int32_t format = GL_RGBA;
+        int32_t format_internal = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+
+        int32_t mips = floor(log2(std::max(_width, _height))) + 1;
+        glTextureStorage2D(_handle, mips, format_internal, _width, _height);
+        glCompressedTextureSubImage2D(_handle, 0, 0, 0, _width, _height, format_internal, compressed_size, compressed_data.data());
+        glGenerateTextureMipmap(_handle);
+        _data.clear();
+        _data.shrink_to_fit();
+    }
+
     void Texture::make_resident()
     {
         if (_handle == 0)
@@ -216,41 +333,82 @@ namespace cologne
         }
 
         int compressed_size = (new_width * new_height) / 2;
-        std::vector<uint8_t> compressed_data(compressed_size);
-        for (int y = 0; y < new_height; y += 4)
-        {
-            for (int x = 0; x < new_width; x += 4)
-            {
-                int block_x = x / 4;
-                int block_y = y / 4;
-                int blocks_per_row = new_width / 4;
-                uint8_t* dest_block = &compressed_data[(block_y * blocks_per_row + block_x) * 8];
-
-                uint8_t source_block[16 * 4];
-
-                for (int row_in_block = 0; row_in_block < 4; row_in_block++)
-                {
-                    uint8_t* source_row = img_data + ((y + row_in_block) * new_width + x) * 4;
-
-                    uint8_t* dest_row = img_data + (row_in_block * 4 * 4);
-
-                    memcpy(dest_row, source_row, 16);
-                }
-
-                stb_compress_dxt_block(dest_block, source_block, 0, STB_DXT_HIGHQUAL);
-            }
-        }
-
+        // std::vector<uint8_t> compressed_data(compressed_size);
+        // for (int y = 0; y < new_height; y += 4)
+        // {
+        //     for (int x = 0; x < new_width; x += 4)
+        //     {
+        //         int block_x = x / 4;
+        //         int block_y = y / 4;
+        //         int blocks_per_row = new_width / 4;
+        //         uint8_t* dest_block = &compressed_data[(block_y * blocks_per_row + block_x) * 8];
+        //
+        //         uint8_t source_block[16 * 4];
+        //
+        //         for (int row_in_block = 0; row_in_block < 4; row_in_block++)
+        //         {
+        //             uint8_t* source_row = img_data + ((y + row_in_block) * new_width + x) * 4;
+        //
+        //             uint8_t* dest_row = img_data + (row_in_block * 4 * 4);
+        //
+        //             memcpy(dest_row, source_row, 16);
+        //         }
+        //
+        //         stb_compress_dxt_block(dest_block, source_block, 1, STB_DXT_HIGHQUAL);
+        //     }
+        // }
+        stbi_image_free(img_data);
         FileUtil::create_directory_recursive(path);
         std::ofstream outfile (path, std::ios::binary);
         if (outfile.fail())
         {
             LOG_ERROR("Couldn't open output file %s %s", path, strerror(errno));
-            stbi_image_free(img_data);
             return;
         }
 
-        outfile.write(reinterpret_cast<const char*>(compressed_data.data()), compressed_data.size());
+
+        DDS_HEADER header = {};
+        header.dwSize = 124;
+        header.dwFlags = 0x1 | 0x2 | 0x4 | 0x1000 | 0x80000; // CAPS, HEIGHT, WIDTH, PIXELFORMAT, LINEARSIZE
+        header.dwHeight = new_height;
+        header.dwWidth = new_width;
+        header.dwPitchOrLinearSize = compressed_size;
+        header.dwDepth = 0;
+        header.dwMipMapCount = 0;
+        header.ddspf.dwSize = 32;
+        header.ddspf.dwFlags = 0x4; // FOURCC
+        header.ddspf.dwFourCC = FOURCC_DXT1;
+        header.dwCaps = 0x1000; // TEXTURE
+
+        outfile.write("DDS ", 4);
+        outfile.write(reinterpret_cast<const char*>(&header), sizeof(header));
+
+        unsigned char inDataBuf[64];
+        unsigned char outDataBuf[16];
+
+        const int blockSize = 16;
+        const int mipCount = 1;
+        int mw = new_width, mh = new_height;
+        for (unsigned int m = 0; m < mipCount; ++m, mw /= 2, mh /= 2)
+        {
+            for (int l = 0; l < mh; l += 4, img_data += mw * 4 * 3)    /* every 4 rows */
+            {
+                for (int j = 0; j < mw; j += 4, img_data += 4 * 4)     /* every 4 columns */
+                {
+                    for (int i = 0; i < 4; ++i)     /* every row in the 4x4 RGBA pixel block */
+                    {
+                        for (int k = 0; k < 4; ++k)
+                        {
+                            memcpy(inDataBuf + (i * 4 + k) * 4, img_data + (i * mw + k) * 4, 4);
+                        }
+                    }
+                    stb_compress_dxt_block(outDataBuf, inDataBuf, 1,  STB_DXT_HIGHQUAL);
+                    outfile.write(reinterpret_cast<const char *>(&outDataBuf), blockSize);
+                }
+            }
+        }
+
+
         outfile.close();
     }
 }

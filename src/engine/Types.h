@@ -94,15 +94,16 @@ namespace cologne
     struct ModelCacheHeader
     {
         uint32_t mesh_count;
+        uint32_t material_count;
         uint64_t time_saved;
         glm::vec3 aabb_min;
         glm::vec3 aabb_max;
-        std::string name;
+        char name[256];
     };
 
     struct MeshCacheHeader
     {
-        std::string name;
+        char name[256];
         uint32_t vertex_count;
         uint32_t index_count;
         glm::vec3 aabb_min;
@@ -113,12 +114,12 @@ namespace cologne
 
     struct MaterialCacheHeader
     {
-        std::string albedo_path;
-        std::string normal_path;
-        std::string metallic_path;
-        std::string roughness_path;
-        std::string ao_path;
-        std::string emission_path;
+        char albedo_path[512];
+        char normal_path[512];
+        char metallic_path[512];
+        char roughness_path[512];
+        char ao_path[512];
+        char emission_path[512];
         float roughness_override = 1.0f;
         float metallic_override = 1.0f;
     };

@@ -54,11 +54,17 @@ namespace cologne
 
         void load_all()
         {
+            albedo.load_compressed();
             albedo.load();
+            ao.load_compressed();
             ao.load();
+            metallic.load_compressed();
             metallic.load();
+            roughness.load_compressed();
             roughness.load();
+            normal.load_compressed();
             normal.load();
+            emission.load_compressed();
             emission.load();
         }
 

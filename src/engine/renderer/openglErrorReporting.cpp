@@ -75,7 +75,7 @@ void GLAPIENTRY glDebugOutput(GLenum source,
         case GL_DEBUG_SEVERITY_HIGH:
         {
             LOG_ERROR("---------------");
-            LOG_ERROR("Debug Message (%)", id);
+            LOG_ERROR("Debug Message (%d)", id);
             LOG_ERROR("%s", message);
             LOG_ERROR("%s", message_source.c_str());
             LOG_ERROR("%s", message_type.c_str());
@@ -85,7 +85,7 @@ void GLAPIENTRY glDebugOutput(GLenum source,
         case GL_DEBUG_SEVERITY_MEDIUM:
         {
             LOG_WARN("---------------");
-            LOG_WARN("Debug Message (%)", id);
+            LOG_WARN("Debug Message (%d)", id);
             LOG_WARN("%s", message);
             LOG_WARN("%s", message_source.c_str());
             LOG_WARN("%s", message_type.c_str());
@@ -96,7 +96,7 @@ void GLAPIENTRY glDebugOutput(GLenum source,
         case GL_DEBUG_SEVERITY_LOW:
         {
             LOG_INFO("---------------");
-            LOG_INFO("Debug Message (%)", id);
+            LOG_INFO("Debug Message (%d)", id);
             LOG_INFO("%s", message);
             LOG_INFO("%s", message_source.c_str());
             LOG_INFO("%s", message_type.c_str());
@@ -106,7 +106,7 @@ void GLAPIENTRY glDebugOutput(GLenum source,
         case GL_DEBUG_SEVERITY_NOTIFICATION:
         {
             LOG_DEBUG("---------------");
-            LOG_DEBUG("Debug Message (%)", id);
+            LOG_DEBUG("Debug Message (%d)", id);
             LOG_DEBUG("%s", message);
             LOG_DEBUG("%s", message_source.c_str());
             LOG_DEBUG("%s", message_type.c_str());
