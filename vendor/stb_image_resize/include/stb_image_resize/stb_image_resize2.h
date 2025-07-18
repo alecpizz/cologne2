@@ -268,7 +268,7 @@
          Define STBIR_ASSERT(boolval) to override assert() and not use assert.h
 
      PORTING FROM VERSION 1
-        The API has changed. You can continue to use the old version of stb_image_resize.h,
+        The API has changed. You can continue to use the old version of stb_image_resize2.h,
         which is available in the "deprecated/" directory.
 
         If you're using the old simple-to-use API, porting is straightforward.

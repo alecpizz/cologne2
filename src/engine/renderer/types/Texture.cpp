@@ -9,6 +9,7 @@
 #include <engine/util/FileUtil.h>
 #include <filesystem>
 #include <squish/squish.h>
+#include <stb_image_resize/stb_image_resize2.h>
 
 namespace cologne
 {
@@ -43,6 +44,24 @@ namespace cologne
         uint32_t dwCaps4;
         uint32_t dwReserved2;
     };
+
+    const uint32_t DDSD_CAPS        = 0x1;
+    const uint32_t DDSD_HEIGHT      = 0x2;
+    const uint32_t DDSD_WIDTH       = 0x4;
+    const uint32_t DDSD_PITCH       = 0x8;
+    const uint32_t DDSD_PIXELFORMAT = 0x1000;
+    const uint32_t DDSD_MIPMAPCOUNT = 0x20000;
+    const uint32_t DDSD_LINEARSIZE  = 0x80000;
+    const uint32_t DDSD_DEPTH       = 0x800000;
+
+    const uint32_t DDPF_ALPHAPIXELS = 0x1;
+    const uint32_t DDPF_ALPHA       = 0x2;
+    const uint32_t DDPF_FOURCC      = 0x4;
+    const uint32_t DDPF_RGB         = 0x40;
+
+    const uint32_t DDSCAPS_COMPLEX  = 0x8;
+    const uint32_t DDSCAPS_MIPMAP   = 0x400000;
+    const uint32_t DDSCAPS_TEXTURE  = 0x1000;
 
 
     Texture::Texture(const char *texture_path)
@@ -249,7 +268,7 @@ namespace cologne
         // outfile.close();
         char sign[4];
         file.read(reinterpret_cast<char *>(&sign), 4);
-        if (!strcmp(sign, "DDS "))
+        if (strncmp(sign, "DDS ", 4) != 0)
         {
             LOG_ERROR("File not DDS!, got: %s", sign);
             return;
@@ -260,10 +279,17 @@ namespace cologne
         int new_width = header.dwWidth;
         int new_height = header.dwHeight;
         int channels = 4;
-        int compressed_size = header.dwPitchOrLinearSize;
-        std::vector<uint8_t> compressed_data(compressed_size);
-        file.read(reinterpret_cast<char *>(compressed_data.data()), compressed_data.size());
+        int mip_count = header.dwMipMapCount;
+
+        //get the start and end points of the image data (everything after the header)
+        std::streampos begin = file.tellg();
+        file.seekg(0, std::ios::end);
+        std::streampos end = file.tellg();
+        std::vector<uint8_t> all_img_data (end - begin); //determine how big the total data is
+        file.seekg(begin); //go back andd re-read it
+        file.read(reinterpret_cast<char*>(all_img_data.data()), all_img_data.size());
         file.close();
+
 
         _width = new_width;
         _height = new_height;
@@ -275,14 +301,22 @@ namespace cologne
         glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTextureParameteri(_handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        int32_t format = GL_RGBA;
         int32_t format_internal = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+        glTextureStorage2D(_handle, mip_count, format_internal, _width, _height);
 
-        int32_t mips = floor(log2(std::max(_width, _height))) + 1;
-        glTextureStorage2D(_handle, mips, format_internal, _width, _height);
-        glCompressedTextureSubImage2D(_handle, 0, 0, 0, _width, _height, format_internal, compressed_size,
-                                      compressed_data.data());
-        glGenerateTextureMipmap(_handle);
+        uint32_t current_width = new_width;
+        uint32_t current_height = new_height;
+        size_t offset = 0;
+        for (uint32_t level = 0; level < mip_count && (current_width || current_height); level++)
+        {
+            int cFlags = squish::kDxt1;
+            uint32_t size = squish::GetStorageRequirements(current_width, current_height, cFlags);
+            glCompressedTextureSubImage2D(_handle, level, 0, 0, current_width, current_height, format_internal, size, all_img_data.data() + offset);
+
+            offset += size;
+            current_width = std::max(1u, current_width / 2);
+            current_height = std::max(1u, current_height / 2);
+        }
         _data.clear();
         _data.shrink_to_fit();
     }
@@ -337,31 +371,59 @@ namespace cologne
             return;
         }
 
+        int mip_count = floor(log2(std::max(new_width, new_height))) + 1;
+        std::vector<uint8_t> all_mip_data;
+        int current_width = new_width;
+        int current_height = new_height;
+        uint8_t* previous_mip_data = img_data;
+        for (int i = 0; i < mip_count; i++)
+        {
+            uint8_t* current_mip = previous_mip_data;
+            if (i > 0)
+            {
+                current_mip = new uint8_t[current_width * current_height * 4];
+                stbir_resize_uint8_linear(previous_mip_data, (i == 1) ? new_width : current_width * 2, (i == 1) ? new_height : current_height * 2,
+                    0, current_mip, current_width, current_height, 0, stbir_pixel_layout::STBIR_RGBA);
+                if (i > 1)
+                {
+                    delete[] previous_mip_data;
+                }
+                previous_mip_data = current_mip;
+            }
 
-        int cFlags = squish::kDxt1;
-        int cSize = squish::GetStorageRequirements(new_width, new_height, cFlags);
+            int cFlags = squish::kDxt1;
+            int comprssed_size = squish::GetStorageRequirements(current_width, current_height, cFlags);
+            std::vector<uint8_t> compressed_data(comprssed_size);
+            squish::CompressImage(current_mip, current_width, current_height, current_width * 4, compressed_data.data(), cFlags);
+            all_mip_data.insert(all_mip_data.end(), compressed_data.begin(), compressed_data.end());
+            current_width = std::max(1, current_width / 2);
+            current_height = std::max(1, current_height / 2);
+        }
+
+        if (mip_count > 1)
+        {
+            delete[] previous_mip_data;
+        }
+        stbi_image_free(img_data);
+
+
         DDS_HEADER header = {};
         header.dwSize = 124;
-        header.dwFlags = 0x1 | 0x2 | 0x4 | 0x1000 | 0x80000; // CAPS, HEIGHT, WIDTH, PIXELFORMAT, LINEARSIZE
+        header.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT | DDSD_MIPMAPCOUNT | DDSD_LINEARSIZE;
         header.dwHeight = new_height;
         header.dwWidth = new_width;
-        header.dwPitchOrLinearSize = cSize;
+        header.dwPitchOrLinearSize = squish::GetStorageRequirements(new_width, new_height, squish::kDxt1);
         header.dwDepth = 0;
-        header.dwMipMapCount = 0;
+        header.dwMipMapCount = mip_count;
         header.ddspf.dwSize = 32;
-        header.ddspf.dwFlags = 0x4; // FOURCC
+        header.ddspf.dwFlags = DDPF_FOURCC; // FOURCC
         header.ddspf.dwFourCC = FOURCC_DXT1;
-        header.dwCaps = 0x1000; // TEXTURE
+        header.dwCaps = DDSCAPS_TEXTURE | DDSCAPS_COMPLEX | DDSCAPS_MIPMAP; // TEXTURE
 
         outfile.write("DDS ", 4);
         outfile.write(reinterpret_cast<const char *>(&header), sizeof(header));
+        outfile.write(reinterpret_cast<const char *>(all_mip_data.data()), all_mip_data.size());
 
-        std::vector<uint8_t> pixels(cSize);
-        squish::CompressImage(img_data, new_width, new_height, new_width * 4, pixels.data(), cFlags);
-
-        outfile.write(reinterpret_cast<const char *>(pixels.data()), pixels.size());
-
-        stbi_image_free(img_data);
         outfile.close();
     }
 }
