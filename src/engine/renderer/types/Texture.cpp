@@ -223,7 +223,6 @@ namespace cologne
 
         if (!f_path.has_extension())
         {
-            LOG_ERROR("INVALID TEXTURE EXTENSION!");
             _data.clear();
             _data.shrink_to_fit();
             return;
@@ -231,7 +230,7 @@ namespace cologne
 
         if (f_path.extension() != ".ctext")
         {
-            LOG_ERROR("INVALID TEXTURE EXTENSION!");
+            LOG_ERROR("INVALID TEXTURE EXTENSION! %d", f_path.extension().c_str());
             _data.clear();
             _data.shrink_to_fit();
             return;
@@ -327,10 +326,9 @@ namespace cologne
         int new_width;
         int new_height;
         int new_channels;
+        stbi_set_flip_vertically_on_load(false);
         stbi_uc *img_data = stbi_load_from_memory(_data.data(), static_cast<int>(_data.size()),
                                       &new_width, &new_height, &new_channels, 4);
-
-        int compressed_size = (new_width * new_height) / 2;
         FileUtil::create_directory_recursive(path);
         std::ofstream outfile(path, std::ios::binary);
         if (outfile.fail())
@@ -340,12 +338,14 @@ namespace cologne
         }
 
 
+        int cFlags = squish::kDxt1;
+        int cSize = squish::GetStorageRequirements(new_width, new_height, cFlags);
         DDS_HEADER header = {};
         header.dwSize = 124;
         header.dwFlags = 0x1 | 0x2 | 0x4 | 0x1000 | 0x80000; // CAPS, HEIGHT, WIDTH, PIXELFORMAT, LINEARSIZE
         header.dwHeight = new_height;
         header.dwWidth = new_width;
-        header.dwPitchOrLinearSize = compressed_size;
+        header.dwPitchOrLinearSize = cSize;
         header.dwDepth = 0;
         header.dwMipMapCount = 0;
         header.ddspf.dwSize = 32;
@@ -356,8 +356,6 @@ namespace cologne
         outfile.write("DDS ", 4);
         outfile.write(reinterpret_cast<const char *>(&header), sizeof(header));
 
-        int cFlags = squish::kDxt1;
-        int cSize = squish::GetStorageRequirements(new_width, new_height, cFlags);
         std::vector<uint8_t> pixels(cSize);
         squish::CompressImage(img_data, new_width, new_height, new_width * 4, pixels.data(), cFlags);
 

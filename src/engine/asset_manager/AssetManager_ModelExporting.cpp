@@ -195,6 +195,7 @@ namespace cologne::AssetManager
         copy_name(header.name, skinned_model_data.name);
         header.bone_count = skinned_model_data.skeleton.get_bone_count();
         header.animation_count = skinned_model_data.animations.size();
+        file.write(reinterpret_cast<const char*>(&header), sizeof(header));
 
         //write meshes
         for (const auto& mesh : skinned_model_data.meshes)
@@ -260,9 +261,9 @@ namespace cologne::AssetManager
                 key_frame_header.scale_count = key_frame.second.get_scales().size();
                 file.write(reinterpret_cast<const char*>(&key_frame_header), sizeof(KeyframeCacheHeader));
 
-                file.write(reinterpret_cast<const char*>(&key_frame.second.get_positions()), sizeof(AnimationKeyPosition) * key_frame.second.get_positions().size());
-                file.write(reinterpret_cast<const char*>(&key_frame.second.get_rotations()), sizeof(AnimationKeyRotation) * key_frame.second.get_rotations().size());
-                file.write(reinterpret_cast<const char*>(&key_frame.second.get_scales()), sizeof(AnimationKeyScale) * key_frame.second.get_scales().size());
+                file.write(reinterpret_cast<const char*>(key_frame.second.get_positions().data()), sizeof(AnimationKeyPosition) * key_frame.second.get_positions().size());
+                file.write(reinterpret_cast<const char*>(key_frame.second.get_rotations().data()), sizeof(AnimationKeyRotation) * key_frame.second.get_rotations().size());
+                file.write(reinterpret_cast<const char*>(key_frame.second.get_scales().data()), sizeof(AnimationKeyScale) * key_frame.second.get_scales().size());
             }
         }
 

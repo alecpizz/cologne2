@@ -108,6 +108,7 @@ namespace cologne
 
     bool Engine::init(uint32_t width, uint32_t height)
     {
+        ElapsedTime et;
         Audio::init();
         _impl->debug_ui = std::unique_ptr<Editor>(new Editor());
         _impl->window = std::unique_ptr<Window>(new Window(width, height));
@@ -131,6 +132,8 @@ namespace cologne
             return false;
         }
         LOG_INFO("Engine initialized successfully!");
+        et.update();
+        LOG_INFO("Engine initialized in %f time", et.elapsed);
         return true;
     }
 

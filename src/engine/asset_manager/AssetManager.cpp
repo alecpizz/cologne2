@@ -88,23 +88,38 @@ namespace cologne::AssetManager
             }
         }
 
-        model_datas.resize(model_paths.size());
-        std::transform(std::execution::par_unseq, std::begin(model_paths),
-                       std::end(model_paths), std::begin(model_datas),
+        std::vector<FileUtil::FileInfo> cache_model_paths = FileUtil::iterate_directory(RESOURCES_PATH "cache/models");
+        model_datas.resize(cache_model_paths.size());
+        std::transform(std::execution::par_unseq, std::begin(cache_model_paths),
+                       std::end(cache_model_paths), std::begin(model_datas),
                        [](const FileUtil::FileInfo &file)
                        {
-                           const ModelData data = import_model(std::string(RESOURCES_PATH "cache/models/" + file.name + ".cmdl").c_str());
+                           const ModelData data = import_model(file.path.c_str());
                            return data;
                        });
 
         //skinned models --> assuming animations are in models for now
         std::vector<FileUtil::FileInfo> skinned_paths = FileUtil::iterate_directory(RESOURCES_PATH "skinned_models");
         std::vector<SkinnedModelData> skinned_model_datas;
-        skinned_model_datas.resize(skinned_paths.size());
-        std::transform(std::execution::par_unseq, std::begin(skinned_paths), std::end(skinned_paths),
+        for (auto& model_path : skinned_paths)
+        {
+            if (!std::filesystem::exists(RESOURCES_PATH "cache/skinned_models/" + model_path.name + ".cskmdl"))
+            {
+                LOG_INFO("No cache for file %s found!", model_path.name.c_str());
+                const SkinnedModelData data = FileUtil::import_skinned_model(model_path.path);
+                auto time = std::filesystem::last_write_time(model_path.path);
+                auto sys_time = std::chrono::clock_cast<std::chrono::system_clock>(time);
+                export_skinned_model(data, std::chrono::duration_cast<std::chrono::seconds>(sys_time.time_since_epoch()).count());
+                LOG_INFO("Exported skinned model %s", model_path.name.c_str());
+            }
+        }
+
+        std::vector<FileUtil::FileInfo> cache_skinned_paths = FileUtil::iterate_directory(RESOURCES_PATH "cache/skinned_models");
+        skinned_model_datas.resize(cache_skinned_paths.size());
+        std::transform(std::execution::par_unseq, std::begin(cache_skinned_paths), std::end(cache_skinned_paths),
                        std::begin(skinned_model_datas), [](const FileUtil::FileInfo &file)
                        {
-                           const SkinnedModelData data = FileUtil::import_skinned_model(file.path);
+                           const SkinnedModelData data = import_skinned_model(file.path.c_str());
                            return data;
                        });
         scope = DebugScope("load models");
