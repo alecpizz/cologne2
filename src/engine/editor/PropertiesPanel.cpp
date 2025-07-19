@@ -78,7 +78,7 @@ namespace cologne
                     if (child.has_component<MeshComponent>())
                     {
                         Engine::get_renderer()->submit_outline_render_item(RenderItem(
-                            child.get_component<MeshComponent>().mesh_idx,
+                            AssetManager::get_mesh_index_by_name(child.get_component<MeshComponent>().mesh_name),
                             child.get_component<
                                 WorldTransformComponent>(),
                             false,
@@ -86,7 +86,7 @@ namespace cologne
                     }
                     if (child.has_component<ModelComponent>())
                     {
-                        auto model = AssetManager::get_model_by_index(child.get_component<ModelComponent>().id);
+                        auto model = AssetManager::get_model_by_name(child.get_component<ModelComponent>().model_name);
                         for (auto mesh_index: model->get_mesh_indices())
                         {
                             Engine::get_renderer()->submit_outline_render_item(RenderItem(mesh_index,
@@ -99,8 +99,8 @@ namespace cologne
 
                     if (child.has_component<SkinnedModelComponent>())
                     {
-                        auto model = AssetManager::get_skinned_model_by_index(
-                            child.get_component<SkinnedModelComponent>().id);
+                        auto model = AssetManager::get_skinned_model_by_name(
+                            child.get_component<SkinnedModelComponent>().model_name);
                         if (model)
                         {
                             std::vector<glm::mat4> bones = std::vector<glm::mat4>();
@@ -155,27 +155,21 @@ namespace cologne
                 ImGui::Checkbox("CAST SHADOWS", &light.cast_shadows);
             });
 
-            draw_component<MeshComponent>("Mesh", _selected_entity, true, [this](auto &mesh_comp)
+            draw_component<MeshComponent>("Mesh", _selected_entity, true, [this](MeshComponent &mesh_comp)
             {
-                Engine::get_renderer()->submit_outline_render_item(RenderItem(mesh_comp.mesh_idx,
+                Engine::get_renderer()->submit_outline_render_item(RenderItem(AssetManager::get_mesh_index_by_name(mesh_comp.mesh_name),
                                                                               _selected_entity.get_component<
                                                                                   WorldTransformComponent>(),
                                                                               false,
                                                                               static_cast<uint32_t>(_selected_entity)));
-                int id = mesh_comp.mesh_idx;
-                if (ImGui::InputInt("Mesh ID", &id))
-                {
-                    id = glm::clamp(id, 0, static_cast<int>(AssetManager::get_meshes().size()) - 1);
-                    mesh_comp.mesh_idx = id;
-                }
-                auto mesh = AssetManager::get_mesh_by_index(mesh_comp.mesh_idx);
+                auto mesh = AssetManager::get_mesh_by_name(mesh_comp.mesh_name);
                 std::string mesh_name = mesh->get_name();
                 ImGui::Text("Name %s Material %d", mesh_name.c_str(), mesh->get_material_index());
             });
 
-            draw_component<ModelComponent>("Model", _selected_entity, true, [this](auto &model)
+            draw_component<ModelComponent>("Model", _selected_entity, true, [this](ModelComponent &model)
             {
-                auto m = AssetManager::get_model_by_index(model.id);
+                auto m = AssetManager::get_model_by_name(model.model_name);
                 for (auto idx: m->get_mesh_indices())
                 {
                     Engine::get_renderer()->submit_outline_render_item(RenderItem(
@@ -184,21 +178,13 @@ namespace cologne
                         false,
                         static_cast<uint32_t>(_selected_entity)));
                 }
-                int id = static_cast<int>(model.id);
-                if (ImGui::InputInt("Model ID", &id))
-                {
-                    id = glm::clamp(id, 0,
-                                    static_cast<int>(AssetManager::get_models().size()) - 1);
-                    model.id = id;
-                }
-                std::string model_name = AssetManager::get_model_by_index(model.id)->get_name();
-                ImGui::Text("Name %s", model_name.c_str());
+                ImGui::Text("Name %s", model.model_name.c_str());
                 ImGui::Checkbox("GI Only", &model.gi_only);
             });
 
             draw_component<SkinnedModelComponent>("Skinned Model", _selected_entity, true, [this](SkinnedModelComponent &model)
             {
-                if (auto skinned_model = AssetManager::get_skinned_model_by_index(model.id))
+                if (auto skinned_model = AssetManager::get_skinned_model_by_name(model.model_name))
                 {
                     std::vector<glm::mat4> bones = std::vector<glm::mat4>();
                     if (_selected_entity.has_component<AnimatorComponent>())
@@ -215,15 +201,7 @@ namespace cologne
                         Engine::get_renderer()->submit_skinned_outline_render_item(item);
                     }
                 }
-                int id = static_cast<int>(model.id);
-                if (ImGui::InputInt("Skinned Model ID", &id))
-                {
-                    id = glm::clamp(id, 0,
-                                    static_cast<int>(AssetManager::get_skinned_models().size()) - 1);
-                    model.id = id;
-                }
-                std::string model_name = AssetManager::get_skinned_model_by_index(model.id)->get_name();
-                ImGui::Text("Name %s", model_name.c_str());
+                ImGui::Text("Name %s", model.model_name.c_str());
             });
 
             draw_component<StaticColliderComponent>("Static Collider", _selected_entity, false, [](auto &collider)

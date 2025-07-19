@@ -41,19 +41,19 @@ namespace cologne
         man.get_component<TransformComponent>().position.y -= 0.25f;
         auto enemy = man.add_component<EnemyComponent>();
         Audio::add_sound(enemy.hurt_sound.c_str()); //todo: have asset manager do this
-        man.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("man"));
+        man.add_component<SkinnedModelComponent>("man");
         AnimatorComponent &anim = man.add_component<AnimatorComponent>("man");
         anim.play_base_animation(AssetManager::get_animation_by_name("man_Idle"));
         anim.create_ragdoll(man);
 
         Entity man2 = create_entity("man2");
         man2.get_component<TransformComponent>().position = glm::vec3(0.0f, -0.25f, 2.5f);
-        man2.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("man"));
+        man2.add_component<SkinnedModelComponent>("man");
         AnimatorComponent& anim3 = man2.add_component<AnimatorComponent>("man");
         anim3.play_base_animation(AssetManager::get_animation_by_name("man_Idle"));
 
         Entity revolver = create_entity("deagle");
-        revolver.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
+        revolver.add_component<SkinnedModelComponent>("deagle");
         AnimatorComponent &anim2 = revolver.add_component<AnimatorComponent>("deagle");
         anim2.play_base_animation(AssetManager::get_animation_by_name("deagle_Rig|Rig|MK_ReloadFull"));
 
@@ -62,7 +62,7 @@ namespace cologne
         c.primary = true;
 
         Entity viewModel = create_entity("viewmodel");
-        viewModel.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("vsk"));
+        viewModel.add_component<SkinnedModelComponent>("vsk");
         auto &anim4 = viewModel.add_component<AnimatorComponent>("vsk");
         anim4.play_base_animation(AssetManager::get_animation_by_name("vsk_Idle"));
         // viewModel.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
@@ -162,7 +162,7 @@ namespace cologne
             auto &transform = _registry.get<TransformComponent>(entity);
             auto &collider = _registry.get<StaticColliderComponent>(entity);
             auto &mc = _registry.get<MeshComponent>(entity);
-            auto mesh = AssetManager::get_mesh_by_index(mc.mesh_idx);
+            auto mesh = AssetManager::get_mesh_by_name(mc.mesh_name);
             if (!mesh)
             {
                 continue;
@@ -358,12 +358,11 @@ namespace cologne
         {
             auto [m, tr, active] =
                     view.get<ModelComponent, WorldTransformComponent, ActiveComponent>(entity);
-            //culling step would be here probably? though for GI i dunno. might have to pack into render item
             if (!active)
             {
                 continue;
             }
-            Model *model = AssetManager::get_model_by_index(m.id);
+            Model *model = AssetManager::get_model_by_name(m.model_name);
             for (int32_t idx: model->get_mesh_indices())
             {
                 Engine::get_renderer()->submit_render_item(
@@ -380,7 +379,7 @@ namespace cologne
                 continue;
             }
             Engine::get_renderer()->
-                    submit_render_item(RenderItem(m.mesh_idx, tr, false, static_cast<uint32_t>(entity)));
+                    submit_render_item(RenderItem(AssetManager::get_mesh_index_by_name(m.mesh_name), tr, false, static_cast<uint32_t>(entity)));
         }
 
         auto view3 = _registry.view<SkinnedModelComponent, WorldTransformComponent, ActiveComponent>();
@@ -393,7 +392,7 @@ namespace cologne
             {
                 continue;
             }
-            SkinnedModel *skinned_model = AssetManager::get_skinned_model_by_index(m.id);
+            SkinnedModel *skinned_model = AssetManager::get_skinned_model_by_name(m.model_name);
             std::vector<glm::mat4> bones;
             if (_registry.all_of<AnimatorComponent>(entity))
             {
@@ -419,7 +418,7 @@ namespace cologne
         for (const auto entity: view)
         {
             auto [tr, m] = view.get<TransformComponent, ModelComponent>(entity);
-            const auto model = AssetManager::get_model_by_index(m.id);
+            const auto model = AssetManager::get_model_by_name(m.model_name);
             AABB aabb = model->get_aabb();
             aabb.min *= glm::vec4(tr.scale, 1.0);
             aabb.max *= glm::vec4(tr.scale, 1.0);
@@ -430,7 +429,7 @@ namespace cologne
         for (const auto entity: view2)
         {
             auto [tr, m] = view2.get<TransformComponent, MeshComponent>(entity);
-            const auto mesh = AssetManager::get_mesh_by_index(m.mesh_idx);
+            const auto mesh = AssetManager::get_mesh_by_name(m.mesh_name);
             AABB aabb = mesh->get_aabb();
             aabb.min *= glm::vec4(tr.scale, 1.0);
             aabb.max *= glm::vec4(tr.scale, 1.0);

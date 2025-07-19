@@ -83,19 +83,20 @@ namespace cologne
 
     struct ModelComponent
     {
-        //no clue what i want in here yet lmao, maybe just an id of the list of models? then just load all of da models?
-        int32_t id = 0;
+        std::string model_name;
         bool gi_only = false;
     };
 
     struct MeshComponent
     {
-        int32_t mesh_idx = 0;
+        MeshComponent() = default;
+        MeshComponent(int idx);
+        std::string mesh_name;
     };
 
     struct SkinnedModelComponent
     {
-        int32_t id = 0;
+        std::string model_name;
     };
 
     struct TagComponent
