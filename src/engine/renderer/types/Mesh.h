@@ -20,9 +20,9 @@ namespace cologne
 
         uint32_t get_material_index() const;
 
-        std::vector<Vertex> get_vertices() const;
+        const std::vector<Vertex>& get_vertices() const;
 
-        std::vector<uint32_t> get_indices() const;
+        const std::vector<uint32_t>& get_indices() const;
 
         uint32_t get_indices_count() const;
 

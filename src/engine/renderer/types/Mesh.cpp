@@ -32,12 +32,12 @@ namespace cologne
         return _material_index;
     }
 
-    std::vector<Vertex> Mesh::get_vertices() const
+    const std::vector<Vertex>& Mesh::get_vertices() const
     {
         return _vertices;
     }
 
-    std::vector<uint32_t> Mesh::get_indices() const
+    const std::vector<uint32_t>& Mesh::get_indices() const
     {
         return _indices;
     }

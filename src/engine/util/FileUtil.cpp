@@ -72,4 +72,9 @@ namespace cologne::FileUtil
         }
         return true;
     }
+
+    bool file_exists(const std::string &path)
+    {
+        return std::filesystem::exists(path);
+    }
 }

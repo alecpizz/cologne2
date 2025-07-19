@@ -10,7 +10,9 @@
 #include <engine/core/Engine.h>
 #include <engine/core/Input.h>
 #include <engine/renderer/Renderer.h>
+#include <engine/renderer/types/Mesh.h>
 #include <engine/scene/Components.h>
+#include <engine/util/FileUtil.h>
 #include <Jolt/Jolt.h>
 #include <Jolt/Core/Factory.h>
 #include <Jolt/Core/TempAllocator.h>
@@ -28,10 +30,11 @@
 #include <Jolt/Physics/Collision/CastResult.h>
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Physics/Collision/Shape/MeshShape.h>
+#include <Jolt/Core/StreamWrapper.h>
 #include <Jolt/Renderer/DebugRendererSimple.h>
 
 #include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
-
+#include <fstream>
 #include "Jolt/Physics/Constraints/SwingTwistConstraint.h"
 #include "Jolt/Physics/Ragdoll/Ragdoll.h"
 
@@ -837,24 +840,70 @@ namespace cologne::Physics
     }
 
     uint32_t create_static_mesh_collider(Entity entity, TransformComponent transform,
-                                         const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices)
+                                         const Mesh &mesh)
     {
-        JPH::TriangleList triangle_list;
-        for (int i = 0; i * 3 < indices.size(); i++)
+        JPH::Ref<Shape> mesh_shape;
+        const std::string path = RESOURCES_PATH "cache/colliders/" + mesh.get_name() + ".ccol";
+        if (!FileUtil::file_exists(path))
         {
-            Triangle triangle =
+            FileUtil::create_directory_recursive(path);
+            LOG_INFO("No cache collider for %s mesh! Generating one.", mesh.get_name().c_str());
+            JPH::TriangleList triangle_list;
+            for (int i = 0; i * 3 < mesh.get_indices_count(); i++)
             {
-                glm_vec3_to_float3(vertices[indices[3 * i]].position),
-                glm_vec3_to_float3(vertices[indices[3 * i + 1]].position),
-                glm_vec3_to_float3(vertices[indices[3 * i + 2]].position)
-            };
-            triangle_list.emplace_back(triangle);
+                Triangle triangle =
+                {
+                    glm_vec3_to_float3(mesh.get_vertices()[mesh.get_indices()[3 * i]].position),
+                    glm_vec3_to_float3(mesh.get_vertices()[mesh.get_indices()[3 * i + 1]].position),
+                    glm_vec3_to_float3(mesh.get_vertices()[mesh.get_indices()[3 * i + 2]].position)
+                };
+                triangle_list.emplace_back(triangle);
+            }
+            JPH::MeshShapeSettings mesh_settings(triangle_list);
+            mesh_settings.SetEmbedded();
+            auto result = mesh_settings.Create();
+            mesh_shape = result.Get();
+            //export now
+            std::ofstream file (path, std::ios::binary);
+            if (!file.is_open())
+            {
+                LOG_ERROR("Couldn't open file to export collision shape!");
+                return -1;
+            }
+            JPH::StreamOutWrapper stream_out(file);
+            JPH::Shape::ShapeToIDMap shape_to_id_map;
+            JPH::Shape::MaterialToIDMap material_to_id_map;
+            mesh_shape->SaveWithChildren(stream_out, shape_to_id_map, material_to_id_map);
+            file.close();
         }
-        JPH::MeshShapeSettings mesh_settings(triangle_list);
-        mesh_settings.SetEmbedded();
-        JPH::BodyCreationSettings settings(&mesh_settings, JPH::Vec3::sZero(),
-                                           JPH::Quat::sIdentity(), JPH::EMotionType::Static,
-                                           cologne::Physics::NON_MOVING);
+        else
+        {
+            // settings = something_else;
+            std::ifstream file(path, std::ios::binary);
+            if (!file.is_open())
+            {
+                LOG_ERROR("Couldn't open file to import collision shape!");
+                return -1;
+            }
+            JPH::StreamInWrapper stream_in(file);
+            JPH::Shape::IDToShapeMap id_to_shape_map;
+            JPH::Shape::IDToMaterialMap id_to_material_map;
+            JPH::Shape::ShapeResult result = JPH::Shape::sRestoreWithChildren(stream_in, id_to_shape_map, id_to_material_map);
+            file.close();
+            if (result.IsValid())
+            {
+                mesh_shape = result.Get();
+            }
+            else
+            {
+                LOG_ERROR("Couldn't open shape from file!");
+                return -1;
+            }
+        }
+        auto settings = BodyCreationSettings(mesh_shape, JPH::Vec3::sZero(),
+                                             JPH::Quat::sIdentity(), JPH::EMotionType::Static,
+                                             cologne::Physics::NON_MOVING);
+
         auto &body_interface = physics_system.GetBodyInterface();
         auto id = body_interface.CreateAndAddBody(
             settings, JPH::EActivation::DontActivate);
@@ -1035,7 +1084,7 @@ namespace cologne::Physics
         }
     }
 
-    void sync_ragdoll(uint32_t ragdoll_id, const std::unordered_map<std::string, glm::mat4>& ragdoll_transforms)
+    void sync_ragdoll(uint32_t ragdoll_id, const std::unordered_map<std::string, glm::mat4> &ragdoll_transforms)
     {
         auto *ragdoll = ragdolls[ragdoll_id];
         if (!ragdoll)
@@ -1054,7 +1103,8 @@ namespace cologne::Physics
             Util::decompose_mat4(tr, position, rotation, scale);
             auto pos = glm_vec3_to_vec3(position);
             auto rot = glm_quat_to_jph_quat(rotation);
-            physics_system.GetBodyInterface().SetPositionAndRotation(ragdoll->GetBodyID(i), pos, rot, EActivation::DontActivate);
+            physics_system.GetBodyInterface().SetPositionAndRotation(ragdoll->GetBodyID(i), pos, rot,
+                                                                     EActivation::DontActivate);
         }
     }
 

@@ -163,9 +163,12 @@ namespace cologne
             auto &collider = _registry.get<StaticColliderComponent>(entity);
             auto &mc = _registry.get<MeshComponent>(entity);
             auto mesh = AssetManager::get_mesh_by_index(mc.mesh_idx);
+            if (!mesh)
+            {
+                continue;
+            }
             uint32_t body_id = Physics::create_static_mesh_collider(
-                e, transform, mesh->get_vertices(),
-                mesh->get_indices());
+                e, transform, *mesh);
             collider.body_id = body_id;
         }
 
@@ -479,8 +482,7 @@ namespace cologne
             {
                 auto mesh = AssetManager::get_mesh_by_index(model->get_mesh_indices()[0]);
                 uint32_t body_id = Physics::create_static_mesh_collider(
-                    parent, parent_transform, mesh->get_vertices(),
-                    mesh->get_indices());
+                    parent, parent_transform, *mesh);
                 col.body_id = body_id;
             }
             return parent;
@@ -502,8 +504,7 @@ namespace cologne
                 TransformComponent temp = TransformComponent(
                     parent_transform.get_mat4() * mesh->get_inverse_bind_pose());
                 uint32_t body_id = Physics::create_static_mesh_collider(
-                    sub_mesh, temp, mesh->get_vertices(),
-                    mesh->get_indices());
+                    sub_mesh, temp, *mesh);
                 col.body_id = body_id;
             }
             update_transforms();

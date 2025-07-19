@@ -4,6 +4,7 @@
 
 namespace cologne
 {
+    class Mesh;
     struct RaycastHitInfo;
     struct TransformComponent;
     class Entity;
@@ -40,7 +41,7 @@ namespace cologne::Physics
     glm::vec3 get_player_ground_velocity(uint32_t id);
 
     uint32_t create_static_mesh_collider(Entity entity, TransformComponent transform,
-                                         const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices);
+                                         const Mesh& mesh);
 
     void sync_transform(Entity entity);
 
