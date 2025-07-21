@@ -64,17 +64,19 @@ namespace cologne
             ImGui::InputText("Tag", &tag.tag);
 
             ImGui::Text("Entity ID: %d", static_cast<uint32_t>(_selected_entity));
+            ImGui::Text("Entity UUID %d", static_cast<uint64_t>(_selected_entity.get_uuid()));
             ImGui::Separator();
             if (ImGui::Checkbox("Active", &_selected_entity.get_component<ActiveComponent>().active))
             {
                 Audio::play_sound(_cancel_sound, 30);
             }
             ImGui::Text("Transform");
-            build_transform_entry(_selected_entity.get_component<TransformComponent>());
+            build_transform_entry(_selected_entity.get_transform());
             if (_selected_entity.has_component<ParentComponent>())
             {
-                for (auto child: _selected_entity.get_component<ParentComponent>().children)
+                for (auto child_id: _selected_entity.get_component<ParentComponent>().children)
                 {
+                    Entity child = Engine::get_scene()->get_entity_by_uuid(child_id);
                     if (child.has_component<MeshComponent>())
                     {
                         Engine::get_renderer()->submit_outline_render_item(RenderItem(

@@ -28,14 +28,16 @@ namespace cologne
                 "GRAPH_ENTITY", ImGuiDragDropFlags_AcceptBeforeDelivery))
             {
                 uint32_t id = *(uint32_t *) payload->Data;
-                Entity found_entity = {static_cast<entt::entity>(id), Engine::get_scene()};
-
+                auto scene = Engine::get_scene();
+                Entity found_entity = {static_cast<entt::entity>(id), scene};
+                UUID found_entity_id = found_entity.get_component<IDComponent>().id;
                 //remove the entity from its parent entity
                 if (found_entity.has_component<ChildComponent>())
                 {
-                    auto parent = found_entity.get_component<ChildComponent>().parent;
+                    auto parent_id = found_entity.get_component<ChildComponent>().parent;
+                    auto parent = scene->get_entity_by_uuid(parent_id);
                     auto &vec = parent.get_component<ParentComponent>().children;
-                    vec.erase(std::ranges::remove(vec, found_entity).begin(), vec.end());
+                    vec.erase(std::ranges::remove(vec, found_entity_id).begin(), vec.end());
                     found_entity.remove_component<ChildComponent>();
                     LOG_INFO("REPARENTED");
                 }
@@ -110,7 +112,7 @@ namespace cologne
 
                 bool bad_parent = found_entity.has_component<ParentComponent>() &&
                                   entity.has_component<ChildComponent>() && entity.get_component<ChildComponent>().
-                                  parent == found_entity;
+                                  parent == found_entity.get_uuid();
                 if (bad_parent)
                 {
                     LOG_WARN("You cannot parent an entity to its own child!");
@@ -120,14 +122,15 @@ namespace cologne
                     //remove the entity from its parent entity
                     if (found_entity.has_component<ChildComponent>())
                     {
-                        auto parent = found_entity.get_component<ChildComponent>().parent;
-                        auto &vec = parent.get_component<ParentComponent>().children;
-                        vec.erase(std::ranges::remove(vec, found_entity).begin(), vec.end());
+                        auto parent_id = found_entity.get_component<ChildComponent>().parent;
+                        auto parent_entity = Engine::get_scene()->get_entity_by_uuid(parent_id);
+                        auto &vec = parent_entity.get_component<ParentComponent>().children;
+                        vec.erase(std::ranges::remove(vec, found_entity.get_uuid()).begin(), vec.end());
                         found_entity.remove_component<ChildComponent>();
                     }
 
                     //add new child component to the entity
-                    found_entity.add_component<ChildComponent>(entity);
+                    found_entity.add_component<ChildComponent>(entity.get_uuid());
 
                     //add a parent component to this entity
                     if (!entity.has_component<ParentComponent>())
@@ -135,7 +138,7 @@ namespace cologne
                         entity.add_component<ParentComponent>();
                     }
                     auto &parent_comp = entity.get_component<ParentComponent>();
-                    parent_comp.children.push_back(found_entity);
+                    parent_comp.children.push_back(found_entity.get_uuid());
                 }
             }
             ImGui::EndDragDropTarget();
@@ -148,7 +151,7 @@ namespace cologne
                 auto &children = entity.get_component<ParentComponent>().children;
                 for (auto child: children)
                 {
-                    draw_entity_node(child);
+                    draw_entity_node(Engine::get_scene()->get_entity_by_uuid(child));
                 }
             }
             ImGui::TreePop();

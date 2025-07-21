@@ -67,6 +67,9 @@ namespace cologne
         }
 
         TransformComponent& get_transform();
+        const std::string& get_name();
+        const UUID& get_uuid();
+        const bool is_active();
 
         explicit operator bool() const { return _entity_handle != entt::null; }
         explicit operator uint32_t() const { return (uint32_t(_entity_handle)); }

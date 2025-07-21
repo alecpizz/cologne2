@@ -48,13 +48,13 @@ namespace cologne
                     if (temp.has_component<ChildComponent>())
                     {
                         auto comp = temp.get_component<ChildComponent>();
-                        if (comp.parent == _selected_entity)
+                        if (comp.parent == _selected_entity.get_uuid())
                         {
                             _selected_entity = temp;
                         }
                         else
                         {
-                            _selected_entity = comp.parent;
+                            _selected_entity = Engine::get_scene()->get_entity_by_uuid(comp.parent);
                         }
                     }
                     else
@@ -132,7 +132,7 @@ namespace cologne
             const float scroll_speed = 5.0f;
             float scroll = Input::get_scroll().y * dt * scroll_speed;
             auto camera = Engine::get_scene()->get_scene_camera();
-            auto &cam_transform = camera.get_component<TransformComponent>();
+            auto &cam_transform = camera.get_transform();
             cam_transform.position = cam_transform.position + cam_transform.get_forward() * scroll;
         }
 
@@ -160,7 +160,7 @@ namespace cologne
                 else if (Input::key_pressed(Input::Key::F))
                 {
                     auto camera = Engine::get_scene()->get_scene_camera();
-                    auto &cam_transform = camera.get_component<TransformComponent>();
+                    auto &cam_transform = camera.get_transform();
                     auto &entity_transform = _selected_entity.get_component<WorldTransformComponent>();
                     cam_transform.position = glm::vec3(entity_transform.transform[3]) - cam_transform.get_forward() *
                                              0.5f;
@@ -168,17 +168,21 @@ namespace cologne
             }
             auto camera = Engine::get_scene()->get_scene_camera();
             auto camera_comp = camera.get_component<CameraComponent>();
-            auto transform = camera.get_component<TransformComponent>();
+            auto transform = camera.get_transform();
             glm::mat4 view = Renderer::get_camera_view(transform);
             glm::mat4 proj = Renderer::get_camera_projection(transform, camera_comp);
 
-            auto &tr = _selected_entity.get_component<TransformComponent>();
+            auto &tr = _selected_entity.get_transform();
             //         auto& tr = Engine::get_scene()->_registry.get<TransformComponent>(entity);
             glm::mat4 mat4 = tr.get_mat4();
             if (_selected_entity.has_component<ChildComponent>())
             {
-                mat4 = _selected_entity.get_component<ChildComponent>().parent.get_component<WorldTransformComponent>().
-                       transform * mat4;
+                auto parent_entity = Engine::get_scene()->get_entity_by_uuid(
+                    _selected_entity.get_component<ChildComponent>().parent);
+                if (parent_entity)
+                {
+                    mat4 = parent_entity.get_component<WorldTransformComponent>().transform * mat4;
+                }
             }
             bool changed = ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(proj),
                                                 current_operation, ImGuizmo::LOCAL, glm::value_ptr(mat4));
@@ -188,10 +192,9 @@ namespace cologne
                 glm::mat4 world_mat = mat4;
                 if (_selected_entity.has_component<ChildComponent>())
                 {
+                    auto parent_entity = Engine::get_scene()->get_entity_by_uuid(_selected_entity.get_component<ChildComponent>().parent);
                     mat4 = glm::inverse(
-                               _selected_entity.get_component<ChildComponent>().parent.get_component<
-                                   WorldTransformComponent>().
-                               transform) * mat4;
+                               parent_entity.get_component<WorldTransformComponent>().transform) * mat4;
                 }
                 glm::quat orientation;
                 glm::vec3 translation;

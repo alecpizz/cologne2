@@ -7,6 +7,7 @@
 #include <engine/animation/AnimatorComponent.h>
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/core/Engine.h>
+#include <engine/core/UUID.h>
 #include <engine/physics/Physics.h>
 #include <engine/renderer/types/Light.h>
 #include <engine/util/FileUtil.h>
@@ -18,6 +19,7 @@
 
 #include "Components.h"
 #include "Entity.h"
+#include "SceneSaver.h"
 #include "engine/physics/RaycastHitInfo.h"
 
 namespace cologne
@@ -27,18 +29,17 @@ namespace cologne
     Scene::Scene()
     {
         DebugScope scope(__PRETTY_FUNCTION__);
-        //Create entities
 
         create_static_model_entities("sponza2", {});
 
         // Entity glowCube = create_entity("glowing cube");
-        // glowCube.get_component<TransformComponent>().position = glm::vec3(0.0f, 1.0f, 4.5f);
+        // glowCube.get_transform().position = glm::vec3(0.0f, 1.0f, 4.5f);
         // glowCube.add_component<ModelComponent>(AssetManager::get_model_index_by_name("glowCube"), true);
 
         Entity man = create_entity("man");
-        man.get_component<TransformComponent>().rotation =
-            glm::quat(glm::vec3(0.0f, glm::radians(-90.0f), 0.0f));
-        man.get_component<TransformComponent>().position.y -= 0.25f;
+        man.get_transform().rotation =
+                glm::quat(glm::vec3(0.0f, glm::radians(-90.0f), 0.0f));
+        man.get_transform().position.y -= 0.25f;
         auto enemy = man.add_component<EnemyComponent>();
         Audio::add_sound(enemy.hurt_sound.c_str()); //todo: have asset manager do this
         man.add_component<SkinnedModelComponent>("man");
@@ -47,9 +48,9 @@ namespace cologne
         anim.create_ragdoll(man);
 
         Entity man2 = create_entity("man2");
-        man2.get_component<TransformComponent>().position = glm::vec3(0.0f, -0.25f, 2.5f);
+        man2.get_transform().position = glm::vec3(0.0f, -0.25f, 2.5f);
         man2.add_component<SkinnedModelComponent>("man");
-        AnimatorComponent& anim3 = man2.add_component<AnimatorComponent>("man");
+        AnimatorComponent &anim3 = man2.add_component<AnimatorComponent>("man");
         anim3.play_base_animation(AssetManager::get_animation_by_name("man_Idle"));
 
         Entity revolver = create_entity("deagle");
@@ -73,7 +74,7 @@ namespace cologne
         player.add_component<NativeScriptComponent>().bind<PlayerController>();
         PlayerCreateInfo info;
         info.position = glm::vec3(-3.0f, 2.0f, 0.0f);
-        player.add_component<PlayerComponent>(Physics::create_player(info), camera, viewModel);
+        player.add_component<PlayerComponent>(Physics::create_player(info), camera.get_uuid(), viewModel.get_uuid());
 
         create_static_model_entities("Lantern", TransformComponent(
                                          glm::vec3(0.180f, -0.338f, -4.8f),
@@ -92,47 +93,47 @@ namespace cologne
         light2.radius = 3.0f;
         light2.strength = 6.0f;
         light2.type = LightComponent::Point;
-        point_light.get_component<TransformComponent>().position = glm::vec3(-6.0f, 5.0f, -5.0f);
+        point_light.get_transform().position = glm::vec3(-6.0f, 5.0f, -5.0f);
 
         Entity point_light2 = create_entity("point light2");
         auto &light3 = point_light2.add_component<LightComponent>();
         light3 = light2;
         light3.color = glm::vec3(0.2f, 0.9f, 0.15f);
-        point_light2.get_component<TransformComponent>().position = glm::vec3(6.0f, 4.580, 3.796f);
+        point_light2.get_transform().position = glm::vec3(6.0f, 4.580, 3.796f);
 
         Entity point_light3 = create_entity("point light3");
         auto &light4 = point_light3.add_component<LightComponent>();
         light4.color = glm::vec3(0.078f, 0.656, 0.840f);
         light4.radius = 3.13f;
         light4.strength = 6.670f;
-        point_light3.get_component<TransformComponent>().position = glm::vec3(-6.7, 1.4, -3.979);
+        point_light3.get_transform().position = glm::vec3(-6.7, 1.4, -3.979);
 
         Entity lantern_light = create_entity("lantern light");
         auto &light5 = lantern_light.add_component<LightComponent>();
         light5.color = glm::vec3(1.0, 0.78, 0.529);
         light5.radius = 3.670f;
-        lantern_light.get_component<TransformComponent>().position = glm::vec3(0.243f, 1.073f, -3.608f);
+        lantern_light.get_transform().position = glm::vec3(0.243f, 1.073f, -3.608f);
 
         Entity evil_light = create_entity("evil light");
         auto &light6 = evil_light.add_component<LightComponent>();
         light6.radius = 3.670f;
         light6.color = glm::vec3(1.0f, 0.0f, 0.0f);
         light6.strength = 7.0f;
-        evil_light.get_component<TransformComponent>().position = glm::vec3(-4.538, 1.082, 3.635);
+        evil_light.get_transform().position = glm::vec3(-4.538, 1.082, 3.635);
 
         Entity purple_light = create_entity("purple light");
         auto &light7 = purple_light.add_component<LightComponent>();
         light7.radius = 4.0f;
         light7.strength = 7.1f;
         light7.color = glm::vec3(0.426f, 0.020f, 0.962f);
-        purple_light.get_component<TransformComponent>().position = glm::vec3(9.786, 0.487f, 0.158f);
+        purple_light.get_transform().position = glm::vec3(9.786, 0.487f, 0.158f);
 
         Entity hall_light = create_entity("hall light");
         auto &light8 = hall_light.add_component<LightComponent>();
         light8.radius = 3.780f;
         light8.strength = 5.910f;
         light8.color = glm::vec3(1.0f, 0.780f, 0.529f);
-        hall_light.get_component<TransformComponent>().position = glm::vec3(2.795f, 0.419f, 3.638f);
+        hall_light.get_transform().position = glm::vec3(2.795f, 0.419f, 3.638f);
 
         Entity dir_light = create_entity("directional light");
         auto &light = dir_light.add_component<LightComponent>();
@@ -141,8 +142,8 @@ namespace cologne
         light.strength = 2.0f;
         light.cast_shadows = true;
         light.type = Directional;
-        dir_light.get_component<TransformComponent>().position = glm::vec3(0.790f, 18.867f, 0.024f);
-        dir_light.get_component<TransformComponent>().rotation =
+        dir_light.get_transform().position = glm::vec3(0.790f, 18.867f, 0.024f);
+        dir_light.get_transform().rotation =
                 glm::quat(glm::radians(glm::vec3(88.500, 0.0f, 0.0f)));
 
 
@@ -179,6 +180,8 @@ namespace cologne
         LOG_INFO("Scene size is (%f, %f, %f)", _scene_bounds.size().x, _scene_bounds.size().y, _scene_bounds.size().z);
         _particles.emplace_back(Particles());
         _particles[0].init(_scene_bounds, 20);
+        SceneSaver saver_temp (this);
+        saver_temp.serialize(RESOURCES_PATH "scenes/test_scene.cscn");
     }
 
     Scene::~Scene()
@@ -206,7 +209,6 @@ namespace cologne
                 }
                 auto &animator = _registry.get<AnimatorComponent>(entity);
                 animator.update(delta_time, _registry.get<WorldTransformComponent>(entity));
-
             }
         }
 
@@ -266,7 +268,8 @@ namespace cologne
                                 if (info.hit_entity.has_component<AnimatorComponent>())
                                 {
                                     info.hit_entity.get_component<AnimatorComponent>().to_ragdoll();
-                                    info.hit_entity.get_component<AnimatorComponent>().take_ragdoll_hit(info.hit_point, info.hit_normal);
+                                    info.hit_entity.get_component<AnimatorComponent>().take_ragdoll_hit(
+                                        info.hit_point, info.hit_normal);
                                 }
                             }
                         }
@@ -281,7 +284,7 @@ namespace cologne
         }
 
         auto camera = !Engine::in_edit_mode() ? get_primary_camera() : get_scene_camera();
-        auto tr = camera.get_component<TransformComponent>();
+        auto tr = camera.get_transform();
         auto cm = camera.get_component<CameraComponent>();
         Engine::get_renderer()->submit_camera_transform(tr, cm);
         cam_frustum.update(Renderer::get_camera_projection(tr, cm) * Renderer::get_camera_view(tr));
@@ -379,7 +382,8 @@ namespace cologne
                 continue;
             }
             Engine::get_renderer()->
-                    submit_render_item(RenderItem(AssetManager::get_mesh_index_by_name(m.mesh_name), tr, false, static_cast<uint32_t>(entity)));
+                    submit_render_item(RenderItem(AssetManager::get_mesh_index_by_name(m.mesh_name), tr, false,
+                                                  static_cast<uint32_t>(entity)));
         }
 
         auto view3 = _registry.view<SkinnedModelComponent, WorldTransformComponent, ActiveComponent>();
@@ -399,7 +403,7 @@ namespace cologne
                 auto &animator = _registry.get<AnimatorComponent>(entity);
                 bones = animator.get_skinning_matrices();
             }
-            for (int32_t mesh_index : skinned_model->get_mesh_indices())
+            for (int32_t mesh_index: skinned_model->get_mesh_indices())
             {
                 SkinnedRenderItem item;
                 item.mesh_idx = mesh_index;
@@ -451,15 +455,31 @@ namespace cologne
         return _particles;
     }
 
-    Entity Scene::create_entity(const std::string &name)
+    Entity Scene::create_entity_with_uuid(UUID id, const std::string &name)
     {
-        //all entities have a transform, a tag/name, and a bool for whether or not they are currently active
         Entity entity = {_registry.create(), this};
+        entity.add_component<IDComponent>(id);
         entity.add_component<TransformComponent>();
         entity.add_component<TagComponent>(name.empty() ? "Entity" : name);
         entity.add_component<ActiveComponent>(true);
         entity.add_component<WorldTransformComponent>();
+        _entity_map[id] = entity;
         return entity;
+    }
+
+
+    Entity Scene::create_entity(const std::string &name)
+    {
+        return create_entity_with_uuid(UUID(), name);
+    }
+
+    Entity Scene::get_entity_by_uuid(UUID uuid)
+    {
+        if (!_entity_map.contains(uuid))
+        {
+            return {};
+        }
+        return {_entity_map.at(uuid), this};
     }
 
     Entity Scene::create_static_model_entities(const char *model_name, const TransformComponent &parent_transform,
@@ -471,7 +491,7 @@ namespace cologne
             return {};
         }
         Entity parent = create_entity(std::string(model_name));
-        parent.get_component<TransformComponent>() = parent_transform;
+        parent.get_transform() = parent_transform;
         parent.get_component<WorldTransformComponent>().transform = parent_transform.get_mat4();
         if (model->get_mesh_indices().size() == 1)
         {
@@ -491,10 +511,10 @@ namespace cologne
         {
             const auto mesh = AssetManager::get_mesh_by_index(idx);
             Entity sub_mesh = create_entity(mesh->get_name());
-            sub_mesh.add_component<ChildComponent>(parent);
-            parent_comp.children.emplace_back(sub_mesh);
+            sub_mesh.add_component<ChildComponent>(parent.get_uuid());
+            parent_comp.children.emplace_back(sub_mesh.get_uuid());
             sub_mesh.add_component<MeshComponent>(idx);
-            sub_mesh.get_component<TransformComponent>() = TransformComponent(mesh->get_inverse_bind_pose());
+            sub_mesh.get_transform() = TransformComponent(mesh->get_inverse_bind_pose());
             sub_mesh.get_component<WorldTransformComponent>().transform =
                     parent_transform.get_mat4() * mesh->get_inverse_bind_pose();
             auto &col = sub_mesh.add_component<StaticColliderComponent>();
@@ -514,11 +534,12 @@ namespace cologne
 
     void Scene::destroy_entity(Entity entity)
     {
+        _entity_map.erase(entity.get_uuid());
         if (entity.has_component<ParentComponent>())
         {
             for (auto e: entity.get_component<ParentComponent>().children)
             {
-                destroy_entity(e);
+                destroy_entity(get_entity_by_uuid(e));
             }
         }
         if (entity.has_component<StaticColliderComponent>())
@@ -559,7 +580,7 @@ namespace cologne
         Entity scene_cam = get_scene_camera();
         Entity game_cam = get_primary_camera();
         if (!scene_cam || !game_cam) return;
-        scene_cam.get_component<TransformComponent>().position = game_cam.get_component<TransformComponent>().position;
+        scene_cam.get_transform().position = game_cam.get_transform().position;
     }
 
     void Scene::update_transforms()
@@ -590,8 +611,9 @@ namespace cologne
         auto &parent_wld = _registry.get<WorldTransformComponent>(parent);
         auto &parent_comp = _registry.get<ParentComponent>(parent);
 
-        for (auto child: parent_comp.children)
+        for (auto child_id: parent_comp.children)
         {
+            Entity child = get_entity_by_uuid(child_id);
             if (_registry.valid(child))
             {
                 auto &child_transform = _registry.get<TransformComponent>(child);

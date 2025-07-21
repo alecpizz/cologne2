@@ -3,7 +3,7 @@
 #include "../renderer/types/Model.h"
 #include "../renderer/types/Particles.h"
 #include <entt/entt.hpp>
-
+#include <engine/core/UUID.h>
 
 namespace cologne
 {
@@ -16,8 +16,6 @@ namespace cologne
         Scene();
 
         ~Scene();
-
-        Model &add_model(const char *path);
 
         void update(float delta_time);
 
@@ -35,8 +33,9 @@ namespace cologne
 
         std::vector<Particles> &get_particles();
 
+        Entity create_entity_with_uuid(UUID id, const std::string& name = std::string());
         Entity create_entity(const std::string& name = std::string());
-
+        Entity get_entity_by_uuid(UUID uuid);
         Entity create_static_model_entities(const char *model_name, const TransformComponent &parent_transform,
                                             bool create_colliders = false);
 
@@ -55,8 +54,10 @@ namespace cologne
         void update_children(entt::entity parent);
         AABB _scene_bounds;
         std::vector<Particles> _particles;
+        std::unordered_map<UUID, entt::entity> _entity_map;
         entt::registry _registry;
         friend class Entity;
         friend class Editor;
+        friend class SceneSaver;
     };
 }

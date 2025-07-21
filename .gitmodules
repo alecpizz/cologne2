@@ -26,6 +26,6 @@
 [submodule "vendor/libsquish"]
 	path = vendor/libsquish
 	url = https://github.com/oblivioncth/libsquish.git
-[submodule "vendor/rapidyaml"]
-	path = vendor/rapidyaml
-	url = https://github.com/biojppm/rapidyaml
+[submodule "vendor/json"]
+	path = vendor/json
+	url = https://github.com/nlohmann/json

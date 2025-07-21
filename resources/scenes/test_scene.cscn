@@ -1,0 +1,299 @@
+{
+    "entities": [
+        {
+            "Entity": 48,
+            "TagComponent": {
+                "Tag": "sofa_1-1"
+            }
+        },
+        {
+            "Entity": 47,
+            "TagComponent": {
+                "Tag": "sofa_1-0"
+            }
+        },
+        {
+            "Entity": 46,
+            "TagComponent": {
+                "Tag": "sofa"
+            }
+        },
+        {
+            "Entity": 45,
+            "TagComponent": {
+                "Tag": "Scene Camera"
+            }
+        },
+        {
+            "Entity": 44,
+            "TagComponent": {
+                "Tag": "directional light"
+            }
+        },
+        {
+            "Entity": 43,
+            "TagComponent": {
+                "Tag": "hall light"
+            }
+        },
+        {
+            "Entity": 42,
+            "TagComponent": {
+                "Tag": "purple light"
+            }
+        },
+        {
+            "Entity": 41,
+            "TagComponent": {
+                "Tag": "evil light"
+            }
+        },
+        {
+            "Entity": 40,
+            "TagComponent": {
+                "Tag": "lantern light"
+            }
+        },
+        {
+            "Entity": 39,
+            "TagComponent": {
+                "Tag": "point light3"
+            }
+        },
+        {
+            "Entity": 38,
+            "TagComponent": {
+                "Tag": "point light2"
+            }
+        },
+        {
+            "Entity": 37,
+            "TagComponent": {
+                "Tag": "point light"
+            }
+        },
+        {
+            "Entity": 36,
+            "TagComponent": {
+                "Tag": "spot light"
+            }
+        },
+        {
+            "Entity": 35,
+            "TagComponent": {
+                "Tag": "LanternPole_Lantern"
+            }
+        },
+        {
+            "Entity": 34,
+            "TagComponent": {
+                "Tag": "LanternPole_Chain"
+            }
+        },
+        {
+            "Entity": 33,
+            "TagComponent": {
+                "Tag": "LanternPole_Body"
+            }
+        },
+        {
+            "Entity": 32,
+            "TagComponent": {
+                "Tag": "Lantern"
+            }
+        },
+        {
+            "Entity": 31,
+            "TagComponent": {
+                "Tag": "player"
+            }
+        },
+        {
+            "Entity": 30,
+            "TagComponent": {
+                "Tag": "viewmodel"
+            }
+        },
+        {
+            "Entity": 29,
+            "TagComponent": {
+                "Tag": "camera"
+            }
+        },
+        {
+            "Entity": 28,
+            "TagComponent": {
+                "Tag": "deagle"
+            }
+        },
+        {
+            "Entity": 27,
+            "TagComponent": {
+                "Tag": "man2"
+            }
+        },
+        {
+            "Entity": 26,
+            "TagComponent": {
+                "Tag": "man"
+            }
+        },
+        {
+            "Entity": 25,
+            "TagComponent": {
+                "Tag": "Mesh_0.024"
+            }
+        },
+        {
+            "Entity": 24,
+            "TagComponent": {
+                "Tag": "Mesh_0.023"
+            }
+        },
+        {
+            "Entity": 23,
+            "TagComponent": {
+                "Tag": "Mesh_0.022"
+            }
+        },
+        {
+            "Entity": 22,
+            "TagComponent": {
+                "Tag": "Mesh_0.021"
+            }
+        },
+        {
+            "Entity": 21,
+            "TagComponent": {
+                "Tag": "Mesh_0.020"
+            }
+        },
+        {
+            "Entity": 20,
+            "TagComponent": {
+                "Tag": "Mesh_0.019"
+            }
+        },
+        {
+            "Entity": 19,
+            "TagComponent": {
+                "Tag": "Mesh_0.018"
+            }
+        },
+        {
+            "Entity": 18,
+            "TagComponent": {
+                "Tag": "Mesh_0.017"
+            }
+        },
+        {
+            "Entity": 17,
+            "TagComponent": {
+                "Tag": "Mesh_0.016"
+            }
+        },
+        {
+            "Entity": 16,
+            "TagComponent": {
+                "Tag": "Mesh_0.015"
+            }
+        },
+        {
+            "Entity": 15,
+            "TagComponent": {
+                "Tag": "Mesh_0.014"
+            }
+        },
+        {
+            "Entity": 14,
+            "TagComponent": {
+                "Tag": "Mesh_0.013"
+            }
+        },
+        {
+            "Entity": 13,
+            "TagComponent": {
+                "Tag": "Mesh_0.012"
+            }
+        },
+        {
+            "Entity": 12,
+            "TagComponent": {
+                "Tag": "Mesh_0.011"
+            }
+        },
+        {
+            "Entity": 11,
+            "TagComponent": {
+                "Tag": "Mesh_0.010"
+            }
+        },
+        {
+            "Entity": 10,
+            "TagComponent": {
+                "Tag": "Mesh_0.009"
+            }
+        },
+        {
+            "Entity": 9,
+            "TagComponent": {
+                "Tag": "Mesh_0.008"
+            }
+        },
+        {
+            "Entity": 8,
+            "TagComponent": {
+                "Tag": "Mesh_0.007"
+            }
+        },
+        {
+            "Entity": 7,
+            "TagComponent": {
+                "Tag": "Mesh_0.006"
+            }
+        },
+        {
+            "Entity": 6,
+            "TagComponent": {
+                "Tag": "Mesh_0.005"
+            }
+        },
+        {
+            "Entity": 5,
+            "TagComponent": {
+                "Tag": "Mesh_0.004"
+            }
+        },
+        {
+            "Entity": 4,
+            "TagComponent": {
+                "Tag": "Mesh_0.003"
+            }
+        },
+        {
+            "Entity": 3,
+            "TagComponent": {
+                "Tag": "Mesh_0.002"
+            }
+        },
+        {
+            "Entity": 2,
+            "TagComponent": {
+                "Tag": "Mesh_0.001"
+            }
+        },
+        {
+            "Entity": 1,
+            "TagComponent": {
+                "Tag": "Mesh_0"
+            }
+        },
+        {
+            "Entity": 0,
+            "TagComponent": {
+                "Tag": "sponza2"
+            }
+        }
+    ],
+    "scene_name": "untitled_scene"
+}

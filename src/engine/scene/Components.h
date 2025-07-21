@@ -1,5 +1,6 @@
 #pragma once
 #include <engine/audio/Audio.h>
+#include <engine/core/UUID.h>
 #include <engine/physics/Physics.h>
 #include <engine/util/Util.h>
 
@@ -7,6 +8,11 @@
 
 namespace cologne
 {
+    struct IDComponent
+    {
+        UUID id;
+    };
+
     struct WorldTransformComponent
     {
         glm::mat4 transform;
@@ -66,12 +72,12 @@ namespace cologne
 
     struct ParentComponent
     {
-        std::vector<Entity> children;
+        std::vector<UUID> children;
     };
 
     struct ChildComponent
     {
-        Entity parent;
+        UUID parent;
     };
 
     struct ActiveComponent
@@ -136,8 +142,8 @@ namespace cologne
     struct PlayerComponent
     {
         uint32_t id = -1;
-        Entity camera = {};
-        Entity viewmodel = {};
+        UUID camera = {};
+        UUID viewmodel = {};
 #define DEFINE_MEMBER(type, name, ...) type name = __VA_ARGS__;
         PLAYER_COMPONENT_FIELDS(DEFINE_MEMBER)
 #undef DEFINE_MEMBER

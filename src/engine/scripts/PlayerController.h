@@ -63,7 +63,8 @@ namespace cologne
             glm::quat y_quat = glm::angleAxis(glm::radians(_rotation.y),
                                               glm::vec3(1.0f, 0.0f, 0.0f));
             glm::quat target_rotation = x_quat * y_quat;
-            get_component<PlayerComponent>().camera.get_component<TransformComponent>().rotation = target_rotation;
+            Entity camera = Engine::get_scene()->get_entity_by_uuid(get_component<PlayerComponent>().camera);
+            camera.get_transform().rotation = target_rotation;
             glm::vec3 fwd = target_rotation * glm::vec3(0.0f, 0.0f, 1.0f);
             glm::vec3 right = target_rotation * glm::vec3(1.0f, 0.0f, 0.0f);
             glm::vec3 up = target_rotation * glm::vec3(0.0f, 1.0f, 0.0f);
@@ -80,7 +81,7 @@ namespace cologne
             }
 
             float speed = 10.0f;
-            auto &tr = get_component<PlayerComponent>().camera.get_component<TransformComponent>();
+            auto &tr = camera.get_transform();
             if (cologne::Input::key_down(Input::Key::LeftShift))
             {
                 speed *= 2.5f;
@@ -160,7 +161,9 @@ namespace cologne
         void move_viewmodel(float dt)
         {
             glm::vec2 mouse = Input::get_relative_mouse();
-            auto &viewmodel = get_component<PlayerComponent>().viewmodel.get_component<ViewmodelComponent>();
+            Entity viewmodel_entity = Engine::get_scene()->get_entity_by_uuid(
+                get_component<PlayerComponent>().viewmodel);
+            auto &viewmodel = viewmodel_entity.get_component<ViewmodelComponent>();
             float mouse_x = mouse.x * viewmodel.sway_multiplier * dt;
             float mouse_y = mouse.y * viewmodel.sway_multiplier * dt;
 
@@ -194,7 +197,8 @@ namespace cologne
             _prev_transform.rotation = new_rotation;
 
             glm::mat4 gun_mat = glm::mat4(1.0f);
-            auto &cam_transform = get_component<PlayerComponent>().camera.get_component<TransformComponent>();
+            Entity camera = Engine::get_scene()->get_entity_by_uuid(get_component<PlayerComponent>().camera);
+            auto &cam_transform = camera.get_transform();
             gun_mat = glm::translate(gun_mat, new_position);
             gun_mat *= glm::toMat4(new_rotation);
             gun_mat = glm::inverse(Renderer::get_camera_view(cam_transform)) * gun_mat;
@@ -205,8 +209,8 @@ namespace cologne
             glm::vec3 skew;
             glm::decompose(gun_mat, scale, orientation, translation, skew, persp);
 
-            get_component<PlayerComponent>().viewmodel.get_component<TransformComponent>().position = translation;
-            get_component<PlayerComponent>().viewmodel.get_component<TransformComponent>().rotation = orientation;
+            viewmodel_entity.get_transform().position = translation;
+            viewmodel_entity.get_transform().rotation = orientation;
         }
 
         void apply_friction(float t, float dt)
@@ -371,12 +375,12 @@ namespace cologne
                 if (Input::mouse_pressed(Input::MouseButton::Left) && _current_ammo > 0)
                 {
                     LOG_INFO("Bang");
-                    Entity vm = get_component<PlayerComponent>().viewmodel;
+                    Entity vm = Engine::get_scene()->get_entity_by_uuid(get_component<PlayerComponent>().viewmodel);
                     auto &anim = vm.get_component<AnimatorComponent>();
                     anim.play_one_shot_animation(AssetManager::get_animation_by_name("vsk_Fire"));
                     Audio::play_sound(shoot_sound, 30);
-                    auto cam = get_component<PlayerComponent>().camera;
-                    auto tr = cam.get_component<TransformComponent>();
+                    auto cam = Engine::get_scene()->get_entity_by_uuid(get_component<PlayerComponent>().camera);
+                    auto tr = cam.get_transform();
                     Engine::get_scene()->create_bullet(tr.position, tr.get_forward(), 25);
                     _shot_timer = 0.0f;
                     _gun_time = _rpm;
@@ -389,7 +393,7 @@ namespace cologne
                     LOG_INFO("RELOADING!");
                     _shot_timer = 0.0f;
                     _gun_time = _reload_time;
-                    Entity vm = get_component<PlayerComponent>().viewmodel;
+                    Entity vm = Engine::get_scene()->get_entity_by_uuid(get_component<PlayerComponent>().viewmodel);
                     auto &anim = vm.get_component<AnimatorComponent>();
                     anim.play_one_shot_animation(AssetManager::get_animation_by_name("vsk_Reload_Full"));
                     Audio::play_sound(reload_sound, 20);
@@ -432,7 +436,8 @@ namespace cologne
             if (_is_free_cam)
             {
                 get_component<PlayerComponent>().teleport_to_position(
-                    get_component<PlayerComponent>().camera.get_component<TransformComponent>().position
+                    Engine::get_scene()->get_entity_by_uuid(get_component<PlayerComponent>().camera)
+                    .get_transform().position
                     - glm::vec3(0.0f, 1.45f, 0.0f));
                 move_viewmodel(dt);
                 return;
@@ -459,7 +464,8 @@ namespace cologne
             bool crouch = cologne::Input::key_pressed(cologne::Input::Key::LeftCtrl);
 
             glm::vec3 movement = glm::vec3(-y, 0.0f, x);
-            movement = get_component<PlayerComponent>().camera.get_component<TransformComponent>().rotation * movement;
+            movement = Engine::get_scene()->get_entity_by_uuid(get_component<PlayerComponent>().camera)
+                       .get_transform().rotation * movement;
             movement.y = 0.0f;
             if (abs(movement.x) > 0.0f || abs(movement.y) > 0.0f)
             {
@@ -495,7 +501,8 @@ namespace cologne
             glm::vec3 player_pos = Physics::get_player_position(
                 get_component<PlayerComponent>().id);
             glm::vec3 camera_pos = player_pos + glm::vec3(0.0f, 1.45f, 0.0f);
-            get_component<PlayerComponent>().camera.get_component<TransformComponent>().position = camera_pos;
+            Engine::get_scene()->get_entity_by_uuid(get_component<PlayerComponent>().camera)
+                    .get_transform().position = camera_pos;
             get_component<TransformComponent>().position = player_pos;
             update_gun(dt);
             move_viewmodel(dt);
