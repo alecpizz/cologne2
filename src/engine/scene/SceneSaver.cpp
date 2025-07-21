@@ -77,6 +77,23 @@ namespace nlohmann
             j.at(3).get_to(quat.z);
         }
     };
+
+    template<>
+    struct adl_serializer<glm::mat4>
+    {
+        static void to_json(json& j, const glm::mat4& mat)
+        {
+            j = {mat[0], mat[1], mat[2], mat[3]};
+        }
+
+        static void from_json(const json& j, glm::mat4& mat)
+        {
+            j.at(0).get_to(mat[0]);
+            j.at(1).get_to(mat[1]);
+            j.at(2).get_to(mat[2]);
+            j.at(3).get_to(mat[3]);
+        }
+    };
 }
 
 
@@ -96,6 +113,94 @@ namespace cologne
         json["TransformComponent"]["position"] = tr.position;
         json["TransformComponent"]["rotation"] = tr.rotation;
         json["TransformComponent"]["scale"] = tr.scale;
+
+        auto& wc = entity.get_component<WorldTransformComponent>();
+        json["WorldTransformComponent"] = wc.transform;
+
+        json["ActiveComponent"] = entity.is_active();
+
+        if (entity.has_component<ParentComponent>())
+        {
+            auto& pc = entity.get_component<ParentComponent>();
+            for (auto child : pc.children)
+            {
+                json["ParentComponent"].emplace_back(static_cast<uint64_t>(child));
+            }
+        }
+
+        if (entity.has_component<ModelComponent>())
+        {
+            auto& mc = entity.get_component<ModelComponent>();
+            json["ModelComponent"]["model_name"] = mc.model_name;
+            json["ModelComponent"]["gi_only"] = mc.gi_only;
+        }
+
+        if (entity.has_component<MeshComponent>())
+        {
+            auto& mc = entity.get_component<MeshComponent>();
+            json["MeshComponent"] = mc.mesh_name;
+        }
+
+        if (entity.has_component<SkinnedModelComponent>())
+        {
+            json["SkinnedModelComponent"] = entity.get_component<SkinnedModelComponent>().model_name;
+        }
+
+        //TODO: how to link static collider info? use another UUID? link with mesh?
+        if (entity.has_component<StaticColliderComponent>())
+        {
+        }
+
+        if (entity.has_component<CameraComponent>())
+        {
+            json["CameraComponent"]["fov_radians"] = entity.get_component<CameraComponent>().fov_radians;
+            json["CameraComponent"]["primary"] = entity.get_component<CameraComponent>().primary;
+        }
+
+        //TODO: player component serialization
+        if (entity.has_component<PlayerComponent>())
+        {
+
+        }
+
+        //TODO: viewmodel serialization
+        if (entity.has_component<ViewmodelComponent>())
+        {
+
+        }
+
+        if (entity.has_component<EnemyComponent>())
+        {
+            auto& ec = entity.get_component<EnemyComponent>();
+            json["EnemyComponent"]["health"] = ec.health;
+            json["EnemyComponent"]["dead"] = ec.dead;
+        }
+
+        if (entity.has_component<BulletComponent>())
+        {
+            auto& bc = entity.get_component<BulletComponent>();
+            json["BulletComponent"]["position"] = bc.position;
+            json["BulletComponent"]["direction"] = bc.direction;
+            json["BulletComponent"]["damage"] = bc.damage;
+        }
+
+        if (entity.has_component<LightComponent>())
+        {
+            auto& lc = entity.get_component<LightComponent>();
+            json["LightComponent"]["color"] = lc.color;
+            json["LightComponent"]["strength"] = lc.strength;
+            json["LightComponent"]["radius"] = lc.radius;
+            json["LightComponent"]["type"] = lc.type;
+            json["LightComponent"]["outer_cutoff"] = lc.outer_cutoff;
+            json["LightComponent"]["inner_cutoff"] = lc.inner_cutoff;
+            json["LightComponent"]["cast_shadows"] = lc.cast_shadows;
+        }
+
+        //TODO: native script serialization
+        if (entity.has_component<NativeScriptComponent>())
+        {
+
+        }
     }
 
     void SceneSaver::serialize(const std::string &path)
