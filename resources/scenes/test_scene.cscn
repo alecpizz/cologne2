@@ -1,297 +1,1179 @@
 {
     "entities": [
         {
-            "Entity": 48,
+            "Entity": 9792031153784946034,
             "TagComponent": {
-                "Tag": "sofa_1-1"
+                "tag": "sofa_1-1"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.7071066498756409,
+                    0.70710688829422,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    0.9999999403953552,
+                    0.9999999403953552
+                ]
             }
         },
         {
-            "Entity": 47,
+            "Entity": 556566850649466148,
             "TagComponent": {
-                "Tag": "sofa_1-0"
+                "tag": "sofa_1-0"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.7071066498756409,
+                    0.70710688829422,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    0.9999999403953552,
+                    0.9999999403953552
+                ]
             }
         },
         {
-            "Entity": 46,
+            "Entity": 9982703037849632036,
             "TagComponent": {
-                "Tag": "sofa"
+                "tag": "sofa"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.6000000238418579,
+                    -0.5,
+                    -2.2699999809265137
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 45,
+            "Entity": 3760524338564866328,
             "TagComponent": {
-                "Tag": "Scene Camera"
+                "tag": "Scene Camera"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 44,
+            "Entity": 10824674357037177406,
             "TagComponent": {
-                "Tag": "directional light"
+                "tag": "directional light"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.7900000214576721,
+                    18.867000579833984,
+                    0.024000000208616257
+                ],
+                "rotation": [
+                    0.7163019776344299,
+                    0.6977904438972473,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 43,
+            "Entity": 5271058450376234659,
             "TagComponent": {
-                "Tag": "hall light"
+                "tag": "hall light"
+            },
+            "TransformComponent": {
+                "position": [
+                    2.7950000762939453,
+                    0.4189999997615814,
+                    3.638000011444092
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 42,
+            "Entity": 11975417482658255246,
             "TagComponent": {
-                "Tag": "purple light"
+                "tag": "purple light"
+            },
+            "TransformComponent": {
+                "position": [
+                    9.78600025177002,
+                    0.4869999885559082,
+                    0.15800000727176666
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 41,
+            "Entity": 13710305381835784646,
             "TagComponent": {
-                "Tag": "evil light"
+                "tag": "evil light"
+            },
+            "TransformComponent": {
+                "position": [
+                    -4.538000106811523,
+                    1.0820000171661377,
+                    3.634999990463257
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 40,
+            "Entity": 14172952694289411717,
             "TagComponent": {
-                "Tag": "lantern light"
+                "tag": "lantern light"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.24300000071525574,
+                    1.0729999542236328,
+                    -3.6080000400543213
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 39,
+            "Entity": 3167640089726950715,
             "TagComponent": {
-                "Tag": "point light3"
+                "tag": "point light3"
+            },
+            "TransformComponent": {
+                "position": [
+                    -6.699999809265137,
+                    1.399999976158142,
+                    -3.9790000915527344
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 38,
+            "Entity": 3715604161305667737,
             "TagComponent": {
-                "Tag": "point light2"
+                "tag": "point light2"
+            },
+            "TransformComponent": {
+                "position": [
+                    6.0,
+                    4.579999923706055,
+                    3.7960000038146973
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 37,
+            "Entity": 258454459690724034,
             "TagComponent": {
-                "Tag": "point light"
+                "tag": "point light"
+            },
+            "TransformComponent": {
+                "position": [
+                    -6.0,
+                    5.0,
+                    -5.0
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 36,
+            "Entity": 2994853725544670571,
             "TagComponent": {
-                "Tag": "spot light"
+                "tag": "spot light"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 35,
+            "Entity": 226223363330130816,
             "TagComponent": {
-                "Tag": "LanternPole_Lantern"
+                "tag": "LanternPole_Lantern"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.9578503370285034,
+                    1.8984285593032837,
+                    -0.00020266369392629713
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 34,
+            "Entity": 8470927511467316792,
             "TagComponent": {
-                "Tag": "LanternPole_Chain"
+                "tag": "LanternPole_Chain"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.958199143409729,
+                    2.106623649597168,
+                    0.0
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 33,
+            "Entity": 16292865891046479171,
             "TagComponent": {
-                "Tag": "LanternPole_Body"
+                "tag": "LanternPole_Body"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.19950899481773376,
+                    1.7236459255218506,
+                    7.242303399834782e-05
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 32,
+            "Entity": 7382933370675591784,
             "TagComponent": {
-                "Tag": "Lantern"
+                "tag": "Lantern"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.18000000715255737,
+                    -0.33799999952316284,
+                    -4.800000190734863
+                ],
+                "rotation": [
+                    0.7071067690849304,
+                    0.0,
+                    -0.7071067690849304,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 31,
+            "Entity": 12571621520773116020,
             "TagComponent": {
-                "Tag": "player"
+                "tag": "player"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 30,
+            "Entity": 2786202434558867762,
             "TagComponent": {
-                "Tag": "viewmodel"
+                "tag": "viewmodel"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 29,
+            "Entity": 10107658104402441816,
             "TagComponent": {
-                "Tag": "camera"
+                "tag": "camera"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 28,
+            "Entity": 11541435537179405609,
             "TagComponent": {
-                "Tag": "deagle"
+                "tag": "deagle"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 27,
+            "Entity": 13638557640556222719,
             "TagComponent": {
-                "Tag": "man2"
+                "tag": "man2"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    -0.25,
+                    2.5
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 26,
+            "Entity": 12244920526578854261,
             "TagComponent": {
-                "Tag": "man"
+                "tag": "man"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    -0.25,
+                    0.0
+                ],
+                "rotation": [
+                    0.7071067690849304,
+                    0.0,
+                    -0.7071067690849304,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 25,
+            "Entity": 14500629220606799879,
             "TagComponent": {
-                "Tag": "Mesh_0.024"
+                "tag": "Mesh_0.024"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.5139411687850952,
+                    1.240036964416504,
+                    -0.311993271112442
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 24,
+            "Entity": 5895419779232325149,
             "TagComponent": {
-                "Tag": "Mesh_0.023"
+                "tag": "Mesh_0.023"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.3115405738353729,
+                    0.42900633811950684,
+                    -0.19471414387226105
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 23,
+            "Entity": 2938304849785590856,
             "TagComponent": {
-                "Tag": "Mesh_0.022"
+                "tag": "Mesh_0.022"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.5278977155685425,
+                    0.8024132251739502,
+                    -0.3319307565689087
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 22,
+            "Entity": 4584603637928347504,
             "TagComponent": {
-                "Tag": "Mesh_0.021"
+                "tag": "Mesh_0.021"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.6557071208953857,
+                    1.23561429977417,
+                    -0.2908840775489807
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 21,
+            "Entity": 1111238911455418596,
             "TagComponent": {
-                "Tag": "Mesh_0.020"
+                "tag": "Mesh_0.020"
+            },
+            "TransformComponent": {
+                "position": [
+                    -1.6507313251495361,
+                    0.9799587726593018,
+                    0.3511495292186737
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 20,
+            "Entity": 5319253746059126481,
             "TagComponent": {
-                "Tag": "Mesh_0.019"
+                "tag": "Mesh_0.019"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.5118553042411804,
+                    0.9951056241989136,
+                    -0.33981674909591675
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 19,
+            "Entity": 17615150243443384303,
             "TagComponent": {
-                "Tag": "Mesh_0.018"
+                "tag": "Mesh_0.018"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.6447742581367493,
+                    0.9799587726593018,
+                    -1.015756607055664
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 18,
+            "Entity": 5908793490954023405,
             "TagComponent": {
-                "Tag": "Mesh_0.017"
+                "tag": "Mesh_0.017"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.5432094931602478,
+                    3.7797484397888184,
+                    -0.31279706954956055
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 17,
+            "Entity": 5666916427080434625,
             "TagComponent": {
-                "Tag": "Mesh_0.016"
+                "tag": "Mesh_0.016"
+            },
+            "TransformComponent": {
+                "position": [
+                    -1.0812530517578125,
+                    3.7798800468444824,
+                    -0.9788471460342407
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 16,
+            "Entity": 17432018603180323928,
             "TagComponent": {
-                "Tag": "Mesh_0.015"
+                "tag": "Mesh_0.015"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.008290350437164307,
+                    3.7801034450531006,
+                    0.35191845893859863
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 15,
+            "Entity": 11854722486857856060,
             "TagComponent": {
-                "Tag": "Mesh_0.014"
+                "tag": "Mesh_0.014"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.5073261857032776,
+                    3.8363735675811768,
+                    -0.33697524666786194
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 14,
+            "Entity": 2322578901118494055,
             "TagComponent": {
-                "Tag": "Mesh_0.013"
+                "tag": "Mesh_0.013"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.5083215236663818,
+                    2.3812830448150635,
+                    5.0402021408081055
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 13,
+            "Entity": 7574835087999072021,
             "TagComponent": {
-                "Tag": "Mesh_0.012"
+                "tag": "Mesh_0.012"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.5148208737373352,
+                    5.165515899658203,
+                    -0.3243970274925232
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 12,
+            "Entity": 14112978234548590820,
             "TagComponent": {
-                "Tag": "Mesh_0.011"
+                "tag": "Mesh_0.011"
+            },
+            "TransformComponent": {
+                "position": [
+                    3.3383030891418457,
+                    2.4986510276794434,
+                    0.050707992166280746
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 11,
+            "Entity": 10885701017658380080,
             "TagComponent": {
-                "Tag": "Mesh_0.010"
+                "tag": "Mesh_0.010"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.5379714965820313,
+                    4.345012664794922,
+                    -0.31370070576667786
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 10,
+            "Entity": 14106065583156890665,
             "TagComponent": {
-                "Tag": "Mesh_0.009"
+                "tag": "Mesh_0.009"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.5155087113380432,
+                    2.2435548305511475,
+                    -0.07400288432836533
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 9,
+            "Entity": 10873195683837757328,
             "TagComponent": {
-                "Tag": "Mesh_0.008"
+                "tag": "Mesh_0.008"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.5155513882637024,
+                    1.3780227899551392,
+                    -0.31043630838394165
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 8,
+            "Entity": 7406744218214912733,
             "TagComponent": {
-                "Tag": "Mesh_0.007"
+                "tag": "Mesh_0.007"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.012294232845306396,
+                    6.001372337341309,
+                    -0.3079092800617218
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 7,
+            "Entity": 6163383964801000254,
             "TagComponent": {
-                "Tag": "Mesh_0.006"
+                "tag": "Mesh_0.006"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.6819008588790894,
+                    5.88134765625,
+                    -0.31404414772987366
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 6,
+            "Entity": 17330465537839323591,
             "TagComponent": {
-                "Tag": "Mesh_0.005"
+                "tag": "Mesh_0.005"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.23735475540161133,
+                    5.565385818481445,
+                    0.08750325441360474
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 5,
+            "Entity": 9989599538029616822,
             "TagComponent": {
-                "Tag": "Mesh_0.004"
+                "tag": "Mesh_0.004"
+            },
+            "TransformComponent": {
+                "position": [
+                    -4.489065170288086,
+                    2.9580225944519043,
+                    -0.32058075070381165
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 4,
+            "Entity": 1523466995784000572,
             "TagComponent": {
-                "Tag": "Mesh_0.003"
+                "tag": "Mesh_0.003"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.5174335837364197,
+                    -0.0313112735748291,
+                    -0.3100207448005676
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 3,
+            "Entity": 7076537821559769231,
             "TagComponent": {
-                "Tag": "Mesh_0.002"
+                "tag": "Mesh_0.002"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.9217716455459595,
+                    0.2162950038909912,
+                    -0.31083571910858154
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 2,
+            "Entity": 17711772119120555037,
             "TagComponent": {
-                "Tag": "Mesh_0.001"
+                "tag": "Mesh_0.001"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.49813926219940186,
+                    0.9205667972564697,
+                    -0.014208100736141205
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 1,
+            "Entity": 7751958278787592468,
             "TagComponent": {
-                "Tag": "Mesh_0"
+                "tag": "Mesh_0"
+            },
+            "TransformComponent": {
+                "position": [
+                    -0.485302209854126,
+                    11.676187515258789,
+                    -0.3237643837928772
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         },
         {
-            "Entity": 0,
+            "Entity": 8446592422888978634,
             "TagComponent": {
-                "Tag": "sponza2"
+                "tag": "sponza2"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             }
         }
     ],
