@@ -49,8 +49,8 @@ namespace cologne::Audio
     {
         if (!sounds.contains(sound_path))
         {
-            LOG_ERROR("No sound found for: %s", sound_path);
-            return;
+            LOG_WARN("No sound found for: %s, attempting to add it", sound_path);
+            add_sound(sound_path);
         }
         auto channel = Mix_PlayChannel(-1, sounds[sound_path], 0);
         Mix_Volume(channel, volume);

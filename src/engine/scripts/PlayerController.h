@@ -1,8 +1,7 @@
 ﻿#pragma once
-#include <engine/Types.h>
 #include <engine/audio/Audio.h>
-#include <engine/physics/Physics.h>
 #include <engine/renderer/Renderer.h>
+#include <engine/scene/ScriptableEntity.h>
 
 namespace cologne
 {
@@ -38,79 +37,7 @@ namespace cologne
         float _time = 0.0f;
         TransformComponent _prev_transform;
 
-        void update_camera(float dt)
-        {
-            if (cologne::Input::key_pressed(Input::Key::Escape))
-            {
-                _show_mouse = !_show_mouse;
-                if (_show_mouse)
-                {
-                    Engine::get_window()->show_mouse();
-                }
-                else
-                {
-                    Engine::get_window()->hide_mouse();
-                }
-            }
-
-            auto mouse = Input::get_relative_mouse();
-            constexpr float sensitivity = 30.0f;
-            _rotation.x += mouse.x * sensitivity * dt;
-            _rotation.y += mouse.y * sensitivity * dt;
-            _rotation.y = glm::clamp(_rotation.y, -89.0f, 89.0f);
-            glm::quat x_quat = glm::angleAxis(glm::radians(-_rotation.x),
-                                              glm::vec3(0.0f, 1.0f, 0.0f));
-            glm::quat y_quat = glm::angleAxis(glm::radians(_rotation.y),
-                                              glm::vec3(1.0f, 0.0f, 0.0f));
-            glm::quat target_rotation = x_quat * y_quat;
-            Entity camera = Engine::get_scene()->get_entity_by_uuid(get_component<PlayerComponent>().camera);
-            camera.get_transform().rotation = target_rotation;
-            glm::vec3 fwd = target_rotation * glm::vec3(0.0f, 0.0f, 1.0f);
-            glm::vec3 right = target_rotation * glm::vec3(1.0f, 0.0f, 0.0f);
-            glm::vec3 up = target_rotation * glm::vec3(0.0f, 1.0f, 0.0f);
-
-            bool was_free_cam = _is_free_cam;
-            if (Input::key_pressed(Input::Key::F))
-            {
-                _is_free_cam = !_is_free_cam;
-            }
-
-            if (!_is_free_cam)
-            {
-                return;
-            }
-
-            float speed = 10.0f;
-            auto &tr = camera.get_transform();
-            if (cologne::Input::key_down(Input::Key::LeftShift))
-            {
-                speed *= 2.5f;
-            }
-            if (cologne::Input::key_down(Input::Key::W))
-            {
-                tr.position += fwd * dt * speed;
-            }
-            if (cologne::Input::key_down(Input::Key::S))
-            {
-                tr.position -= fwd * dt * speed;
-            }
-            if (cologne::Input::key_down(Input::Key::A))
-            {
-                tr.position += right * dt * speed;
-            }
-            if (cologne::Input::key_down(Input::Key::D))
-            {
-                tr.position -= right * dt * speed;
-            }
-            if (cologne::Input::key_down(Input::Key::Space))
-            {
-                tr.position += up * dt * speed;
-            }
-            if (cologne::Input::key_down(Input::Key::LeftCtrl))
-            {
-                tr.position -= up * dt * speed;
-            }
-        }
+        void update_camera(float dt);
 
         float inverse_lerp(float a, float b, float v)
         {
@@ -158,355 +85,31 @@ namespace cologne
             }
         }
 
-        void move_viewmodel(float dt)
-        {
-            glm::vec2 mouse = Input::get_relative_mouse();
-            Entity viewmodel_entity = Engine::get_scene()->get_entity_by_uuid(
-                get_component<PlayerComponent>().viewmodel);
-            auto &viewmodel = viewmodel_entity.get_component<ViewmodelComponent>();
-            float mouse_x = mouse.x * viewmodel.sway_multiplier * dt;
-            float mouse_y = mouse.y * viewmodel.sway_multiplier * dt;
+        void move_viewmodel(float dt);
 
-            glm::quat x_rotation = glm::angleAxis(glm::radians(-mouse_y), glm::vec3(1.0f, 0.0f, 0.0f));
-            glm::quat y_rotation = glm::angleAxis(glm::radians(-mouse_x), glm::vec3(0.0, 1.0f, 0.0f));
-            glm::quat target_rotation = x_rotation * y_rotation;
-            glm::quat new_rotation = glm::slerp(_prev_transform.rotation,
-                                                target_rotation * glm::quat(
-                                                    glm::radians(glm::vec3(viewmodel.euler_offset))),
-                                                dt * viewmodel.smoothing);
-            glm::vec3 velocity = Physics::get_player_velocity(get_component<PlayerComponent>().id);
-            float y_vel = velocity.y;
-            velocity.y = 0.0f;
-            if (glm::length2(velocity) > 0.0f)
-            {
-                _time += dt;
-            }
-            else
-            {
-                _time = 0.0f;
-            }
+        void apply_friction(float t, float dt);
 
-            glm::vec3 bob = glm::vec3(0.0f);
-            bob.y += glm::sin(_time * viewmodel.frequency) * viewmodel.amplitude;
-            bob.x += glm::cos(_time * viewmodel.frequency / 2.0f) * viewmodel.amplitude * 2.0f;
-            bob.y += glm::clamp(-y_vel * viewmodel.vertical_velocity_multiplier,
-                                -viewmodel.max_vertical_offset, viewmodel.max_vertical_offset);
-            glm::vec3 new_position = glm::lerp(_prev_transform.position,
-                                               bob + viewmodel.position_offset, dt * viewmodel.smoothing);
-            _prev_transform.position = new_position;
-            _prev_transform.rotation = new_rotation;
+        void acceleration(glm::vec3 goal_dir, float goal_speed, float accel, float dt);
 
-            glm::mat4 gun_mat = glm::mat4(1.0f);
-            Entity camera = Engine::get_scene()->get_entity_by_uuid(get_component<PlayerComponent>().camera);
-            auto &cam_transform = camera.get_transform();
-            gun_mat = glm::translate(gun_mat, new_position);
-            gun_mat *= glm::toMat4(new_rotation);
-            gun_mat = glm::inverse(Renderer::get_camera_view(cam_transform)) * gun_mat;
-            glm::quat orientation;
-            glm::vec3 translation;
-            glm::vec3 scale;
-            glm::vec4 persp;
-            glm::vec3 skew;
-            glm::decompose(gun_mat, scale, orientation, translation, skew, persp);
+        void ground_move(glm::vec3 movement_input, float dt);
 
-            viewmodel_entity.get_transform().position = translation;
-            viewmodel_entity.get_transform().rotation = orientation;
-        }
+        void air_move(glm::vec3 movement_input, bool strafing_only, float dt);
 
-        void apply_friction(float t, float dt)
-        {
-            glm::vec3 v = _velocity;
-            v.y = 0.0f;
-            float speed = length(v);
-            float drop = 0.0f;
-            if (_grounded)
-            {
-                float control = speed < get_component<PlayerComponent>().run_deceleration
-                                    ? get_component<PlayerComponent>().run_deceleration
-                                    : speed;
-                drop = control * get_component<PlayerComponent>().friction * dt * t;
-            }
+        void air_control(glm::vec3 movement_input, float target_speed, bool only_forward, float dt);
 
-            float new_speed = speed - drop;
-            if (new_speed < 0.0f)
-            {
-                new_speed = 0.0f;
-            }
-            if (new_speed > 0.0f)
-            {
-                new_speed /= speed;
-            }
+        void queue_jump();
 
-            _velocity.x *= new_speed;
-            _velocity.z *= new_speed;
-        }
+        void update_gun(float dt);
 
-        void acceleration(glm::vec3 goal_dir, float goal_speed, float accel, float dt)
-        {
-            float current_speed = glm::dot(_velocity, goal_dir);
-            float add_speed = goal_speed - current_speed;
-            if (add_speed <= 0)
-            {
-                return;
-            }
-
-            float accel_speed = accel * dt * goal_speed;
-            if (accel_speed > add_speed)
-            {
-                accel_speed = add_speed;
-            }
-            _velocity.x += accel_speed * goal_dir.x;
-            _velocity.z += accel_speed * goal_dir.z;
-        }
-
-        void ground_move(glm::vec3 movement_input, float dt)
-        {
-            apply_friction(!_jump_queued ? 1.0f : 0.0f, dt);
-            if (length2(movement_input) != 0.0f)
-            {
-                movement_input = normalize(movement_input);
-            }
-            float goal_speed = length(movement_input) * get_component<PlayerComponent>().move_speed;
-            acceleration(movement_input, goal_speed, get_component<PlayerComponent>().run_acceleration, dt);
-            _velocity.y = -get_component<PlayerComponent>().gravity * dt;
-            if (_jump_queued)
-            {
-                _velocity.y = get_component<PlayerComponent>().jump_speed;
-                _jump_queued = false;
-            }
-            else
-            {
-                //slope correct here
-            }
-        }
-
-        void air_move(glm::vec3 movement_input, bool strafing_only, float dt)
-        {
-            float accel;
-            float wish_speed = glm::length(movement_input);
-            wish_speed *= get_component<PlayerComponent>().move_speed;
-            if (length(movement_input) != 0.0f)
-            {
-                movement_input = normalize(movement_input);
-            }
-
-            float wish_speed2 = wish_speed;
-            if (glm::dot(_velocity, movement_input) < 0)
-            {
-                accel = get_component<PlayerComponent>().air_deceleration;
-            }
-            else
-            {
-                accel = get_component<PlayerComponent>().air_acceleration;
-            }
-
-            if (strafing_only)
-            {
-                if (wish_speed > get_component<PlayerComponent>().side_strafe_speed)
-                {
-                    wish_speed = get_component<PlayerComponent>().side_strafe_speed;
-                }
-                accel = get_component<PlayerComponent>().side_strafe_acceleration;
-            }
-            acceleration(movement_input, wish_speed, accel, dt);
-            if (get_component<PlayerComponent>().air_control > 0)
-            {
-                air_control(movement_input, wish_speed2, !strafing_only, dt);
-            }
-            _velocity.y -= get_component<PlayerComponent>().gravity * dt;
-        }
-
-        void air_control(glm::vec3 movement_input, float target_speed, bool only_forward, float dt)
-        {
-            if (!only_forward || glm::abs(target_speed) < 0.0001f)
-            {
-                return;
-            }
-
-            float z_speed = _velocity.y;
-            _velocity.y = 0.0f;
-
-            float speed = length(_velocity);
-            if (speed != 0.0f)
-            {
-                _velocity = glm::normalize(_velocity);
-            }
-
-            float dot = glm::dot(_velocity, movement_input);
-            float k = 32;
-            k *= get_component<PlayerComponent>().air_control * dot * dot * dt;
-
-            if (dot > 0)
-            {
-                _velocity *= speed * glm::length(movement_input) * k;
-                _velocity = glm::normalize(_velocity);
-            }
-            _velocity.x *= speed;
-            _velocity.y = z_speed;
-            _velocity.z *= speed;
-        }
-
-        void queue_jump()
-        {
-            if (Input::key_pressed(Input::Key::Space))
-            {
-                _jump_queued = true;
-            }
-            if (!Input::key_pressed(Input::Key::Space))
-            {
-                _jump_queued = false;
-            }
-        }
-
-        void update_gun(float dt)
-        {
-            if (_shot_timer < _gun_time)
-            {
-                _shot_timer += dt;
-            }
-            else
-            {
-                _is_firing = false;
-                _is_reloading = false;
-            }
-
-            if (!_is_firing && !_is_reloading)
-            {
-                if (Input::mouse_pressed(Input::MouseButton::Left) && _current_ammo > 0)
-                {
-                    LOG_INFO("Bang");
-                    Entity vm = Engine::get_scene()->get_entity_by_uuid(get_component<PlayerComponent>().viewmodel);
-                    auto &anim = vm.get_component<AnimatorComponent>();
-                    anim.play_one_shot_animation(AssetManager::get_animation_by_name("vsk_Fire"));
-                    Audio::play_sound(shoot_sound, 30);
-                    auto cam = Engine::get_scene()->get_entity_by_uuid(get_component<PlayerComponent>().camera);
-                    auto tr = cam.get_transform();
-                    Engine::get_scene()->create_bullet(tr.position, tr.get_forward(), 25);
-                    _shot_timer = 0.0f;
-                    _gun_time = _rpm;
-                    _current_ammo--;
-                    _is_firing = true;
-                }
-
-                if (Input::key_pressed(Input::Key::R) && _current_ammo < _max_ammo)
-                {
-                    LOG_INFO("RELOADING!");
-                    _shot_timer = 0.0f;
-                    _gun_time = _reload_time;
-                    Entity vm = Engine::get_scene()->get_entity_by_uuid(get_component<PlayerComponent>().viewmodel);
-                    auto &anim = vm.get_component<AnimatorComponent>();
-                    anim.play_one_shot_animation(AssetManager::get_animation_by_name("vsk_Reload_Full"));
-                    Audio::play_sound(reload_sound, 20);
-                    _is_reloading = true;
-                    _current_ammo = _max_ammo;
-                }
-            }
-
-            std::string text = (std::string("Ammo ") + std::to_string(_current_ammo) + "/" + std::to_string(_max_ammo));
-            Engine::get_renderer()->draw_text(text.c_str(),
-                                              glm::vec3(Engine::get_window()->get_width() - (text.length() * 48.0f),
-                                                        660.0f, 0.0f), glm::vec4(1.0f), 0.6f);
-        }
 
     protected:
-        void on_create() override
-        {
-            _footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_1.wav");
-            _footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_2.wav");
-            _footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_3.wav");
-            _footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_4.wav");
-            for (const auto &footstep_sound: _footstep_sounds)
-            {
-                Audio::add_sound(footstep_sound.c_str());
-            }
-            auto anim = AssetManager::get_animation_by_name("vsk_Reload_Full");
-            _reload_time = anim->get_duration() / anim->get_ticks_per_second();
-            Audio::add_sound(shoot_sound);
-            Audio::add_sound(reload_sound);
-            _current_ammo = _max_ammo;
-        }
+        void on_create() override;
 
         void on_destroy() override
         {
         }
 
-        void on_update(float dt) override
-        {
-            update_camera(dt);
-            if (_is_free_cam)
-            {
-                get_component<PlayerComponent>().teleport_to_position(
-                    Engine::get_scene()->get_entity_by_uuid(get_component<PlayerComponent>().camera)
-                    .get_transform().position
-                    - glm::vec3(0.0f, 1.45f, 0.0f));
-                move_viewmodel(dt);
-                return;
-            }
-            float x = 0.0f;
-            float y = 0.0f;
-            if (cologne::Input::key_down(cologne::Input::Key::W))
-            {
-                x += 1.0f;
-            }
-            if (cologne::Input::key_down(cologne::Input::Key::S))
-            {
-                x -= 1.0f;
-            }
-            if (cologne::Input::key_down(cologne::Input::Key::A))
-            {
-                y -= 1.0f;
-            }
-            if (cologne::Input::key_down(cologne::Input::Key::D))
-            {
-                y += 1.0f;
-            }
-            queue_jump();
-            bool crouch = cologne::Input::key_pressed(cologne::Input::Key::LeftCtrl);
-
-            glm::vec3 movement = glm::vec3(-y, 0.0f, x);
-            movement = Engine::get_scene()->get_entity_by_uuid(get_component<PlayerComponent>().camera)
-                       .get_transform().rotation * movement;
-            movement.y = 0.0f;
-            if (abs(movement.x) > 0.0f || abs(movement.y) > 0.0f)
-            {
-                movement = glm::normalize(movement);
-            }
-
-
-            glm::quat up_rotation = glm::quat(glm::vec3(0.0f));
-            glm::vec3 up = up_rotation * glm::vec3(0.0f, 1.0f, 0.0f);
-
-
-            _was_grounded = _grounded;
-            _grounded = Physics::player_is_grounded(get_component<PlayerComponent>().id);
-            if (_grounded)
-            {
-                ground_move(movement, dt);
-            }
-            else
-            {
-                //air move
-                bool strafing_only = y == 0 && x != 0;
-                air_move(movement, !strafing_only, dt);
-            }
-
-            PlayerMovementCommand cmd;
-            cmd.up = up;
-            cmd.rotation = up_rotation;
-            cmd.movement = _velocity;
-
-            Physics::move_player(get_component<PlayerComponent>().id, cmd);
-
-            play_footstep(dt);
-            glm::vec3 player_pos = Physics::get_player_position(
-                get_component<PlayerComponent>().id);
-            glm::vec3 camera_pos = player_pos + glm::vec3(0.0f, 1.45f, 0.0f);
-            Engine::get_scene()->get_entity_by_uuid(get_component<PlayerComponent>().camera)
-                    .get_transform().position = camera_pos;
-            get_component<TransformComponent>().position = player_pos;
-            update_gun(dt);
-            move_viewmodel(dt);
-        }
+        void on_update(float dt) override;
 
         RuntimeMode get_runtime_mode() override
         {

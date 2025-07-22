@@ -48,7 +48,7 @@ namespace cologne
                     if (temp.has_component<ChildComponent>())
                     {
                         auto comp = temp.get_component<ChildComponent>();
-                        if (comp.parent == _selected_entity.get_uuid())
+                        if (_selected_entity && comp.parent == _selected_entity.get_uuid())
                         {
                             _selected_entity = temp;
                         }

@@ -2,8 +2,12 @@
     "entities": [
         {
             "ActiveComponent": true,
-            "Entity": 8037269511987960123,
+            "ChildComponent": 12581511240167202623,
+            "Entity": 2340529674415514396,
             "MeshComponent": "sofa_1-1",
+            "StaticColliderComponent": {
+                "mesh_name": "sofa_1-1"
+            },
             "TagComponent": {
                 "tag": "sofa_1-1"
             },
@@ -54,8 +58,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 2861101596550376623,
+            "ChildComponent": 12581511240167202623,
+            "Entity": 8411691859926844251,
             "MeshComponent": "sofa_1-0",
+            "StaticColliderComponent": {
+                "mesh_name": "sofa_1-0"
+            },
             "TagComponent": {
                 "tag": "sofa_1-0"
             },
@@ -106,10 +114,10 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 7109004213734009996,
+            "Entity": 12581511240167202623,
             "ParentComponent": [
-                2861101596550376623,
-                8037269511987960123
+                8411691859926844251,
+                2340529674415514396
             ],
             "TagComponent": {
                 "tag": "sofa"
@@ -165,7 +173,10 @@
                 "fov_radians": 0.7853981852531433,
                 "primary": false
             },
-            "Entity": 8691882661507399660,
+            "Entity": 4543540608377243771,
+            "NativeScriptComponent": {
+                "type_name": "EditorCameraController"
+            },
             "TagComponent": {
                 "tag": "Scene Camera"
             },
@@ -216,7 +227,7 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 3104876194326228837,
+            "Entity": 10467811379549995843,
             "LightComponent": {
                 "cast_shadows": true,
                 "color": [
@@ -280,7 +291,7 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 7786341497173052989,
+            "Entity": 9379551324279858658,
             "LightComponent": {
                 "cast_shadows": false,
                 "color": [
@@ -344,71 +355,7 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 10569910774519409415,
-            "LightComponent": {
-                "cast_shadows": false,
-                "color": [
-                    0.4259999990463257,
-                    0.019999999552965164,
-                    0.9620000123977661
-                ],
-                "inner_cutoff": 12.5,
-                "outer_cutoff": 17.5,
-                "radius": 4.0,
-                "strength": 7.099999904632568,
-                "type": 1
-            },
-            "TagComponent": {
-                "tag": "purple light"
-            },
-            "TransformComponent": {
-                "position": [
-                    9.78600025177002,
-                    0.4869999885559082,
-                    0.15800000727176666
-                ],
-                "rotation": [
-                    1.0,
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "WorldTransformComponent": [
-                [
-                    1.0,
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                [
-                    0.0,
-                    1.0,
-                    0.0,
-                    0.0
-                ],
-                [
-                    0.0,
-                    0.0,
-                    1.0,
-                    0.0
-                ],
-                [
-                    9.78600025177002,
-                    0.4869999885559082,
-                    0.15800000727176666,
-                    1.0
-                ]
-            ]
-        },
-        {
-            "ActiveComponent": true,
-            "Entity": 12568345303337387820,
+            "Entity": 2304197191108639213,
             "LightComponent": {
                 "cast_shadows": false,
                 "color": [
@@ -472,7 +419,7 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 13089037967703878254,
+            "Entity": 7270809793424550759,
             "LightComponent": {
                 "cast_shadows": false,
                 "color": [
@@ -536,7 +483,7 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 15540581148939131186,
+            "Entity": 14092867053480631745,
             "LightComponent": {
                 "cast_shadows": false,
                 "color": [
@@ -600,7 +547,7 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 4492786618998245215,
+            "Entity": 13886912870997920271,
             "LightComponent": {
                 "cast_shadows": false,
                 "color": [
@@ -664,7 +611,7 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 15572961774370528791,
+            "Entity": 10927729110891660965,
             "LightComponent": {
                 "cast_shadows": false,
                 "color": [
@@ -728,7 +675,7 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 3718642171592368067,
+            "Entity": 12700859756339758321,
             "LightComponent": {
                 "cast_shadows": false,
                 "color": [
@@ -792,8 +739,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 2803762796203471933,
+            "ChildComponent": 16429655857007511994,
+            "Entity": 12971604989640411771,
             "MeshComponent": "LanternPole_Lantern",
+            "StaticColliderComponent": {
+                "mesh_name": "LanternPole_Lantern"
+            },
             "TagComponent": {
                 "tag": "LanternPole_Lantern"
             },
@@ -844,8 +795,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 8024685111796983735,
+            "ChildComponent": 16429655857007511994,
+            "Entity": 11229411391846592869,
             "MeshComponent": "LanternPole_Chain",
+            "StaticColliderComponent": {
+                "mesh_name": "LanternPole_Chain"
+            },
             "TagComponent": {
                 "tag": "LanternPole_Chain"
             },
@@ -896,8 +851,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 16236544470295455717,
+            "ChildComponent": 16429655857007511994,
+            "Entity": 8618088302539885459,
             "MeshComponent": "LanternPole_Body",
+            "StaticColliderComponent": {
+                "mesh_name": "LanternPole_Body"
+            },
             "TagComponent": {
                 "tag": "LanternPole_Body"
             },
@@ -948,11 +907,11 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 1538933185798334714,
+            "Entity": 16429655857007511994,
             "ParentComponent": [
-                16236544470295455717,
-                8024685111796983735,
-                2803762796203471933
+                8618088302539885459,
+                11229411391846592869,
+                12971604989640411771
             ],
             "TagComponent": {
                 "tag": "Lantern"
@@ -1004,7 +963,29 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 13261304894378525355,
+            "Entity": 6052158850906467783,
+            "NativeScriptComponent": {
+                "type_name": "PlayerController"
+            },
+            "PlayerComponent": {
+                "air_acceleration": 2.0,
+                "air_control": 0.10000000149011612,
+                "air_deceleration": 2.0,
+                "camera": 1866229007866848673,
+                "friction": 6.0,
+                "gravity": 19.600000381469727,
+                "jump_speed": 7.0,
+                "maxStepInterval": 1.25,
+                "maxStepVelocity": 12.5,
+                "minStepInterval": 0.15000000596046448,
+                "minStepVelocity": 2.5,
+                "move_speed": 5.0,
+                "run_acceleration": 7.0,
+                "run_deceleration": 3.0,
+                "side_strafe_acceleration": 15.0,
+                "side_strafe_speed": 1.0,
+                "viewmodel": 8592289413533775022
+            },
             "TagComponent": {
                 "tag": "player"
             },
@@ -1055,7 +1036,15 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 11669617583138563726,
+            "AnimatorComponent": {
+                "base_clip": "vsk_Idle",
+                "current_clip": "vsk_Idle",
+                "current_state": 0,
+                "current_time": 0.0,
+                "has_ragdoll": false,
+                "model_name": "vsk"
+            },
+            "Entity": 8592289413533775022,
             "SkinnedModelComponent": "vsk",
             "TagComponent": {
                 "tag": "viewmodel"
@@ -1077,6 +1066,24 @@
                     1.0,
                     1.0
                 ]
+            },
+            "ViewmodelComponent": {
+                "amplitude": 0.009999999776482582,
+                "euler_offset": [
+                    0.0,
+                    180.0,
+                    0.0
+                ],
+                "frequency": 12.0,
+                "max_vertical_offset": 0.07000000029802322,
+                "position_offset": [
+                    0.04500000178813934,
+                    -0.27000001072883606,
+                    -0.20000000298023224
+                ],
+                "smoothing": 8.0,
+                "sway_multiplier": 100.0,
+                "vertical_velocity_multiplier": 0.009999999776482582
             },
             "WorldTransformComponent": [
                 [
@@ -1111,7 +1118,7 @@
                 "fov_radians": 0.7853981852531433,
                 "primary": true
             },
-            "Entity": 126303986794452244,
+            "Entity": 1866229007866848673,
             "TagComponent": {
                 "tag": "camera"
             },
@@ -1162,7 +1169,15 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 2912652418139492748,
+            "AnimatorComponent": {
+                "base_clip": "deagle_Rig|Rig|MK_ReloadFull",
+                "current_clip": "deagle_Rig|Rig|MK_ReloadFull",
+                "current_state": 0,
+                "current_time": 0.0,
+                "has_ragdoll": false,
+                "model_name": "deagle"
+            },
+            "Entity": 189127267548643606,
             "SkinnedModelComponent": "deagle",
             "TagComponent": {
                 "tag": "deagle"
@@ -1214,7 +1229,15 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 2968607972826069011,
+            "AnimatorComponent": {
+                "base_clip": "man_Idle",
+                "current_clip": "man_Idle",
+                "current_state": 0,
+                "current_time": 0.0,
+                "has_ragdoll": false,
+                "model_name": "man"
+            },
+            "Entity": 17048564199031951305,
             "SkinnedModelComponent": "man",
             "TagComponent": {
                 "tag": "man2"
@@ -1266,11 +1289,19 @@
         },
         {
             "ActiveComponent": true,
+            "AnimatorComponent": {
+                "base_clip": "man_Idle",
+                "current_clip": "man_Idle",
+                "current_state": 0,
+                "current_time": 0.0,
+                "has_ragdoll": true,
+                "model_name": "man"
+            },
             "EnemyComponent": {
                 "dead": false,
                 "health": 100.0
             },
-            "Entity": 6393487418189374578,
+            "Entity": 4772861360313560611,
             "SkinnedModelComponent": "man",
             "TagComponent": {
                 "tag": "man"
@@ -1322,8 +1353,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 15249233475442090167,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 1934513059975266475,
             "MeshComponent": "Mesh_0.024",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.024"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.024"
             },
@@ -1374,8 +1409,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 17658907305173784896,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 17174141489946311471,
             "MeshComponent": "Mesh_0.023",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.023"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.023"
             },
@@ -1426,8 +1465,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 11689408877585578022,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 2262203706540309450,
             "MeshComponent": "Mesh_0.022",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.022"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.022"
             },
@@ -1478,8 +1521,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 3993205313855206008,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 14442935027334620618,
             "MeshComponent": "Mesh_0.021",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.021"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.021"
             },
@@ -1530,8 +1577,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 3324621193991108617,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 12460358621492895083,
             "MeshComponent": "Mesh_0.020",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.020"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.020"
             },
@@ -1582,8 +1633,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 16405679213391342783,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 479801856007251436,
             "MeshComponent": "Mesh_0.019",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.019"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.019"
             },
@@ -1634,8 +1689,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 4659269617988692908,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 3736757102198575176,
             "MeshComponent": "Mesh_0.018",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.018"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.018"
             },
@@ -1686,8 +1745,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 16524811414908929874,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 602213790077635126,
             "MeshComponent": "Mesh_0.017",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.017"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.017"
             },
@@ -1738,8 +1801,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 8454874873977543824,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 6421672744996065067,
             "MeshComponent": "Mesh_0.016",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.016"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.016"
             },
@@ -1790,8 +1857,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 11878842716760162951,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 3259098235329140979,
             "MeshComponent": "Mesh_0.015",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.015"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.015"
             },
@@ -1842,8 +1913,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 9766628695233356802,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 3640495349528253736,
             "MeshComponent": "Mesh_0.014",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.014"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.014"
             },
@@ -1894,8 +1969,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 1640051229693908899,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 10001397019809645324,
             "MeshComponent": "Mesh_0.013",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.013"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.013"
             },
@@ -1946,8 +2025,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 12538676488245742503,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 8704818593293373724,
             "MeshComponent": "Mesh_0.012",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.012"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.012"
             },
@@ -1998,8 +2081,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 3722485930847975894,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 9044374307404264271,
             "MeshComponent": "Mesh_0.011",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.011"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.011"
             },
@@ -2050,8 +2137,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 13111505905655216713,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 6561791174195422635,
             "MeshComponent": "Mesh_0.010",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.010"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.010"
             },
@@ -2102,8 +2193,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 16287950429909903299,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 3044465339460428332,
             "MeshComponent": "Mesh_0.009",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.009"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.009"
             },
@@ -2154,8 +2249,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 11494969378290420286,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 13128291245576104561,
             "MeshComponent": "Mesh_0.008",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.008"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.008"
             },
@@ -2206,8 +2305,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 14325913814433989128,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 13997479277233532096,
             "MeshComponent": "Mesh_0.007",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.007"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.007"
             },
@@ -2258,8 +2361,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 17422326713068743137,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 16597935472334043142,
             "MeshComponent": "Mesh_0.006",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.006"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.006"
             },
@@ -2310,8 +2417,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 9455380885446152733,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 6373664922221419616,
             "MeshComponent": "Mesh_0.005",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.005"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.005"
             },
@@ -2362,8 +2473,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 17764756320230753035,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 14279159139559195266,
             "MeshComponent": "Mesh_0.004",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.004"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.004"
             },
@@ -2414,8 +2529,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 4551763775010542189,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 8625124209217482784,
             "MeshComponent": "Mesh_0.003",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.003"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.003"
             },
@@ -2466,8 +2585,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 16727657546631382617,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 15351337289835120185,
             "MeshComponent": "Mesh_0.002",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.002"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.002"
             },
@@ -2518,8 +2641,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 11438053764941500550,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 17905271675155367215,
             "MeshComponent": "Mesh_0.001",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0.001"
+            },
             "TagComponent": {
                 "tag": "Mesh_0.001"
             },
@@ -2570,8 +2697,12 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 12893593816264403289,
+            "ChildComponent": 1062824802019117369,
+            "Entity": 2301775388926544854,
             "MeshComponent": "Mesh_0",
+            "StaticColliderComponent": {
+                "mesh_name": "Mesh_0"
+            },
             "TagComponent": {
                 "tag": "Mesh_0"
             },
@@ -2622,33 +2753,33 @@
         },
         {
             "ActiveComponent": true,
-            "Entity": 11352690727620132844,
+            "Entity": 1062824802019117369,
             "ParentComponent": [
-                12893593816264403289,
-                11438053764941500550,
-                16727657546631382617,
-                4551763775010542189,
-                17764756320230753035,
-                9455380885446152733,
-                17422326713068743137,
-                14325913814433989128,
-                11494969378290420286,
-                16287950429909903299,
-                13111505905655216713,
-                3722485930847975894,
-                12538676488245742503,
-                1640051229693908899,
-                9766628695233356802,
-                11878842716760162951,
-                8454874873977543824,
-                16524811414908929874,
-                4659269617988692908,
-                16405679213391342783,
-                3324621193991108617,
-                3993205313855206008,
-                11689408877585578022,
-                17658907305173784896,
-                15249233475442090167
+                2301775388926544854,
+                17905271675155367215,
+                15351337289835120185,
+                8625124209217482784,
+                14279159139559195266,
+                6373664922221419616,
+                16597935472334043142,
+                13997479277233532096,
+                13128291245576104561,
+                3044465339460428332,
+                6561791174195422635,
+                9044374307404264271,
+                8704818593293373724,
+                10001397019809645324,
+                3640495349528253736,
+                3259098235329140979,
+                6421672744996065067,
+                602213790077635126,
+                3736757102198575176,
+                479801856007251436,
+                12460358621492895083,
+                14442935027334620618,
+                2262203706540309450,
+                17174141489946311471,
+                1934513059975266475
             ],
             "TagComponent": {
                 "tag": "sponza2"

@@ -21,12 +21,7 @@ namespace cologne
     {
         _current_time = 0.0f;
         _current_clip = nullptr;
-    }
-
-    AnimatorComponent::AnimatorComponent(const Skeleton &skeleton) : _skeleton(skeleton), _pose(skeleton)
-    {
-        _current_time = 0.0f;
-        _current_clip = nullptr;
+        _model_name = model.get_name();
     }
 
     AnimatorComponent::AnimatorComponent(const std::string &model_name) : _skeleton(
@@ -37,6 +32,7 @@ namespace cologne
     {
         _current_time = 0.0f;
         _current_clip = nullptr;
+        _model_name = model_name;
     }
 
     void AnimatorComponent::create_ragdoll(Entity entity_id)
@@ -205,9 +201,29 @@ namespace cologne
         return _current_clip;
     }
 
+    AnimationClip * AnimatorComponent::get_base_clip() const
+    {
+        return _base_clip;
+    }
+
+    void AnimatorComponent::set_current_progress(float progress)
+    {
+        _current_time = progress;
+    }
+
     AnimatorComponent::State AnimatorComponent::get_current_state() const
     {
         return _current_state;
+    }
+
+    const std::string & AnimatorComponent::get_model_base_name() const
+    {
+        return _model_name;
+    }
+
+    int32_t AnimatorComponent::get_ragdoll_id() const
+    {
+        return _ragdoll_id;
     }
 
     void AnimatorComponent::take_ragdoll_hit(glm::vec3 point, glm::vec3 normal)

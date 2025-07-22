@@ -159,11 +159,12 @@ namespace cologne
 
             draw_component<MeshComponent>("Mesh", _selected_entity, true, [this](MeshComponent &mesh_comp)
             {
-                Engine::get_renderer()->submit_outline_render_item(RenderItem(AssetManager::get_mesh_index_by_name(mesh_comp.mesh_name),
-                                                                              _selected_entity.get_component<
-                                                                                  WorldTransformComponent>(),
-                                                                              false,
-                                                                              static_cast<uint32_t>(_selected_entity)));
+                Engine::get_renderer()->submit_outline_render_item(RenderItem(
+                    AssetManager::get_mesh_index_by_name(mesh_comp.mesh_name),
+                    _selected_entity.get_component<
+                        WorldTransformComponent>(),
+                    false,
+                    static_cast<uint32_t>(_selected_entity)));
                 auto mesh = AssetManager::get_mesh_by_name(mesh_comp.mesh_name);
                 std::string mesh_name = mesh->get_name();
                 ImGui::Text("Name %s Material %d", mesh_name.c_str(), mesh->get_material_index());
@@ -184,27 +185,32 @@ namespace cologne
                 ImGui::Checkbox("GI Only", &model.gi_only);
             });
 
-            draw_component<SkinnedModelComponent>("Skinned Model", _selected_entity, true, [this](SkinnedModelComponent &model)
-            {
-                if (auto skinned_model = AssetManager::get_skinned_model_by_name(model.model_name))
-                {
-                    std::vector<glm::mat4> bones = std::vector<glm::mat4>();
-                    if (_selected_entity.has_component<AnimatorComponent>())
-                    {
-                        auto &anim = _selected_entity.get_component<AnimatorComponent>();
-                        bones = anim.get_skinning_matrices();
-                    }
-                    for (int32_t mesh_index: skinned_model->get_mesh_indices())
-                    {
-                        SkinnedRenderItem item;
-                        item.mesh_idx = mesh_index;
-                        item.transform = _selected_entity.get_component<WorldTransformComponent>();
-                        item.bones = bones;
-                        Engine::get_renderer()->submit_skinned_outline_render_item(item);
-                    }
-                }
-                ImGui::Text("Name %s", model.model_name.c_str());
-            });
+            draw_component<SkinnedModelComponent>("Skinned Model", _selected_entity, true,
+                                                  [this](SkinnedModelComponent &model)
+                                                  {
+                                                      if (auto skinned_model = AssetManager::get_skinned_model_by_name(
+                                                          model.model_name))
+                                                      {
+                                                          std::vector<glm::mat4> bones = std::vector<glm::mat4>();
+                                                          if (_selected_entity.has_component<AnimatorComponent>())
+                                                          {
+                                                              auto &anim = _selected_entity.get_component<
+                                                                  AnimatorComponent>();
+                                                              bones = anim.get_skinning_matrices();
+                                                          }
+                                                          for (int32_t mesh_index: skinned_model->get_mesh_indices())
+                                                          {
+                                                              SkinnedRenderItem item;
+                                                              item.mesh_idx = mesh_index;
+                                                              item.transform = _selected_entity.get_component<
+                                                                  WorldTransformComponent>();
+                                                              item.bones = bones;
+                                                              Engine::get_renderer()->
+                                                                      submit_skinned_outline_render_item(item);
+                                                          }
+                                                      }
+                                                      ImGui::Text("Name %s", model.model_name.c_str());
+                                                  });
 
             draw_component<StaticColliderComponent>("Static Collider", _selected_entity, false, [](auto &collider)
             {
@@ -232,10 +238,21 @@ namespace cologne
 
             draw_component<PlayerComponent>("Player", _selected_entity, true, [](PlayerComponent &player)
             {
-#define IMGUI_WIDGET(type, name, ...) \
-                ImGui::DragFloat(#name, &player.name);
-                PLAYER_COMPONENT_FIELDS(IMGUI_WIDGET)
-#undef IMGUI_WIDGET
+                ImGui::InputFloat("GRAVITY", &player.gravity);
+                ImGui::InputFloat("MOVE SPEED", &player.move_speed);
+                ImGui::InputFloat("RUN ACCELERATION", &player.run_acceleration);
+                ImGui::InputFloat("RUN DECELERATION", &player.run_deceleration);
+                ImGui::InputFloat("AIR ACCELERATION", &player.air_acceleration);
+                ImGui::InputFloat("AIR DECELERATION", &player.air_deceleration);
+                ImGui::InputFloat("AIR CONTROL", &player.air_control);
+                ImGui::InputFloat("SIDE STRAFE ACCELERATION", &player.side_strafe_acceleration);
+                ImGui::InputFloat("SIDE STRAFE SPEED", &player.side_strafe_speed);
+                ImGui::InputFloat("JUMP SPEED", &player.jump_speed);
+                ImGui::InputFloat("FRICTION", &player.friction);
+                ImGui::InputFloat("MAX STEP VELOCITY", &player.maxStepVelocity);
+                ImGui::InputFloat("MIN STEP VELOCITY", &player.minStepVelocity);
+                ImGui::InputFloat("MIN STEP INTERVAL", &player.minStepInterval);
+                ImGui::InputFloat("MAX STEP INTERVAL", &player.maxStepInterval);
             });
 
 
