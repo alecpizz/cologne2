@@ -16,6 +16,7 @@
 #include "Time.h"
 #include <queue>
 #include <engine/util/FileUtil.h>
+#include <engine/scene/ComponentRegistry.h>
 
 namespace cologne
 {
@@ -50,6 +51,7 @@ namespace cologne
         _instance = this;
         _impl = new Impl();
         LOG_INFO("Starting up engine. the world is a shit place, and this is a shit engine. good luck!");
+        LOG_INFO("C++ VERSION %d", __cplusplus);
     }
 
     Engine::~Engine()
@@ -124,6 +126,7 @@ namespace cologne
         // Audio::add_music(RESOURCES_PATH "sounds/music2.mp3");
         // Audio::play_music(RESOURCES_PATH "sounds/music2.mp3");
         // Audio::set_music_volume(12);
+        ComponentRegistry::register_components();
         _impl->scene = std::make_unique<Scene>();
         _impl->event_manager = std::unique_ptr<EventManager>(new EventManager());
         if (_impl->window == nullptr || _impl->renderer == nullptr)

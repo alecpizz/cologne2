@@ -12,7 +12,6 @@ namespace cologne
         UUID(uint64_t id);
         UUID(const UUID&) = default;
         operator uint64_t() const {return _uuid;}
-    private:
         uint64_t _uuid;
     };
 }

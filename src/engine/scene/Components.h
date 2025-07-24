@@ -3,6 +3,7 @@
 #include <engine/core/UUID.h>
 #include <engine/physics/Physics.h>
 #include <engine/util/Util.h>
+#include <nlohmann/adl_serializer.hpp>
 
 #include "ScriptableEntity.h"
 
