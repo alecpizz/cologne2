@@ -10,7 +10,8 @@ namespace cologne::ComponentRegistry
 {
 #define REGISTER_COMPONENT(T) \
 entt::meta_factory<T>() \
-.func<[](entt::registry* registry, entt::entity entity) { registry->emplace<T>(entity); }>("emplace"_hs)
+.func<[](entt::registry* registry, entt::entity entity, T& value) { \
+        registry->emplace_or_replace<T>(entity, std::move(value)); }>("emplace"_hs)
 #define REGISTER_PROPERTY(Type, member, ...) \
 .data<&Type::member, entt::as_ref_t>(#member##_hs) \
 .custom<PropertiesMap>(PropertiesMap{{"name"_hs, #member} __VA_OPT__(, __VA_ARGS__)})
@@ -19,7 +20,6 @@ entt::meta_factory<T>() \
     {
         using namespace entt::literals;
         entt::meta_reset();
-
         entt::meta_factory<glm::vec3>()
                 .data<&glm::vec3::x>("x"_hs)
                 .data<&glm::vec3::y>("y"_hs)
@@ -40,7 +40,6 @@ entt::meta_factory<T>() \
                 .data<[](glm::mat4 &m) { return m[1]; }>("c1"_hs)
                 .data<[](glm::mat4 &m) { return m[2]; }>("c2"_hs)
                 .data<[](glm::mat4 &m) { return m[3]; }>("c3"_hs);
-
 
         REGISTER_COMPONENT(TransformComponent)
                 REGISTER_PROPERTY(TransformComponent, position)

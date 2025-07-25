@@ -6,13 +6,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 3212030198547928315
+                    "parent": 10858837897462797619
                 },
                 "cologne::IDComponent": {
-                    "id": 16234201877608773413
+                    "id": 11075538410384600620
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "sofa_1-1"
+                },
+                "cologne::TagComponent": {
+                    "tag": "sofa_1-1"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,
@@ -67,13 +71,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 3212030198547928315
+                    "parent": 10858837897462797619
                 },
                 "cologne::IDComponent": {
-                    "id": 12437438672665373481
+                    "id": 17145181615066094661
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "sofa_1-0"
+                },
+                "cologne::TagComponent": {
+                    "tag": "sofa_1-0"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,
@@ -128,9 +136,11 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 3212030198547928315
+                    "id": 10858837897462797619
                 },
-                "cologne::TagComponent": null,
+                "cologne::TagComponent": {
+                    "tag": "sofa"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.6000000238418579,
@@ -189,9 +199,11 @@
                     "primary": false
                 },
                 "cologne::IDComponent": {
-                    "id": 16394621574813840374
+                    "id": 5124521414911025934
                 },
-                "cologne::TagComponent": null,
+                "cologne::TagComponent": {
+                    "tag": "Scene Camera"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,
@@ -246,7 +258,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 6574141798321059594
+                    "id": 8486405841182427705
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": true,
@@ -258,9 +270,12 @@
                     "inner_cutoff": 12.5,
                     "outer_cutoff": 17.5,
                     "radius": 6.0,
-                    "strength": 2.0
+                    "strength": 2.0,
+                    "type": 0
                 },
-                "cologne::TagComponent": null,
+                "cologne::TagComponent": {
+                    "tag": "directional light"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         0.7900000214576721,
@@ -315,7 +330,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 10071149237818843403
+                    "id": 14844161008844753022
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -327,9 +342,12 @@
                     "inner_cutoff": 12.5,
                     "outer_cutoff": 17.5,
                     "radius": 3.7799999713897705,
-                    "strength": 5.909999847412109
+                    "strength": 5.909999847412109,
+                    "type": 1
                 },
-                "cologne::TagComponent": null,
+                "cologne::TagComponent": {
+                    "tag": "hall light"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         2.7950000762939453,
@@ -384,7 +402,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 8513825301392230991
+                    "id": 12867359472664130802
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -396,9 +414,12 @@
                     "inner_cutoff": 12.5,
                     "outer_cutoff": 17.5,
                     "radius": 3.6700000762939453,
-                    "strength": 7.0
+                    "strength": 7.0,
+                    "type": 1
                 },
-                "cologne::TagComponent": null,
+                "cologne::TagComponent": {
+                    "tag": "evil light"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -4.538000106811523,
@@ -453,7 +474,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 14727764179660416799
+                    "id": 5500991197556239961
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -465,9 +486,12 @@
                     "inner_cutoff": 12.5,
                     "outer_cutoff": 17.5,
                     "radius": 3.6700000762939453,
-                    "strength": 1.0
+                    "strength": 1.0,
+                    "type": 1
                 },
-                "cologne::TagComponent": null,
+                "cologne::TagComponent": {
+                    "tag": "lantern light"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         0.24300000071525574,
@@ -522,7 +546,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 16829355603724879407
+                    "id": 12315772500492246620
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -534,9 +558,12 @@
                     "inner_cutoff": 12.5,
                     "outer_cutoff": 17.5,
                     "radius": 3.130000114440918,
-                    "strength": 6.670000076293945
+                    "strength": 6.670000076293945,
+                    "type": 1
                 },
-                "cologne::TagComponent": null,
+                "cologne::TagComponent": {
+                    "tag": "point light3"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -6.699999809265137,
@@ -591,7 +618,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 17034475815597771748
+                    "id": 5409529179409157148
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -603,9 +630,12 @@
                     "inner_cutoff": 12.5,
                     "outer_cutoff": 17.5,
                     "radius": 3.0,
-                    "strength": 6.0
+                    "strength": 6.0,
+                    "type": 1
                 },
-                "cologne::TagComponent": null,
+                "cologne::TagComponent": {
+                    "tag": "point light2"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         6.0,
@@ -660,7 +690,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 16346291897453876574
+                    "id": 7776487932195074937
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -672,9 +702,12 @@
                     "inner_cutoff": 12.5,
                     "outer_cutoff": 17.5,
                     "radius": 3.0,
-                    "strength": 6.0
+                    "strength": 6.0,
+                    "type": 1
                 },
-                "cologne::TagComponent": null,
+                "cologne::TagComponent": {
+                    "tag": "point light"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -6.0,
@@ -729,7 +762,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 5836828220803880709
+                    "id": 3330645582263989737
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -741,9 +774,12 @@
                     "inner_cutoff": 12.5,
                     "outer_cutoff": 17.5,
                     "radius": 3.0,
-                    "strength": 1.0
+                    "strength": 1.0,
+                    "type": 2
                 },
-                "cologne::TagComponent": null,
+                "cologne::TagComponent": {
+                    "tag": "spot light"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,
@@ -798,13 +834,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 14993752013956653538
+                    "parent": 14797417285809884190
                 },
                 "cologne::IDComponent": {
-                    "id": 10593662587285158265
+                    "id": 5280523123919684640
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "LanternPole_Lantern"
+                },
+                "cologne::TagComponent": {
+                    "tag": "LanternPole_Lantern"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         0.9578503370285034,
@@ -859,13 +899,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 14993752013956653538
+                    "parent": 14797417285809884190
                 },
                 "cologne::IDComponent": {
-                    "id": 7664900118828255927
+                    "id": 10416235414276699603
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "LanternPole_Chain"
+                },
+                "cologne::TagComponent": {
+                    "tag": "LanternPole_Chain"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         0.958199143409729,
@@ -920,13 +964,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 14993752013956653538
+                    "parent": 14797417285809884190
                 },
                 "cologne::IDComponent": {
-                    "id": 393354073742000616
+                    "id": 18013061326303356318
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "LanternPole_Body"
+                },
+                "cologne::TagComponent": {
+                    "tag": "LanternPole_Body"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         0.19950899481773376,
@@ -981,9 +1029,11 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 14993752013956653538
+                    "id": 14797417285809884190
                 },
-                "cologne::TagComponent": null,
+                "cologne::TagComponent": {
+                    "tag": "Lantern"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         0.18000000715255737,
@@ -1038,13 +1088,13 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 16030429100508282
+                    "id": 10505582742403743790
                 },
                 "cologne::PlayerComponent": {
                     "air_acceleration": 2.0,
                     "air_control": 0.10000000149011612,
                     "air_deceleration": 2.0,
-                    "camera": 14867049343537895511,
+                    "camera": 1027120773572589911,
                     "friction": 6.0,
                     "gravity": 19.600000381469727,
                     "jump_speed": 7.0,
@@ -1057,9 +1107,11 @@
                     "run_deceleration": 3.0,
                     "side_strafe_acceleration": 15.0,
                     "side_strafe_speed": 1.0,
-                    "viewmodel": 3987335103639545036
+                    "viewmodel": 7533178625762209763
                 },
-                "cologne::TagComponent": null,
+                "cologne::TagComponent": {
+                    "tag": "player"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,
@@ -1114,10 +1166,14 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 3987335103639545036
+                    "id": 7533178625762209763
                 },
-                "cologne::SkinnedModelComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::SkinnedModelComponent": {
+                    "model_name": "vsk"
+                },
+                "cologne::TagComponent": {
+                    "tag": "viewmodel"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,
@@ -1194,9 +1250,11 @@
                     "primary": true
                 },
                 "cologne::IDComponent": {
-                    "id": 14867049343537895511
+                    "id": 1027120773572589911
                 },
-                "cologne::TagComponent": null,
+                "cologne::TagComponent": {
+                    "tag": "camera"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,
@@ -1251,10 +1309,14 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 17551482669289161207
+                    "id": 13802968434264708515
                 },
-                "cologne::SkinnedModelComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::SkinnedModelComponent": {
+                    "model_name": "deagle"
+                },
+                "cologne::TagComponent": {
+                    "tag": "deagle"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,
@@ -1309,10 +1371,14 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 13985828860650398995
+                    "id": 1354284209592453590
                 },
-                "cologne::SkinnedModelComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::SkinnedModelComponent": {
+                    "model_name": "man"
+                },
+                "cologne::TagComponent": {
+                    "tag": "man2"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,
@@ -1368,13 +1434,18 @@
                 },
                 "cologne::EnemyComponent": {
                     "dead": false,
-                    "health": 100.0
+                    "health": 100.0,
+                    "hurt_sound": "/home/alecpizz/Repos/goonengine/resources/sounds/enemy_hurt.mp3"
                 },
                 "cologne::IDComponent": {
-                    "id": 619669032408711899
+                    "id": 5976711169919013429
                 },
-                "cologne::SkinnedModelComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::SkinnedModelComponent": {
+                    "model_name": "man"
+                },
+                "cologne::TagComponent": {
+                    "tag": "man"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,
@@ -1429,13 +1500,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 14825469595265537228
+                    "id": 2857971474069933844
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.024"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.024"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5139411687850952,
@@ -1490,13 +1565,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 11032572633987764339
+                    "id": 7207724515549336508
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.023"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.023"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.3115405738353729,
@@ -1551,13 +1630,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 7699809726587638618
+                    "id": 1181420019225521243
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.022"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.022"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5278977155685425,
@@ -1612,13 +1695,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 8947703148541605101
+                    "id": 17866221945992912639
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.021"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.021"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.6557071208953857,
@@ -1673,13 +1760,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 11291550747761814992
+                    "id": 16120386557672902927
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.020"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.020"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -1.6507313251495361,
@@ -1734,13 +1825,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 2641415813333103556
+                    "id": 15295404572912132095
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.019"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.019"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5118553042411804,
@@ -1795,13 +1890,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 13566079323017387874
+                    "id": 5680284701365600705
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.018"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.018"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         0.6447742581367493,
@@ -1856,13 +1955,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 3071037539535243774
+                    "id": 9457589398398373518
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.017"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.017"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5432094931602478,
@@ -1917,13 +2020,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 10487994011622604682
+                    "id": 386723009004389814
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.016"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.016"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -1.0812530517578125,
@@ -1978,13 +2085,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 17301731865914988259
+                    "id": 10373018689487639708
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.015"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.015"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.008290350437164307,
@@ -2039,13 +2150,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 14083023726696892567
+                    "id": 16867359142920819859
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.014"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.014"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5073261857032776,
@@ -2100,13 +2215,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 1570425582465907934
+                    "id": 12184013859860601990
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.013"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.013"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5083215236663818,
@@ -2161,13 +2280,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 12497637296066767712
+                    "id": 18125836312141607160
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.012"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.012"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5148208737373352,
@@ -2222,13 +2345,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 7979519816984743397
+                    "id": 1382605044812131889
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.011"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.011"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         3.3383030891418457,
@@ -2283,13 +2410,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 8614734044055377117
+                    "id": 14717726481246881696
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.010"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.010"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5379714965820313,
@@ -2344,13 +2475,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 18238626735304029728
+                    "id": 15271904692531577813
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.009"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.009"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5155087113380432,
@@ -2405,13 +2540,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 8436804124099204495
+                    "id": 11526561905551640202
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.008"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.008"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5155513882637024,
@@ -2466,13 +2605,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 3985022696303559677
+                    "id": 15125491554067236915
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.007"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.007"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.012294232845306396,
@@ -2527,13 +2670,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 6124922280389299653
+                    "id": 5017840186855530721
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.006"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.006"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.6819008588790894,
@@ -2588,13 +2735,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 16607849586592502008
+                    "id": 17112995290971436611
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.005"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.005"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.23735475540161133,
@@ -2649,13 +2800,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 2170816627176745484
+                    "id": 12071688596739928176
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.004"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.004"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -4.489065170288086,
@@ -2710,13 +2865,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 10505034924782352236
+                    "id": 5790500227437369133
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.003"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.003"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5174335837364197,
@@ -2771,13 +2930,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 12782173953282442231
+                    "id": 12014394974632436569
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.002"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.002"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.9217716455459595,
@@ -2832,13 +2995,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 11267888042890440620
+                    "id": 5922136342577791267
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.001"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0.001"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.49813926219940186,
@@ -2893,13 +3060,17 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4734517439440647828
+                    "parent": 4653939822246449598
                 },
                 "cologne::IDComponent": {
-                    "id": 7214144195132096916
+                    "id": 16319352825272249702
                 },
-                "cologne::MeshComponent": null,
-                "cologne::TagComponent": null,
+                "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0"
+                },
+                "cologne::TagComponent": {
+                    "tag": "Mesh_0"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         -0.485302209854126,
@@ -2954,9 +3125,11 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 4734517439440647828
+                    "id": 4653939822246449598
                 },
-                "cologne::TagComponent": null,
+                "cologne::TagComponent": {
+                    "tag": "sponza2"
+                },
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,

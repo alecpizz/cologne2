@@ -447,14 +447,6 @@ namespace cologne
     //         ac.set_current_progress(j_entity["AnimatorComponent"]["current_time"].get<float>());
     //     }
     // }
-    constexpr entt::hashed_string vec3_hash = entt::hashed_string("glm::vec<3, float, glm::packed_highp>");
-    constexpr entt::hashed_string quat_hash = entt::hashed_string("glm::qua<float, glm::packed_highp>");
-    constexpr entt::hashed_string vec4_hash = entt::hashed_string("glm::vec<4, float, glm::packed_highp>");
-    constexpr entt::hashed_string mat4_hash = entt::hashed_string("glm::mat<4, 4, float, glm::packed_highp>");
-    constexpr entt::hashed_string uuid_hash = entt::hashed_string("cologne::UUID");
-    constexpr entt::hashed_string float_hash = entt::hashed_string("float");
-    constexpr entt::hashed_string bool_hash = entt::hashed_string("bool");
-    constexpr entt::hashed_string string_hash = entt::hashed_string("std::string");
 
     void save_component(entt::meta_any instance, nlohmann::json &j)
     {
@@ -470,37 +462,41 @@ namespace cologne
                     member_name = *it->second.try_cast<const char *>();
                 }
             }
-            if (hash == vec3_hash)
+            if (hash == entt::type_hash<glm::vec3>::value())
             {
                 j[member_name] = *data.get(instance).try_cast<glm::vec3>();
             }
-            else if (hash == vec4_hash)
+            else if (hash == entt::type_hash<glm::vec4>::value())
             {
                 j[member_name] = *data.get(instance).try_cast<glm::vec4>();
             }
-            else if (hash == quat_hash)
+            else if (hash == entt::type_hash<glm::quat>::value())
             {
                 j[member_name] = *data.get(instance).try_cast<glm::quat>();
             }
-            else if (hash == uuid_hash)
+            else if (hash == entt::type_hash<cologne::UUID>::value())
             {
                 j[member_name] = data.get(instance).try_cast<UUID>()->_uuid;
             }
-            else if (hash == mat4_hash)
+            else if (hash == entt::type_hash<glm::mat4>::value())
             {
                 j[member_name] = *data.get(instance).try_cast<glm::mat4>();
             }
-            else if (hash == float_hash)
+            else if (hash == entt::type_hash<float>::value())
             {
                 j[member_name] = *data.get(instance).try_cast<float>();
             }
-            else if (hash == bool_hash)
+            else if (hash == entt::type_hash<bool>::value())
             {
                 j[member_name] = *data.get(instance).try_cast<bool>();
             }
-            else if (hash == string_hash)
+            else if (hash == entt::type_hash<std::string>::value())
             {
                 j[member_name] = *data.get(instance).try_cast<std::string>();
+            }
+            else if (hash == entt::type_hash<int>::value())
+            {
+                j[member_name] = *data.get(instance).try_cast<int>();
             }
             else
             {
@@ -513,40 +509,44 @@ namespace cologne
     void load_property(const nlohmann::json& j, entt::meta_data& meta_data, entt::meta_any instance)
     {
         auto hash = meta_data.type().info().hash();
-        if (hash == vec3_hash)
+        if (hash == entt::type_hash<glm::vec3>::value())
         {
             if (!meta_data.set(instance, j.get<glm::vec3>()))
             {
                 LOG_ERROR("couldn't set meta data");
             }
         }
-        else if (hash == vec4_hash)
+        else if (hash == entt::type_hash<glm::vec4>::value())
         {
             meta_data.set(instance, j.get<glm::vec4>());
         }
-        else if (hash == quat_hash)
+        else if (hash == entt::type_hash<glm::quat>::value())
         {
             meta_data.set(instance, j.get<glm::quat>());
         }
-        else if (hash == uuid_hash)
+        else if (hash == entt::type_hash<UUID>::value())
         {
             meta_data.set(instance, j.get<UUID>());
         }
-        else if (hash == mat4_hash)
+        else if (hash == entt::type_hash<glm::mat4>::value())
         {
             meta_data.set(instance, j.get<glm::mat4>());
         }
-        else if (hash == float_hash)
+        else if (hash == entt::type_hash<float>::value())
         {
             meta_data.set(instance, j.get<float>());
         }
-        else if (hash == bool_hash)
+        else if (hash == entt::type_hash<bool>::value())
         {
             meta_data.set(instance, j.get<bool>());
         }
-        else if (hash == string_hash)
+        else if (hash == entt::type_hash<std::string>::value())
         {
             meta_data.set(instance, j.get<std::string>());
+        }
+        else if (hash == entt::type_hash<int>::value())
+        {
+            meta_data.set(instance, j.get<int>());
         }
         else
         {
@@ -567,20 +567,19 @@ namespace cologne
                     std::string member_name = *it->second.try_cast<const char *>();
                     if (j.contains(member_name))
                     {
-                        LOG_INFO("found property %s", member_name.c_str());
-                        load_property(j.at(member_name), data, instance);
+                        load_property(j.at(member_name), data, instance.as_ref());
                     }
                 }
             }
         }
     }
 
-    void emplace_component(entt::registry& registry, entt::entity entity, const entt::meta_any& any)
+    void emplace_component(entt::registry& registry, entt::entity entity, entt::meta_any& any)
     {
         using namespace entt::literals;
         if (auto emplace_func = any.type().func("emplace"_hs); emplace_func)
         {
-            emplace_func.invoke({}, &registry, entity);
+            emplace_func.invoke({}, &registry, entity, any.as_ref());
         }
         else
         {
@@ -597,15 +596,6 @@ namespace cologne
             return;
         }
 
-        //
-        // js["scene_name"] = "untitled_scene";
-        // for (auto e: _scene->_registry.view<entt::entity>())
-        // {
-        //     Entity entity{e, _scene};
-        //     json e_json;
-        //     serialize_entity(e_json, entity);
-        //     js["entities"].push_back(e_json);
-        // }
         nlohmann::json j_scene;
         j_scene["scene_name"] = "untitled_scene";
         nlohmann::json j_entities;
@@ -686,20 +676,6 @@ namespace cologne
             }
         }
         file.close();
-        // auto scene_name = data["scene_name"].get<std::string>();
-        // if (!data.contains("entities"))
-        // {
-        // LOG_WARN("No entities in scene...");
-        // return;
-        // }
-
-        // for (auto &j_entity: data["entities"])
-        // {
-        // uint64_t uuid = j_entity["Entity"].get<uint64_t>();
-        // std::string name = j_entity["TagComponent"]["tag"].get<std::string>();
-        // Entity entity = _scene->create_entity_with_uuid(uuid, name);
-        // deserialize_entity(j_entity, entity);
-        // }
     }
 
     void SceneSaver::serialize_runtime(const std::string &path)
