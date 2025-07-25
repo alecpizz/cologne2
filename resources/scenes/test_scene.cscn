@@ -2,9 +2,17 @@
     "entities": [
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 9280019429990185409
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 3212030198547928315
+                },
+                "cologne::IDComponent": {
+                    "id": 16234201877608773413
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,
@@ -55,9 +63,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 18322043783297605771
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 3212030198547928315
+                },
+                "cologne::IDComponent": {
+                    "id": 12437438672665373481
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,
@@ -108,9 +124,13 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 2843590092813877654
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::IDComponent": {
+                    "id": 3212030198547928315
+                },
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.6000000238418579,
@@ -161,9 +181,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 15891311203315443567
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::CameraComponent": {
+                    "fov_radians": 0.7853981852531433,
+                    "primary": false
+                },
+                "cologne::IDComponent": {
+                    "id": 16394621574813840374
+                },
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,
@@ -214,9 +242,25 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 4023214613372963121
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::IDComponent": {
+                    "id": 6574141798321059594
+                },
+                "cologne::LightComponent": {
+                    "cast_shadows": true,
+                    "color": [
+                        1.0,
+                        0.8640000224113464,
+                        0.7089999914169312
+                    ],
+                    "inner_cutoff": 12.5,
+                    "outer_cutoff": 17.5,
+                    "radius": 6.0,
+                    "strength": 2.0
+                },
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         0.7900000214576721,
@@ -267,9 +311,25 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 12713990486640083387
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::IDComponent": {
+                    "id": 10071149237818843403
+                },
+                "cologne::LightComponent": {
+                    "cast_shadows": false,
+                    "color": [
+                        1.0,
+                        0.7799999713897705,
+                        0.5289999842643738
+                    ],
+                    "inner_cutoff": 12.5,
+                    "outer_cutoff": 17.5,
+                    "radius": 3.7799999713897705,
+                    "strength": 5.909999847412109
+                },
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         2.7950000762939453,
@@ -320,9 +380,25 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 18338687653001351234
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::IDComponent": {
+                    "id": 8513825301392230991
+                },
+                "cologne::LightComponent": {
+                    "cast_shadows": false,
+                    "color": [
+                        1.0,
+                        0.0,
+                        0.0
+                    ],
+                    "inner_cutoff": 12.5,
+                    "outer_cutoff": 17.5,
+                    "radius": 3.6700000762939453,
+                    "strength": 7.0
+                },
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -4.538000106811523,
@@ -373,9 +449,25 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 7819189887473128347
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::IDComponent": {
+                    "id": 14727764179660416799
+                },
+                "cologne::LightComponent": {
+                    "cast_shadows": false,
+                    "color": [
+                        1.0,
+                        0.7799999713897705,
+                        0.5289999842643738
+                    ],
+                    "inner_cutoff": 12.5,
+                    "outer_cutoff": 17.5,
+                    "radius": 3.6700000762939453,
+                    "strength": 1.0
+                },
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         0.24300000071525574,
@@ -426,9 +518,25 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 13870183421050486218
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::IDComponent": {
+                    "id": 16829355603724879407
+                },
+                "cologne::LightComponent": {
+                    "cast_shadows": false,
+                    "color": [
+                        0.07800000160932541,
+                        0.656000018119812,
+                        0.8399999737739563
+                    ],
+                    "inner_cutoff": 12.5,
+                    "outer_cutoff": 17.5,
+                    "radius": 3.130000114440918,
+                    "strength": 6.670000076293945
+                },
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -6.699999809265137,
@@ -479,9 +587,25 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 8424043796019587795
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::IDComponent": {
+                    "id": 17034475815597771748
+                },
+                "cologne::LightComponent": {
+                    "cast_shadows": false,
+                    "color": [
+                        0.20000000298023224,
+                        0.8999999761581421,
+                        0.15000000596046448
+                    ],
+                    "inner_cutoff": 12.5,
+                    "outer_cutoff": 17.5,
+                    "radius": 3.0,
+                    "strength": 6.0
+                },
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         6.0,
@@ -532,9 +656,25 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 16401117057506335662
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::IDComponent": {
+                    "id": 16346291897453876574
+                },
+                "cologne::LightComponent": {
+                    "cast_shadows": false,
+                    "color": [
+                        1.0,
+                        0.7799999713897705,
+                        0.5289999842643738
+                    ],
+                    "inner_cutoff": 12.5,
+                    "outer_cutoff": 17.5,
+                    "radius": 3.0,
+                    "strength": 6.0
+                },
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -6.0,
@@ -585,9 +725,25 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 5134380190829861755
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::IDComponent": {
+                    "id": 5836828220803880709
+                },
+                "cologne::LightComponent": {
+                    "cast_shadows": false,
+                    "color": [
+                        1.0,
+                        0.7799999713897705,
+                        0.5289999842643738
+                    ],
+                    "inner_cutoff": 12.5,
+                    "outer_cutoff": 17.5,
+                    "radius": 3.0,
+                    "strength": 1.0
+                },
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,
@@ -638,9 +794,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 12584052736973907038
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 14993752013956653538
+                },
+                "cologne::IDComponent": {
+                    "id": 10593662587285158265
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         0.9578503370285034,
@@ -691,9 +855,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 4433386317054465616
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 14993752013956653538
+                },
+                "cologne::IDComponent": {
+                    "id": 7664900118828255927
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         0.958199143409729,
@@ -744,9 +916,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 14744717289535129486
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 14993752013956653538
+                },
+                "cologne::IDComponent": {
+                    "id": 393354073742000616
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         0.19950899481773376,
@@ -797,9 +977,13 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 17926045577026974749
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::IDComponent": {
+                    "id": 14993752013956653538
+                },
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         0.18000000715255737,
@@ -850,9 +1034,32 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 15601545238655283951
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::IDComponent": {
+                    "id": 16030429100508282
+                },
+                "cologne::PlayerComponent": {
+                    "air_acceleration": 2.0,
+                    "air_control": 0.10000000149011612,
+                    "air_deceleration": 2.0,
+                    "camera": 14867049343537895511,
+                    "friction": 6.0,
+                    "gravity": 19.600000381469727,
+                    "jump_speed": 7.0,
+                    "maxStepInterval": 1.25,
+                    "maxStepVelocity": 12.5,
+                    "minStepInterval": 0.15000000596046448,
+                    "minStepVelocity": 2.5,
+                    "move_speed": 5.0,
+                    "run_acceleration": 7.0,
+                    "run_deceleration": 3.0,
+                    "side_strafe_acceleration": 15.0,
+                    "side_strafe_speed": 1.0,
+                    "viewmodel": 3987335103639545036
+                },
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,
@@ -903,9 +1110,93 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 17784814540555059725
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::IDComponent": {
+                    "id": 3987335103639545036
+                },
+                "cologne::SkinnedModelComponent": null,
+                "cologne::TagComponent": null,
+                "cologne::TransformComponent": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::ViewmodelComponent": {
+                    "amplitude": 0.009999999776482582,
+                    "euler_offset": [
+                        0.0,
+                        180.0,
+                        0.0
+                    ],
+                    "frequency": 12.0,
+                    "max_vertical_offset": 0.07000000029802322,
+                    "position_offset": [
+                        0.04500000178813934,
+                        -0.27000001072883606,
+                        -0.20000000298023224
+                    ],
+                    "smoothing": 8.0,
+                    "sway_multiplier": 100.0,
+                    "vertical_velocity_multiplier": 0.009999999776482582
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            1.0,
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            1.0,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::CameraComponent": {
+                    "fov_radians": 0.7853981852531433,
+                    "primary": true
+                },
+                "cologne::IDComponent": {
+                    "id": 14867049343537895511
+                },
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,
@@ -956,9 +1247,14 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 15406520209550697042
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::IDComponent": {
+                    "id": 17551482669289161207
+                },
+                "cologne::SkinnedModelComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,
@@ -1009,62 +1305,14 @@
         },
         {
             "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
                 "cologne::IDComponent": {
-                    "id": 11872309610785981938
+                    "id": 13985828860650398995
                 },
-                "cologne::TransformComponent": {
-                    "position": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "rotation": [
-                        1.0,
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "scale": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ]
-                },
-                "cologne::WorldTransformComponent": {
-                    "transform": [
-                        [
-                            1.0,
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        [
-                            0.0,
-                            1.0,
-                            0.0,
-                            0.0
-                        ],
-                        [
-                            0.0,
-                            0.0,
-                            1.0,
-                            0.0
-                        ],
-                        [
-                            0.0,
-                            0.0,
-                            0.0,
-                            1.0
-                        ]
-                    ]
-                }
-            }
-        },
-        {
-            "components": {
-                "cologne::IDComponent": {
-                    "id": 10888384532058419254
-                },
+                "cologne::SkinnedModelComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,
@@ -1115,9 +1363,18 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 17648251446439226968
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::EnemyComponent": {
+                    "dead": false,
+                    "health": 100.0
+                },
+                "cologne::IDComponent": {
+                    "id": 619669032408711899
+                },
+                "cologne::SkinnedModelComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,
@@ -1168,9 +1425,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 3797461140610969381
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 14825469595265537228
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5139411687850952,
@@ -1221,9 +1486,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 6354895652181799892
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 11032572633987764339
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.3115405738353729,
@@ -1274,9 +1547,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 6020279489702502732
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 7699809726587638618
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5278977155685425,
@@ -1327,9 +1608,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 13958472970494603171
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 8947703148541605101
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.6557071208953857,
@@ -1380,9 +1669,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 1956841117726554687
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 11291550747761814992
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -1.6507313251495361,
@@ -1433,9 +1730,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 378676062870348602
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 2641415813333103556
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5118553042411804,
@@ -1486,9 +1791,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 17913129774521369118
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 13566079323017387874
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         0.6447742581367493,
@@ -1539,9 +1852,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 14662307409377377605
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 3071037539535243774
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5432094931602478,
@@ -1592,9 +1913,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 6879242253756674946
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 10487994011622604682
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -1.0812530517578125,
@@ -1645,9 +1974,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 16791481358138624055
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 17301731865914988259
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.008290350437164307,
@@ -1698,9 +2035,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 5184081316842164119
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 14083023726696892567
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5073261857032776,
@@ -1751,9 +2096,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 3301364426949061978
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 1570425582465907934
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5083215236663818,
@@ -1804,9 +2157,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 1757075339445761842
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 12497637296066767712
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5148208737373352,
@@ -1857,9 +2218,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 14596752535490336179
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 7979519816984743397
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         3.3383030891418457,
@@ -1910,9 +2279,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 12120712532424942568
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 8614734044055377117
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5379714965820313,
@@ -1963,9 +2340,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 2337158145590010156
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 18238626735304029728
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5155087113380432,
@@ -2016,9 +2401,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 16767535286971671674
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 8436804124099204495
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5155513882637024,
@@ -2069,9 +2462,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 17165625913112317138
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 3985022696303559677
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.012294232845306396,
@@ -2122,9 +2523,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 10662547822163951698
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 6124922280389299653
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.6819008588790894,
@@ -2175,9 +2584,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 9202396230209931310
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 16607849586592502008
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.23735475540161133,
@@ -2228,9 +2645,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 7487118138856549941
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 2170816627176745484
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -4.489065170288086,
@@ -2281,9 +2706,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 836415320320980369
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 10505034924782352236
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.5174335837364197,
@@ -2334,9 +2767,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 265567073054019318
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 12782173953282442231
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.9217716455459595,
@@ -2387,9 +2828,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 17097690939152465254
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 11267888042890440620
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.49813926219940186,
@@ -2440,9 +2889,17 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 9843718629753922933
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 4734517439440647828
+                },
+                "cologne::IDComponent": {
+                    "id": 7214144195132096916
+                },
+                "cologne::MeshComponent": null,
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         -0.485302209854126,
@@ -2493,9 +2950,13 @@
         },
         {
             "components": {
-                "cologne::IDComponent": {
-                    "id": 4598288345027269008
+                "cologne::ActiveComponent": {
+                    "active": true
                 },
+                "cologne::IDComponent": {
+                    "id": 4734517439440647828
+                },
+                "cologne::TagComponent": null,
                 "cologne::TransformComponent": {
                     "position": [
                         0.0,

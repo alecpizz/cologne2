@@ -13,24 +13,8 @@
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/scripts/EditorCameraController.h>
 #include <engine/scripts/PlayerController.h>
-#include <glaze/glaze.hpp>
 
 #include "ComponentRegistry.h"
-
-
-template<>
-struct glz::meta<glm::vec3>
-{
-    using T = glm::vec3;
-    static constexpr auto value = object("x", &T::x, "y", &T::y, "z", &T::z);
-};
-
-template<>
-struct glz::meta<glm::quat>
-{
-    using T = glm::quat;
-    static constexpr auto value = object("w", &T::w, "x", &T::x, "y", &T::y, "z", &T::z);
-};
 
 namespace nlohmann
 {
@@ -114,6 +98,20 @@ namespace nlohmann
             j.at(1).get_to(mat[1]);
             j.at(2).get_to(mat[2]);
             j.at(3).get_to(mat[3]);
+        }
+    };
+
+    template<>
+    struct adl_serializer<cologne::UUID>
+    {
+        static void to_json(json &j, const cologne::UUID &id)
+        {
+            j = {id._uuid};
+        }
+
+        static void from_json(const json &j, cologne::UUID &id)
+        {
+            id = j.get<uint64_t>();
         }
     };
 }
@@ -458,50 +456,6 @@ namespace cologne
     constexpr entt::hashed_string bool_hash = entt::hashed_string("bool");
     constexpr entt::hashed_string string_hash = entt::hashed_string("std::string");
 
-    void test(entt::meta_any instance)
-    {
-        using namespace entt::literals;
-        for (auto [id, data]: instance.type().data())
-        {
-            entt::meta_custom custom = data.custom();
-            ComponentRegistry::PropertiesMap map = {};
-            if (auto *mp = static_cast<const ComponentRegistry::PropertiesMap *>(custom))
-            {
-                map = *mp;
-                if (auto it = map.find("name"_hs); it != map.end())
-                {
-                    LOG_INFO("Member name %s", *it->second.try_cast<const char*>());
-                }
-            }
-
-
-            auto hash = data.type().info().hash();
-            if (hash == vec3_hash)
-            {
-                LOG_INFO("Member is a vec3 with value: %s",
-                         glm::to_string(*data.get(instance).try_cast<glm::vec3>()).c_str());
-            }
-            else if (hash == vec4_hash)
-            {
-                LOG_INFO("Member is a vec4 with value: %s",
-                         glm::to_string(*data.get(instance).try_cast<glm::vec4>()).c_str());
-            }
-            else if (hash == quat_hash)
-            {
-                LOG_INFO("Member is a quat with value: %s",
-                         glm::to_string(*data.get(instance).try_cast<glm::quat>()).c_str());
-            }
-            else if (hash == uuid_hash)
-            {
-                LOG_INFO("Member is a uuid with value: %d", data.get(instance).try_cast<UUID>()->_uuid);
-            }
-            else
-            {
-                LOG_INFO("unknown type %s hash %d", std::string(data.type().info().name()).c_str(), hash);
-            }
-        }
-    }
-
     void save_component(entt::meta_any instance, nlohmann::json &j)
     {
         using namespace entt::literals;
@@ -536,6 +490,18 @@ namespace cologne
             {
                 j[member_name] = *data.get(instance).try_cast<glm::mat4>();
             }
+            else if (hash == float_hash)
+            {
+                j[member_name] = *data.get(instance).try_cast<float>();
+            }
+            else if (hash == bool_hash)
+            {
+                j[member_name] = *data.get(instance).try_cast<bool>();
+            }
+            else if (hash == string_hash)
+            {
+                j[member_name] = *data.get(instance).try_cast<std::string>();
+            }
             else
             {
                 LOG_INFO("TRYING TO RECURSIVELY SAVE UNKNOWN TYPE %s!", std::string(data.type().info().name()).c_str());
@@ -549,24 +515,43 @@ namespace cologne
         auto hash = meta_data.type().info().hash();
         if (hash == vec3_hash)
         {
-            LOG_INFO("found vec3 %s", glm::to_string(j.get<glm::vec3>()).c_str());
-            meta_data.set(instance, j.get<glm::vec3>());
+            if (!meta_data.set(instance, j.get<glm::vec3>()))
+            {
+                LOG_ERROR("couldn't set meta data");
+            }
         }
-        // else if (hash == vec4_hash)
-        // {
-        // }
-        // else if (hash == quat_hash)
-        // {
-        // }
-        // else if (hash == uuid_hash)
-        // {
-        // }
-        // else if (hash == mat4_hash)
-        // {
-        // }
+        else if (hash == vec4_hash)
+        {
+            meta_data.set(instance, j.get<glm::vec4>());
+        }
+        else if (hash == quat_hash)
+        {
+            meta_data.set(instance, j.get<glm::quat>());
+        }
+        else if (hash == uuid_hash)
+        {
+            meta_data.set(instance, j.get<UUID>());
+        }
+        else if (hash == mat4_hash)
+        {
+            meta_data.set(instance, j.get<glm::mat4>());
+        }
+        else if (hash == float_hash)
+        {
+            meta_data.set(instance, j.get<float>());
+        }
+        else if (hash == bool_hash)
+        {
+            meta_data.set(instance, j.get<bool>());
+        }
+        else if (hash == string_hash)
+        {
+            meta_data.set(instance, j.get<std::string>());
+        }
         else
         {
             LOG_INFO("TRYING TO RECURSIVELY SAVE UNKNOWN TYPE %s!", std::string(meta_data.type().info().name()).c_str());
+            load_property(j, meta_data, meta_data.get(instance).as_ref());
         }
     }
 
@@ -595,7 +580,11 @@ namespace cologne
         using namespace entt::literals;
         if (auto emplace_func = any.type().func("emplace"_hs); emplace_func)
         {
-            emplace_func.invoke({}, entt::forward_as_meta(registry), entt::forward_as_meta(entity), any);
+            emplace_func.invoke({}, &registry, entity);
+        }
+        else
+        {
+            LOG_WARN("NO EMPLACE FUNCTION FOR THE COMPONENT, WILL BE SKIPPED!");
         }
     }
 
@@ -654,6 +643,14 @@ namespace cologne
         }
         file << j_scene.dump(4);
         file.close();
+    }
+
+    void copy_component_meta_data(entt::meta_any& src, entt::meta_any& dest)
+    {
+        for (auto [i, data] : src.type().data())
+        {
+            data.set(dest, data.get(src));
+        }
     }
 
     void SceneSaver::deserialize(const std::string &path)

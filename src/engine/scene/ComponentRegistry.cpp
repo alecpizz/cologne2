@@ -8,16 +8,12 @@
 
 namespace cologne::ComponentRegistry
 {
-    static std::vector<unsigned int> component_ids;
-
-    const std::vector<unsigned int> &get_component_ids()
-    {
-        return component_ids;
-    }
-
 #define REGISTER_COMPONENT(T) \
-    component_ids.emplace_back(entt::type_hash<T>::value())
-
+entt::meta_factory<T>() \
+.func<[](entt::registry* registry, entt::entity entity) { registry->emplace<T>(entity); }>("emplace"_hs)
+#define REGISTER_PROPERTY(Type, member, ...) \
+.data<&Type::member, entt::as_ref_t>(#member##_hs) \
+.custom<PropertiesMap>(PropertiesMap{{"name"_hs, #member} __VA_OPT__(, __VA_ARGS__)})
 
     void register_components()
     {
@@ -45,25 +41,94 @@ namespace cologne::ComponentRegistry
                 .data<[](glm::mat4 &m) { return m[2]; }>("c2"_hs)
                 .data<[](glm::mat4 &m) { return m[3]; }>("c3"_hs);
 
-        entt::meta_factory<cologne::TransformComponent>()
-                .data<&TransformComponent::position, entt::as_ref_t>("position"_hs)
-                .custom<PropertiesMap>(PropertiesMap{{"name"_hs, "position"}})
-                .data<&TransformComponent::rotation, entt::as_ref_t>("rotation"_hs)
-                .custom<PropertiesMap>(PropertiesMap{{"name"_hs, "rotation"}})
-                .data<&TransformComponent::scale, entt::as_ref_t>("scale"_hs)
-                .custom<PropertiesMap>(PropertiesMap{{"name"_hs, "scale"}})
-                .func<&entt::registry::emplace<TransformComponent>>("emplace"_hs);
+
+        REGISTER_COMPONENT(TransformComponent)
+                REGISTER_PROPERTY(TransformComponent, position)
+                REGISTER_PROPERTY(TransformComponent, rotation)
+                REGISTER_PROPERTY(TransformComponent, scale);
 
         entt::meta_factory<UUID>().conv<uint64_t>().data<&UUID::_uuid>("uuid"_hs);
+        REGISTER_COMPONENT(IDComponent)
+                REGISTER_PROPERTY(IDComponent, id);
 
-        entt::meta_factory<cologne::IDComponent>()
-                .data<&IDComponent::id>("id"_hs)
-                .custom<PropertiesMap>(PropertiesMap{{"name"_hs, "id"}})
-                .func<&entt::registry::emplace<IDComponent>>("emplace"_hs);
+        REGISTER_COMPONENT(WorldTransformComponent)
+                REGISTER_PROPERTY(WorldTransformComponent, transform);
 
-        entt::meta_factory<cologne::WorldTransformComponent>()
-                .data<&WorldTransformComponent::transform>("transform"_hs)
-                .custom<PropertiesMap>(PropertiesMap{{"name"_hs, "transform"}})
-                .func<&entt::registry::emplace<WorldTransformComponent>>("emplace"_hs);
+        REGISTER_COMPONENT(ChildComponent)
+                REGISTER_PROPERTY(ChildComponent, parent);
+
+        REGISTER_COMPONENT(ActiveComponent)
+                REGISTER_PROPERTY(ActiveComponent, active);
+
+        REGISTER_COMPONENT(ModelComponent)
+                REGISTER_PROPERTY(ModelComponent, model_name)
+                REGISTER_PROPERTY(ModelComponent, gi_only);
+
+        REGISTER_COMPONENT(MeshComponent)
+                REGISTER_PROPERTY(MeshComponent, mesh_name);
+
+        REGISTER_COMPONENT(SkinnedModelComponent)
+                REGISTER_PROPERTY(SkinnedModelComponent, model_name);
+
+        REGISTER_COMPONENT(CameraComponent)
+                REGISTER_PROPERTY(CameraComponent, fov_radians)
+                REGISTER_PROPERTY(CameraComponent, primary);
+
+        REGISTER_COMPONENT(TagComponent)
+                REGISTER_PROPERTY(TagComponent, tag);
+
+        // REGISTER_COMPONENT(StaticColliderComponent)
+        //         REGISTER_PROPERTY(StaticColliderComponent, mesh_name);
+
+        REGISTER_COMPONENT(PlayerComponent)
+                REGISTER_PROPERTY(PlayerComponent, camera)
+                REGISTER_PROPERTY(PlayerComponent, viewmodel)
+                REGISTER_PROPERTY(PlayerComponent, gravity)
+                REGISTER_PROPERTY(PlayerComponent, move_speed)
+                REGISTER_PROPERTY(PlayerComponent, run_acceleration)
+                REGISTER_PROPERTY(PlayerComponent, run_deceleration)
+                REGISTER_PROPERTY(PlayerComponent, air_acceleration)
+                REGISTER_PROPERTY(PlayerComponent, air_deceleration)
+                REGISTER_PROPERTY(PlayerComponent, air_control)
+                REGISTER_PROPERTY(PlayerComponent, side_strafe_acceleration)
+                REGISTER_PROPERTY(PlayerComponent, side_strafe_speed)
+                REGISTER_PROPERTY(PlayerComponent, jump_speed)
+                REGISTER_PROPERTY(PlayerComponent, friction)
+                REGISTER_PROPERTY(PlayerComponent, maxStepVelocity)
+                REGISTER_PROPERTY(PlayerComponent, minStepVelocity)
+                REGISTER_PROPERTY(PlayerComponent, maxStepInterval)
+                REGISTER_PROPERTY(PlayerComponent, minStepInterval);
+
+        REGISTER_COMPONENT(ViewmodelComponent)
+                REGISTER_PROPERTY(ViewmodelComponent, position_offset)
+                REGISTER_PROPERTY(ViewmodelComponent, euler_offset)
+                REGISTER_PROPERTY(ViewmodelComponent, sway_multiplier)
+                REGISTER_PROPERTY(ViewmodelComponent, smoothing)
+                REGISTER_PROPERTY(ViewmodelComponent, amplitude)
+                REGISTER_PROPERTY(ViewmodelComponent, frequency)
+                REGISTER_PROPERTY(ViewmodelComponent, vertical_velocity_multiplier)
+                REGISTER_PROPERTY(ViewmodelComponent, max_vertical_offset);
+
+        REGISTER_COMPONENT(EnemyComponent)
+                REGISTER_PROPERTY(EnemyComponent, health)
+                REGISTER_PROPERTY(EnemyComponent, dead)
+                REGISTER_PROPERTY(EnemyComponent, hurt_sound);
+
+        REGISTER_COMPONENT(BulletComponent)
+                REGISTER_PROPERTY(BulletComponent, position)
+                REGISTER_PROPERTY(BulletComponent, direction)
+                REGISTER_PROPERTY(BulletComponent, damage);
+
+        REGISTER_COMPONENT(LightComponent)
+                REGISTER_PROPERTY(LightComponent, color)
+                REGISTER_PROPERTY(LightComponent, strength)
+                REGISTER_PROPERTY(LightComponent, radius)
+                REGISTER_PROPERTY(LightComponent, type)
+                REGISTER_PROPERTY(LightComponent, outer_cutoff)
+                REGISTER_PROPERTY(LightComponent, inner_cutoff)
+                REGISTER_PROPERTY(LightComponent, cast_shadows);
+
+        // REGISTER_COMPONENT(NativeScriptComponent)
+        //         REGISTER_PROPERTY(NativeScriptComponent, type_name);
     }
 }
