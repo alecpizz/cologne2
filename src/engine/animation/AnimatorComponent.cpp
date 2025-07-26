@@ -16,6 +16,66 @@
 
 namespace cologne
 {
+    AnimatorComponent::AnimatorComponent(const AnimatorComponent &other): _current_state(other._current_state),
+                                                                          _ragdoll_id(other._ragdoll_id),
+                                                                          _bone_to_ragdoll_map(other._bone_to_ragdoll_map),
+                                                                          _skeleton(other._skeleton),
+                                                                          _model_name(other._model_name),
+                                                                          _pose(other._pose),
+                                                                          _current_clip(other._current_clip),
+                                                                          _base_clip(other._base_clip),
+                                                                          _current_time(other._current_time),
+                                                                          _is_playing_one_shot(other._is_playing_one_shot)
+    {
+    }
+
+    AnimatorComponent::AnimatorComponent(AnimatorComponent &&other) noexcept: _current_state(other._current_state),
+                                                                              _ragdoll_id(other._ragdoll_id),
+                                                                              _bone_to_ragdoll_map(std::move(other._bone_to_ragdoll_map)),
+                                                                              _skeleton(other._skeleton),
+                                                                              _model_name(std::move(other._model_name)),
+                                                                              _pose(std::move(other._pose)),
+                                                                              _current_clip(other._current_clip),
+                                                                              _base_clip(other._base_clip),
+                                                                              _current_time(other._current_time),
+                                                                              _is_playing_one_shot(other._is_playing_one_shot)
+    {
+    }
+
+    AnimatorComponent & AnimatorComponent::operator=(const AnimatorComponent &other)
+    {
+        if (this == &other)
+            return *this;
+        _current_state = other._current_state;
+        _ragdoll_id = other._ragdoll_id;
+        _bone_to_ragdoll_map = other._bone_to_ragdoll_map;
+        _skeleton = other._skeleton;
+        _model_name = other._model_name;
+        _pose = other._pose;
+        _current_clip = other._current_clip;
+        _base_clip = other._base_clip;
+        _current_time = other._current_time;
+        _is_playing_one_shot = other._is_playing_one_shot;
+        return *this;
+    }
+
+    AnimatorComponent & AnimatorComponent::operator=(AnimatorComponent &&other) noexcept
+    {
+        if (this == &other)
+            return *this;
+        _current_state = other._current_state;
+        _ragdoll_id = other._ragdoll_id;
+        _bone_to_ragdoll_map = std::move(other._bone_to_ragdoll_map);
+        _skeleton = other._skeleton;
+        _model_name = std::move(other._model_name);
+        _pose = std::move(other._pose);
+        _current_clip = other._current_clip;
+        _base_clip = other._base_clip;
+        _current_time = other._current_time;
+        _is_playing_one_shot = other._is_playing_one_shot;
+        return *this;
+    }
+
     AnimatorComponent::AnimatorComponent(const SkinnedModel &model) : _skeleton(model.get_skeleton()),
                                                                       _pose(model.get_skeleton())
     {
@@ -45,6 +105,7 @@ namespace cologne
         pose.update_skinning_matrices(_skeleton);
         _ragdoll_id = Physics::create_ragdoll(entity_id, _bone_to_ragdoll_map, _skeleton, pose._global_transforms);
         Physics::make_ragdoll_kinematic(_ragdoll_id);
+        _has_ragdoll = true;
     }
 
     void AnimatorComponent::update(float dt, glm::mat4 transform)

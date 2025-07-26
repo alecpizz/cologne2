@@ -79,12 +79,21 @@ namespace cologne
                 }
             }
         }
+
+        for (const auto entity : _registry.view<AnimatorComponent>())
+        {
+            auto& ac = _registry.get<AnimatorComponent>(entity);
+            if (ac.has_ragdoll() && ac.get_ragdoll_id() == -1)
+            {
+                ac.create_ragdoll({entity, this});
+            }
+        }
     }
 
     Scene::Scene()
     {
-        // DebugScope scope(__PRETTY_FUNCTION__);
-        //
+        DebugScope scope(__PRETTY_FUNCTION__);
+
         // create_static_model_entities("sponza2", {});
         //
         // // Entity glowCube = create_entity("glowing cube");
@@ -209,7 +218,7 @@ namespace cologne
         // create_static_model_entities("sofa", TransformComponent(glm::vec3(-.6f, -.5f, -2.270f),
         //                                                         glm::quat(glm::radians(glm::vec3(0.0f))),
         //                                                         glm::vec3(1.0f)));
-
+        //
 
         SceneSaver saver_temp(this);
         // saver_temp.serialize(RESOURCES_PATH "scenes/test_scene.cscn");

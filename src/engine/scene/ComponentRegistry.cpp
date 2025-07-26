@@ -3,6 +3,9 @@
 //
 #include "ComponentRegistry.h"
 
+#include <engine/animation/AnimatorComponent.h>
+#include <engine/asset_manager/AssetManager.h>
+#include <nlohmann/json.hpp>
 #include "Components.h"
 #include "SceneSaver.h"
 
@@ -16,6 +19,52 @@ entt::meta_factory<T>() \
 #define REGISTER_PROPERTY(Type, member, ...) \
 .data<&Type::member, entt::as_ref_t>(#member##_hs) \
 .custom<PropertiesMap>(PropertiesMap{{"name"_hs, #member} __VA_OPT__(, __VA_ARGS__)})
+
+
+    void serialize_animator(const AnimatorComponent &comp, nlohmann::json &j)
+    {
+        j["model_name"] = comp.get_model_base_name();
+        j["has_ragdoll"] = comp.get_ragdoll_id() != -1;
+        if (comp.get_current_clip())
+        {
+            j["current_clip"] = comp.get_current_clip()->get_name();
+        }
+        if (comp.get_base_clip())
+        {
+            j["base_clip"] = comp.get_base_clip()->get_name();
+        }
+        j["current_state"] = comp.get_current_state();
+        j["current_time"] = comp.get_current_progress();
+    }
+
+    void deserialize_animator(const nlohmann::json &j, AnimatorComponent &animator_component)
+    {
+        if (j["has_ragdoll"].get<bool>())
+        {
+            animator_component.set_has_ragdoll(true);
+        }
+        if (j.contains("current_clip"))
+        {
+            auto clip = AssetManager::get_animation_by_name(j["current_clip"]);
+            if (clip)
+            {
+                animator_component.play_one_shot_animation(clip);
+            }
+        }
+        if (j.contains("base_clip"))
+        {
+            auto clip = AssetManager::get_animation_by_name(j["base_clip"]);
+            if (clip)
+            {
+                animator_component.play_base_animation(clip);
+            }
+        }
+        if (j["current_state"] == AnimatorComponent::State::RAGDOLLING)
+        {
+            animator_component.to_ragdoll();
+        }
+        animator_component.set_current_progress(j["current_time"].get<float>());
+    }
 
     void register_components()
     {
@@ -128,6 +177,16 @@ entt::meta_factory<T>() \
                 REGISTER_PROPERTY(LightComponent, inner_cutoff)
                 REGISTER_PROPERTY(LightComponent, cast_shadows);
 
+        REGISTER_COMPONENT(AnimatorComponent)
+                .func<[](AnimatorComponent &comp, nlohmann::json &j)
+                {
+                    serialize_animator(comp, j);
+                }>("serialize"_hs)
+                .func<[]( nlohmann::json &j, AnimatorComponent &animator_component)
+                {
+                        LOG_INFO("i've been invoke!");
+                    deserialize_animator(j, animator_component);
+                }>("deserialize"_hs);
         REGISTER_COMPONENT(ParentComponent)
                 REGISTER_PROPERTY(ParentComponent, children);
         REGISTER_COMPONENT(NativeScriptComponent)

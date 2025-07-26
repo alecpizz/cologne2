@@ -2,6 +2,13 @@
 // Created by alecpizz on 7/19/25.
 //
 #pragma once
+#include <nlohmann/json_fwd.hpp>
+
+namespace cologne
+{
+    class AnimatorComponent;
+}
+
 namespace cologne
 {
     class Scene;
