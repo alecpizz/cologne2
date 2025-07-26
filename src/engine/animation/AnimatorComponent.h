@@ -33,6 +33,7 @@ namespace cologne
             RAGDOLLING
         };
 
+        AnimatorComponent() = default;
         AnimatorComponent(const AnimatorComponent &other);
 
         AnimatorComponent(AnimatorComponent &&other) noexcept;

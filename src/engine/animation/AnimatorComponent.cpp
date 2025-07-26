@@ -18,31 +18,38 @@ namespace cologne
 {
     AnimatorComponent::AnimatorComponent(const AnimatorComponent &other): _current_state(other._current_state),
                                                                           _ragdoll_id(other._ragdoll_id),
-                                                                          _bone_to_ragdoll_map(other._bone_to_ragdoll_map),
+                                                                          _bone_to_ragdoll_map(
+                                                                              other._bone_to_ragdoll_map),
                                                                           _skeleton(other._skeleton),
                                                                           _model_name(other._model_name),
                                                                           _pose(other._pose),
                                                                           _current_clip(other._current_clip),
                                                                           _base_clip(other._base_clip),
                                                                           _current_time(other._current_time),
-                                                                          _is_playing_one_shot(other._is_playing_one_shot)
+                                                                          _is_playing_one_shot(
+                                                                              other._is_playing_one_shot),
+                                                                          _has_ragdoll(other._has_ragdoll)
     {
     }
 
     AnimatorComponent::AnimatorComponent(AnimatorComponent &&other) noexcept: _current_state(other._current_state),
                                                                               _ragdoll_id(other._ragdoll_id),
-                                                                              _bone_to_ragdoll_map(std::move(other._bone_to_ragdoll_map)),
+                                                                              _bone_to_ragdoll_map(
+                                                                                  std::move(
+                                                                                      other._bone_to_ragdoll_map)),
                                                                               _skeleton(other._skeleton),
                                                                               _model_name(std::move(other._model_name)),
                                                                               _pose(std::move(other._pose)),
                                                                               _current_clip(other._current_clip),
                                                                               _base_clip(other._base_clip),
                                                                               _current_time(other._current_time),
-                                                                              _is_playing_one_shot(other._is_playing_one_shot)
+                                                                              _is_playing_one_shot(
+                                                                                  other._is_playing_one_shot),
+                                                                              _has_ragdoll(other._has_ragdoll)
     {
     }
 
-    AnimatorComponent & AnimatorComponent::operator=(const AnimatorComponent &other)
+    AnimatorComponent &AnimatorComponent::operator=(const AnimatorComponent &other)
     {
         if (this == &other)
             return *this;
@@ -56,10 +63,11 @@ namespace cologne
         _base_clip = other._base_clip;
         _current_time = other._current_time;
         _is_playing_one_shot = other._is_playing_one_shot;
+        _has_ragdoll = other._has_ragdoll;
         return *this;
     }
 
-    AnimatorComponent & AnimatorComponent::operator=(AnimatorComponent &&other) noexcept
+    AnimatorComponent &AnimatorComponent::operator=(AnimatorComponent &&other) noexcept
     {
         if (this == &other)
             return *this;
@@ -73,6 +81,7 @@ namespace cologne
         _base_clip = other._base_clip;
         _current_time = other._current_time;
         _is_playing_one_shot = other._is_playing_one_shot;
+        _has_ragdoll = other._has_ragdoll;
         return *this;
     }
 
@@ -97,6 +106,10 @@ namespace cologne
 
     void AnimatorComponent::create_ragdoll(Entity entity_id)
     {
+        if (_ragdoll_id != -1)
+        {
+            LOG_INFO("already had ragdoll!");
+        }
         SkeletonPose pose(_skeleton);
         for (size_t i = 0; i < _skeleton.get_bone_count(); i++)
         {
@@ -262,7 +275,7 @@ namespace cologne
         return _current_clip;
     }
 
-    AnimationClip * AnimatorComponent::get_base_clip() const
+    AnimationClip *AnimatorComponent::get_base_clip() const
     {
         return _base_clip;
     }
@@ -277,7 +290,7 @@ namespace cologne
         return _current_state;
     }
 
-    const std::string & AnimatorComponent::get_model_base_name() const
+    const std::string &AnimatorComponent::get_model_base_name() const
     {
         return _model_name;
     }
@@ -300,7 +313,7 @@ namespace cologne
 
         uint32_t closest_body = 0;
         float dist = std::numeric_limits<float>::max();
-        for (auto pair : _bone_to_ragdoll_map)
+        for (auto pair: _bone_to_ragdoll_map)
         {
             auto transform = Physics::get_rigidbody_transform(pair.second);
             float distance = glm::distance(glm::vec3(transform[3]), point);

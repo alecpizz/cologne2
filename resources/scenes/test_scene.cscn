@@ -6,10 +6,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 18381363187152961424
+                    "parent": 13540645836904867361
                 },
                 "cologne::IDComponent": {
-                    "id": 8085740130318320901
+                    "id": 119768899841706519
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "sofa_1-1"
@@ -74,10 +74,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 18381363187152961424
+                    "parent": 13540645836904867361
                 },
                 "cologne::IDComponent": {
-                    "id": 15664784559173201109
+                    "id": 74689655902892577
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "sofa_1-0"
@@ -142,12 +142,12 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 18381363187152961424
+                    "id": 13540645836904867361
                 },
                 "cologne::ParentComponent": {
                     "children": [
-                        15664784559173201109,
-                        8085740130318320901
+                        74689655902892577,
+                        119768899841706519
                     ]
                 },
                 "cologne::TagComponent": {
@@ -211,7 +211,7 @@
                     "primary": false
                 },
                 "cologne::IDComponent": {
-                    "id": 5638400297138038214
+                    "id": 12069857974175197925
                 },
                 "cologne::NativeScriptComponent": {
                     "type_name": "cologne::EditorCameraController"
@@ -273,7 +273,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 7013798532394299245
+                    "id": 10247646716031441366
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": true,
@@ -345,7 +345,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 4225413797983030905
+                    "id": 8207130412725781825
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -417,7 +417,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 17655746664512523871
+                    "id": 11556985883549171447
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -489,7 +489,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 420430353712009388
+                    "id": 8622311100642432409
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -561,7 +561,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 15616865879846781508
+                    "id": 12177164081805151958
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -633,7 +633,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 15517890772807371337
+                    "id": 13738194435019121164
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -705,7 +705,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 5398341818637334478
+                    "id": 17809036324860528111
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -777,7 +777,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 9416562239932638352
+                    "id": 7249553884414166951
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -849,10 +849,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 7812460221497550854
+                    "parent": 729397038683449858
                 },
                 "cologne::IDComponent": {
-                    "id": 136913905666801143
+                    "id": 3775289829509233270
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "LanternPole_Lantern"
@@ -917,10 +917,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 7812460221497550854
+                    "parent": 729397038683449858
                 },
                 "cologne::IDComponent": {
-                    "id": 4112816394460186812
+                    "id": 2676528621758122205
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "LanternPole_Chain"
@@ -985,10 +985,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 7812460221497550854
+                    "parent": 729397038683449858
                 },
                 "cologne::IDComponent": {
-                    "id": 12795983550103410524
+                    "id": 15486691115028218993
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "LanternPole_Body"
@@ -1053,13 +1053,13 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 7812460221497550854
+                    "id": 729397038683449858
                 },
                 "cologne::ParentComponent": {
                     "children": [
-                        12795983550103410524,
-                        4112816394460186812,
-                        136913905666801143
+                        15486691115028218993,
+                        2676528621758122205,
+                        3775289829509233270
                     ]
                 },
                 "cologne::TagComponent": {
@@ -1119,7 +1119,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 14920090675124794253
+                    "id": 18725235654037815
                 },
                 "cologne::NativeScriptComponent": {
                     "type_name": "cologne::PlayerController"
@@ -1128,7 +1128,7 @@
                     "air_acceleration": 2.0,
                     "air_control": 0.10000000149011612,
                     "air_deceleration": 2.0,
-                    "camera": 10630881882528397628,
+                    "camera": 2786574626833717084,
                     "friction": 6.0,
                     "gravity": 19.600000381469727,
                     "jump_speed": 7.0,
@@ -1141,7 +1141,7 @@
                     "run_deceleration": 3.0,
                     "side_strafe_acceleration": 15.0,
                     "side_strafe_speed": 1.0,
-                    "viewmodel": 10647004116579564326
+                    "viewmodel": 17775951712860775076
                 },
                 "cologne::TagComponent": {
                     "tag": "player"
@@ -1208,7 +1208,7 @@
                     "model_name": "vsk"
                 },
                 "cologne::IDComponent": {
-                    "id": 10647004116579564326
+                    "id": 17775951712860775076
                 },
                 "cologne::SkinnedModelComponent": {
                     "model_name": "vsk"
@@ -1292,7 +1292,7 @@
                     "primary": true
                 },
                 "cologne::IDComponent": {
-                    "id": 10630881882528397628
+                    "id": 2786574626833717084
                 },
                 "cologne::TagComponent": {
                     "tag": "camera"
@@ -1359,7 +1359,7 @@
                     "model_name": "deagle"
                 },
                 "cologne::IDComponent": {
-                    "id": 3565128299095993259
+                    "id": 3787359230006449025
                 },
                 "cologne::SkinnedModelComponent": {
                     "model_name": "deagle"
@@ -1429,7 +1429,7 @@
                     "model_name": "man"
                 },
                 "cologne::IDComponent": {
-                    "id": 14690099312102621257
+                    "id": 5473320586695561989
                 },
                 "cologne::SkinnedModelComponent": {
                     "model_name": "man"
@@ -1504,7 +1504,7 @@
                     "hurt_sound": "/home/alecpizz/Repos/goonengine/resources/sounds/enemy_hurt.mp3"
                 },
                 "cologne::IDComponent": {
-                    "id": 12118114308050012352
+                    "id": 11761260270411901909
                 },
                 "cologne::SkinnedModelComponent": {
                     "model_name": "man"
@@ -1566,10 +1566,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 15126645127769089252
+                    "id": 12488897575204120871
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.024"
@@ -1634,10 +1634,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 15482818312055354589
+                    "id": 11382656784295170782
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.023"
@@ -1702,10 +1702,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 9545903589435185140
+                    "id": 18052923903348558510
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.022"
@@ -1770,10 +1770,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 756284806999101814
+                    "id": 206976386609025065
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.021"
@@ -1838,10 +1838,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 5520133935496186187
+                    "id": 9798996347587339118
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.020"
@@ -1906,10 +1906,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 9858790081226439885
+                    "id": 5017938002342821041
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.019"
@@ -1974,10 +1974,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 5522388605745104023
+                    "id": 18307460737001106334
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.018"
@@ -2042,10 +2042,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 7408333595195765451
+                    "id": 17251465105583974217
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.017"
@@ -2110,10 +2110,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 611597340019830273
+                    "id": 18085200841471511407
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.016"
@@ -2178,10 +2178,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 1645439451867310739
+                    "id": 10887970225884841768
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.015"
@@ -2246,10 +2246,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 11767696503169021763
+                    "id": 9288576872431259175
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.014"
@@ -2314,10 +2314,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 15220989734957589262
+                    "id": 686152530626977442
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.013"
@@ -2382,10 +2382,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 13439513675335700414
+                    "id": 13370613158901276095
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.012"
@@ -2450,10 +2450,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 16873672282977024604
+                    "id": 4371790289897637325
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.011"
@@ -2518,10 +2518,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 2018930663980044355
+                    "id": 4944246691126071504
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.010"
@@ -2586,10 +2586,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 18035243870503073538
+                    "id": 12373054494133859641
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.009"
@@ -2654,10 +2654,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 6880637225182827711
+                    "id": 15771291907266101674
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.008"
@@ -2722,10 +2722,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 8678104116528226189
+                    "id": 7757444581061446050
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.007"
@@ -2790,10 +2790,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 5697594136660864257
+                    "id": 7528166765805187025
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.006"
@@ -2858,10 +2858,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 497878960080107508
+                    "id": 17651264254134610571
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.005"
@@ -2926,10 +2926,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 17997181721660301589
+                    "id": 16936797757149997905
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.004"
@@ -2994,10 +2994,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 13478934569634265056
+                    "id": 3940604267047539332
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.003"
@@ -3062,10 +3062,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 16650217028739715086
+                    "id": 2729813108554731534
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.002"
@@ -3130,10 +3130,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 6693727341272878490
+                    "id": 7026390755886680465
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0.001"
@@ -3198,10 +3198,10 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 16715967031531109241
+                    "parent": 4877500027844702666
                 },
                 "cologne::IDComponent": {
-                    "id": 16216124927786236943
+                    "id": 15692729855064821526
                 },
                 "cologne::MeshComponent": {
                     "mesh_name": "Mesh_0"
@@ -3266,35 +3266,35 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 16715967031531109241
+                    "id": 4877500027844702666
                 },
                 "cologne::ParentComponent": {
                     "children": [
-                        16216124927786236943,
-                        6693727341272878490,
-                        16650217028739715086,
-                        13478934569634265056,
-                        17997181721660301589,
-                        497878960080107508,
-                        5697594136660864257,
-                        8678104116528226189,
-                        6880637225182827711,
-                        18035243870503073538,
-                        2018930663980044355,
-                        16873672282977024604,
-                        13439513675335700414,
-                        15220989734957589262,
-                        11767696503169021763,
-                        1645439451867310739,
-                        611597340019830273,
-                        7408333595195765451,
-                        5522388605745104023,
-                        9858790081226439885,
-                        5520133935496186187,
-                        756284806999101814,
-                        9545903589435185140,
-                        15482818312055354589,
-                        15126645127769089252
+                        15692729855064821526,
+                        7026390755886680465,
+                        2729813108554731534,
+                        3940604267047539332,
+                        16936797757149997905,
+                        17651264254134610571,
+                        7528166765805187025,
+                        7757444581061446050,
+                        15771291907266101674,
+                        12373054494133859641,
+                        4944246691126071504,
+                        4371790289897637325,
+                        13370613158901276095,
+                        686152530626977442,
+                        9288576872431259175,
+                        10887970225884841768,
+                        18085200841471511407,
+                        17251465105583974217,
+                        18307460737001106334,
+                        5017938002342821041,
+                        9798996347587339118,
+                        206976386609025065,
+                        18052923903348558510,
+                        11382656784295170782,
+                        12488897575204120871
                     ]
                 },
                 "cologne::TagComponent": {

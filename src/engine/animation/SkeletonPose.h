@@ -10,6 +10,9 @@ namespace cologne
     {
     public:
         explicit SkeletonPose(const Skeleton& skeleton);
+
+        SkeletonPose() = default;
+
         void update_skinning_matrices(const Skeleton& skeleton);
         void update_skinning_matrices_no_rebuild(const Skeleton& skeleton);
         const std::vector<glm::mat4> get_skinning_matrices() const;

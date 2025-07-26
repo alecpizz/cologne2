@@ -37,18 +37,19 @@ entt::meta_factory<T>() \
         j["current_time"] = comp.get_current_progress();
     }
 
-    void deserialize_animator(const nlohmann::json &j, AnimatorComponent &animator_component)
+    void deserialize_animator(AnimatorComponent &animator_component, const nlohmann::json &j)
     {
+        AnimatorComponent temp(j["model_name"]);
         if (j["has_ragdoll"].get<bool>())
         {
-            animator_component.set_has_ragdoll(true);
+            temp.set_has_ragdoll(true);
         }
         if (j.contains("current_clip"))
         {
             auto clip = AssetManager::get_animation_by_name(j["current_clip"]);
             if (clip)
             {
-                animator_component.play_one_shot_animation(clip);
+                temp.play_one_shot_animation(clip);
             }
         }
         if (j.contains("base_clip"))
@@ -56,14 +57,15 @@ entt::meta_factory<T>() \
             auto clip = AssetManager::get_animation_by_name(j["base_clip"]);
             if (clip)
             {
-                animator_component.play_base_animation(clip);
+                temp.play_base_animation(clip);
             }
         }
         if (j["current_state"] == AnimatorComponent::State::RAGDOLLING)
         {
-            animator_component.to_ragdoll();
+            temp.to_ragdoll();
         }
-        animator_component.set_current_progress(j["current_time"].get<float>());
+        temp.set_current_progress(j["current_time"].get<float>());
+        animator_component = temp;
     }
 
     void register_components()
@@ -182,10 +184,9 @@ entt::meta_factory<T>() \
                 {
                     serialize_animator(comp, j);
                 }>("serialize"_hs)
-                .func<[]( nlohmann::json &j, AnimatorComponent &animator_component)
+                .func<[](AnimatorComponent &comp, const nlohmann::json &j)
                 {
-                        LOG_INFO("i've been invoke!");
-                    deserialize_animator(j, animator_component);
+                    deserialize_animator(comp, j);
                 }>("deserialize"_hs);
         REGISTER_COMPONENT(ParentComponent)
                 REGISTER_PROPERTY(ParentComponent, children);

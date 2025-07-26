@@ -352,7 +352,7 @@ namespace cologne
         }
         else
         {
-            LOG_WARN("NO EMPLACE FUNCTION FOR THE COMPONENT, WILL BE SKIPPED!");
+            LOG_WARN("NO EMPLACE FUNCTION FOR THE COMPONENT %s, WILL BE SKIPPED!", std::string(any.type().info().name()).c_str());
         }
     }
 
@@ -444,17 +444,20 @@ namespace cologne
             {
                 if (auto meta_type = entt::resolve(entt::hashed_string(type_name.c_str())))
                 {
-                    auto new_component = meta_type.construct();
-                    if (auto func = meta_type.func("deserialize"_hs); func)
+                    auto instance = meta_type.construct();
+                    if (!instance)
                     {
-                        func.invoke({}, (j_component_data),
-                                    new_component.as_ref());
+                        LOG_INFO("COULDNT CONSTRUCT TYPE %s", type_name.c_str());
+                    }
+                    if (auto func = instance.type().func("deserialize"_hs); func)
+                    {
+                        func.invoke(instance, instance.as_ref(), entt::forward_as_meta(j_component_data).as_ref());
                     }
                     else
                     {
-                        load_component(j_component_data, new_component);
+                        load_component(j_component_data, instance);
                     }
-                    emplace_component(_scene->_registry, e, new_component);
+                    emplace_component(_scene->_registry, e, instance);
                 }
             }
         }

@@ -83,7 +83,7 @@ namespace cologne
         for (const auto entity : _registry.view<AnimatorComponent>())
         {
             auto& ac = _registry.get<AnimatorComponent>(entity);
-            if (ac.has_ragdoll() && ac.get_ragdoll_id() == -1)
+            if (ac.has_ragdoll())
             {
                 ac.create_ragdoll({entity, this});
             }
