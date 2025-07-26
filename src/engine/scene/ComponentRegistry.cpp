@@ -4,6 +4,7 @@
 #include "ComponentRegistry.h"
 
 #include "Components.h"
+#include "SceneSaver.h"
 
 
 namespace cologne::ComponentRegistry
@@ -76,8 +77,8 @@ entt::meta_factory<T>() \
         REGISTER_COMPONENT(TagComponent)
                 REGISTER_PROPERTY(TagComponent, tag);
 
-        // REGISTER_COMPONENT(StaticColliderComponent)
-        //         REGISTER_PROPERTY(StaticColliderComponent, mesh_name);
+        REGISTER_COMPONENT(StaticColliderComponent)
+                REGISTER_PROPERTY(StaticColliderComponent, mesh_name);
 
         REGISTER_COMPONENT(PlayerComponent)
                 REGISTER_PROPERTY(PlayerComponent, camera)
@@ -129,7 +130,7 @@ entt::meta_factory<T>() \
 
         REGISTER_COMPONENT(ParentComponent)
                 REGISTER_PROPERTY(ParentComponent, children);
-        // REGISTER_COMPONENT(NativeScriptComponent)
-        //         REGISTER_PROPERTY(NativeScriptComponent, type_name);
+        REGISTER_COMPONENT(NativeScriptComponent)
+                REGISTER_PROPERTY(NativeScriptComponent, type_name);
     }
 }

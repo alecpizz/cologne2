@@ -711,6 +711,7 @@ namespace cologne
             LOG_ERROR("Error opening file at %s", path.c_str());
             return;
         }
+        using namespace entt::literals;
         using json = nlohmann::json;
         json data = json::parse(file);
         std::string scene_name = data["scene_name"];
@@ -724,6 +725,10 @@ namespace cologne
                 {
                     auto new_component = meta_type.construct();
                     load_component(j_component_data, new_component);
+                    if (auto custom_func = new_component.type().func("custom_deserialize"_hs); custom_func)
+                    {
+                        custom_func.invoke({}, static_cast<uint32_t>(e), new_component.as_ref());
+                    }
                     emplace_component(_scene->_registry, e, new_component);
                 }
             }

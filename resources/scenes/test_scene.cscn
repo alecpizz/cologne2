@@ -6,12 +6,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 6039939340803703782
+                    "parent": 1912948168666037906
                 },
                 "cologne::IDComponent": {
-                    "id": 2677262173236054921
+                    "id": 2867239457265980473
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "sofa_1-1"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "sofa_1-1"
                 },
                 "cologne::TagComponent": {
@@ -71,12 +74,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 6039939340803703782
+                    "parent": 1912948168666037906
                 },
                 "cologne::IDComponent": {
-                    "id": 7207022922602331648
+                    "id": 3571144989844734775
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "sofa_1-0"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "sofa_1-0"
                 },
                 "cologne::TagComponent": {
@@ -136,12 +142,12 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 6039939340803703782
+                    "id": 1912948168666037906
                 },
                 "cologne::ParentComponent": {
                     "children": [
-                        7207022922602331648,
-                        2677262173236054921
+                        3571144989844734775,
+                        2867239457265980473
                     ]
                 },
                 "cologne::TagComponent": {
@@ -205,7 +211,10 @@
                     "primary": false
                 },
                 "cologne::IDComponent": {
-                    "id": 17778526252371140612
+                    "id": 1962699230777574200
+                },
+                "cologne::NativeScriptComponent": {
+                    "type_name": "cologne::EditorCameraController"
                 },
                 "cologne::TagComponent": {
                     "tag": "Scene Camera"
@@ -264,7 +273,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 11451262821525049501
+                    "id": 15684162201250919109
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": true,
@@ -336,7 +345,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 11072579780934285986
+                    "id": 9408606838331644456
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -408,7 +417,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 5076637847168718284
+                    "id": 18418474107989936798
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -480,7 +489,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 17211426217394334385
+                    "id": 14909091049794904306
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -552,7 +561,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 16359696197860490621
+                    "id": 13964312184004169262
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -624,7 +633,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 10083877346416447727
+                    "id": 4258458442896806176
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -696,7 +705,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 287807277332127145
+                    "id": 17302904096777444726
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -768,7 +777,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 16575481106424577245
+                    "id": 14636844479501819134
                 },
                 "cologne::LightComponent": {
                     "cast_shadows": false,
@@ -840,12 +849,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 3319733576584891294
+                    "parent": 10771765871601774804
                 },
                 "cologne::IDComponent": {
-                    "id": 16497039693907337702
+                    "id": 17302666695839979989
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "LanternPole_Lantern"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "LanternPole_Lantern"
                 },
                 "cologne::TagComponent": {
@@ -905,12 +917,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 3319733576584891294
+                    "parent": 10771765871601774804
                 },
                 "cologne::IDComponent": {
-                    "id": 2635170522827223917
+                    "id": 3927037758627907398
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "LanternPole_Chain"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "LanternPole_Chain"
                 },
                 "cologne::TagComponent": {
@@ -970,12 +985,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 3319733576584891294
+                    "parent": 10771765871601774804
                 },
                 "cologne::IDComponent": {
-                    "id": 16463991268424050509
+                    "id": 13040191177930776380
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "LanternPole_Body"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "LanternPole_Body"
                 },
                 "cologne::TagComponent": {
@@ -1035,13 +1053,13 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 3319733576584891294
+                    "id": 10771765871601774804
                 },
                 "cologne::ParentComponent": {
                     "children": [
-                        16463991268424050509,
-                        2635170522827223917,
-                        16497039693907337702
+                        13040191177930776380,
+                        3927037758627907398,
+                        17302666695839979989
                     ]
                 },
                 "cologne::TagComponent": {
@@ -1101,13 +1119,16 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 16219856067574524083
+                    "id": 11360986955004016605
+                },
+                "cologne::NativeScriptComponent": {
+                    "type_name": "cologne::PlayerController"
                 },
                 "cologne::PlayerComponent": {
                     "air_acceleration": 2.0,
                     "air_control": 0.10000000149011612,
                     "air_deceleration": 2.0,
-                    "camera": 3640294789380831292,
+                    "camera": 16388315263830693883,
                     "friction": 6.0,
                     "gravity": 19.600000381469727,
                     "jump_speed": 7.0,
@@ -1120,7 +1141,7 @@
                     "run_deceleration": 3.0,
                     "side_strafe_acceleration": 15.0,
                     "side_strafe_speed": 1.0,
-                    "viewmodel": 2474696292994882612
+                    "viewmodel": 4874228479144080610
                 },
                 "cologne::TagComponent": {
                     "tag": "player"
@@ -1179,7 +1200,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 2474696292994882612
+                    "id": 4874228479144080610
                 },
                 "cologne::SkinnedModelComponent": {
                     "model_name": "vsk"
@@ -1263,7 +1284,7 @@
                     "primary": true
                 },
                 "cologne::IDComponent": {
-                    "id": 3640294789380831292
+                    "id": 16388315263830693883
                 },
                 "cologne::TagComponent": {
                     "tag": "camera"
@@ -1322,7 +1343,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 2621655874326604651
+                    "id": 4075367715939431541
                 },
                 "cologne::SkinnedModelComponent": {
                     "model_name": "deagle"
@@ -1384,7 +1405,7 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 16970708531504615452
+                    "id": 4666449792489820302
                 },
                 "cologne::SkinnedModelComponent": {
                     "model_name": "man"
@@ -1451,7 +1472,7 @@
                     "hurt_sound": "/home/alecpizz/Repos/goonengine/resources/sounds/enemy_hurt.mp3"
                 },
                 "cologne::IDComponent": {
-                    "id": 8437739827678214748
+                    "id": 6057743745141644242
                 },
                 "cologne::SkinnedModelComponent": {
                     "model_name": "man"
@@ -1513,12 +1534,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 11842369691102711248
+                    "id": 12275005568308755913
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.024"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.024"
                 },
                 "cologne::TagComponent": {
@@ -1578,12 +1602,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 15185464301677135143
+                    "id": 12236001035139382607
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.023"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.023"
                 },
                 "cologne::TagComponent": {
@@ -1643,12 +1670,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 10678090224084285037
+                    "id": 12394352566622032155
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.022"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.022"
                 },
                 "cologne::TagComponent": {
@@ -1708,12 +1738,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 4279165531076899857
+                    "id": 17649555660981638630
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.021"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.021"
                 },
                 "cologne::TagComponent": {
@@ -1773,12 +1806,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 18248435638634724965
+                    "id": 1239078825378055322
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.020"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.020"
                 },
                 "cologne::TagComponent": {
@@ -1838,12 +1874,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 2052396498823997729
+                    "id": 13724830143647348921
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.019"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.019"
                 },
                 "cologne::TagComponent": {
@@ -1903,12 +1942,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 17395369100693051736
+                    "id": 7879905927081653897
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.018"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.018"
                 },
                 "cologne::TagComponent": {
@@ -1968,12 +2010,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 8446718639473654103
+                    "id": 10831071355791561968
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.017"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.017"
                 },
                 "cologne::TagComponent": {
@@ -2033,12 +2078,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 11455500762947454433
+                    "id": 11525168925605361598
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.016"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.016"
                 },
                 "cologne::TagComponent": {
@@ -2098,12 +2146,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 14095090022673359702
+                    "id": 9496040373335099491
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.015"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.015"
                 },
                 "cologne::TagComponent": {
@@ -2163,12 +2214,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 263324351135826631
+                    "id": 4825471422420308888
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.014"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.014"
                 },
                 "cologne::TagComponent": {
@@ -2228,12 +2282,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 12522676225256871341
+                    "id": 2410575108220902550
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.013"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.013"
                 },
                 "cologne::TagComponent": {
@@ -2293,12 +2350,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 5206982805955491909
+                    "id": 7596590261474219422
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.012"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.012"
                 },
                 "cologne::TagComponent": {
@@ -2358,12 +2418,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 8751089610594695104
+                    "id": 11319953672601460106
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.011"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.011"
                 },
                 "cologne::TagComponent": {
@@ -2423,12 +2486,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 15867612119926634818
+                    "id": 16096917393205813968
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.010"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.010"
                 },
                 "cologne::TagComponent": {
@@ -2488,12 +2554,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 674020689787846491
+                    "id": 674085275967310023
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.009"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.009"
                 },
                 "cologne::TagComponent": {
@@ -2553,12 +2622,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 1767782373344280600
+                    "id": 3185483989866230332
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.008"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.008"
                 },
                 "cologne::TagComponent": {
@@ -2618,12 +2690,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 6468676920092433546
+                    "id": 7355894627923263965
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.007"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.007"
                 },
                 "cologne::TagComponent": {
@@ -2683,12 +2758,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 14700273234748907162
+                    "id": 1479342377661980422
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.006"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.006"
                 },
                 "cologne::TagComponent": {
@@ -2748,12 +2826,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 11859349152258810052
+                    "id": 9361215217335815548
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.005"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.005"
                 },
                 "cologne::TagComponent": {
@@ -2813,12 +2894,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 7008989568643764619
+                    "id": 14868141547764845684
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.004"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.004"
                 },
                 "cologne::TagComponent": {
@@ -2878,12 +2962,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 3312720395818162010
+                    "id": 8111542881070103256
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.003"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.003"
                 },
                 "cologne::TagComponent": {
@@ -2943,12 +3030,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 16017462888688393225
+                    "id": 9725529500543490395
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.002"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.002"
                 },
                 "cologne::TagComponent": {
@@ -3008,12 +3098,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 16197079752913004623
+                    "id": 6011188800609961095
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0.001"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0.001"
                 },
                 "cologne::TagComponent": {
@@ -3073,12 +3166,15 @@
                     "active": true
                 },
                 "cologne::ChildComponent": {
-                    "parent": 4912140218134004243
+                    "parent": 15806763813773295979
                 },
                 "cologne::IDComponent": {
-                    "id": 13881167265563564836
+                    "id": 16957355898792735236
                 },
                 "cologne::MeshComponent": {
+                    "mesh_name": "Mesh_0"
+                },
+                "cologne::StaticColliderComponent": {
                     "mesh_name": "Mesh_0"
                 },
                 "cologne::TagComponent": {
@@ -3138,35 +3234,35 @@
                     "active": true
                 },
                 "cologne::IDComponent": {
-                    "id": 4912140218134004243
+                    "id": 15806763813773295979
                 },
                 "cologne::ParentComponent": {
                     "children": [
-                        13881167265563564836,
-                        16197079752913004623,
-                        16017462888688393225,
-                        3312720395818162010,
-                        7008989568643764619,
-                        11859349152258810052,
-                        14700273234748907162,
-                        6468676920092433546,
-                        1767782373344280600,
-                        674020689787846491,
-                        15867612119926634818,
-                        8751089610594695104,
-                        5206982805955491909,
-                        12522676225256871341,
-                        263324351135826631,
-                        14095090022673359702,
-                        11455500762947454433,
-                        8446718639473654103,
-                        17395369100693051736,
-                        2052396498823997729,
-                        18248435638634724965,
-                        4279165531076899857,
-                        10678090224084285037,
-                        15185464301677135143,
-                        11842369691102711248
+                        16957355898792735236,
+                        6011188800609961095,
+                        9725529500543490395,
+                        8111542881070103256,
+                        14868141547764845684,
+                        9361215217335815548,
+                        1479342377661980422,
+                        7355894627923263965,
+                        3185483989866230332,
+                        674085275967310023,
+                        16096917393205813968,
+                        11319953672601460106,
+                        7596590261474219422,
+                        2410575108220902550,
+                        4825471422420308888,
+                        9496040373335099491,
+                        11525168925605361598,
+                        10831071355791561968,
+                        7879905927081653897,
+                        13724830143647348921,
+                        1239078825378055322,
+                        17649555660981638630,
+                        12394352566622032155,
+                        12236001035139382607,
+                        12275005568308755913
                     ]
                 },
                 "cologne::TagComponent": {

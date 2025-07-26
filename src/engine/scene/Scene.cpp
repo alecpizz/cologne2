@@ -26,6 +26,61 @@ namespace cologne
 {
     Frustum cam_frustum;
 
+    void Scene::initialize_special_types()
+    {
+        for (const auto entity: _registry.view<IDComponent>())
+        {
+            _entity_map[_registry.get<IDComponent>(entity).id] = entity;
+        }
+        auto view = _registry.view<TransformComponent, StaticColliderComponent>();
+        for (auto entity: view)
+        {
+            Entity e = {entity, this};
+            auto &transform = _registry.get<TransformComponent>(entity);
+            auto &collider = _registry.get<StaticColliderComponent>(entity);
+            if (collider.body_id > 0)
+            {
+                continue;
+            }
+            auto mesh = AssetManager::get_mesh_by_name(collider.mesh_name);
+            if (!mesh)
+            {
+                continue;
+            }
+            uint32_t body_id = Physics::create_static_mesh_collider(
+                e, transform, *mesh);
+            collider.body_id = body_id;
+        }
+
+        for (const auto entity : _registry.view<PlayerComponent>())
+        {
+            auto& pc = _registry.get<PlayerComponent>(entity);
+            PlayerCreateInfo info;
+            info.position = _registry.get<TransformComponent>(entity).position;
+            pc.id = Physics::create_player(info);
+        }
+
+        for (const auto entity: _registry.view<NativeScriptComponent>())
+        {
+            auto &ns = _registry.get<NativeScriptComponent>(entity);
+            if (!ns.instance)
+            {
+                if (ns.type_name == entt::type_name<EditorCameraController>().value())
+                {
+                    ns.bind<EditorCameraController>();
+                }
+                else if (ns.type_name == entt::type_name<PlayerController>().value())
+                {
+                    ns.bind<PlayerController>();
+                }
+                else
+                {
+                    LOG_ERROR("NO TYPE FOUND FOR %s", ns.type_name.c_str());
+                }
+            }
+        }
+    }
+
     Scene::Scene()
     {
         // DebugScope scope(__PRETTY_FUNCTION__);
@@ -72,9 +127,9 @@ namespace cologne
         //
         // Entity player = create_entity("player");
         // //todo: REMOVE NATIVE SCRIPT COMPONENT!
-        // auto& nc = player.add_component<NativeScriptComponent>();
+        // auto &nc = player.add_component<NativeScriptComponent>();
         // nc.bind<PlayerController>();
-        // nc.type_name = "PlayerController";
+        // nc.type_name = entt::type_name<PlayerController>::value();
         // PlayerCreateInfo info;
         // info.position = glm::vec3(-3.0f, 2.0f, 0.0f);
         // player.add_component<PlayerComponent>(Physics::create_player(info), camera.get_uuid(), viewModel.get_uuid());
@@ -146,40 +201,21 @@ namespace cologne
         // Entity scene_camera = create_entity("Scene Camera");
         // auto &cam = scene_camera.add_component<CameraComponent>();
         // cam.primary = false;
-        // auto& scn = scene_camera.add_component<NativeScriptComponent>();
+        // auto &scn = scene_camera.add_component<NativeScriptComponent>();
         // scn.bind<EditorCameraController>();
-        // scn.type_name = "EditorCameraController";
+        // scn.type_name = entt::type_name<EditorCameraController>().value();
         //
         //
         // create_static_model_entities("sofa", TransformComponent(glm::vec3(-.6f, -.5f, -2.270f),
         //                                                         glm::quat(glm::radians(glm::vec3(0.0f))),
         //                                                         glm::vec3(1.0f)));
-        //
-        // auto view = _registry.view<TransformComponent, StaticColliderComponent, MeshComponent>();
-        // for (auto entity: view)
-        // {
-        //     Entity e = {entity, this};
-        //     auto &transform = _registry.get<TransformComponent>(entity);
-        //     auto &collider = _registry.get<StaticColliderComponent>(entity);
-        //     auto &mc = _registry.get<MeshComponent>(entity);
-        //     auto mesh = AssetManager::get_mesh_by_name(mc.mesh_name);
-        //     if (!mesh)
-        //     {
-        //         continue;
-        //     }
-        //     uint32_t body_id = Physics::create_static_mesh_collider(
-        //         e, transform, *mesh);
-        //     collider.body_id = body_id;
-        // }
 
 
-        SceneSaver saver_temp (this);
+        SceneSaver saver_temp(this);
         // saver_temp.serialize(RESOURCES_PATH "scenes/test_scene.cscn");
         saver_temp.deserialize(RESOURCES_PATH "scenes/test_scene.cscn");
-        for (const auto entity : _registry.view<IDComponent>())
-        {
-            _entity_map[_registry.get<IDComponent>(entity).id] = entity;
-        }
+        initialize_special_types();
+
         re_calculate_bounds();
         LOG_INFO("Scene bounds are min (%f, %f, %f), max (%f, %f, %f)", _scene_bounds.min.x, _scene_bounds.min.y,
                  _scene_bounds.min.z, _scene_bounds.max.z, _scene_bounds.max.y, _scene_bounds.max.z);

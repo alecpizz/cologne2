@@ -115,7 +115,7 @@ namespace cologne
 
     struct StaticColliderComponent
     {
-        uint32_t body_id = -1;
+        uint32_t body_id = 0;
         std::string mesh_name;
         bool body_enabled = true;
     };

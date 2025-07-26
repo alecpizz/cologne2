@@ -13,6 +13,7 @@ namespace cologne
     class Scene
     {
     public:
+
         Scene();
 
         ~Scene();
@@ -52,6 +53,7 @@ namespace cologne
 
     private:
         void update_children(entt::entity parent);
+        void initialize_special_types();
         AABB _scene_bounds;
         std::vector<Particles> _particles;
         std::unordered_map<UUID, entt::entity> _entity_map;
