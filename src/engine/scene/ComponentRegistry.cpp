@@ -127,6 +127,8 @@ entt::meta_factory<T>() \
                 REGISTER_PROPERTY(LightComponent, inner_cutoff)
                 REGISTER_PROPERTY(LightComponent, cast_shadows);
 
+        REGISTER_COMPONENT(ParentComponent)
+                REGISTER_PROPERTY(ParentComponent, children);
         // REGISTER_COMPONENT(NativeScriptComponent)
         //         REGISTER_PROPERTY(NativeScriptComponent, type_name);
     }

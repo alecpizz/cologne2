@@ -79,6 +79,10 @@ namespace cologne
 
     void Editor::draw_entity_node(Entity entity)
     {
+        if (!entity)
+        {
+            return;
+        }
         auto &tag = entity.get_component<TagComponent>();
         ImGuiTreeNodeFlags flags = ((_selected_entity == entity) ? ImGuiTreeNodeFlags_Selected : 0) |
                                    ImGuiTreeNodeFlags_OpenOnArrow |

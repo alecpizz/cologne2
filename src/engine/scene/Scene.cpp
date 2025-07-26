@@ -28,154 +28,158 @@ namespace cologne
 
     Scene::Scene()
     {
-        DebugScope scope(__PRETTY_FUNCTION__);
-
-        create_static_model_entities("sponza2", {});
-
-        // Entity glowCube = create_entity("glowing cube");
-        // glowCube.get_transform().position = glm::vec3(0.0f, 1.0f, 4.5f);
-        // glowCube.add_component<ModelComponent>(AssetManager::get_model_index_by_name("glowCube"), true);
-
-        Entity man = create_entity("man");
-        man.get_transform().rotation =
-                glm::quat(glm::vec3(0.0f, glm::radians(-90.0f), 0.0f));
-        man.get_transform().position.y -= 0.25f;
-        auto enemy = man.add_component<EnemyComponent>();
-        Audio::add_sound(enemy.hurt_sound.c_str()); //todo: have asset manager do this
-        man.add_component<SkinnedModelComponent>("man");
-        AnimatorComponent &anim = man.add_component<AnimatorComponent>("man");
-        anim.play_base_animation(AssetManager::get_animation_by_name("man_Idle"));
-        anim.create_ragdoll(man);
-
-        Entity man2 = create_entity("man2");
-        man2.get_transform().position = glm::vec3(0.0f, -0.25f, 2.5f);
-        man2.add_component<SkinnedModelComponent>("man");
-        AnimatorComponent &anim3 = man2.add_component<AnimatorComponent>("man");
-        anim3.play_base_animation(AssetManager::get_animation_by_name("man_Idle"));
-
-        Entity revolver = create_entity("deagle");
-        revolver.add_component<SkinnedModelComponent>("deagle");
-        AnimatorComponent &anim2 = revolver.add_component<AnimatorComponent>("deagle");
-        anim2.play_base_animation(AssetManager::get_animation_by_name("deagle_Rig|Rig|MK_ReloadFull"));
-
-        auto camera = create_entity("camera");
-        auto &c = camera.add_component<CameraComponent>();
-        c.primary = true;
-
-        Entity viewModel = create_entity("viewmodel");
-        viewModel.add_component<SkinnedModelComponent>("vsk");
-        auto &anim4 = viewModel.add_component<AnimatorComponent>("vsk");
-        anim4.play_base_animation(AssetManager::get_animation_by_name("vsk_Idle"));
-        // viewModel.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
-        // viewModel.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("deagle_Rig|Rig|MK_Idle"));
-        viewModel.add_component<ViewmodelComponent>();
-
-        Entity player = create_entity("player");
-        //todo: REMOVE NATIVE SCRIPT COMPONENT!
-        auto& nc = player.add_component<NativeScriptComponent>();
-        nc.bind<PlayerController>();
-        nc.type_name = "PlayerController";
-        PlayerCreateInfo info;
-        info.position = glm::vec3(-3.0f, 2.0f, 0.0f);
-        player.add_component<PlayerComponent>(Physics::create_player(info), camera.get_uuid(), viewModel.get_uuid());
-
-        create_static_model_entities("Lantern", TransformComponent(
-                                         glm::vec3(0.180f, -0.338f, -4.8f),
-                                         glm::quat(glm::radians(glm::vec3(0.0f, -90.0f, 0.0f))),
-                                         glm::vec3(1.0f)));
-
-
-        Entity spot_light = create_entity("spot light");
-        auto &lc = spot_light.add_component<LightComponent>();
-        lc.type = LightComponent::Spot;
-
-
-        Entity point_light = create_entity("point light");
-        auto &light2 = point_light.add_component<LightComponent>();
-        light2.color = glm::vec3(1, 0.7799999713897705, 0.5289999842643738);
-        light2.radius = 3.0f;
-        light2.strength = 6.0f;
-        light2.type = LightComponent::Point;
-        point_light.get_transform().position = glm::vec3(-6.0f, 5.0f, -5.0f);
-
-        Entity point_light2 = create_entity("point light2");
-        auto &light3 = point_light2.add_component<LightComponent>();
-        light3 = light2;
-        light3.color = glm::vec3(0.2f, 0.9f, 0.15f);
-        point_light2.get_transform().position = glm::vec3(6.0f, 4.580, 3.796f);
-
-        Entity point_light3 = create_entity("point light3");
-        auto &light4 = point_light3.add_component<LightComponent>();
-        light4.color = glm::vec3(0.078f, 0.656, 0.840f);
-        light4.radius = 3.13f;
-        light4.strength = 6.670f;
-        point_light3.get_transform().position = glm::vec3(-6.7, 1.4, -3.979);
-
-        Entity lantern_light = create_entity("lantern light");
-        auto &light5 = lantern_light.add_component<LightComponent>();
-        light5.color = glm::vec3(1.0, 0.78, 0.529);
-        light5.radius = 3.670f;
-        lantern_light.get_transform().position = glm::vec3(0.243f, 1.073f, -3.608f);
-
-        Entity evil_light = create_entity("evil light");
-        auto &light6 = evil_light.add_component<LightComponent>();
-        light6.radius = 3.670f;
-        light6.color = glm::vec3(1.0f, 0.0f, 0.0f);
-        light6.strength = 7.0f;
-        evil_light.get_transform().position = glm::vec3(-4.538, 1.082, 3.635);
-
-        Entity hall_light = create_entity("hall light");
-        auto &light8 = hall_light.add_component<LightComponent>();
-        light8.radius = 3.780f;
-        light8.strength = 5.910f;
-        light8.color = glm::vec3(1.0f, 0.780f, 0.529f);
-        hall_light.get_transform().position = glm::vec3(2.795f, 0.419f, 3.638f);
-
-        Entity dir_light = create_entity("directional light");
-        auto &light = dir_light.add_component<LightComponent>();
-        light.color = glm::vec3(1, 0.864, 0.709);
-        light.radius = 6.0f;
-        light.strength = 2.0f;
-        light.cast_shadows = true;
-        light.type = Directional;
-        dir_light.get_transform().position = glm::vec3(0.790f, 18.867f, 0.024f);
-        dir_light.get_transform().rotation =
-                glm::quat(glm::radians(glm::vec3(88.500, 0.0f, 0.0f)));
-
-
-        Entity scene_camera = create_entity("Scene Camera");
-        auto &cam = scene_camera.add_component<CameraComponent>();
-        cam.primary = false;
-        auto& scn = scene_camera.add_component<NativeScriptComponent>();
-        scn.bind<EditorCameraController>();
-        scn.type_name = "EditorCameraController";
-
-
-        create_static_model_entities("sofa", TransformComponent(glm::vec3(-.6f, -.5f, -2.270f),
-                                                                glm::quat(glm::radians(glm::vec3(0.0f))),
-                                                                glm::vec3(1.0f)));
-
-        auto view = _registry.view<TransformComponent, StaticColliderComponent, MeshComponent>();
-        for (auto entity: view)
-        {
-            Entity e = {entity, this};
-            auto &transform = _registry.get<TransformComponent>(entity);
-            auto &collider = _registry.get<StaticColliderComponent>(entity);
-            auto &mc = _registry.get<MeshComponent>(entity);
-            auto mesh = AssetManager::get_mesh_by_name(mc.mesh_name);
-            if (!mesh)
-            {
-                continue;
-            }
-            uint32_t body_id = Physics::create_static_mesh_collider(
-                e, transform, *mesh);
-            collider.body_id = body_id;
-        }
+        // DebugScope scope(__PRETTY_FUNCTION__);
+        //
+        // create_static_model_entities("sponza2", {});
+        //
+        // // Entity glowCube = create_entity("glowing cube");
+        // // glowCube.get_transform().position = glm::vec3(0.0f, 1.0f, 4.5f);
+        // // glowCube.add_component<ModelComponent>(AssetManager::get_model_index_by_name("glowCube"), true);
+        //
+        // Entity man = create_entity("man");
+        // man.get_transform().rotation =
+        //         glm::quat(glm::vec3(0.0f, glm::radians(-90.0f), 0.0f));
+        // man.get_transform().position.y -= 0.25f;
+        // auto enemy = man.add_component<EnemyComponent>();
+        // Audio::add_sound(enemy.hurt_sound.c_str()); //todo: have asset manager do this
+        // man.add_component<SkinnedModelComponent>("man");
+        // AnimatorComponent &anim = man.add_component<AnimatorComponent>("man");
+        // anim.play_base_animation(AssetManager::get_animation_by_name("man_Idle"));
+        // anim.create_ragdoll(man);
+        //
+        // Entity man2 = create_entity("man2");
+        // man2.get_transform().position = glm::vec3(0.0f, -0.25f, 2.5f);
+        // man2.add_component<SkinnedModelComponent>("man");
+        // AnimatorComponent &anim3 = man2.add_component<AnimatorComponent>("man");
+        // anim3.play_base_animation(AssetManager::get_animation_by_name("man_Idle"));
+        //
+        // Entity revolver = create_entity("deagle");
+        // revolver.add_component<SkinnedModelComponent>("deagle");
+        // AnimatorComponent &anim2 = revolver.add_component<AnimatorComponent>("deagle");
+        // anim2.play_base_animation(AssetManager::get_animation_by_name("deagle_Rig|Rig|MK_ReloadFull"));
+        //
+        // auto camera = create_entity("camera");
+        // auto &c = camera.add_component<CameraComponent>();
+        // c.primary = true;
+        //
+        // Entity viewModel = create_entity("viewmodel");
+        // viewModel.add_component<SkinnedModelComponent>("vsk");
+        // auto &anim4 = viewModel.add_component<AnimatorComponent>("vsk");
+        // anim4.play_base_animation(AssetManager::get_animation_by_name("vsk_Idle"));
+        // // viewModel.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
+        // // viewModel.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("deagle_Rig|Rig|MK_Idle"));
+        // viewModel.add_component<ViewmodelComponent>();
+        //
+        // Entity player = create_entity("player");
+        // //todo: REMOVE NATIVE SCRIPT COMPONENT!
+        // auto& nc = player.add_component<NativeScriptComponent>();
+        // nc.bind<PlayerController>();
+        // nc.type_name = "PlayerController";
+        // PlayerCreateInfo info;
+        // info.position = glm::vec3(-3.0f, 2.0f, 0.0f);
+        // player.add_component<PlayerComponent>(Physics::create_player(info), camera.get_uuid(), viewModel.get_uuid());
+        //
+        // create_static_model_entities("Lantern", TransformComponent(
+        //                                  glm::vec3(0.180f, -0.338f, -4.8f),
+        //                                  glm::quat(glm::radians(glm::vec3(0.0f, -90.0f, 0.0f))),
+        //                                  glm::vec3(1.0f)));
+        //
+        //
+        // Entity spot_light = create_entity("spot light");
+        // auto &lc = spot_light.add_component<LightComponent>();
+        // lc.type = LightComponent::Spot;
+        //
+        //
+        // Entity point_light = create_entity("point light");
+        // auto &light2 = point_light.add_component<LightComponent>();
+        // light2.color = glm::vec3(1, 0.7799999713897705, 0.5289999842643738);
+        // light2.radius = 3.0f;
+        // light2.strength = 6.0f;
+        // light2.type = LightComponent::Point;
+        // point_light.get_transform().position = glm::vec3(-6.0f, 5.0f, -5.0f);
+        //
+        // Entity point_light2 = create_entity("point light2");
+        // auto &light3 = point_light2.add_component<LightComponent>();
+        // light3 = light2;
+        // light3.color = glm::vec3(0.2f, 0.9f, 0.15f);
+        // point_light2.get_transform().position = glm::vec3(6.0f, 4.580, 3.796f);
+        //
+        // Entity point_light3 = create_entity("point light3");
+        // auto &light4 = point_light3.add_component<LightComponent>();
+        // light4.color = glm::vec3(0.078f, 0.656, 0.840f);
+        // light4.radius = 3.13f;
+        // light4.strength = 6.670f;
+        // point_light3.get_transform().position = glm::vec3(-6.7, 1.4, -3.979);
+        //
+        // Entity lantern_light = create_entity("lantern light");
+        // auto &light5 = lantern_light.add_component<LightComponent>();
+        // light5.color = glm::vec3(1.0, 0.78, 0.529);
+        // light5.radius = 3.670f;
+        // lantern_light.get_transform().position = glm::vec3(0.243f, 1.073f, -3.608f);
+        //
+        // Entity evil_light = create_entity("evil light");
+        // auto &light6 = evil_light.add_component<LightComponent>();
+        // light6.radius = 3.670f;
+        // light6.color = glm::vec3(1.0f, 0.0f, 0.0f);
+        // light6.strength = 7.0f;
+        // evil_light.get_transform().position = glm::vec3(-4.538, 1.082, 3.635);
+        //
+        // Entity hall_light = create_entity("hall light");
+        // auto &light8 = hall_light.add_component<LightComponent>();
+        // light8.radius = 3.780f;
+        // light8.strength = 5.910f;
+        // light8.color = glm::vec3(1.0f, 0.780f, 0.529f);
+        // hall_light.get_transform().position = glm::vec3(2.795f, 0.419f, 3.638f);
+        //
+        // Entity dir_light = create_entity("directional light");
+        // auto &light = dir_light.add_component<LightComponent>();
+        // light.color = glm::vec3(1, 0.864, 0.709);
+        // light.radius = 6.0f;
+        // light.strength = 2.0f;
+        // light.cast_shadows = true;
+        // light.type = Directional;
+        // dir_light.get_transform().position = glm::vec3(0.790f, 18.867f, 0.024f);
+        // dir_light.get_transform().rotation =
+        //         glm::quat(glm::radians(glm::vec3(88.500, 0.0f, 0.0f)));
+        //
+        //
+        // Entity scene_camera = create_entity("Scene Camera");
+        // auto &cam = scene_camera.add_component<CameraComponent>();
+        // cam.primary = false;
+        // auto& scn = scene_camera.add_component<NativeScriptComponent>();
+        // scn.bind<EditorCameraController>();
+        // scn.type_name = "EditorCameraController";
+        //
+        //
+        // create_static_model_entities("sofa", TransformComponent(glm::vec3(-.6f, -.5f, -2.270f),
+        //                                                         glm::quat(glm::radians(glm::vec3(0.0f))),
+        //                                                         glm::vec3(1.0f)));
+        //
+        // auto view = _registry.view<TransformComponent, StaticColliderComponent, MeshComponent>();
+        // for (auto entity: view)
+        // {
+        //     Entity e = {entity, this};
+        //     auto &transform = _registry.get<TransformComponent>(entity);
+        //     auto &collider = _registry.get<StaticColliderComponent>(entity);
+        //     auto &mc = _registry.get<MeshComponent>(entity);
+        //     auto mesh = AssetManager::get_mesh_by_name(mc.mesh_name);
+        //     if (!mesh)
+        //     {
+        //         continue;
+        //     }
+        //     uint32_t body_id = Physics::create_static_mesh_collider(
+        //         e, transform, *mesh);
+        //     collider.body_id = body_id;
+        // }
 
 
         SceneSaver saver_temp (this);
-        saver_temp.serialize(RESOURCES_PATH "scenes/test_scene.cscn");
+        // saver_temp.serialize(RESOURCES_PATH "scenes/test_scene.cscn");
         saver_temp.deserialize(RESOURCES_PATH "scenes/test_scene.cscn");
+        for (const auto entity : _registry.view<IDComponent>())
+        {
+            _entity_map[_registry.get<IDComponent>(entity).id] = entity;
+        }
         re_calculate_bounds();
         LOG_INFO("Scene bounds are min (%f, %f, %f), max (%f, %f, %f)", _scene_bounds.min.x, _scene_bounds.min.y,
                  _scene_bounds.min.z, _scene_bounds.max.z, _scene_bounds.max.y, _scene_bounds.max.z);

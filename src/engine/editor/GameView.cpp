@@ -193,8 +193,11 @@ namespace cologne
                 if (_selected_entity.has_component<ChildComponent>())
                 {
                     auto parent_entity = Engine::get_scene()->get_entity_by_uuid(_selected_entity.get_component<ChildComponent>().parent);
-                    mat4 = glm::inverse(
+                    if (parent_entity)
+                    {
+                        mat4 = glm::inverse(
                                parent_entity.get_component<WorldTransformComponent>().transform) * mat4;
+                    }
                 }
                 glm::quat orientation;
                 glm::vec3 translation;

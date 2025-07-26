@@ -106,12 +106,12 @@ namespace nlohmann
     {
         static void to_json(json &j, const cologne::UUID &id)
         {
-            j = {id._uuid};
+            j = id._uuid;
         }
 
         static void from_json(const json &j, cologne::UUID &id)
         {
-            id = j.get<uint64_t>();
+            id = cologne::UUID(j.get<uint64_t>());
         }
     };
 }
@@ -448,12 +448,27 @@ namespace cologne
     //     }
     // }
 
+    template<typename T>
+    void save_property(nlohmann::json& j, const std::string& member_name, entt::meta_any& any)
+    {
+        T value = any.cast<T>();
+        if (member_name.empty())
+        {
+            j.emplace_back(value);
+        }
+        else
+        {
+            j[member_name] = value;
+        }
+    }
+
     void save_component(entt::meta_any instance, nlohmann::json &j)
     {
         using namespace entt::literals;
         for (auto [id, data]: instance.type().data())
         {
             auto hash = data.type().info().hash();
+            auto property_any = data.get(instance);
             std::string member_name;
             if (auto *mp = static_cast<const ComponentRegistry::PropertiesMap *>(data.custom()))
             {
@@ -464,44 +479,65 @@ namespace cologne
             }
             if (hash == entt::type_hash<glm::vec3>::value())
             {
-                j[member_name] = *data.get(instance).try_cast<glm::vec3>();
+                save_property<glm::vec3>(j, member_name, property_any);
             }
             else if (hash == entt::type_hash<glm::vec4>::value())
             {
-                j[member_name] = *data.get(instance).try_cast<glm::vec4>();
+                save_property<glm::vec4>(j, member_name, property_any);
             }
             else if (hash == entt::type_hash<glm::quat>::value())
             {
-                j[member_name] = *data.get(instance).try_cast<glm::quat>();
+                save_property<glm::quat>(j, member_name, property_any);
             }
             else if (hash == entt::type_hash<cologne::UUID>::value())
             {
-                j[member_name] = data.get(instance).try_cast<UUID>()->_uuid;
+                save_property<UUID>(j, member_name, property_any);
             }
             else if (hash == entt::type_hash<glm::mat4>::value())
             {
-                j[member_name] = *data.get(instance).try_cast<glm::mat4>();
+                save_property<glm::mat4>(j, member_name, property_any);
             }
             else if (hash == entt::type_hash<float>::value())
             {
-                j[member_name] = *data.get(instance).try_cast<float>();
+                save_property<float>(j, member_name, property_any);
             }
             else if (hash == entt::type_hash<bool>::value())
             {
-                j[member_name] = *data.get(instance).try_cast<bool>();
+                save_property<bool>(j, member_name, property_any);
             }
             else if (hash == entt::type_hash<std::string>::value())
             {
-                j[member_name] = *data.get(instance).try_cast<std::string>();
+                save_property<std::string>(j, member_name, property_any);
             }
             else if (hash == entt::type_hash<int>::value())
             {
-                j[member_name] = *data.get(instance).try_cast<int>();
+                save_property<int>(j, member_name, property_any);
+            }
+            else if (hash == entt::type_hash<uint64_t>::value())
+            {
+                save_property<uint64_t>(j, member_name, property_any);
+            }
+            else if (hash == entt::type_hash<uint32_t>::value())
+            {
+                save_property<uint32_t>(j, member_name, property_any);
+            }
+            else if (data.type().is_sequence_container())
+            {
+                nlohmann::json array_node = nlohmann::json::array();
+                if (auto view = data.get(instance).as_sequence_container(); view)
+                {
+                    for (auto meta_any : view)
+                    {
+                        save_component(meta_any.as_ref(), array_node);
+                    }
+                }
+                j[member_name] = array_node;
             }
             else
             {
-                LOG_INFO("TRYING TO RECURSIVELY SAVE UNKNOWN TYPE %s!", std::string(data.type().info().name()).c_str());
-                save_component(data.get(instance).as_ref(), j);
+                nlohmann::json object_node;
+                save_component(data.get(instance).as_ref(), object_node);
+                j[member_name] = object_node;
             }
         }
     }
@@ -548,9 +584,28 @@ namespace cologne
         {
             meta_data.set(instance, j.get<int>());
         }
+        else if (hash == entt::type_hash<uint64_t>::value())
+        {
+            meta_data.set(instance, j.get<uint64_t>());
+        }
+        else if (meta_data.type().is_sequence_container())
+        {
+            if (j.is_array())
+            {
+                auto container_view = meta_data.get(instance).as_ref().as_sequence_container();
+                container_view.resize(j.size());
+                for (size_t i = 0; i < j.size(); i++)
+                {
+                    for (auto [id, data] : container_view.value_type().data())
+                    {
+                        load_property(j[i], data, container_view[i].as_ref());
+                    }
+                }
+            }
+        }
         else
         {
-            LOG_INFO("TRYING TO RECURSIVELY SAVE UNKNOWN TYPE %s!", std::string(meta_data.type().info().name()).c_str());
+            LOG_INFO("TRYING TO RECURSIVELY LOAD UNKNOWN TYPE %s!", std::string(meta_data.type().info().name()).c_str());
             load_property(j, meta_data, meta_data.get(instance).as_ref());
         }
     }
@@ -609,7 +664,6 @@ namespace cologne
                 {
                     continue;
                 }
-                LOG_INFO("Type Name %s", std::string(set.type().name()).c_str());
                 if (auto meta = entt::resolve(id))
                 {
                     nlohmann::json j_component_data;
@@ -668,7 +722,6 @@ namespace cologne
             {
                 if (auto meta_type = entt::resolve(entt::hashed_string(type_name.c_str())))
                 {
-                    LOG_INFO("FOUND KNOWN TYPE %s", type_name.c_str());
                     auto new_component = meta_type.construct();
                     load_component(j_component_data, new_component);
                     emplace_component(_scene->_registry, e, new_component);

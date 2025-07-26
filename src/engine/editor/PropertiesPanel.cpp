@@ -77,6 +77,10 @@ namespace cologne
                 for (auto child_id: _selected_entity.get_component<ParentComponent>().children)
                 {
                     Entity child = Engine::get_scene()->get_entity_by_uuid(child_id);
+                    if (!child)
+                    {
+                        continue;
+                    }
                     if (child.has_component<MeshComponent>())
                     {
                         Engine::get_renderer()->submit_outline_render_item(RenderItem(
