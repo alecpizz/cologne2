@@ -127,6 +127,8 @@ namespace cologne
                     }
                 }
             }
+
+
             draw_component<ViewmodelComponent>("View Model", _selected_entity, true, [](auto &vm)
             {
                 ImGui::DragFloat("smoothing", &vm.smoothing, 0.1f);
@@ -370,12 +372,14 @@ namespace cologne
 
         glm::vec3 euler = glm::eulerAngles(tr.rotation);
         euler = glm::degrees(euler);
-        ImGui::DragFloat3("Rotation", glm::value_ptr(euler), 0.1f);
-        // euler.x = fmodf(euler.x, 360.0f);
-        // euler.y = fmodf(euler.y, 360.0f);
-        // euler.z = fmodf(euler.z, 360.0f);
-        euler = glm::radians(euler);
-        tr.rotation = glm::quat(euler);
+        if (ImGui::DragFloat3("Rotation", glm::value_ptr(euler), 0.1f))
+        {
+            euler.x = fmodf(euler.x, 360.0f);
+            euler.y = fmodf(euler.y, 360.0f);
+            euler.z = fmodf(euler.z, 360.0f);
+            euler = glm::radians(euler);
+            tr.rotation = glm::quat(euler);
+        }
 
         ImGui::DragFloat3("Scale", glm::value_ptr(tr.scale), 0.01f);
     }

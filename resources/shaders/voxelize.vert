@@ -13,6 +13,7 @@ uniform int num_lights = 8;
 
 out vec4 FragPos;
 out vec2 TexCoords;
+out vec3 Normal;
 out mat3 TBN;
 out flat uint DrawID;
 struct Light
@@ -65,6 +66,7 @@ void main()
     mat3 normalMatrix = transpose(inverse(mat3(model)));
     vec3 T = normalize(normalMatrix * tangent);
     vec3 N = normalize(normalMatrix * normal);
+    Normal = N;
     vec3 B = cross(N, T);
     TBN = mat3(T, B, N);
     FragPos = pos;

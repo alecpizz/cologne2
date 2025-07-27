@@ -265,6 +265,11 @@ namespace cologne
         return get_framebuffer_by_name("output")->get_color_attachment_handle_by_name("color");
     }
 
+    uint32_t Renderer::get_albedo_image()
+    {
+        return get_framebuffer_by_name("gbuffer")->get_color_attachment_handle_by_name("albedo");
+    }
+
     uint32_t Renderer::read_fbo_pixel(const std::string &fbo_name, const std::string &attachment_name, uint32_t x,
                                       uint32_t y)
     {

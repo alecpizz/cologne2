@@ -57,6 +57,7 @@ uniform int num_lights = 8;
 in vec2 TexCoords;
 in vec4 FragPos;
 in mat3 TBN;
+in vec3 Normal;
 in vec4 FragPosLightSpace[8];
 flat in uint DrawID;
 
@@ -180,11 +181,38 @@ vec4 pbr()
     Material mat = materials[DrawID];
     vec4 albedo_texture = texture2D(sampler2D(mat.albedo), TexCoords);
     vec3 albedo = pow(albedo_texture.rgb, vec3(2.2));
-    float metallic = texture2D(sampler2D(mat.metallic), TexCoords).r;
-    float roughness = texture2D(sampler2D(mat.roughness), TexCoords).g;
+    float metallic;
+    float roughness;
+    if(mat.metallic == uvec2(0))
+    {
+        metallic = mat.metallic_mod;
+    }
+    else
+    {
+        metallic = texture2D(sampler2D(mat.metallic), TexCoords).r;
+        metallic *= mat.metallic_mod;
+    }
+
+    if(mat.roughness == uvec2(0))
+    {
+        roughness = mat.roughness_mod;
+    }
+    else
+    {
+        roughness = texture2D(sampler2D(mat.roughness), TexCoords).g;
+        roughness *= mat.roughness_mod;
+    }
     float ao = texture2D(sampler2D(mat.ao), TexCoords).b + 0.2;
 
-    vec3 N = texture2D(sampler2D(mat.normal), TexCoords).rgb;
+    vec3 N;
+    if(mat.normal == vec2(0))
+    {
+        N = Normal;
+    }
+    else
+    {
+        N = texture2D(sampler2D(mat.normal), TexCoords).rgb;
+    }
     N = N * 2.0 - 1.0;
     N = normalize(TBN * N);
 
