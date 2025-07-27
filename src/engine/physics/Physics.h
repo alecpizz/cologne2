@@ -43,6 +43,8 @@ namespace cologne::Physics
     uint32_t create_static_mesh_collider(Entity entity, TransformComponent transform,
                                          const Mesh& mesh);
 
+    uint32_t create_infinite_ground_plane(glm::vec3 plane_normal, float constant);
+
     void sync_transform(Entity entity);
 
     bool raycast(glm::vec3 origin, glm::vec3 direction, float max_distance, uint32_t layers, RaycastHitInfo &info);

@@ -224,7 +224,7 @@ namespace cologne
         // saver_temp.serialize(RESOURCES_PATH "scenes/test_scene.cscn");
         saver_temp.deserialize(RESOURCES_PATH "scenes/test_scene.cscn");
         initialize_special_types();
-
+        Physics::create_infinite_ground_plane(glm::vec3(0.0f, 1.0f, 0.0f), 1.0f);
         re_calculate_bounds();
         LOG_INFO("Scene bounds are min (%f, %f, %f), max (%f, %f, %f)", _scene_bounds.min.x, _scene_bounds.min.y,
                  _scene_bounds.min.z, _scene_bounds.max.z, _scene_bounds.max.y, _scene_bounds.max.z);

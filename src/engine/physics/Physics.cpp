@@ -23,6 +23,8 @@
 #include <Jolt/Physics/Character/Character.h>
 #include <Jolt/Physics/Character/CharacterVirtual.h>
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
+#include <Jolt/Physics/Collision/Shape/PlaneShape.h>
+#include <Jolt/Physics/Collision/Shape/ScaledShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
@@ -923,6 +925,17 @@ namespace cologne::Physics
         colliders_static.push_back(id);
         physics_system.OptimizeBroadPhase();
         entity_to_collider_map[id] = entity;
+        return id.GetIndexAndSequenceNumber();
+    }
+
+    uint32_t create_infinite_ground_plane(glm::vec3 plane_normal, float constant)
+    {
+        auto id = physics_system.GetBodyInterface().CreateAndAddBody(
+            BodyCreationSettings(
+                new PlaneShape(Plane(JPH::Vec3(plane_normal.x, plane_normal.y, plane_normal.z).Normalized(), constant),
+                               nullptr, 100), RVec3(0, 0, 0), Quat::sIdentity(), EMotionType::Static,
+                Layers::NON_MOVING), EActivation::DontActivate);
+        colliders_static.emplace_back(id);
         return id.GetIndexAndSequenceNumber();
     }
 

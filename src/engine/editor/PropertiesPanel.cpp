@@ -172,6 +172,7 @@ namespace cologne
                 auto mesh = AssetManager::get_mesh_by_name(mesh_comp.mesh_name);
                 std::string mesh_name = mesh->get_name();
                 ImGui::Text("Name %s Material %d", mesh_name.c_str(), mesh->get_material_index());
+                ImGui::Text("Metallic %f Roughness %f", AssetManager::get_material_by_index(mesh->get_material_index())->metallic_override, AssetManager::get_material_by_index(mesh->get_material_index())->roughness_override);
             });
 
             draw_component<ModelComponent>("Model", _selected_entity, true, [this](ModelComponent &model)

@@ -39,7 +39,7 @@ void main()
     vec3 N = normalize(normalMatrix * normal);
     vec3 B = cross(N, T);
     TBN = mat3(T, B, N);
-    Normal = normalMatrix * normal;
+    Normal = normalize(normalMatrix * normal);
     EntityID = gl_BaseInstance;
     gl_Position = projection_view * worldPos;
 }
