@@ -646,6 +646,8 @@ namespace cologne::Physics
         physics_system.OptimizeBroadPhase();
     }
 
+    float accumulation_time = 0.0f;
+    float fixed_delta_time = 1.0 / 60.0f;
     void update(float dt)
     {
         if (cologne::Input::key_pressed(Input::Key::P))
@@ -674,7 +676,12 @@ namespace cologne::Physics
                                                  character->GetPosition().GetZ());
             }
             const int collisionSteps = 1;
-            physics_system.Update(dt, collisionSteps, temp_allocator, job_system);
+            accumulation_time += dt;
+            while (accumulation_time >= fixed_delta_time)
+            {
+                physics_system.Update(fixed_delta_time, collisionSteps, temp_allocator, job_system);
+                accumulation_time -= fixed_delta_time;
+            }
         }
 
         if (drawing)

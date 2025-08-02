@@ -332,6 +332,11 @@ namespace cologne
         Engine::get_renderer()->draw_text(text.c_str(),
                                           glm::vec3(Engine::get_window()->get_width() - (text.length() * 48.0f),
                                                     660.0f, 0.0f), glm::vec4(1.0f), 0.6f);
+        auto vel = _velocity;
+        vel.y = 0.0f;
+        float speed = glm::length(vel);
+        std::string speed_text = std::string("Speed ") + std::to_string(speed);
+        Engine::get_renderer()->draw_text(speed_text.c_str(), glm::vec3(Engine::get_window()->get_width() - (speed_text.length() * 48.0f), 690.0f, 0.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 0.6f);
     }
 
     void PlayerController::on_create()
