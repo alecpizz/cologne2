@@ -279,6 +279,10 @@ namespace cologne
                 }
             }
         }
+        else if (meta_data.type().is_enum())
+        {
+
+        }
         else
         {
             LOG_INFO("TRYING TO RECURSIVELY LOAD UNKNOWN TYPE %s!",

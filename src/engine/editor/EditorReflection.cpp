@@ -139,10 +139,11 @@ namespace cologne
         ImGui::Text((std::string("%s: ") + scalar_to_format<Scalar>()).c_str(), label, s);
     }
 
-    static bool write_vec3(glm::vec3& v)
+    static bool write_vec3(glm::vec3& v, const PropertiesMap& properties)
     {
-        const char* lable = "vec3";
-        return ImGui::DragFloat3(lable, glm::value_ptr(v));
+        const char* label = "vec3";
+        get_editor_name(label, properties);
+        return ImGui::DragFloat3(label, glm::value_ptr(v));
     }
 
     static void read_vec3(glm::vec3 v, const PropertiesMap& properties)
@@ -152,9 +153,10 @@ namespace cologne
         ImGui::Text("%s: %f, %f, %f", label, v.x, v.y, v.z);
     }
 
-    static bool write_vec4(glm::vec4& v)
+    static bool write_vec4(glm::vec4& v, const PropertiesMap& properties)
     {
         const char* label = "vec4";
+        get_editor_name(label, properties);
         return ImGui::DragFloat4(label, glm::value_ptr(v));
     }
 
@@ -165,9 +167,10 @@ namespace cologne
         ImGui::Text("%s: %f %f %f %f", label, v.x, v.y, v.z, v.w);
     }
 
-    static bool write_quat(glm::quat& q)
+    static bool write_quat(glm::quat& q, const PropertiesMap& properties)
     {
         const char* label = "quat";
+        get_editor_name(label, properties);
         auto euler = glm::degrees(glm::eulerAngles(q));
         bool changed = ImGui::DragFloat3(label, glm::value_ptr(euler));
         if (changed)
@@ -198,11 +201,35 @@ namespace cologne
         ImGui::Text("%.*s", static_cast<int>(s.size()), s.c_str());
     }
 
+    static bool write_mat4(glm::mat4& mat, const PropertiesMap& properties)
+    {
+        const char* label = "mat4";
+        get_editor_name(label, properties);
+        bool c0 = ImGui::DragFloat4(std::string(std::string(label) + "col 0").c_str(), &mat[0][0]);
+        bool c1 = ImGui::DragFloat4(std::string(std::string(label) + "col 1").c_str(), &mat[1][0]);
+        bool c2 = ImGui::DragFloat4(std::string(std::string(label) + "col 2").c_str(), &mat[2][0]);
+        bool c3 = ImGui::DragFloat4(std::string(std::string(label) + "col 3").c_str(), &mat[3][0]);
+        return c0 || c1 || c2 || c3;
+    }
+
+    static void read_mat4(const glm::mat4& mat, const PropertiesMap& properties)
+    {
+        const char* label = "mat4";
+        get_editor_name(label, properties);
+        ImGui::Text("%s: %f %f %f %f", label, mat[0][0], mat[0][1], mat[0][2], mat[0][3]);
+        ImGui::Text("%s: %f %f %f %f", label, mat[1][0], mat[1][1], mat[1][2], mat[1][3]);
+        ImGui::Text("%s: %f %f %f %f", label, mat[2][0], mat[2][1], mat[2][2], mat[2][3]);
+        ImGui::Text("%s: %f %f %f %f", label, mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
+    }
+
     void Editor::initialize_reflection_editor()
     {
         entt::meta_factory<int>()
             .func<&editor_write_scalar<int>>("editor_write"_hs)
             .func<&editor_read_scalar<int>>("editor_read"_hs);
+        entt::meta_factory<uint64_t>()
+            .func<&editor_write_scalar<uint64_t>>("editor_write"_hs)
+            .func<&editor_write_scalar<uint64_t>>("editor_write"_hs);
         entt::meta_factory<uint32_t>()
             .func<&editor_write_scalar<uint32_t>>("editor_write"_hs)
             .func<&editor_read_scalar<uint32_t>>("editor_read"_hs);
@@ -230,5 +257,8 @@ namespace cologne
         entt::meta_factory<std::string>()
             .func<&write_string>("editor_write"_hs)
             .func<&read_string>("editor_read"_hs);
+        entt::meta_factory<glm::mat4>()
+            .func<&write_mat4>("editor_write"_hs)
+            .func<&read_mat4>("editor_read"_hs);
     }
 }

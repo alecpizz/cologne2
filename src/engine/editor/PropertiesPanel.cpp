@@ -69,7 +69,8 @@ namespace cologne
         bool changed = false;
         if (auto write_func = meta.func("editor_write"_hs); write_func)
         {
-            changed |= write_func.invoke(instance, properties).cast<bool>();
+            // changed |= write_func.invoke(instance, properties).cast<bool>();
+            write_func.invoke(instance, properties);
         }
         else if (auto read_func = meta.func("editor_read"_hs); read_func)
         {
@@ -212,7 +213,11 @@ namespace cologne
                                                         light.radius, light.color);
                 }
                 const char *items[] = {"DIRECTIONAL", "POINT", "SPOT"};
-                ImGui::Combo("LIGHT TYPE", &light.type, items, 3);
+                int type = light.type;
+                if (ImGui::Combo("LIGHT TYPE", &type, items, 3))
+                {
+                    light.type = static_cast<LightComponent::LightType>(type);
+                }
                 if (light.type == LightComponent::Spot)
                 {
                     ImGui::DragFloat("outer cutoff", &light.outer_cutoff, 0.01f);

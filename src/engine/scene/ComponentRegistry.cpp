@@ -20,6 +20,11 @@ entt::meta_factory<T>() \
 .data<&Type::member, entt::as_ref_t>(#member##_hs) \
 .custom<PropertiesMap>(PropertiesMap{{"name"_hs, #member} __VA_OPT__(, __VA_ARGS__)})
 
+#define REFLECT_ENUM(T) \
+        entt::meta_factory<T>()
+#define ENUMERATOR(E, Member, ...) \
+        .data<E::Member>(#Member##_hs) \
+        .custom<PropertiesMap>(PropertiesMap{{"name"_hs, #Member} __VA_OPT__(, __VA_ARGS__)})
 
     void serialize_animator(const AnimatorComponent &comp, nlohmann::json &j)
     {
@@ -71,7 +76,6 @@ entt::meta_factory<T>() \
     void register_components()
     {
         using namespace entt::literals;
-        entt::meta_reset();
         entt::meta_factory<glm::vec3>()
                 .data<&glm::vec3::x>("x"_hs)
                 .data<&glm::vec3::y>("y"_hs)
@@ -98,7 +102,8 @@ entt::meta_factory<T>() \
                 REGISTER_PROPERTY(TransformComponent, rotation)
                 REGISTER_PROPERTY(TransformComponent, scale);
 
-        entt::meta_factory<UUID>().conv<uint64_t>().data<&UUID::_uuid>("uuid"_hs);
+        entt::meta_factory<UUID>().conv<uint64_t>()
+                REGISTER_PROPERTY(UUID, _uuid);
         REGISTER_COMPONENT(IDComponent)
                 REGISTER_PROPERTY(IDComponent, id);
 
@@ -178,6 +183,11 @@ entt::meta_factory<T>() \
                 REGISTER_PROPERTY(LightComponent, outer_cutoff)
                 REGISTER_PROPERTY(LightComponent, inner_cutoff)
                 REGISTER_PROPERTY(LightComponent, cast_shadows);
+
+        REFLECT_ENUM(LightComponent::LightType)
+            ENUMERATOR(LightComponent::LightType, Directional)
+            ENUMERATOR(LightComponent::LightType, Point)
+            ENUMERATOR(LightComponent::LightType, Spot);
 
         REGISTER_COMPONENT(AnimatorComponent)
                 .func<[](AnimatorComponent &comp, nlohmann::json &j)
