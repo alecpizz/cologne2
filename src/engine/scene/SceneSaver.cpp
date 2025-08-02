@@ -134,7 +134,14 @@ namespace cologne
         }
         else
         {
-            j[member_name] = value;
+            if (j.is_array())
+            {
+                j.emplace_back(value);
+            }
+            else
+            {
+                j[member_name] = value;
+            }
         }
     }
 
@@ -207,7 +214,15 @@ namespace cologne
                         save_component(meta_any.as_ref(), array_node);
                     }
                 }
-                j[member_name] = array_node;
+
+                if (member_name.empty())
+                {
+                    j.emplace_back(std::move(array_node));
+                }
+                else
+                {
+                    j[member_name] = std::move(array_node);
+                }
             }
             else
             {
@@ -281,7 +296,6 @@ namespace cologne
         }
         else if (meta_data.type().is_enum())
         {
-
         }
         else
         {
@@ -319,7 +333,8 @@ namespace cologne
         }
         else
         {
-            LOG_WARN("NO EMPLACE FUNCTION FOR THE COMPONENT %s, WILL BE SKIPPED!", std::string(any.type().info().name()).c_str());
+            LOG_WARN("NO EMPLACE FUNCTION FOR THE COMPONENT %s, WILL BE SKIPPED!",
+                     std::string(any.type().info().name()).c_str());
         }
     }
 
@@ -375,6 +390,18 @@ namespace cologne
         }
         file << j_scene.dump(4);
         file.close();
+
+        FileUtil::create_directory_recursive(RESOURCES_PATH "last_saved_scene.json");
+        std::ofstream file2(RESOURCES_PATH "last_saved_scene.json");
+        if (!file2.is_open())
+        {
+            LOG_ERROR("error opening file for serialization!");
+            return;
+        }
+        nlohmann::json j;
+        j["scene_name"] = _scene->_scene_name;
+        file2 << j.dump(4);
+        file2.close();
     }
 
     void copy_component_meta_data(entt::meta_any &src, entt::meta_any &dest)

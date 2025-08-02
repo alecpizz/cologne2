@@ -183,9 +183,11 @@ namespace cologne
         {
             if (ImGui::BeginMenu("File"))
             {
-                if (ImGui::MenuItem("Exit"))
+                if (ImGui::MenuItem("Load Scene"))
                 {
-                    Engine::get_event_manager()->set_should_quit(true);
+                    Engine::get_window()->show_file_dialogue_window({{"Scene Files", "cscn"}, {"All Files", "*"}},
+                                                                    RESOURCES_PATH "scenes",
+                                                                    reinterpret_cast<void *>(open_scene_callback));
                 }
                 if (ImGui::MenuItem("Save Scene"))
                 {
@@ -196,11 +198,9 @@ namespace cologne
                 {
                     //open a save file dialogue
                 }
-                if (ImGui::MenuItem("Load Scene"))
+                if (ImGui::MenuItem("Exit"))
                 {
-                    Engine::get_window()->show_file_dialogue_window({{"Scene Files", "cscn"}, {"All Files", "*"}},
-                                                                    RESOURCES_PATH "scenes",
-                                                                    reinterpret_cast<void *>(open_scene_callback));
+                    Engine::get_event_manager()->set_should_quit(true);
                 }
                 ImGui::EndMenu();
             }
