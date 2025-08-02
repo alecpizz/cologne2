@@ -65,7 +65,7 @@ namespace cologne
         void set_scene_name(const std::string &path) { _scene_name = path; }
 
     private:
-        std::string _scene_name = RESOURCES_PATH "scenes/untitled_scene.cscn";
+        std::string _scene_name = "untitled_scene.cscn";
 
         void update_children(entt::entity parent);
 

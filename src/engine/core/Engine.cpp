@@ -138,8 +138,8 @@ namespace cologne
             {
                 nlohmann::json j = nlohmann::json::parse(file);
                 std::string last_save_path = j["scene_name"];
-                _impl->scene = std::make_unique<Scene>(last_save_path.c_str());
-                LOG_INFO("LOADED PREVIOUSLY USED SCENE");
+                _impl->scene = std::make_unique<Scene>((RESOURCES_PATH + std::string("scenes/") + last_save_path).c_str());
+                LOG_INFO("LOADED PREVIOUSLY USED SCENE %s", last_save_path.c_str());
             }
         }
         else

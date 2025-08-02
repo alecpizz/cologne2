@@ -149,7 +149,7 @@ namespace cologne
         if (ImGui::IsKeyChordPressed(chord))
         {
             SceneSaver saver(Engine::get_scene());
-            saver.serialize(Engine::get_scene()->get_scene_name());
+            saver.serialize(RESOURCES_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name());
         }
 
         chord = ImGuiKey_Delete;
@@ -192,7 +192,7 @@ namespace cologne
                 if (ImGui::MenuItem("Save Scene"))
                 {
                     SceneSaver saver(Engine::get_scene());
-                    saver.serialize(Engine::get_scene()->get_scene_name());
+                    saver.serialize(RESOURCES_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name());
                 }
                 if (ImGui::MenuItem("Save Scene As"))
                 {

@@ -348,7 +348,7 @@ namespace cologne
         }
 
         nlohmann::json j_scene;
-        j_scene["scene_name"] = "untitled_scene";
+        j_scene["scene_name"] = _scene->get_scene_name();
         nlohmann::json j_entities;
         _scene->_registry.view<entt::entity>().each([&](auto entity)
         {
@@ -430,6 +430,7 @@ namespace cologne
         using json = nlohmann::json;
         json data = json::parse(file);
         std::string scene_name = data["scene_name"];
+        _scene->set_scene_name(scene_name);
         json entities = data["entities"];
         for (const auto &entity: entities)
         {
