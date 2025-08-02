@@ -74,6 +74,7 @@ namespace cologne
         material_font = io.Fonts->AddFontFromFileTTF(RESOURCES_PATH "fonts/MaterialIcons-Regular.ttf", 48.0f);
         std::setlocale(LC_CTYPE, ".UTF8");
         ImGuiStyle &style = ImGui::GetStyle();
+        style.WindowMenuButtonPosition = ImGuiDir_None;
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
             //style.WindowRounding = 0.0f;
@@ -84,6 +85,7 @@ namespace cologne
         Audio::add_sound(_accept_sound);
         Audio::add_sound(_cancel_sound);
         Audio::add_sound(_move_sound);
+        initialize_reflection_editor();
     }
 
     Editor::~Editor()

@@ -14,6 +14,7 @@
 #include <misc/cpp/imgui_stdlib.h>
 
 #include "Editor.h"
+#include "engine/scene/ComponentRegistry.h"
 
 namespace cologne
 {
@@ -55,6 +56,52 @@ namespace cologne
         }
     }
 
+    static bool draw_component_editor(entt::entity entity, entt::meta_any instance, entt::meta_custom custom, int& guiID)
+    {
+        using namespace entt::literals;
+        auto meta = instance.type();
+        ComponentRegistry::PropertiesMap properties = {};
+        if (auto* mp = static_cast<const ComponentRegistry::PropertiesMap*>(custom))
+        {
+            properties = *mp;
+        }
+
+        bool changed = false;
+        if (auto write_func = meta.func("editor_write"_hs); write_func)
+        {
+            changed |= write_func.invoke(instance, properties).cast<bool>();
+        }
+        else if (auto read_func = meta.func("editor_read"_hs); read_func)
+        {
+            read_func.invoke(instance, properties);
+        }
+        else if (meta.is_sequence_container())
+        {
+            bool isOpen = false;
+            if (auto it = properties.find("name"_hs); it != properties.end())
+            {
+                //TODO: ts
+            }
+            ImGui::Text("TODO: sequence containers");
+        }
+        else if (meta.is_enum())
+        {
+            ImGui::Text("TODO: enum");
+        }
+        else
+        {
+            for (auto [id, data] : meta.data())
+            {
+                ImGui::PushID(guiID++);
+                ImGui::Indent();
+                changed |= draw_component_editor(entity, data.get(instance).as_ref(), data.custom(), guiID);
+                ImGui::Unindent();
+                ImGui::PopID();
+            }
+        }
+        return changed;
+    }
+
     void Editor::build_properties_panel()
     {
         ImGui::Begin("Properties", nullptr, _global_window_flags);
@@ -70,6 +117,21 @@ namespace cologne
             {
                 Audio::play_sound(_cancel_sound, 30);
             }
+
+
+            for (int i = 0; auto&& [id, storage] : Engine::get_scene()->_registry.storage())
+            {
+                if (!storage.contains(_selected_entity))
+                {
+                    continue;
+                }
+                ImGui::SeparatorText(std::string(storage.type().name()).c_str());
+                if (auto meta = entt::resolve(id))
+                {
+                    draw_component_editor(_selected_entity, meta.from_void(storage.value(_selected_entity)).as_ref(), meta.custom(), i);
+                }
+            }
+
             ImGui::Text("Transform");
             build_transform_entry(_selected_entity.get_transform());
             if (_selected_entity.has_component<ParentComponent>())

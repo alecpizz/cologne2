@@ -123,43 +123,6 @@ namespace cologne
         _scene = scene;
     }
 
-    //
-    // static void deserialize_entity(const nlohmann::json &j_entity, Entity entity)
-    // {
-    //     if (j_entity.contains("AnimatorComponent"))
-    //     {
-    //         auto &ac = entity.add_component<AnimatorComponent>(j_entity["AnimatorComponent"]["model_name"]);
-    //         if (j_entity["AnimatorComponent"]["has_ragdoll"].get<bool>())
-    //         {
-    //             //create the ragdoll!
-    //             ac.create_ragdoll(entity);
-    //         }
-    //         if (j_entity["AnimatorComponent"].contains("current_clip"))
-    //         {
-    //             auto clip = AssetManager::get_animation_by_name(j_entity["AnimatorComponent"]["current_clip"]);
-    //             if (clip)
-    //             {
-    //                 ac.play_one_shot_animation(clip);
-    //             }
-    //         }
-    //
-    //         if (j_entity["AnimatorComponent"].contains("base_clip"))
-    //         {
-    //             auto clip = AssetManager::get_animation_by_name(j_entity["AnimatorComponent"]["base_clip"]);
-    //             if (clip)
-    //             {
-    //                 ac.play_base_animation(clip);
-    //             }
-    //         }
-    //
-    //         if (j_entity["AnimatorComponent"]["current_state"] == AnimatorComponent::State::RAGDOLLING)
-    //         {
-    //             ac.to_kinematic();
-    //         }
-    //
-    //         ac.set_current_progress(j_entity["AnimatorComponent"]["current_time"].get<float>());
-    //     }
-    // }
 
     template<typename T>
     void save_property(nlohmann::json &j, const std::string &member_name, entt::meta_any &any)
