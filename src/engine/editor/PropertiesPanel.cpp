@@ -120,18 +120,19 @@ namespace cologne
             }
 
 
-            for (int i = 0; auto&& [id, storage] : Engine::get_scene()->_registry.storage())
-            {
-                if (!storage.contains(_selected_entity))
-                {
-                    continue;
-                }
-                ImGui::SeparatorText(std::string(storage.type().name()).c_str());
-                if (auto meta = entt::resolve(id))
-                {
-                    draw_component_editor(_selected_entity, meta.from_void(storage.value(_selected_entity)).as_ref(), meta.custom(), i);
-                }
-            }
+            //TODO: figure out if i actually need this.
+            // for (int i = 0; auto&& [id, storage] : Engine::get_scene()->_registry.storage())
+            // {
+            //     if (!storage.contains(_selected_entity))
+            //     {
+            //         continue;
+            //     }
+            //     ImGui::SeparatorText(std::string(storage.type().name()).c_str());
+            //     if (auto meta = entt::resolve(id))
+            //     {
+            //         draw_component_editor(_selected_entity, meta.from_void(storage.value(_selected_entity)).as_ref(), meta.custom(), i);
+            //     }
+            // }
 
             ImGui::Text("Transform");
             build_transform_entry(_selected_entity.get_transform());

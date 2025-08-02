@@ -1002,11 +1002,22 @@ namespace cologne::Physics
         return true;
     }
 
-
-    void cleanup()
+    void delete_all_bodies()
     {
         physics_system.GetBodyInterface().RemoveBodies(colliders_static.data(), colliders_static.size());
         physics_system.GetBodyInterface().DestroyBodies(colliders_static.data(), colliders_static.size());
+        for (auto& physics_player : physics_players)
+        {
+            delete physics_player.second.character;
+        }
+        physics_players.clear();
+        colliders_static.clear();
+    }
+
+
+    void cleanup()
+    {
+        delete_all_bodies();
         UnregisterTypes();
         delete temp_allocator;
         delete debug_renderer;
@@ -1019,6 +1030,7 @@ namespace cologne::Physics
     {
         disable_body(body_id);
         physics_system.GetBodyInterface().DestroyBody(static_cast<BodyID>(body_id));
+        std::erase(colliders_static, static_cast<BodyID>(body_id));
     }
 
     void add_impulse_force_at_position(uint32_t body_id, glm::vec3 position, glm::vec3 force)

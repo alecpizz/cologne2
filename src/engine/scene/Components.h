@@ -128,7 +128,7 @@ namespace cologne
 
     struct PlayerComponent
     {
-        uint32_t id = -1;
+        uint32_t id = 0;
         UUID camera = {};
         UUID viewmodel = {};
         float gravity = 9.8f * 2.0f;

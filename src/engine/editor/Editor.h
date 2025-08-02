@@ -49,6 +49,8 @@ namespace cologne
 
         void build_main_window();
 
+        void handle_hotkeys();
+
         void build_main_menu_bar();
 
         void build_asset_browser();

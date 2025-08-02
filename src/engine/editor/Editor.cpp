@@ -13,6 +13,7 @@
 #include "engine/imguiThemes.h"
 #include <imgui.h>
 #include <engine/audio/Audio.h>
+#include <engine/scene/SceneSaver.h>
 #include <misc/cpp/imgui_stdlib.h>
 
 namespace cologne
@@ -136,6 +137,45 @@ namespace cologne
         ImGui::DockSpace(dock_space_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
     }
 
+    void Editor::handle_hotkeys()
+    {
+        if (_mouse_captured)
+        {
+            return;
+        }
+
+        auto io = ImGui::GetIO();
+        ImGuiKeyChord chord = ImGuiMod_Ctrl | ImGuiKey_S;
+        if (ImGui::IsKeyChordPressed(chord))
+        {
+            SceneSaver saver(Engine::get_scene());
+            saver.serialize(Engine::get_scene()->get_scene_name());
+        }
+
+        chord = ImGuiKey_Delete;
+        if (ImGui::IsKeyChordPressed(chord))
+        {
+            if (_selected_entity)
+            {
+                Engine::get_scene()->destroy_entity(_selected_entity);
+                _selected_entity = {};
+            }
+        }
+    }
+
+    void open_scene_callback(void *userdata, const char *const*filelist, int filter)
+    {
+        if (!filelist)
+        {
+            return;
+        }
+        const char *file = *filelist;
+        if (!file)
+        {
+            return;
+        }
+        Engine::load_scene(file);
+    }
 
     void Editor::build_main_menu_bar()
     {
@@ -146,6 +186,21 @@ namespace cologne
                 if (ImGui::MenuItem("Exit"))
                 {
                     Engine::get_event_manager()->set_should_quit(true);
+                }
+                if (ImGui::MenuItem("Save Scene"))
+                {
+                    SceneSaver saver(Engine::get_scene());
+                    saver.serialize(Engine::get_scene()->get_scene_name());
+                }
+                if (ImGui::MenuItem("Save Scene As"))
+                {
+                    //open a save file dialogue
+                }
+                if (ImGui::MenuItem("Load Scene"))
+                {
+                    Engine::get_window()->show_file_dialogue_window({{"Scene Files", "cscn"}, {"All Files", "*"}},
+                                                                    RESOURCES_PATH "scenes",
+                                                                    reinterpret_cast<void *>(open_scene_callback));
                 }
                 ImGui::EndMenu();
             }
@@ -165,6 +220,7 @@ namespace cologne
     {
         if (active)
         {
+            handle_hotkeys();
             build_main_window();
             build_main_menu_bar();
             build_scene_graph();
@@ -194,6 +250,4 @@ namespace cologne
             SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
         }
     }
-
-
 }

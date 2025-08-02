@@ -4,7 +4,7 @@
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/audio/Audio.h>
 #include <engine/core/Engine.h>
-
+#include <misc/cpp/imgui_stdlib.h>
 #include "Editor.h"
 
 namespace cologne
@@ -13,6 +13,11 @@ namespace cologne
     {
         ImGui::Begin("Scene Hiearchy", nullptr, _global_window_flags);
 
+        std::string scene_name = Engine::get_scene()->get_scene_name();
+        if (ImGui::InputText("Scene Name", &scene_name))
+        {
+            Engine::get_scene()->set_scene_name(scene_name);
+        }
         for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
         {
             Entity e = {entity, Engine::get_scene()};

@@ -117,7 +117,8 @@ namespace cologne
         if (maximized)
         {
             SDL_MaximizeWindow(_impl->window);
-        } else
+        }
+        else
         {
             SDL_RestoreWindow(_impl->window);
         }
@@ -150,9 +151,22 @@ namespace cologne
         return _impl->mouse_visible;
     }
 
+    void Window::show_file_dialogue_window(const std::unordered_map<std::string, std::string> &filters,
+                                           const std::string &path, void *callback)
+    {
+        std::vector<SDL_DialogFileFilter> dialog_file_filters;
+        for (auto &filter: filters)
+        {
+            dialog_file_filters.emplace_back(filter.first.c_str(), filter.second.c_str());
+        }
+
+        SDL_ShowOpenFileDialog(reinterpret_cast<SDL_DialogFileCallback>(callback), nullptr, _impl->window, dialog_file_filters.data(),
+                               dialog_file_filters.size(), path.c_str(), false);
+    }
+
     Window::Window(uint32_t width, uint32_t height)
     {
-        DebugScope scope (__PRETTY_FUNCTION__);
+        DebugScope scope(__PRETTY_FUNCTION__);
         _impl = new Impl();
         _impl->init(width, height);
         //hide_mouse();

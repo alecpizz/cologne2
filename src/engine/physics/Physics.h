@@ -50,6 +50,8 @@ namespace cologne::Physics
     bool raycast(glm::vec3 origin, glm::vec3 direction, float max_distance, uint32_t layers, RaycastHitInfo &info);
 
     // void create_static_mesh_collider(Model& model);
+    void delete_all_bodies();
+
     void cleanup();
 
     void destroy_body(uint32_t body_id);
