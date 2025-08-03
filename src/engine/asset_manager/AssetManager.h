@@ -17,6 +17,8 @@ namespace cologne::AssetManager
     void print_all();
     void file_added(const std::filesystem::path& path);
 
+    void cleanup();
+
     void export_model(const ModelData& model_data, uint64_t export_time);
     void export_skinned_model(const SkinnedModelData& skinned_model_data, uint64_t export_time);
     ModelData import_model(const char* path);

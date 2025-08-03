@@ -113,15 +113,19 @@ namespace cologne
         data.camera_position = glm::vec4(_camera_transform.position, 1.0f);
         data.projection_view_inverse = glm::inverse(data.projection_view);
 
-        ssbos["skinned_model_matrices"].update(sizeof(glm::mat4) * _skinned_model_matrices.size(), _skinned_model_matrices.data());
+        ssbos["skinned_model_matrices"].update(sizeof(glm::mat4) * _skinned_model_matrices.size(),
+                                               _skinned_model_matrices.data());
         ssbos["model_matrices"].update(sizeof(glm::mat4) * _model_matrices.size(), _model_matrices.data());
         ssbos["draw_cmds"].update(sizeof(MultiDrawElementsCommand) * _render_cmds.size(), _render_cmds.data());
-        ssbos["skinned_draw_cmds"].update(sizeof(MultiDrawElementsCommand) * _skinned_render_cmds.size(), _skinned_render_cmds.data());
+        ssbos["skinned_draw_cmds"].update(sizeof(MultiDrawElementsCommand) * _skinned_render_cmds.size(),
+                                          _skinned_render_cmds.data());
         ssbos["lights"].update(sizeof(Light) * _lights.size(), _lights.data());
         ssbos["viewport"].update(sizeof(ViewportData), &data);
         ssbos["materials"].update(sizeof(GPUMaterial) * _gpu_materials.size(), _gpu_materials.data());
-        ssbos["skinned_materials"].update(sizeof(GPUMaterial) * _skinned_gpu_materials.size(), _skinned_gpu_materials.data());
-        ssbos["skinning_transforms"].update(sizeof(glm::mat4) * _skinning_transforms.size(), _skinning_transforms.data());
+        ssbos["skinned_materials"].update(sizeof(GPUMaterial) * _skinned_gpu_materials.size(),
+                                          _skinned_gpu_materials.data());
+        ssbos["skinning_transforms"].update(sizeof(glm::mat4) * _skinning_transforms.size(),
+                                            _skinning_transforms.data());
         ssbos["model_aabbs"].update(sizeof(AABB) * _model_AABBs.size(), _model_AABBs.data());
         ssbos["skinned_aabbs"].update(sizeof(AABB) * _skinned_AABBs.size(), _skinned_AABBs.data());
 
@@ -248,7 +252,8 @@ namespace cologne
         if (cam.orthographic)
         {
             float scale = cam.ortho_zoom;
-            float aspect = static_cast<float>(Engine::get_window()->get_width()) / static_cast<float>(Engine::get_window()->get_height());
+            float aspect = static_cast<float>(Engine::get_window()->get_width()) / static_cast<float>(
+                               Engine::get_window()->get_height());
             return glm::ortho(-aspect * scale, aspect * scale, -scale, scale, -300.0f, 300.0f);
         }
         return glm::perspective(cam.fov_radians,
@@ -338,7 +343,29 @@ namespace cologne
         {
             glDeleteBuffers(1, &_skinned_bind_pose_vbo);
             glDeleteBuffers(1, &_skinned_bind_pose_ebo);
+            glDeleteVertexArrays(1, &_skinned_bind_pose_vao);
         }
+        glCreateVertexArrays(1, &_skinned_bind_pose_vao);
+        glEnableVertexArrayAttrib(_skinned_bind_pose_vao, 0);
+        glEnableVertexArrayAttrib(_skinned_bind_pose_vao, 1);
+        glEnableVertexArrayAttrib(_skinned_bind_pose_vao, 2);
+        glEnableVertexArrayAttrib(_skinned_bind_pose_vao, 3);
+        glEnableVertexArrayAttrib(_skinned_bind_pose_vao, 4);
+        glEnableVertexArrayAttrib(_skinned_bind_pose_vao, 5);
+
+        glVertexArrayAttribFormat(_skinned_bind_pose_vao, 0, 3, GL_FLOAT, GL_FALSE, offsetof(WeightedVertex, position));
+        glVertexArrayAttribFormat(_skinned_bind_pose_vao, 1, 3, GL_FLOAT, GL_FALSE, offsetof(WeightedVertex, normal));
+        glVertexArrayAttribFormat(_skinned_bind_pose_vao, 2, 2, GL_FLOAT, GL_FALSE, offsetof(WeightedVertex, uv));
+        glVertexArrayAttribFormat(_skinned_bind_pose_vao, 3, 3, GL_FLOAT, GL_FALSE, offsetof(WeightedVertex, tangent));
+        glVertexArrayAttribIFormat(_skinned_bind_pose_vao, 4, 4, GL_INT, offsetof(WeightedVertex, boneID));
+        glVertexArrayAttribFormat(_skinned_bind_pose_vao, 5, 4, GL_FLOAT, GL_FALSE, offsetof(WeightedVertex, weight));
+
+        glVertexArrayAttribBinding(_skinned_bind_pose_vao, 0, 0);
+        glVertexArrayAttribBinding(_skinned_bind_pose_vao, 1, 0);
+        glVertexArrayAttribBinding(_skinned_bind_pose_vao, 2, 0);
+        glVertexArrayAttribBinding(_skinned_bind_pose_vao, 3, 0);
+        glVertexArrayAttribBinding(_skinned_bind_pose_vao, 4, 0);
+        glVertexArrayAttribBinding(_skinned_bind_pose_vao, 5, 0);
 
         glCreateBuffers(1, &_skinned_bind_pose_vbo);
         glNamedBufferStorage(_skinned_bind_pose_vbo, sizeof(WeightedVertex) * vertices.size(), vertices.data(),
@@ -347,6 +374,9 @@ namespace cologne
         glCreateBuffers(1, &_skinned_bind_pose_ebo);
         glNamedBufferStorage(_skinned_bind_pose_ebo, sizeof(uint32_t) * indices.size(), indices.data(),
                              GL_MAP_READ_BIT);
+
+        glVertexArrayVertexBuffer(_skinned_bind_pose_vao, 0, _skinned_bind_pose_vbo, 0, sizeof(WeightedVertex));
+        glVertexArrayElementBuffer(_skinned_bind_pose_vao, _skinned_bind_pose_ebo);
     }
 
     void Renderer::allocate_weighted_vertex_buffer(size_t count)
@@ -392,6 +422,45 @@ namespace cologne
 
     Renderer::~Renderer()
     {
+        glDeleteVertexArrays(1, &_vertex_data_vao);
+        glDeleteBuffers(1, &_vertex_data_vbo);
+        glDeleteBuffers(1, &_vertex_data_ebo);
+
+        glDeleteVertexArrays(1, & _skinned_bind_pose_vao);
+        glDeleteBuffers(1, &_skinned_bind_pose_ebo);
+        glDeleteBuffers(1, &_skinned_bind_pose_vbo);
+
+        glDeleteVertexArrays(1, &_skinned_vao);
+        glDeleteBuffers(1, &_skinned_vbo);
+
+        for (auto point_shadow_map : _point_shadow_maps)
+        {
+            uint32_t handle = point_shadow_map.get_handle();
+            glDeleteTextures(1, &handle);
+        }
+        _point_shadow_maps.clear();
+
+        for (auto tex : _dir_shadow_maps)
+        {
+            uint32_t handle = tex.get_handle();
+            glDeleteTextures(1, &handle);
+        }
+
+        _dir_shadow_maps.clear();
+        for (auto framebuffer : framebuffers)
+        {
+            framebuffer.second.clean_up();
+        }
+
+        for (auto ssbo : ssbos)
+        {
+            ssbo.second.cleanup();
+        }
+
+        for (auto shader : shaders)
+        {
+            shader.second.cleanup();
+        }
     }
 
     void Renderer::draw_line(glm::vec3 p1, glm::vec3 p2, glm::vec3 color)

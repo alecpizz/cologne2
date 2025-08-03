@@ -72,8 +72,11 @@ namespace cologne
                                        uint32_t y);
 
         void upload_vertex_data(std::vector<Vertex> &vertices, std::vector<uint32_t> &indices);
-        void upload_weighted_vertex_data(std::vector<WeightedVertex>& vertices, std::vector<uint32_t>& indices);
+
+        void upload_weighted_vertex_data(std::vector<WeightedVertex> &vertices, std::vector<uint32_t> &indices);
+
         void allocate_weighted_vertex_buffer(size_t count);
+
         uint32_t get_vertex_data_vao() const { return _vertex_data_vao; }
         uint32_t get_vertex_data_vbo() const { return _vertex_data_vbo; }
         uint32_t get_vertex_data_ebo() const { return _vertex_data_ebo; }
@@ -81,6 +84,7 @@ namespace cologne
 
         uint32_t get_skinned_bind_pose_vbo() const { return _skinned_bind_pose_vbo; }
         uint32_t get_skinned_bind_pose_ebo() const { return _skinned_bind_pose_ebo; }
+        uint32_t get_skinned_bind_pose_vao() const { return _skinned_bind_pose_vao; }
         uint32_t get_skinned_vbo() const { return _skinned_vbo; }
         uint32_t get_skinned_vao() const { return _skinned_vao; }
 
@@ -161,7 +165,8 @@ namespace cologne
 
         SSBO *get_ssbo_by_name(const char *name);
 
-        std::vector<Texture> _shadow_maps;
+        std::vector<Texture> _point_shadow_maps;
+        std::vector<Texture> _dir_shadow_maps;
         std::vector<RenderItem> _render_items;
         std::vector<SkinnedRenderItem> _skinned_render_items;
         std::vector<RenderItem> _outline_render_items;
@@ -181,6 +186,7 @@ namespace cologne
         uint32_t _vertex_data_vao = 0;
         uint32_t _vertex_data_vbo = 0;
         uint32_t _vertex_data_ebo = 0;
+        uint32_t _skinned_bind_pose_vao = 0;
         uint32_t _skinned_bind_pose_vbo = 0;
         uint32_t _skinned_bind_pose_ebo = 0;
         uint32_t _skinned_vbo = 0;

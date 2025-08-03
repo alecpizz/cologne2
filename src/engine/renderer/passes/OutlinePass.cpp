@@ -84,7 +84,7 @@ namespace cologne
                                      mesh->get_base_vertex());
         }
         glBindVertexArray(0);
-        glBindVertexArray(get_skinned_vao());
+        glBindVertexArray(get_skinned_bind_pose_vao());
         for (auto &item: _outline_skinned_render_items)
         {
             mask_shader->set_mat4("model", item.transform);
@@ -99,6 +99,7 @@ namespace cologne
                                      mesh->get_base_vertex());
             mask_shader->set_bool("is_skinned", false);
         }
+        glBindVertexArray(0);
         mask_shader->set_bool("is_skinned", false);
         //draw the outline a shit load
         outline_shader->bind();

@@ -30,6 +30,8 @@ namespace cologne
 
         void load();
 
+        void cleanup();
+
         void set_path(const std::string& path) {_path = path;}
         void load_compressed();
         void make_resident();

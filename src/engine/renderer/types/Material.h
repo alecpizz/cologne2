@@ -68,6 +68,16 @@ namespace cologne
             emission.load();
         }
 
+        void cleanup_all()
+        {
+            albedo.cleanup();
+            ao.cleanup();
+            metallic.cleanup();
+            roughness.cleanup();
+            normal.cleanup();
+            emission.cleanup();
+        }
+
         GPUMaterial to_gpu_material() const
         {
             return {

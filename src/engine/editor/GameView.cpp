@@ -97,6 +97,11 @@ namespace cologne
                 Engine::get_window()->show_mouse();
             }
         }
+        if (ImGui::Button("Toggle Ortho"))
+        {
+            auto& cam = Engine::get_scene()->get_scene_camera().get_component<CameraComponent>();
+            cam.orthographic = !cam.orthographic;
+        }
         ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(Renderer::get_output_image())), viewport_size,
                      ImVec2(0, 1), ImVec2(1, 0));
 
