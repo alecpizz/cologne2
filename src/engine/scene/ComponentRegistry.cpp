@@ -128,7 +128,9 @@ entt::meta_factory<T>() \
 
         REGISTER_COMPONENT(CameraComponent)
                 REGISTER_PROPERTY(CameraComponent, fov_radians)
-                REGISTER_PROPERTY(CameraComponent, primary);
+                REGISTER_PROPERTY(CameraComponent, primary)
+                REGISTER_PROPERTY(CameraComponent, ortho_zoom)
+                REGISTER_PROPERTY(CameraComponent, orthographic);
 
         REGISTER_COMPONENT(TagComponent)
                 REGISTER_PROPERTY(TagComponent, tag);

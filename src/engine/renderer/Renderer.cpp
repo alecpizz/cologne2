@@ -245,6 +245,12 @@ namespace cologne
 
     glm::mat4 Renderer::get_camera_projection(TransformComponent tr, CameraComponent cam)
     {
+        if (cam.orthographic)
+        {
+            float scale = cam.ortho_zoom;
+            float aspect = static_cast<float>(Engine::get_window()->get_width()) / static_cast<float>(Engine::get_window()->get_height());
+            return glm::ortho(-aspect * scale, aspect * scale, -scale, scale, -300.0f, 300.0f);
+        }
         return glm::perspective(cam.fov_radians,
                                 static_cast<float>(Engine::get_window()->get_width()) /
                                 static_cast<float>(Engine::get_window()->get_height()),

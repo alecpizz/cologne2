@@ -462,6 +462,7 @@ namespace cologne
                     parent, parent_transform, *mesh);
                 col.body_id = body_id;
             }
+            re_calculate_bounds();
             return parent;
         }
         auto &parent_comp = parent.add_component<ParentComponent>();
@@ -487,6 +488,7 @@ namespace cologne
             }
             update_transforms();
         }
+        re_calculate_bounds();
         return parent;
     }
 

@@ -13,6 +13,7 @@ layout (binding = 1, std430) restrict readonly buffer viewportdata
     vec4 camera_position;
 };
 
+uniform mat4 projection_override;
 
 out vec3 LocalPosition;
 out vec4 WorldPosition;
@@ -21,7 +22,7 @@ void main()
 {
     LocalPosition = position;
     mat4 rotView = mat4(mat3(view));
-    vec4 clipPos = projection * rotView * vec4(position, 1.0);
+    vec4 clipPos = projection_override * rotView * vec4(position, 1.0);
     gl_Position = clipPos.xyww;
     WorldPosition = clipPos;
 }

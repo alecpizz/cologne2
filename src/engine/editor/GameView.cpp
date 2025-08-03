@@ -132,13 +132,21 @@ namespace cologne
             const float scroll_speed = 5.0f;
             float scroll = Input::get_scroll().y * dt * scroll_speed;
             auto camera = Engine::get_scene()->get_scene_camera();
-            auto &cam_transform = camera.get_transform();
-            cam_transform.position = cam_transform.position + cam_transform.get_forward() * scroll;
+            auto& cam_comp = camera.get_component<CameraComponent>();
+            if (cam_comp.orthographic)
+            {
+                cam_comp.ortho_zoom += scroll * -10.0f;
+            }
+            else
+            {
+                auto &cam_transform = camera.get_transform();
+                cam_transform.position = cam_transform.position + cam_transform.get_forward() * scroll;
+            }
         }
 
         if (_selected_entity)
         {
-            ImGuizmo::SetOrthographic(false);
+            ImGuizmo::SetOrthographic(Engine::get_scene()->get_scene_camera().get_component<CameraComponent>().orthographic);
             ImGuizmo::SetDrawlist();
             ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, viewport_size.x, viewport_size.y);
             //
@@ -192,11 +200,12 @@ namespace cologne
                 glm::mat4 world_mat = mat4;
                 if (_selected_entity.has_component<ChildComponent>())
                 {
-                    auto parent_entity = Engine::get_scene()->get_entity_by_uuid(_selected_entity.get_component<ChildComponent>().parent);
+                    auto parent_entity = Engine::get_scene()->get_entity_by_uuid(
+                        _selected_entity.get_component<ChildComponent>().parent);
                     if (parent_entity)
                     {
                         mat4 = glm::inverse(
-                               parent_entity.get_component<WorldTransformComponent>().transform) * mat4;
+                                   parent_entity.get_component<WorldTransformComponent>().transform) * mat4;
                     }
                 }
                 glm::quat orientation;

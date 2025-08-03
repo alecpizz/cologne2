@@ -305,8 +305,8 @@ namespace cologne
                     float radians = glm::radians(degrees);
                     camera.fov_radians = radians;
                 }
+                ImGui::Checkbox("Ortho", &camera.orthographic);
                 ImGui::BeginDisabled(true);
-
                 ImGui::Checkbox("Primary", &camera.primary);
                 ImGui::EndDisabled();
             });

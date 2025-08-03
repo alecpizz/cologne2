@@ -124,6 +124,8 @@ namespace cologne
     {
         float fov_radians = glm::radians(45.0f);
         bool primary = false;
+        bool orthographic = false;
+        float ortho_zoom = 5.0f;
     };
 
     struct PlayerComponent
