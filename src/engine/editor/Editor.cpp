@@ -204,6 +204,14 @@ namespace cologne
                 }
                 ImGui::EndMenu();
             }
+            if (ImGui::BeginMenu("Edit"))
+            {
+                if (ImGui::MenuItem("Re-Calculate Bounds"))
+                {
+                    Engine::get_scene()->re_calculate_bounds();
+                }
+                ImGui::EndMenu();
+            }
             if (ImGui::BeginMenu("Settings"))
             {
                 if (ImGui::MenuItem("Save Layout"))
