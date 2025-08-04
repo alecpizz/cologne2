@@ -1,4 +1,5 @@
-﻿#version 460 core
+﻿
+#version 460 core
 #extension GL_NV_shader_atomic_fp16_vector: require
 #extension GL_NV_gpu_shader5: require
 #extension GL_ARB_bindless_texture: require

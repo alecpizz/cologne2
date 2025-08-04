@@ -350,7 +350,7 @@ void main()
     vec2 brdf  = texture(brdf, vec2(max(dot(N, V), 0.0), roughness)).rg;
     vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 
-    vec3 color = Lo + indirect_light + specular;
+    vec3 color = Lo + indirect_light ;
     if(N.x == 0.0f && N.z == 0.0f && N.y == 0.0f)
     {
         color = albedo;

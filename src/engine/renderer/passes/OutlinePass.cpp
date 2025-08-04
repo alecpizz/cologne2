@@ -72,6 +72,7 @@ namespace cologne
 
         glDrawBuffer(outline_fbo->get_color_attachment_slot_by_name("mask"));
         glDisable(GL_BLEND);
+        glDisable(GL_CULL_FACE);
         mask_shader->bind();
         //draw items into mask
         glBindVertexArray(get_vertex_data_vao());
@@ -100,6 +101,7 @@ namespace cologne
             mask_shader->set_bool("is_skinned", false);
         }
         glBindVertexArray(0);
+        glEnable(GL_CULL_FACE);
         mask_shader->set_bool("is_skinned", false);
         //draw the outline a shit load
         outline_shader->bind();
