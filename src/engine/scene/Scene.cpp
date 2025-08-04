@@ -52,9 +52,9 @@ namespace cologne
             collider.body_id = body_id;
         }
 
-        for (const auto entity : _registry.view<PlayerComponent>())
+        for (const auto entity: _registry.view<PlayerComponent>())
         {
-            auto& pc = _registry.get<PlayerComponent>(entity);
+            auto &pc = _registry.get<PlayerComponent>(entity);
             if (pc.id > 0)
             {
                 continue;
@@ -84,9 +84,9 @@ namespace cologne
             }
         }
 
-        for (const auto entity : _registry.view<AnimatorComponent>())
+        for (const auto entity: _registry.view<AnimatorComponent>())
         {
-            auto& ac = _registry.get<AnimatorComponent>(entity);
+            auto &ac = _registry.get<AnimatorComponent>(entity);
             if (ac.has_ragdoll())
             {
                 ac.create_ragdoll({entity, this});
@@ -570,6 +570,90 @@ namespace cologne
             }
         }
         return {};
+    }
+
+    void Scene::duplicate_recursive(Entity source, std::unordered_map<UUID, UUID> &old_to_new_map)
+    {
+        const auto destination = _registry.create();
+
+        for (auto &&[id, storage]: _registry.storage())
+        {
+            if (storage.contains(source))
+            {
+                storage.push(destination, storage.value(source));
+            }
+        }
+
+
+        Entity new_entity = {destination, this};
+        auto &id_comp = new_entity.get_component<IDComponent>();
+        UUID old_uuid = id_comp.id;
+        id_comp.id = UUID();
+        old_to_new_map[old_uuid] = id_comp.id;
+        _entity_map[id_comp.id] = new_entity;
+
+        if (new_entity.has_component<StaticColliderComponent>())
+        {
+            auto &collider = new_entity.get_component<StaticColliderComponent>();
+            auto mesh = AssetManager::get_mesh_by_name(collider.mesh_name);
+            if (mesh)
+            {
+                uint32_t body_id = Physics::create_static_mesh_collider(
+                    new_entity, new_entity.get_transform(), *mesh);
+                collider.body_id = body_id;
+            }
+        }
+
+        if (new_entity.has_component<ParentComponent>())
+        {
+            auto &source_parent_component = source.get_component<ParentComponent>();
+            for (auto &child_uuid: source_parent_component.children)
+            {
+                Entity child_entity = get_entity_by_uuid(child_uuid);
+                if (child_entity)
+                {
+                    duplicate_recursive(child_entity, old_to_new_map);
+                }
+            }
+        }
+    }
+
+    Entity Scene::duplicate_entity(Entity source)
+    {
+        if (!source)
+        {
+            LOG_ERROR("NO SOURCE ENTITY");
+            return {};
+        }
+
+        std::unordered_map<UUID, UUID> old_to_new_map;
+        duplicate_recursive(source, old_to_new_map);
+
+        for (const auto &[old_id, new_id]: old_to_new_map)
+        {
+            Entity new_entity = get_entity_by_uuid(new_id);
+            if (new_entity.has_component<ChildComponent>())
+            {
+                auto &child_comp = new_entity.get_component<ChildComponent>();
+                UUID old_parent_uuid = child_comp.parent;
+                child_comp.parent = old_to_new_map.at(old_parent_uuid);
+            }
+
+            if (new_entity.has_component<ParentComponent>())
+            {
+                auto &parent_comp = new_entity.get_component<ParentComponent>();
+
+                std::vector<UUID> new_children_uuids;
+                new_children_uuids.reserve(parent_comp.children.size());
+                for (const auto &old_child_uuid: parent_comp.children)
+                {
+                    new_children_uuids.push_back(old_to_new_map.at(old_child_uuid));
+                }
+                parent_comp.children = new_children_uuids;
+            }
+        }
+        UUID top_level = old_to_new_map.at(source.get_uuid());
+        return get_entity_by_uuid(top_level);
     }
 
     void Scene::copy_scene_camera_to_primary_camera()

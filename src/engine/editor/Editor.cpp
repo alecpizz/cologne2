@@ -161,6 +161,16 @@ namespace cologne
                 _selected_entity = {};
             }
         }
+
+        chord = ImGuiMod_Ctrl | ImGuiKey_D;
+        if (ImGui::IsKeyChordPressed(chord))
+        {
+            if (_selected_entity)
+            {
+                auto e = Engine::get_scene()->duplicate_entity(_selected_entity);
+                _selected_entity = e;
+            }
+        }
     }
 
     void open_scene_callback(void *userdata, const char *const*filelist, int filter)

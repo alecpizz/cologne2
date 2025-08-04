@@ -5,14 +5,3321 @@
                 "cologne::ActiveComponent": {
                     "active": true
                 },
+                "cologne::ChildComponent": {
+                    "parent": 12658484384459420826
+                },
                 "cologne::IDComponent": {
-                    "id": 18246952968779459121
+                    "id": 15596002826320681156
                 },
                 "cologne::MeshComponent": {
-                    "mesh_name": "Plane"
+                    "mesh_name": "wall_modular_09_wall"
                 },
                 "cologne::StaticColliderComponent": {
-                    "mesh_name": "Plane"
+                    "mesh_name": "wall_modular_09_wall"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_09_wall"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        1.249999761581421,
+                        1.7323708088785838e-17,
+                        -0.14999999105930328
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.026587719097733498,
+                            0.0,
+                            -0.29881951212882996,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.29881951212882996,
+                            0.0,
+                            0.026587719097733498,
+                            0.0
+                        ],
+                        [
+                            3.8267834186553955,
+                            5.1971125093538126e-18,
+                            6.868161678314209,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 12658484384459420826
+                },
+                "cologne::IDComponent": {
+                    "id": 7154101156278077539
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_09_molding"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_09_molding"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_09_molding"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        1.2499995231628418,
+                        0.0,
+                        -3.552713599391162e-17
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.026587719097733498,
+                            0.0,
+                            -0.29881951212882996,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.29881951212882996,
+                            0.0,
+                            0.026587719097733498,
+                            0.0
+                        ],
+                        [
+                            3.8716063499450684,
+                            0.0,
+                            6.87214994430542,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 12658484384459420826
+                },
+                "cologne::IDComponent": {
+                    "id": 5205015429052322627
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_09_frame"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_09_frame"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_09_frame"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        1.2499985694885254,
+                        1.8546470403671265,
+                        -0.08168350905179977
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.026587719097733498,
+                            0.0,
+                            -0.29881951212882996,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.29881951212882996,
+                            0.0,
+                            0.026587719097733498,
+                            0.0
+                        ],
+                        [
+                            3.8471977710723877,
+                            0.5563941597938538,
+                            6.869978427886963,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 12658484384459420826
+                },
+                "cologne::IDComponent": {
+                    "id": 11419669640397094228
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_09_glass 1"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_09_glass 1"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_09_glass 1"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        1.2420765161514282,
+                        2.2901501655578613,
+                        -0.14445725083351135
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.026587719097733498,
+                            0.0,
+                            -0.29881951212882996,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.29881951212882996,
+                            0.0,
+                            0.026587719097733498,
+                            0.0
+                        ],
+                        [
+                            3.8282291889190674,
+                            0.6870450973510742,
+                            6.870676517486572,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 12658484384459420826
+                },
+                "cologne::IDComponent": {
+                    "id": 8862385808383928257
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_09_door2"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_09_door2"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_09_door2"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        1.2499994039535522,
+                        2.294691324234009,
+                        -0.14460302889347076
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.026587719097733498,
+                            0.0,
+                            -0.29881951212882996,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.29881951212882996,
+                            0.0,
+                            0.026587719097733498,
+                            0.0
+                        ],
+                        [
+                            3.8283960819244385,
+                            0.6884074211120605,
+                            6.868305206298828,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 12658484384459420826
+                },
+                "cologne::IDComponent": {
+                    "id": 3298508712337802456
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_09_glass"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_09_glass"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_09_glass"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        1.2420765161514282,
+                        1.4233968257904053,
+                        -0.058326564729213715
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.026587719097733498,
+                            0.0,
+                            -0.29881951212882996,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.29881951212882996,
+                            0.0,
+                            0.026587719097733498,
+                            0.0
+                        ],
+                        [
+                            3.85396671295166,
+                            0.42701905965805054,
+                            6.872966766357422,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 12658484384459420826
+                },
+                "cologne::IDComponent": {
+                    "id": 2289816202945533600
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_09_door1"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_09_door1"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_09_door1"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        1.2499994039535522,
+                        1.4279378652572632,
+                        -0.041723888367414474
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.026587719097733498,
+                            0.0,
+                            -0.29881951212882996,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.29881951212882996,
+                            0.0,
+                            0.026587719097733498,
+                            0.0
+                        ],
+                        [
+                            3.8591384887695313,
+                            0.42838138341903687,
+                            6.871040344238281,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::IDComponent": {
+                    "id": 12658484384459420826
+                },
+                "cologne::ParentComponent": {
+                    "children": [
+                        2289816202945533600,
+                        3298508712337802456,
+                        8862385808383928257,
+                        11419669640397094228,
+                        5205015429052322627,
+                        7154101156278077539,
+                        15596002826320681156
+                    ]
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_09"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        3.838371753692627,
+                        0.0,
+                        7.245674133300781
+                    ],
+                    "rotation": [
+                        0.7377756237983704,
+                        0.0,
+                        0.6750460267066956,
+                        0.0
+                    ],
+                    "scale": [
+                        0.30000001192092896,
+                        0.30000001192092896,
+                        0.30000001192092896
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.026587719097733498,
+                            0.0,
+                            -0.29881951212882996,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.29881951212882996,
+                            0.0,
+                            0.026587719097733498,
+                            0.0
+                        ],
+                        [
+                            3.838371753692627,
+                            0.0,
+                            7.245674133300781,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 429083708967721972
+                },
+                "cologne::IDComponent": {
+                    "id": 2070688985940954530
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_08_wall"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_08_wall"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_08_wall"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        1.250000238418579,
+                        1.75,
+                        -0.0389937199652195
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            -0.009933412075042725,
+                            0.0,
+                            -0.29983586072921753,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.2998358905315399,
+                            0.0,
+                            -0.0099334130063653,
+                            0.0
+                        ],
+                        [
+                            3.868353843688965,
+                            0.5250000357627869,
+                            5.745511054992676,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 429083708967721972
+                },
+                "cologne::IDComponent": {
+                    "id": 7148308496657868281
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_08_molding"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_08_molding"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_08_molding"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        1.2500003576278687,
+                        -9.53674295089968e-09,
+                        -0.17474010586738586
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            -0.009933412075042725,
+                            0.0,
+                            -0.29983586072921753,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.2998358905315399,
+                            0.0,
+                            -0.0099334130063653,
+                            0.0
+                        ],
+                        [
+                            3.8276522159576416,
+                            -2.8610229740877458e-09,
+                            5.746859550476074,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::IDComponent": {
+                    "id": 429083708967721972
+                },
+                "cologne::ParentComponent": {
+                    "children": [
+                        7148308496657868281,
+                        2070688985940954530
+                    ]
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_08"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        3.8924622535705566,
+                        0.0,
+                        6.1199188232421875
+                    ],
+                    "rotation": [
+                        0.6953015923500061,
+                        0.0,
+                        0.7187180519104004,
+                        0.0
+                    ],
+                    "scale": [
+                        0.3000003695487976,
+                        0.30000001192092896,
+                        0.30000039935112
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            -0.009933412075042725,
+                            0.0,
+                            -0.29983586072921753,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.2998358905315399,
+                            0.0,
+                            -0.0099334130063653,
+                            0.0
+                        ],
+                        [
+                            3.8924622535705566,
+                            0.0,
+                            6.1199188232421875,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 6984803689023576490
+                },
+                "cologne::IDComponent": {
+                    "id": 7327994138390492932
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_07_wall"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_07_wall"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_07_wall"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        0.7500002980232239,
+                        0.0,
+                        -0.14999999105930328
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.023147379979491234,
+                            0.0,
+                            -0.2991057336330414,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.29910579323768616,
+                            0.0,
+                            0.023147383704781532,
+                            0.0
+                        ],
+                        [
+                            3.9182872772216797,
+                            0.0,
+                            4.761056900024414,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 6984803689023576490
+                },
+                "cologne::IDComponent": {
+                    "id": 8196616599034281412
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_07_molding"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_07_molding"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_07_molding"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        0.7500002980232239,
+                        0.0,
+                        -0.15000002086162567
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.023147379979491234,
+                            0.0,
+                            -0.2991057336330414,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.29910579323768616,
+                            0.0,
+                            0.023147383704781532,
+                            0.0
+                        ],
+                        [
+                            3.9182872772216797,
+                            0.0,
+                            4.761056900024414,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::IDComponent": {
+                    "id": 6984803689023576490
+                },
+                "cologne::ParentComponent": {
+                    "children": [
+                        8196616599034281412,
+                        7327994138390492932
+                    ]
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_07"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        3.9457926750183105,
+                        0.0,
+                        4.988858222961426
+                    ],
+                    "rotation": [
+                        0.7338793873786926,
+                        0.0,
+                        0.6792798042297363,
+                        0.0
+                    ],
+                    "scale": [
+                        0.30000007152557373,
+                        0.30000001192092896,
+                        0.3000001311302185
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.023147379979491234,
+                            0.0,
+                            -0.2991057336330414,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.29910579323768616,
+                            0.0,
+                            0.023147383704781532,
+                            0.0
+                        ],
+                        [
+                            3.9457926750183105,
+                            0.0,
+                            4.988858222961426,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 2054885276791383605
+                },
+                "cologne::IDComponent": {
+                    "id": 10297340480276650199
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_06_wall"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_06_wall"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_06_wall"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        1.9999994039535522,
+                        0.0,
+                        -0.14999999105930328
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.008354058489203453,
+                            0.0,
+                            -0.2998899519443512,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.2998836934566498,
+                            0.0,
+                            0.008353884331882,
+                            0.0
+                        ],
+                        [
+                            3.9585068225860596,
+                            4.792764684680151e-06,
+                            3.6460795402526855,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 2054885276791383605
+                },
+                "cologne::IDComponent": {
+                    "id": 10332578408607426794
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_06_molding"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_06_molding"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_06_molding"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        1.9999994039535522,
+                        0.0,
+                        -0.15000002086162567
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.008354058489203453,
+                            0.0,
+                            -0.2998899519443512,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.2998836934566498,
+                            0.0,
+                            0.008353884331882,
+                            0.0
+                        ],
+                        [
+                            3.9585068225860596,
+                            4.792764684680151e-06,
+                            3.6460795402526855,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::IDComponent": {
+                    "id": 2054885276791383605
+                },
+                "cologne::ParentComponent": {
+                    "children": [
+                        10332578408607426794,
+                        10297340480276650199
+                    ]
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_06"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        3.986781358718872,
+                        4.792764684680151e-06,
+                        4.247112274169922
+                    ],
+                    "rotation": [
+                        0.7168843150138855,
+                        0.0,
+                        0.6971921324729919,
+                        0.0
+                    ],
+                    "scale": [
+                        0.30000630021095276,
+                        0.30000001192092896,
+                        0.30000004172325134
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.008354058489203453,
+                            0.0,
+                            -0.2998899519443512,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.2998836934566498,
+                            0.0,
+                            0.008353884331882,
+                            0.0
+                        ],
+                        [
+                            3.986781358718872,
+                            4.792764684680151e-06,
+                            4.247112274169922,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 42617321796544483
+                },
+                "cologne::IDComponent": {
+                    "id": 6225150684410433574
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_05_wall"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_05_wall"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_05_wall"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        1.2499998807907104,
+                        0.0,
+                        -0.14999999105930328
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.018764052540063858,
+                            0.0,
+                            -0.2994128465652466,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.2994132936000824,
+                            0.0,
+                            0.018764080479741096,
+                            0.0
+                        ],
+                        [
+                            3.962909698486328,
+                            0.0,
+                            2.3112480640411377,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 42617321796544483
+                },
+                "cologne::IDComponent": {
+                    "id": 9002425758720166460
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_05_molding"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_05_molding"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_05_molding"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        1.2499998807907104,
+                        0.0,
+                        -0.15000002086162567
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.018764052540063858,
+                            0.0,
+                            -0.2994128465652466,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.2994132936000824,
+                            0.0,
+                            0.018764080479741096,
+                            0.0
+                        ],
+                        [
+                            3.962909698486328,
+                            0.0,
+                            2.3112480640411377,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::IDComponent": {
+                    "id": 42617321796544483
+                },
+                "cologne::ParentComponent": {
+                    "children": [
+                        9002425758720166460,
+                        6225150684410433574
+                    ]
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_05"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        3.9843666553497314,
+                        0.0,
+                        2.688328742980957
+                    ],
+                    "rotation": [
+                        0.7288849949836731,
+                        0.0,
+                        0.684636116027832,
+                        0.0
+                    ],
+                    "scale": [
+                        0.30000025033950806,
+                        0.30000001192092896,
+                        0.30000069737434387
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.018764052540063858,
+                            0.0,
+                            -0.2994128465652466,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.2994132936000824,
+                            0.0,
+                            0.018764080479741096,
+                            0.0
+                        ],
+                        [
+                            3.9843666553497314,
+                            0.0,
+                            2.688328742980957,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 4927170982245087691
+                },
+                "cologne::IDComponent": {
+                    "id": 7699281408564677292
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_04_wall"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_04_wall"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_04_wall"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        2.5,
+                        -9.53674295089968e-09,
+                        -0.1484881341457367
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.0020013549365103245,
+                            0.0,
+                            -0.29999300837516785,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.2999930679798126,
+                            0.0,
+                            0.002001355402171612,
+                            0.0
+                        ],
+                        [
+                            3.9930598735809326,
+                            0.002923545427620411,
+                            0.9487964510917664,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 4927170982245087691
+                },
+                "cologne::IDComponent": {
+                    "id": 213672518393055622
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_04_molding"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_04_molding"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_04_molding"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        2.5,
+                        -1.907348590179936e-08,
+                        -0.15000000596046448
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.0020013549365103245,
+                            0.0,
+                            -0.29999300837516785,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.2999930679798126,
+                            0.0,
+                            0.002001355402171612,
+                            0.0
+                        ],
+                        [
+                            3.9926061630249023,
+                            0.0029235424008220434,
+                            0.9487934112548828,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 4927170982245087691
+                },
+                "cologne::IDComponent": {
+                    "id": 11796661002601728745
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_04_frame"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_04_frame"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_04_frame"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        2.499999761581421,
+                        -0.00790346134454012,
+                        -0.14999987185001373
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.0020013549365103245,
+                            0.0,
+                            -0.29999300837516785,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.2999930679798126,
+                            0.0,
+                            0.002001355402171612,
+                            0.0
+                        ],
+                        [
+                            3.9926064014434814,
+                            0.0005525096785277128,
+                            0.9487934708595276,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::IDComponent": {
+                    "id": 4927170982245087691
+                },
+                "cologne::ParentComponent": {
+                    "children": [
+                        11796661002601728745,
+                        213672518393055622,
+                        7699281408564677292
+                    ]
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_04"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        4.032601833343506,
+                        0.0029235482215881348,
+                        1.6990761756896973
+                    ],
+                    "rotation": [
+                        0.709461510181427,
+                        0.0,
+                        0.7047442197799683,
+                        0.0
+                    ],
+                    "scale": [
+                        0.2999996840953827,
+                        0.30000001192092896,
+                        0.29999974370002747
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.0020013549365103245,
+                            0.0,
+                            -0.29999300837516785,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.2999930679798126,
+                            0.0,
+                            0.002001355402171612,
+                            0.0
+                        ],
+                        [
+                            4.032601833343506,
+                            0.0029235482215881348,
+                            1.6990761756896973,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 767810003483514746
+                },
+                "cologne::IDComponent": {
+                    "id": 1044837231338634936
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_03_wall"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_03_wall"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_03_wall"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        1.2499995231628418,
+                        0.0,
+                        -0.14999999105930328
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.0002675056748557836,
+                            0.0,
+                            0.2999999225139618,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            -0.2999998927116394,
+                            0.0,
+                            0.0002675056457519531,
+                            0.0
+                        ],
+                        [
+                            3.9633326530456543,
+                            0.0,
+                            -0.4866102933883667,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 767810003483514746
+                },
+                "cologne::IDComponent": {
+                    "id": 10288017824557305279
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_03_molding"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_03_molding"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_03_molding"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        1.2499995231628418,
+                        -9.53674295089968e-09,
+                        -0.15000002086162567
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.0002675056748557836,
+                            0.0,
+                            0.2999999225139618,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            -0.2999998927116394,
+                            0.0,
+                            0.0002675056457519531,
+                            0.0
+                        ],
+                        [
+                            3.9633326530456543,
+                            -2.8610229740877458e-09,
+                            -0.4866102933883667,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 767810003483514746
+                },
+                "cologne::IDComponent": {
+                    "id": 5800634197214823900
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_03_frame"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_03_frame"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_03_frame"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        1.2499995231628418,
+                        -9.53674295089968e-09,
+                        -0.15210843086242676
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.0002675056748557836,
+                            0.0,
+                            0.2999999225139618,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            -0.2999998927116394,
+                            0.0,
+                            0.0002675056457519531,
+                            0.0
+                        ],
+                        [
+                            3.9639651775360107,
+                            -2.8610229740877458e-09,
+                            -0.48661085963249207,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::IDComponent": {
+                    "id": 767810003483514746
+                },
+                "cologne::ParentComponent": {
+                    "children": [
+                        5800634197214823900,
+                        10288017824557305279,
+                        1044837231338634936
+                    ]
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_03"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        3.9179983139038086,
+                        0.0,
+                        -0.8615699410438538
+                    ],
+                    "rotation": [
+                        0.7074219584465027,
+                        0.0,
+                        -0.7067914605140686,
+                        0.0
+                    ],
+                    "scale": [
+                        0.30000004172325134,
+                        0.30000001192092896,
+                        0.30000001192092896
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.0002675056748557836,
+                            0.0,
+                            0.2999999225139618,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            -0.2999998927116394,
+                            0.0,
+                            0.0002675056457519531,
+                            0.0
+                        ],
+                        [
+                            3.9179983139038086,
+                            0.0,
+                            -0.8615699410438538,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 14058970532935670026
+                },
+                "cologne::IDComponent": {
+                    "id": 15994255911750326258
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_02_wall"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_02_wall"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_02_wall"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        2.0207273960113525,
+                        -9.53674295089968e-09,
+                        -0.14999999105930328
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            -0.0028310164343565702,
+                            0.0,
+                            -0.29998648166656494,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.29998648166656494,
+                            0.0,
+                            -0.0028310164343565702,
+                            0.0
+                        ],
+                        [
+                            3.9591903686523438,
+                            -1.5261650332831778e-05,
+                            -3.1090259552001953,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 14058970532935670026
+                },
+                "cologne::IDComponent": {
+                    "id": 14249111201264774970
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_02_molding"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_02_molding"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_02_molding"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        2.000000238418579,
+                        -9.53674295089968e-09,
+                        -0.15000002086162567
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            -0.0028310164343565702,
+                            0.0,
+                            -0.29998648166656494,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.29998648166656494,
+                            0.0,
+                            -0.0028310164343565702,
+                            0.0
+                        ],
+                        [
+                            3.959249258041382,
+                            -1.5261650332831778e-05,
+                            -3.1028079986572266,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 14058970532935670026
+                },
+                "cologne::IDComponent": {
+                    "id": 7611276463041755866
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_02_frame"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_02_frame"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_02_frame"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        2.0207271575927734,
+                        -9.53674295089968e-09,
+                        -0.14999988675117493
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            -0.0028310164343565702,
+                            0.0,
+                            -0.29998648166656494,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.29998648166656494,
+                            0.0,
+                            -0.0028310164343565702,
+                            0.0
+                        ],
+                        [
+                            3.959190607070923,
+                            -1.5261650332831778e-05,
+                            -3.1090259552001953,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 14058970532935670026
+                },
+                "cologne::IDComponent": {
+                    "id": 6271537888555234364
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_02_divider"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_02_divider"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_02_divider"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        0.9940911531448364,
+                        -8.940696183401542e-09,
+                        0.0401218980550766
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            -0.0028310164343565702,
+                            0.0,
+                            -0.29998648166656494,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.29998648166656494,
+                            0.0,
+                            -0.0028310164343565702,
+                            0.0
+                        ],
+                        [
+                            4.019130706787109,
+                            -1.526147207187023e-05,
+                            -2.8015871047973633,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::IDComponent": {
+                    "id": 14058970532935670026
+                },
+                "cologne::ParentComponent": {
+                    "children": [
+                        6271537888555234364,
+                        7611276463041755866,
+                        14249111201264774970,
+                        15994255911750326258
+                    ]
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_02"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        4.009909152984619,
+                        -1.52587890625e-05,
+                        -2.5032596588134766
+                    ],
+                    "rotation": [
+                        0.7037624716758728,
+                        0.0,
+                        0.7104353308677673,
+                        0.0
+                    ],
+                    "scale": [
+                        0.29999983310699463,
+                        0.30000001192092896,
+                        0.29999983310699463
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            -0.0028310164343565702,
+                            0.0,
+                            -0.29998648166656494,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.30000001192092896,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.29998648166656494,
+                            0.0,
+                            -0.0028310164343565702,
+                            0.0
+                        ],
+                        [
+                            4.009909152984619,
+                            -1.52587890625e-05,
+                            -2.5032596588134766,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 17577441491457220302
+                },
+                "cologne::IDComponent": {
+                    "id": 11221375087571732450
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_01_wall"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_01_wall"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_01_wall"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        2.0,
+                        0.0,
+                        -0.1511947363615036
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.00010358691361034289,
+                            -4.1077323930288793e-20,
+                            -0.29999998211860657,
+                            0.0
+                        ],
+                        [
+                            1.4437114698173659e-12,
+                            0.30000001192092896,
+                            4.984343143503065e-16,
+                            0.0
+                        ],
+                        [
+                            0.29999998211860657,
+                            -1.4437114698173659e-12,
+                            0.00010358691361034289,
+                            0.0
+                        ],
+                        [
+                            3.9628472328186035,
+                            2.1828148826213284e-13,
+                            -1.6151514053344727,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 17577441491457220302
+                },
+                "cologne::IDComponent": {
+                    "id": 9095730733535184156
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_01_molding"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_01_molding"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_01_molding"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        2.0,
+                        0.0,
+                        -0.15000002086162567
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.00010358691361034289,
+                            -4.1077323930288793e-20,
+                            -0.29999998211860657,
+                            0.0
+                        ],
+                        [
+                            1.4437114698173659e-12,
+                            0.30000001192092896,
+                            4.984343143503065e-16,
+                            0.0
+                        ],
+                        [
+                            0.29999998211860657,
+                            -1.4437114698173659e-12,
+                            0.00010358691361034289,
+                            0.0
+                        ],
+                        [
+                            3.963205575942993,
+                            2.1655667168350712e-13,
+                            -1.615151286125183,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 17577441491457220302
+                },
+                "cologne::IDComponent": {
+                    "id": 6534060303650008589
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_01_frame"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_01_frame"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_01_frame"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        2.0,
+                        -9.53674295089968e-09,
+                        -0.15210843086242676
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.00010358691361034289,
+                            -4.1077323930288793e-20,
+                            -0.29999998211860657,
+                            0.0
+                        ],
+                        [
+                            1.4437114698173659e-12,
+                            0.30000001192092896,
+                            4.984343143503065e-16,
+                            0.0
+                        ],
+                        [
+                            0.29999998211860657,
+                            -1.4437114698173659e-12,
+                            0.00010358691361034289,
+                            0.0
+                        ],
+                        [
+                            3.9625730514526367,
+                            -2.860803371973475e-09,
+                            -1.6151514053344727,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 17577441491457220302
+                },
+                "cologne::IDComponent": {
+                    "id": 16036034146486049251
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "wall_modular_01_divider"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "wall_modular_01_divider"
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_01_divider"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        1.4733617305755615,
+                        -8.940696183401542e-09,
+                        0.0401218980550766
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.00010358691361034289,
+                            -4.1077323930288793e-20,
+                            -0.29999998211860657,
+                            0.0
+                        ],
+                        [
+                            1.4437114698173659e-12,
+                            0.30000001192092896,
+                            4.984343143503065e-16,
+                            0.0
+                        ],
+                        [
+                            0.29999998211860657,
+                            -1.4437114698173659e-12,
+                            0.00010358691361034289,
+                            0.0
+                        ],
+                        [
+                            4.020187854766846,
+                            -2.682266853071269e-09,
+                            -1.4571400880813599,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::IDComponent": {
+                    "id": 17577441491457220302
+                },
+                "cologne::ParentComponent": {
+                    "children": [
+                        16036034146486049251,
+                        6534060303650008589,
+                        9095730733535184156,
+                        11221375087571732450
+                    ]
+                },
+                "cologne::TagComponent": {
+                    "tag": "wall_modular_01"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        4.007998466491699,
+                        0.0,
+                        -1.0151357650756836
+                    ],
+                    "rotation": [
+                        0.7072288393974304,
+                        1.7017239397135175e-12,
+                        0.7069846987724304,
+                        -1.7011365189764649e-12
+                    ],
+                    "scale": [
+                        0.30000001192092896,
+                        0.30000001192092896,
+                        0.30000001192092896
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.00010358691361034289,
+                            -4.1077323930288793e-20,
+                            -0.29999998211860657,
+                            0.0
+                        ],
+                        [
+                            1.4437114698173659e-12,
+                            0.30000001192092896,
+                            4.984343143503065e-16,
+                            0.0
+                        ],
+                        [
+                            0.29999998211860657,
+                            -1.4437114698173659e-12,
+                            0.00010358691361034289,
+                            0.0
+                        ],
+                        [
+                            4.007998466491699,
+                            0.0,
+                            -1.0151357650756836,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 4016005731730303521
+                },
+                "cologne::IDComponent": {
+                    "id": 16994974395717762672
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "drawer_a_drawer3_low"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "drawer_a_drawer3_low"
+                },
+                "cologne::TagComponent": {
+                    "tag": "drawer_a_drawer3_low"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        -0.47797060012817383,
+                        0.3792068064212799,
+                        0.1995680034160614
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.5,
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.5,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.0,
+                            0.5,
+                            0.0
+                        ],
+                        [
+                            2.6671030521392822,
+                            0.18960340321063995,
+                            0.0997840017080307,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 4016005731730303521
+                },
+                "cologne::IDComponent": {
+                    "id": 17856673951237159666
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "drawer_a_drawer2_low"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "drawer_a_drawer2_low"
+                },
+                "cologne::TagComponent": {
+                    "tag": "drawer_a_drawer2_low"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        -0.47797060012817383,
+                        0.5856908559799194,
+                        0.1995680034160614
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.5,
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.5,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.0,
+                            0.5,
+                            0.0
+                        ],
+                        [
+                            2.6671030521392822,
+                            0.2928454279899597,
+                            0.0997840017080307,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 4016005731730303521
+                },
+                "cologne::IDComponent": {
+                    "id": 16634812888125754992
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "drawer_a_drawer1_low"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "drawer_a_drawer1_low"
+                },
+                "cologne::TagComponent": {
+                    "tag": "drawer_a_drawer1_low"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        -0.47797060012817383,
+                        0.7967634201049805,
+                        0.1995680034160614
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.5,
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.5,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.0,
+                            0.5,
+                            0.0
+                        ],
+                        [
+                            2.6671030521392822,
+                            0.39838171005249023,
+                            0.0997840017080307,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 4016005731730303521
+                },
+                "cologne::IDComponent": {
+                    "id": 1933002039033718960
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "drawer_a_base_low"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "drawer_a_base_low"
+                },
+                "cologne::TagComponent": {
+                    "tag": "drawer_a_base_low"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        3.967285010730848e-06,
+                        0.0,
+                        -0.00043192863813601434
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.5,
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.5,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.0,
+                            0.5,
+                            0.0
+                        ],
+                        [
+                            2.906090259552002,
+                            0.0,
+                            -0.00021596431906800717,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::IDComponent": {
+                    "id": 4016005731730303521
+                },
+                "cologne::ParentComponent": {
+                    "children": [
+                        1933002039033718960,
+                        16634812888125754992,
+                        17856673951237159666,
+                        16994974395717762672
+                    ]
+                },
+                "cologne::TagComponent": {
+                    "tag": "drawer_a"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        2.906088352203369,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        0.5,
+                        0.5,
+                        0.5
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.5,
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.5,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.0,
+                            0.5,
+                            0.0
+                        ],
+                        [
+                            2.906088352203369,
+                            0.0,
+                            0.0,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::IDComponent": {
+                    "id": 11711584256221962278
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "drawer_c_drawer_c"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "drawer_c_drawer_c"
+                },
+                "cologne::TagComponent": {
+                    "tag": "drawer_c"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        -1.5529552698135376,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        0.5,
+                        0.5,
+                        0.5
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.5,
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.5,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.0,
+                            0.5,
+                            0.0
+                        ],
+                        [
+                            -1.5529552698135376,
+                            0.0,
+                            0.0,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 14270055866664722586
+                },
+                "cologne::IDComponent": {
+                    "id": 5425933731825127910
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "drawer_b_door2_low"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "drawer_b_door2_low"
+                },
+                "cologne::TagComponent": {
+                    "tag": "drawer_b_door2_low"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        0.19561171531677246,
+                        0.6024383306503296,
+                        0.17053358256816864
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.5,
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.5,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.0,
+                            0.5,
+                            0.0
+                        ],
+                        [
+                            1.7664395570755005,
+                            0.3012191653251648,
+                            0.08526679128408432,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 14270055866664722586
+                },
+                "cologne::IDComponent": {
+                    "id": 3517564317112951797
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "drawer_b_door1_low"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "drawer_b_door1_low"
+                },
+                "cologne::TagComponent": {
+                    "tag": "drawer_b_door1_low"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        -0.19756218791007996,
+                        0.6024383306503296,
+                        0.17055976390838623
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.5,
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.5,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.0,
+                            0.5,
+                            0.0
+                        ],
+                        [
+                            1.569852590560913,
+                            0.3012191653251648,
+                            0.08527988195419312,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::ChildComponent": {
+                    "parent": 14270055866664722586
+                },
+                "cologne::IDComponent": {
+                    "id": 3585009343586066938
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "drawer_b_base_low"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "drawer_b_base_low"
+                },
+                "cologne::TagComponent": {
+                    "tag": "drawer_b_base_low"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        2.5243758500437252e-05,
+                        0.0001310039806412533,
+                        6.761550594092114e-06
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.5,
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.5,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.0,
+                            0.5,
+                            0.0
+                        ],
+                        [
+                            1.6686463356018066,
+                            6.550199032062665e-05,
+                            3.380775297046057e-06,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::IDComponent": {
+                    "id": 14270055866664722586
+                },
+                "cologne::ParentComponent": {
+                    "children": [
+                        3585009343586066938,
+                        3517564317112951797,
+                        5425933731825127910
+                    ]
+                },
+                "cologne::TagComponent": {
+                    "tag": "drawer_b"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        1.6686336994171143,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        0.5,
+                        0.5,
+                        0.5
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.5,
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.5,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.0,
+                            0.5,
+                            0.0
+                        ],
+                        [
+                            1.6686336994171143,
+                            0.0,
+                            0.0,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::IDComponent": {
+                    "id": 8347068283550828579
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "drawer_c_drawer_c"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "drawer_c_drawer_c"
+                },
+                "cologne::TagComponent": {
+                    "tag": "drawer_c"
+                },
+                "cologne::TransformComponent": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        0.5,
+                        0.5,
+                        0.5
+                    ]
+                },
+                "cologne::WorldTransformComponent": {
+                    "transform": [
+                        [
+                            0.5,
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.5,
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.0,
+                            0.5,
+                            0.0
+                        ],
+                        [
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "components": {
+                "cologne::ActiveComponent": {
+                    "active": true
+                },
+                "cologne::IDComponent": {
+                    "id": 7400071571938674681
+                },
+                "cologne::MeshComponent": {
+                    "mesh_name": "plane_Plane"
+                },
+                "cologne::StaticColliderComponent": {
+                    "mesh_name": "plane_Plane"
                 },
                 "cologne::TagComponent": {
                     "tag": "plane"
@@ -31,7 +3338,7 @@
                     ],
                     "scale": [
                         10.0,
-                        1.0,
+                        10.0,
                         10.0
                     ]
                 },
@@ -45,7 +3352,7 @@
                         ],
                         [
                             0.0,
-                            1.0,
+                            10.0,
                             0.0,
                             0.0
                         ],
@@ -144,6 +3451,8 @@
                 },
                 "cologne::CameraComponent": {
                     "fov_radians": 0.7853981852531433,
+                    "ortho_zoom": 5.0,
+                    "orthographic": false,
                     "primary": true
                 },
                 "cologne::IDComponent": {
@@ -154,15 +3463,15 @@
                 },
                 "cologne::TransformComponent": {
                     "position": [
-                        -3.0,
-                        1.4500000476837158,
-                        0.0
+                        6.071478843688965,
+                        0.4500000476837158,
+                        -0.8605048656463623
                     ],
                     "rotation": [
-                        0.9975188970565796,
-                        0.07002419233322144,
-                        0.0072410921566188335,
-                        -0.0005083128344267607
+                        -0.5957046747207642,
+                        -0.010739639401435852,
+                        0.8030012845993042,
+                        -0.014476878568530083
                     ],
                     "scale": [
                         1.0,
@@ -173,27 +3482,27 @@
                 "cologne::WorldTransformComponent": {
                     "transform": [
                         [
-                            0.9998946189880371,
-                            0.0,
-                            -0.014517441391944885,
+                            -0.2900412082672119,
+                            7.199396634405275e-10,
+                            0.9570142030715942,
                             0.0
                         ],
                         [
-                            0.0020282065961509943,
-                            0.990192711353302,
-                            0.13969354331493378,
+                            -0.03449577838182449,
+                            0.9993501305580139,
+                            -0.010454597882926464,
                             0.0
                         ],
                         [
-                            0.01437506452202797,
-                            -0.1397082656621933,
-                            0.9900883436203003,
+                            -0.9563922882080078,
+                            -0.03604521229863167,
+                            -0.28985273838043213,
                             0.0
                         ],
                         [
-                            -3.0,
-                            1.4500000476837158,
-                            0.0,
+                            6.071478843688965,
+                            0.4500000476837158,
+                            -0.8605048656463623,
                             1.0
                         ]
                     ]
@@ -209,7 +3518,7 @@
                     "base_clip": "vsk_Idle",
                     "current_clip": "vsk_Idle",
                     "current_state": 0,
-                    "current_time": 1667.6104736328125,
+                    "current_time": 1395.67529296875,
                     "has_ragdoll": false,
                     "model_name": "vsk"
                 },
@@ -224,15 +3533,15 @@
                 },
                 "cologne::TransformComponent": {
                     "position": [
-                        -3.06266450881958,
-                        1.1552032232284546,
-                        0.16131380200386047
+                        5.908034324645996,
+                        0.17453515529632568,
+                        -0.9769567847251892
                     ],
                     "rotation": [
-                        0.99751877784729,
-                        0.07002528011798859,
-                        0.007242286577820778,
-                        -0.0005082336138002574
+                        0.5958237051963806,
+                        0.010755715891718864,
+                        -0.8029122352600098,
+                        0.01450309157371521
                     ],
                     "scale": [
                         1.0,
@@ -261,27 +3570,27 @@
                 "cologne::WorldTransformComponent": {
                     "transform": [
                         [
-                            0.9998945593833923,
-                            3.4121330827474594e-07,
-                            -0.014519811607897282,
+                            -0.28975677490234375,
+                            1.077986689779209e-05,
+                            0.9571002721786499,
                             0.0
                         ],
                         [
-                            0.0020282315090298653,
-                            0.9901924133300781,
-                            0.13969570398330688,
+                            -0.034554362297058105,
+                            0.9993479251861572,
+                            -0.010472399182617664,
                             0.0
                         ],
                         [
-                            0.014377455227077007,
-                            -0.1397104263305664,
-                            0.9900880455970764,
+                            -0.9564763307571411,
+                            -0.03610644116997719,
+                            -0.2895674705505371,
                             0.0
                         ],
                         [
-                            -3.06266450881958,
-                            1.1552032232284546,
-                            0.16131380200386047,
+                            5.908034324645996,
+                            0.17453515529632568,
+                            -0.9769567847251892,
                             1.0
                         ]
                     ]
@@ -311,7 +3620,7 @@
                     "maxStepVelocity": 12.5,
                     "minStepInterval": 0.15000000596046448,
                     "minStepVelocity": 2.5,
-                    "move_speed": 5.0,
+                    "move_speed": 3.0,
                     "run_acceleration": 7.0,
                     "run_deceleration": 3.0,
                     "side_strafe_acceleration": 15.0,
@@ -323,9 +3632,9 @@
                 },
                 "cologne::TransformComponent": {
                     "position": [
-                        -3.0,
-                        2.457090886309743e-08,
-                        0.0
+                        6.071478843688965,
+                        -1.0,
+                        -0.8605048656463623
                     ],
                     "rotation": [
                         1.0,
@@ -360,9 +3669,9 @@
                             0.0
                         ],
                         [
-                            -3.0,
-                            2.457090886309743e-08,
-                            0.0,
+                            6.071478843688965,
+                            -1.0,
+                            -0.8605048656463623,
                             1.0
                         ]
                     ]
@@ -376,6 +3685,8 @@
                 },
                 "cologne::CameraComponent": {
                     "fov_radians": 0.7853981852531433,
+                    "ortho_zoom": 5.0,
+                    "orthographic": false,
                     "primary": false
                 },
                 "cologne::IDComponent": {
@@ -389,15 +3700,15 @@
                 },
                 "cologne::TransformComponent": {
                     "position": [
-                        -2.6476664543151855,
-                        2.2147023677825928,
-                        -6.068368434906006
+                        6.2476487159729,
+                        1.1928000450134277,
+                        7.561339855194092
                     ],
                     "rotation": [
-                        0.9960724711418152,
-                        0.08813471347093582,
-                        0.008441868238151073,
-                        -0.0007469553383998573
+                        0.5038844347000122,
+                        0.050678543746471405,
+                        -0.857954740524292,
+                        0.0862894207239151
                     ],
                     "scale": [
                         1.0,
@@ -408,27 +3719,27 @@
                 "cologne::WorldTransformComponent": {
                     "transform": [
                         [
-                            0.9998563528060913,
-                            -1.1641532182693481e-10,
-                            -0.016949089244008064,
+                            -0.4870643615722656,
+                            4.6339820869434334e-10,
+                            0.873366117477417,
                             0.0
                         ],
                         [
-                            0.0029760864563286304,
-                            0.9844634532928467,
-                            0.17556451261043549,
+                            -0.17391958832740784,
+                            0.9799716472625732,
+                            -0.09699257463216782,
                             0.0
                         ],
                         [
-                            0.016685759648680687,
-                            -0.17558972537517548,
-                            0.9843220114707947,
+                            -0.8558740615844727,
+                            -0.19913709163665771,
+                            -0.4773092269897461,
                             0.0
                         ],
                         [
-                            -2.6476664543151855,
-                            2.2147023677825928,
-                            -6.068368434906006,
+                            6.2476487159729,
+                            1.1928000450134277,
+                            7.561339855194092,
                             1.0
                         ]
                     ]

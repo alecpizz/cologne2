@@ -27,7 +27,7 @@ namespace cologne
 
     struct MeshCacheHeader
     {
-        char name[256];
+        char name[512];
         uint32_t vertex_count;
         uint32_t index_count;
         glm::vec3 aabb_min;

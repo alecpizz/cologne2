@@ -242,6 +242,7 @@ namespace cologne::FileUtil
         ModelData result_data;
         process_node(result_data.meshes, scene->mRootNode, scene, {});
         process_materials(result_data.materials, scene);
+        result_data.name = get_file_name(path);
         for (auto &mesh: result_data.meshes)
         {
             glm::vec3 pos;
@@ -250,8 +251,8 @@ namespace cologne::FileUtil
             Util::decompose_mat4(mesh.inverse_bind_pose, pos, rot, scale);
             result_data.aabb_max = glm::max(result_data.aabb_max, mesh.aabb_max);
             result_data.aabb_min = glm::min(result_data.aabb_min, mesh.aabb_min);
+            mesh.name = result_data.name + "_" + mesh.name;
         }
-        result_data.name = get_file_name(path);
         return result_data;
     }
 

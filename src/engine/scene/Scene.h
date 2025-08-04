@@ -55,6 +55,8 @@ namespace cologne
 
         Entity get_scene_camera();
 
+        Entity duplicate_entity(Entity source);
+
         void copy_scene_camera_to_primary_camera();
 
         void update_transforms();
@@ -68,7 +70,7 @@ namespace cologne
         std::string _scene_name = "untitled_scene.cscn";
 
         void update_children(entt::entity parent);
-
+        void duplicate_recursive(Entity source, std::unordered_map<UUID, UUID>& old_to_new_map);
         void initialize_special_types();
 
         AABB _scene_bounds;

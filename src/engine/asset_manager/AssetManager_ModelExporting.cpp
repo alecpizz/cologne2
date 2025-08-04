@@ -154,7 +154,7 @@ namespace cologne::AssetManager
         for (const auto &mesh: model_data.meshes)
         {
             MeshCacheHeader mesh_header;
-            copy_name(mesh_header.name, mesh.name);
+            copy_name(mesh_header.name, mesh.name, 512);
             mesh_header.aabb_max = mesh.aabb_max;
             mesh_header.aabb_min = mesh.aabb_min;
             mesh_header.index_count = mesh.indices.size();

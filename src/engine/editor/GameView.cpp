@@ -156,19 +156,28 @@ namespace cologne
             ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, viewport_size.x, viewport_size.y);
             //
             //
+            bool snap = false;
+            static float snap_threshold = 1.0f;
             if (ImGui::IsWindowHovered() && !Input::mouse_down(Input::MouseButton::Right))
             {
                 if (Input::key_pressed(Input::Key::W))
                 {
                     current_operation = ImGuizmo::OPERATION::TRANSLATE;
+                    snap_threshold = 1.0f;
                 }
                 else if (Input::key_pressed(Input::Key::E))
                 {
                     current_operation = ImGuizmo::OPERATION::ROTATE;
+                    snap_threshold = 15.0f;
                 }
                 else if (Input::key_pressed(Input::Key::R))
                 {
                     current_operation = ImGuizmo::OPERATION::SCALE;
+                    snap_threshold = 0.2f;
+                }
+                else if (Input::key_down(Input::Key::LeftCtrl))
+                {
+                    snap = true;
                 }
                 else if (Input::key_pressed(Input::Key::F))
                 {
@@ -198,7 +207,7 @@ namespace cologne
                 }
             }
             bool changed = ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(proj),
-                                                current_operation, ImGuizmo::LOCAL, glm::value_ptr(mat4));
+                                                current_operation, ImGuizmo::LOCAL, glm::value_ptr(mat4), nullptr, snap ? &snap_threshold : nullptr);
             //
             if (changed)
             {
