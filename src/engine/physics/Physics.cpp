@@ -648,6 +648,7 @@ namespace cologne::Physics
 
     float accumulation_time = 0.0f;
     float fixed_delta_time = 1.0 / 60.0f;
+
     void update(float dt)
     {
         if (cologne::Input::key_pressed(Input::Key::P))
@@ -675,7 +676,7 @@ namespace cologne::Physics
                 p.character_position = glm::vec3(character->GetPosition().GetX(), character->GetPosition().GetY(),
                                                  character->GetPosition().GetZ());
             }
-            const int collisionSteps = 1;
+            const int collisionSteps = 4;
             accumulation_time += dt;
             while (accumulation_time >= fixed_delta_time)
             {
@@ -689,7 +690,7 @@ namespace cologne::Physics
             BodyManager::DrawSettings draw_settings;
             draw_settings.mDrawShape = true;
             draw_settings.mDrawShapeWireframe = true;
-            physics_system.DrawBodies(draw_settings, debug_renderer, &body_draw_filter);
+            physics_system.DrawBodies(draw_settings, debug_renderer);
         }
     }
 
@@ -869,11 +870,13 @@ namespace cologne::Physics
                 triangle_list.emplace_back(triangle);
             }
             JPH::MeshShapeSettings mesh_settings(triangle_list);
+            mesh_settings.mMaxTrianglesPerLeaf = 4;
+            mesh_settings.mBuildQuality = MeshShapeSettings::EBuildQuality::FavorRuntimePerformance;
             mesh_settings.SetEmbedded();
             auto result = mesh_settings.Create();
             mesh_shape = result.Get();
             //export now
-            std::ofstream file (path, std::ios::binary);
+            std::ofstream file(path, std::ios::binary);
             if (!file.is_open())
             {
                 LOG_ERROR("Couldn't open file to export collision shape!");
@@ -897,7 +900,8 @@ namespace cologne::Physics
             JPH::StreamInWrapper stream_in(file);
             JPH::Shape::IDToShapeMap id_to_shape_map;
             JPH::Shape::IDToMaterialMap id_to_material_map;
-            JPH::Shape::ShapeResult result = JPH::Shape::sRestoreWithChildren(stream_in, id_to_shape_map, id_to_material_map);
+            JPH::Shape::ShapeResult result = JPH::Shape::sRestoreWithChildren(
+                stream_in, id_to_shape_map, id_to_material_map);
             file.close();
             if (result.IsValid())
             {
@@ -909,25 +913,20 @@ namespace cologne::Physics
                 return -1;
             }
         }
-        auto settings = BodyCreationSettings(mesh_shape, JPH::Vec3::sZero(),
-                                             JPH::Quat::sIdentity(), JPH::EMotionType::Static,
-                                             cologne::Physics::NON_MOVING);
-
-        auto &body_interface = physics_system.GetBodyInterface();
-        auto id = body_interface.CreateAndAddBody(
-            settings, JPH::EActivation::DontActivate);
-        const auto shape = body_interface.GetShape(id);
-        const auto new_shape = shape->ScaleShape(glm_vec3_to_jph_vec3(transform.scale)).Get();
-        body_interface.SetShape(id, new_shape, true, EActivation::DontActivate);
         auto quat = glm_quat_to_jph_quat(transform.rotation);
         if (!quat.IsNormalized())
         {
             LOG_INFO("Quat isn't normalized!");
             quat = quat.sIdentity();
         }
-        body_interface.SetPositionAndRotation(id, glm_vec3_to_jph_vec3(transform.position),
-                                              quat,
-                                              EActivation::DontActivate);
+        auto settings = BodyCreationSettings(new ScaledShapeSettings(mesh_shape,
+                                                                     glm_vec3_to_jph_vec3(transform.scale)),
+                                             glm_vec3_to_jph_vec3(transform.position), quat, JPH::EMotionType::Static,
+                                             cologne::Physics::NON_MOVING);
+
+        auto &body_interface = physics_system.GetBodyInterface();
+        auto id = body_interface.CreateAndAddBody(
+            settings, JPH::EActivation::DontActivate);
         LOG_INFO("Created collider with id %d", id);
         colliders_static.push_back(id);
         physics_system.OptimizeBroadPhase();
@@ -964,16 +963,31 @@ namespace cologne::Physics
                 LOG_INFO("scale too smol");
                 scale = JPH::Vec3::sOne();
             }
-            auto &body_interface = physics_system.GetBodyInterface();
-            const auto shape = body_interface.GetShape(body_id);
-            const auto new_shape = shape->ScaleShape(scale).Get();
-            body_interface.SetShape(body_id, new_shape, true, EActivation::DontActivate);
-            if (!rot.IsNormalized())
+            BodyLockWrite lock(physics_system.GetBodyLockInterface(), body_id);
+            if (lock.Succeeded())
             {
-                LOG_INFO("Quat isn't normalized!");
-                rot = JPH::Quat::sIdentity();
+                Body &body = lock.GetBody();
+                const Shape *non_scaled_shape;
+                if (body.GetShape()->GetSubType() != EShapeSubType::Scaled)
+                {
+                    non_scaled_shape = body.GetShape();
+                }
+                else
+                {
+                    const auto *scaled_shape = reinterpret_cast<const ScaledShape *>(body.GetShape());
+                    non_scaled_shape = scaled_shape->GetInnerShape();
+                    if (!non_scaled_shape)
+                    {
+                        LOG_ERROR("no internal shape!");
+                        return;
+                    }
+                }
+                Shape::ShapeResult new_shape = non_scaled_shape->ScaleShape(scale);
+                physics_system.GetBodyInterfaceNoLock().SetShape(body.GetID(), new_shape.Get(), false,
+                                                                 EActivation::DontActivate);
+                physics_system.GetBodyInterfaceNoLock().SetPositionAndRotation(
+                    body_id, pos, rot, EActivation::DontActivate);
             }
-            body_interface.SetPositionAndRotation(body_id, pos, rot, EActivation::DontActivate);
         }
     }
 

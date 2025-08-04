@@ -125,13 +125,13 @@ namespace cologne
     {
         if (std::string(path).empty())
         {
-            Scene();
+            LOG_ERROR("NO PATH TO SCENE");
             return;
         }
         SceneSaver saver_temp(this);
         saver_temp.deserialize(path);
         initialize_special_types();
-        Physics::create_infinite_ground_plane(glm::vec3(0.0f, 1.0f, 0.0f), 1.0f);
+        Physics::create_infinite_ground_plane(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
         re_calculate_bounds();
         LOG_INFO("Scene bounds are min (%f, %f, %f), max (%f, %f, %f)", _scene_bounds.min.x, _scene_bounds.min.y,
                  _scene_bounds.min.z, _scene_bounds.max.z, _scene_bounds.max.y, _scene_bounds.max.z);

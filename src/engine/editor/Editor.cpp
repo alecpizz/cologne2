@@ -230,6 +230,8 @@ namespace cologne
                 }
                 ImGui::EndMenu();
             }
+
+            ImGui::Text("FPS %.f", ImGui::GetIO().Framerate);
             ImGui::EndMainMenuBar();
         }
     }
