@@ -81,6 +81,20 @@ namespace cologne
         UUID parent;
     };
 
+    struct RigidbodyComponent
+    {
+        uint32_t body_id;
+        glm::mat4 get_transform()
+        {
+            return Physics::get_rigidbody_transform(body_id);
+        }
+    };
+
+    struct ConvexMeshColliderComponent
+    {
+        std::string mesh_name;
+    };
+
     struct ActiveComponent
     {
         bool active = true;

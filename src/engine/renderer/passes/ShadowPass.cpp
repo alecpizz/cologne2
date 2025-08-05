@@ -27,7 +27,7 @@ namespace cologne
         glBindTexture(GL_TEXTURE_CUBE_MAP, handle_result);
         for (uint32_t i = 0; i < 6; i++)
         {
-            constexpr int32_t size = 1024;
+            constexpr int32_t size = 512;
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT16,
                          size, size, 0, GL_DEPTH_COMPONENT,
                          GL_FLOAT, nullptr);
@@ -154,16 +154,6 @@ namespace cologne
             glm::mat4 light_space = light_projection * light_view;
             light.light_space_matrix = light_space;
 
-            // cull_shader->bind();
-            // cull_shader->set_int("non_cull_amount", 1);
-            // get_ssbo_by_name("draw_cmds")->bind(6);
-            // const int work_group_size = 64;
-            // cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
-            // cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
-            // get_ssbo_by_name("skinned_draw_cmds")->bind(6);
-            // cull_shader->dispatch((_skinned_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
-            // cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
-
             shadow_shader->bind();
             shadow_shader->set_mat4("lightSpaceMatrix", light_space);
             render_geometry();
@@ -176,8 +166,6 @@ namespace cologne
     {
         OpenGLDebugScope scope("Renderer::point_shadow_pass");
         auto point_shadow_shader = get_shader_by_name("point_shadow");
-        // auto cull_shader = get_shader_by_name("frustum_culling");
-
 
         for (auto &light: _lights)
         {
@@ -193,7 +181,7 @@ namespace cologne
 
             if (point_light_counter > _point_shadow_maps.size() - 1 || _point_shadow_maps.empty())
             {
-                auto& texture = _point_shadow_maps.emplace_back(create_point_shadow_texture(), 1024, 1024, 1);
+                auto& texture = _point_shadow_maps.emplace_back(create_point_shadow_texture(), 512, 512, 1);
                 texture.make_resident();
             }
             light.shadow_handle = _point_shadow_maps[point_light_counter].get_bindless_handle();

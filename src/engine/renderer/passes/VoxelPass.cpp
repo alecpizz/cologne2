@@ -118,9 +118,14 @@ namespace cologne
         glBindTexture(GL_TEXTURE_3D, 0);
     }
 
-
+    static bool has_voxelized = false;
     void Renderer::voxelize_scene()
     {
+        if (!Editor::in_edit_mode() && has_voxelized)
+        {
+            return;
+        }
+        has_voxelized = true;
         OpenGLDebugScope scope("Renderer::voxelize_scene");
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);

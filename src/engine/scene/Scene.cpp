@@ -517,6 +517,7 @@ namespace cologne
         return player;
     }
 
+
     Entity Scene::create_scene_camera_entity()
     {
         Entity scene_camera = create_entity("Scene Camera");

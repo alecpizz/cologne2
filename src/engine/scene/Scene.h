@@ -47,6 +47,7 @@ namespace cologne
 
         Entity create_player_entity(glm::vec3 pos);
 
+        Entity create_physics_cube(glm::vec3 pos);
         Entity create_scene_camera_entity();
 
         void destroy_entity(Entity entity);

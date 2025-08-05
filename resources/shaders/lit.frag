@@ -336,11 +336,11 @@ void main()
     if (indirect_lighting_active)
     {
         indirect_light = texture(indirect_texture, TexCoords).rgb;
-        float factor = min(1, roughness * 1.5);
-        indirect_light *= (0.3) * vec3(factor);
-        indirect_light = max(indirect_light, vec3(0));
+//        float factor = min(1, roughness);
+//        indirect_light *= (0.85) * vec3(factor);
+//        indirect_light = max(indirect_light, vec3(0));
         indirect_light *= albedo;
-        indirect_light *= 0.85f;
+        indirect_light *= 0.235f;
         //        indirect_light = max(indirect_light, emission);
     }
 

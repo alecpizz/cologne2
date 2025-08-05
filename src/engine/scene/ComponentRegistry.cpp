@@ -138,6 +138,11 @@ entt::meta_factory<T>() \
         REGISTER_COMPONENT(StaticColliderComponent)
                 REGISTER_PROPERTY(StaticColliderComponent, mesh_name);
 
+        REGISTER_COMPONENT(RigidbodyComponent);
+
+        REGISTER_COMPONENT(ConvexMeshColliderComponent)
+                REGISTER_PROPERTY(ConvexMeshColliderComponent, mesh_name);
+
         REGISTER_COMPONENT(PlayerComponent)
                 REGISTER_PROPERTY(PlayerComponent, camera)
                 REGISTER_PROPERTY(PlayerComponent, viewmodel)
@@ -187,9 +192,9 @@ entt::meta_factory<T>() \
                 REGISTER_PROPERTY(LightComponent, cast_shadows);
 
         REFLECT_ENUM(LightComponent::LightType)
-            ENUMERATOR(LightComponent::LightType, Directional)
-            ENUMERATOR(LightComponent::LightType, Point)
-            ENUMERATOR(LightComponent::LightType, Spot);
+                ENUMERATOR(LightComponent::LightType, Directional)
+                ENUMERATOR(LightComponent::LightType, Point)
+                ENUMERATOR(LightComponent::LightType, Spot);
 
         REGISTER_COMPONENT(AnimatorComponent)
                 .func<[](AnimatorComponent &comp, nlohmann::json &j)
