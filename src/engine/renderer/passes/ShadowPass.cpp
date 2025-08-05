@@ -207,16 +207,6 @@ namespace cologne
             glClear(GL_DEPTH_BUFFER_BIT);
             point_light_counter++;
             glm::vec3 position = light.position;
-            //
-            // cull_shader->bind();
-            // cull_shader->set_int("non_cull_amount", 1);
-            // get_ssbo_by_name("draw_cmds")->bind(6);
-            // const int work_group_size = 64;
-            // cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
-            // cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
-            // get_ssbo_by_name("skinned_draw_cmds")->bind(6);
-            // cull_shader->dispatch((_render_items.size() + work_group_size - 1) / work_group_size, 1, 1);
-            // cull_shader->wait(GL_SHADER_STORAGE_BARRIER_BIT);
 
             point_shadow_shader->bind();
             point_shadow_shader->set_mat4("light_space_matrices", create_shadow_projection_matrices(position, light.radius));
