@@ -67,17 +67,40 @@ void main()
     }
     gEntityId = EntityID;
     gPosition = vec4(FragPos, 1.0);
-    vec3 N = texture(sampler2D(mat.normal), TexCoords).rgb;
+    vec3 N;
+    if(mat.normal == vec2(0))
+    {
+        N = Normal;
+    }
+    else
+    {
+        N = texture(sampler2D(mat.normal), TexCoords).rgb;
+    }
     N = N * 2.0 - 1.0;
     N = normalize(TBN * N);
     gNormal = vec4(N, 1.0);
 
     gEmission = texture(sampler2D(mat.emission), TexCoords).rgb;
     gl_FragDepth = gl_FragCoord.z;
-    gORM.r = texture(sampler2D(mat.metallic), TexCoords).b;
-    gORM.r *= mat.metallic_mod;
+    if(mat.metallic == uvec2(0))
+    {
+        gORM.r = mat.metallic_mod;
+    }
+    else
+    {
+        gORM.r = texture(sampler2D(mat.metallic), TexCoords).b;
+        gORM.r *= mat.metallic_mod;
+    }
 
-    gORM.g = texture(sampler2D(mat.roughness), TexCoords).g;
+    if(mat.roughness == uvec2(0))
+    {
+        gORM.g = mat.roughness_mod;
+    }
+    else
+    {
+        gORM.g = texture(sampler2D(mat.roughness), TexCoords).g;
+        gORM.g *= mat.roughness_mod;
+    }
 
     gORM.b = texture(sampler2D(mat.ao), TexCoords).b;
 

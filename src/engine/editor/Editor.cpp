@@ -13,6 +13,7 @@
 #include "engine/imguiThemes.h"
 #include <imgui.h>
 #include <engine/audio/Audio.h>
+#include <engine/scene/SceneSaver.h>
 #include <misc/cpp/imgui_stdlib.h>
 
 namespace cologne
@@ -74,6 +75,7 @@ namespace cologne
         material_font = io.Fonts->AddFontFromFileTTF(RESOURCES_PATH "fonts/MaterialIcons-Regular.ttf", 48.0f);
         std::setlocale(LC_CTYPE, ".UTF8");
         ImGuiStyle &style = ImGui::GetStyle();
+        style.WindowMenuButtonPosition = ImGuiDir_None;
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
             //style.WindowRounding = 0.0f;
@@ -84,6 +86,7 @@ namespace cologne
         Audio::add_sound(_accept_sound);
         Audio::add_sound(_cancel_sound);
         Audio::add_sound(_move_sound);
+        initialize_reflection_editor();
     }
 
     Editor::~Editor()
@@ -134,6 +137,55 @@ namespace cologne
         ImGui::DockSpace(dock_space_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
     }
 
+    void Editor::handle_hotkeys()
+    {
+        if (_mouse_captured)
+        {
+            return;
+        }
+
+        auto io = ImGui::GetIO();
+        ImGuiKeyChord chord = ImGuiMod_Ctrl | ImGuiKey_S;
+        if (ImGui::IsKeyChordPressed(chord))
+        {
+            SceneSaver saver(Engine::get_scene());
+            saver.serialize(RESOURCES_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name());
+        }
+
+        chord = ImGuiKey_Delete;
+        if (ImGui::IsKeyChordPressed(chord))
+        {
+            if (_selected_entity)
+            {
+                Engine::get_scene()->destroy_entity(_selected_entity);
+                _selected_entity = {};
+            }
+        }
+
+        chord = ImGuiMod_Ctrl | ImGuiKey_D;
+        if (ImGui::IsKeyChordPressed(chord))
+        {
+            if (_selected_entity)
+            {
+                auto e = Engine::get_scene()->duplicate_entity(_selected_entity);
+                _selected_entity = e;
+            }
+        }
+    }
+
+    void open_scene_callback(void *userdata, const char *const*filelist, int filter)
+    {
+        if (!filelist)
+        {
+            return;
+        }
+        const char *file = *filelist;
+        if (!file)
+        {
+            return;
+        }
+        Engine::load_scene(file);
+    }
 
     void Editor::build_main_menu_bar()
     {
@@ -141,9 +193,32 @@ namespace cologne
         {
             if (ImGui::BeginMenu("File"))
             {
+                if (ImGui::MenuItem("Load Scene"))
+                {
+                    Engine::get_window()->show_file_dialogue_window({{"Scene Files", "cscn"}, {"All Files", "*"}},
+                                                                    RESOURCES_PATH "scenes",
+                                                                    reinterpret_cast<void *>(open_scene_callback));
+                }
+                if (ImGui::MenuItem("Save Scene"))
+                {
+                    SceneSaver saver(Engine::get_scene());
+                    saver.serialize(RESOURCES_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name());
+                }
+                if (ImGui::MenuItem("Save Scene As"))
+                {
+                    //open a save file dialogue
+                }
                 if (ImGui::MenuItem("Exit"))
                 {
                     Engine::get_event_manager()->set_should_quit(true);
+                }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Edit"))
+            {
+                if (ImGui::MenuItem("Re-Calculate Bounds"))
+                {
+                    Engine::get_scene()->re_calculate_bounds();
                 }
                 ImGui::EndMenu();
             }
@@ -155,6 +230,8 @@ namespace cologne
                 }
                 ImGui::EndMenu();
             }
+
+            ImGui::Text("FPS %.f", ImGui::GetIO().Framerate);
             ImGui::EndMainMenuBar();
         }
     }
@@ -163,6 +240,7 @@ namespace cologne
     {
         if (active)
         {
+            handle_hotkeys();
             build_main_window();
             build_main_menu_bar();
             build_scene_graph();
@@ -192,6 +270,4 @@ namespace cologne
             SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
         }
     }
-
-
 }

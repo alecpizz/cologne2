@@ -361,6 +361,29 @@ namespace cologne::AssetManager
         }
     }
 
+    void cleanup()
+    {
+        animations.clear();
+        models.clear();
+        skinned_models.clear();
+        meshes.clear();
+        skinned_meshes.clear();
+        for (auto& material : materials)
+        {
+            material.cleanup_all();
+        }
+        materials.clear();
+        model_index_map.clear();
+        skinned_model_index_map.clear();
+        animation_index_map.clear();
+        mesh_index_map.clear();
+        skinned_mesh_index_map.clear();
+        vertices.clear();
+        weighted_vertices.clear();
+        indices.clear();
+        weighted_indices.clear();
+    }
+
     void print_animations()
     {
         for (auto &anim: animations)

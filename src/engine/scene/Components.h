@@ -1,12 +1,19 @@
 #pragma once
 #include <engine/audio/Audio.h>
+#include <engine/core/UUID.h>
 #include <engine/physics/Physics.h>
 #include <engine/util/Util.h>
+#include <nlohmann/adl_serializer.hpp>
 
 #include "ScriptableEntity.h"
 
 namespace cologne
 {
+    struct IDComponent
+    {
+        UUID id;
+    };
+
     struct WorldTransformComponent
     {
         glm::mat4 transform;
@@ -66,12 +73,26 @@ namespace cologne
 
     struct ParentComponent
     {
-        std::vector<Entity> children;
+        std::vector<UUID> children;
     };
 
     struct ChildComponent
     {
-        Entity parent;
+        UUID parent;
+    };
+
+    struct RigidbodyComponent
+    {
+        uint32_t body_id;
+        glm::mat4 get_transform()
+        {
+            return Physics::get_rigidbody_transform(body_id);
+        }
+    };
+
+    struct ConvexMeshColliderComponent
+    {
+        std::string mesh_name;
     };
 
     struct ActiveComponent
@@ -83,19 +104,22 @@ namespace cologne
 
     struct ModelComponent
     {
-        //no clue what i want in here yet lmao, maybe just an id of the list of models? then just load all of da models?
-        int32_t id = 0;
+        std::string model_name;
         bool gi_only = false;
     };
 
     struct MeshComponent
     {
-        int32_t mesh_idx = 0;
+        MeshComponent() = default;
+
+        MeshComponent(int idx);
+
+        std::string mesh_name;
     };
 
     struct SkinnedModelComponent
     {
-        int32_t id = 0;
+        std::string model_name;
     };
 
     struct TagComponent
@@ -105,7 +129,8 @@ namespace cologne
 
     struct StaticColliderComponent
     {
-        uint32_t body_id = -1;
+        uint32_t body_id = 0;
+        std::string mesh_name;
         bool body_enabled = true;
     };
 
@@ -113,33 +138,31 @@ namespace cologne
     {
         float fov_radians = glm::radians(45.0f);
         bool primary = false;
+        bool orthographic = false;
+        float ortho_zoom = 5.0f;
     };
-
-#define PLAYER_COMPONENT_FIELDS(V) \
-    V(float, gravity,  9.8f * 2.0f)\
-    V(float, move_speed, 5.0f)\
-    V(float, run_acceleration, 7.0f)\
-    V(float, run_deceleration, 3.0f)\
-    V(float, air_acceleration, 2.0f)\
-    V(float, air_deceleration, 2.0f)\
-    V(float, air_control, 0.1f)\
-    V(float, side_strafe_acceleration, 15.0f)\
-    V(float, side_strafe_speed, 1.0f)\
-    V(float, jump_speed, 7.0f)\
-    V(float, friction, 6.0f)\
-    V(float, maxStepVelocity, 12.5)\
-    V(float, minStepVelocity, 2.50f)\
-    V(float, minStepInterval, 0.150f)\
-    V(float, maxStepInterval, 1.250f)\
 
     struct PlayerComponent
     {
-        uint32_t id = -1;
-        Entity camera = {};
-        Entity viewmodel = {};
-#define DEFINE_MEMBER(type, name, ...) type name = __VA_ARGS__;
-        PLAYER_COMPONENT_FIELDS(DEFINE_MEMBER)
-#undef DEFINE_MEMBER
+        uint32_t id = 0;
+        UUID camera = {};
+        UUID viewmodel = {};
+        float gravity = 9.8f * 2.0f;
+        float move_speed = 5.0f;
+        float run_acceleration = 7.0f;
+        float run_deceleration = 3.0f;
+        float air_acceleration = 2.0f;
+        float air_deceleration = 2.0f;
+        float air_control = 0.1f;
+        float side_strafe_acceleration = 15.0f;
+        float side_strafe_speed = 1.0f;
+        float jump_speed = 7.0f;
+        float friction = 6.0f;
+        float maxStepVelocity = 12.5;
+        float minStepVelocity = 2.50f;
+        float minStepInterval = 0.150f;
+        float maxStepInterval = 1.250f;
+
         void teleport_to_position(glm::vec3 pos)
         {
             cologne::Physics::teleport_player(id, pos);
@@ -199,6 +222,7 @@ namespace cologne
 
         void (*destroy_script)(NativeScriptComponent *) = nullptr;
 
+        std::string type_name = std::string();
         template<typename T>
         void bind()
         {

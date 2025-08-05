@@ -222,6 +222,14 @@ namespace cologne
         _data.shrink_to_fit();
     }
 
+    void Texture::cleanup()
+    {
+        if (_handle != 0)
+        {
+            glDeleteTextures(1, &_handle);
+        }
+    }
+
     void Texture::load_compressed()
     {
         if (_path.empty())

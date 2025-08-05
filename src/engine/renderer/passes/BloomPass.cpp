@@ -115,7 +115,6 @@ namespace cologne
                                    static_cast<float>(Engine::get_window()->get_width()) / static_cast<float>(
                                        Engine::get_window()->get_height()));
 
-        //todo: check blending here
         for (int i = mips.size() - 1; i > 0; i--)
         {
             auto &mip = mips[i];

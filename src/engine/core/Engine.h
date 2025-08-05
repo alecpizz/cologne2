@@ -49,6 +49,8 @@ namespace cologne
 
         void run();
 
+        static void load_scene(const char* path);
+
         static bool in_edit_mode();
 
     private:

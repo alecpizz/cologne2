@@ -15,4 +15,19 @@ namespace cologne
     {
         return get_component<TransformComponent>();
     }
+
+    const std::string & Entity::get_name()
+    {
+        return get_component<TagComponent>().tag;
+    }
+
+    const UUID & Entity::get_uuid()
+    {
+        return get_component<IDComponent>().id;
+    }
+
+    const bool Entity::is_active()
+    {
+        return get_component<ActiveComponent>().active;
+    }
 }

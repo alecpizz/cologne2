@@ -48,13 +48,13 @@ namespace cologne
                     if (temp.has_component<ChildComponent>())
                     {
                         auto comp = temp.get_component<ChildComponent>();
-                        if (comp.parent == _selected_entity)
+                        if (_selected_entity && comp.parent == _selected_entity.get_uuid())
                         {
                             _selected_entity = temp;
                         }
                         else
                         {
-                            _selected_entity = comp.parent;
+                            _selected_entity = Engine::get_scene()->get_entity_by_uuid(comp.parent);
                         }
                     }
                     else
@@ -97,6 +97,11 @@ namespace cologne
                 Engine::get_window()->show_mouse();
             }
         }
+        if (ImGui::Button("Toggle Ortho"))
+        {
+            auto& cam = Engine::get_scene()->get_scene_camera().get_component<CameraComponent>();
+            cam.orthographic = !cam.orthographic;
+        }
         ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(Renderer::get_output_image())), viewport_size,
                      ImVec2(0, 1), ImVec2(1, 0));
 
@@ -132,35 +137,52 @@ namespace cologne
             const float scroll_speed = 5.0f;
             float scroll = Input::get_scroll().y * dt * scroll_speed;
             auto camera = Engine::get_scene()->get_scene_camera();
-            auto &cam_transform = camera.get_component<TransformComponent>();
-            cam_transform.position = cam_transform.position + cam_transform.get_forward() * scroll;
+            auto& cam_comp = camera.get_component<CameraComponent>();
+            if (cam_comp.orthographic)
+            {
+                cam_comp.ortho_zoom += scroll * -10.0f;
+            }
+            else
+            {
+                auto &cam_transform = camera.get_transform();
+                cam_transform.position = cam_transform.position + cam_transform.get_forward() * scroll;
+            }
         }
 
         if (_selected_entity)
         {
-            ImGuizmo::SetOrthographic(false);
+            ImGuizmo::SetOrthographic(Engine::get_scene()->get_scene_camera().get_component<CameraComponent>().orthographic);
             ImGuizmo::SetDrawlist();
             ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, viewport_size.x, viewport_size.y);
             //
             //
+            bool snap = false;
+            static float snap_threshold = 1.0f;
             if (ImGui::IsWindowHovered() && !Input::mouse_down(Input::MouseButton::Right))
             {
                 if (Input::key_pressed(Input::Key::W))
                 {
                     current_operation = ImGuizmo::OPERATION::TRANSLATE;
+                    snap_threshold = 1.0f;
                 }
                 else if (Input::key_pressed(Input::Key::E))
                 {
                     current_operation = ImGuizmo::OPERATION::ROTATE;
+                    snap_threshold = 15.0f;
                 }
                 else if (Input::key_pressed(Input::Key::R))
                 {
                     current_operation = ImGuizmo::OPERATION::SCALE;
+                    snap_threshold = 0.2f;
+                }
+                else if (Input::key_down(Input::Key::LeftCtrl))
+                {
+                    snap = true;
                 }
                 else if (Input::key_pressed(Input::Key::F))
                 {
                     auto camera = Engine::get_scene()->get_scene_camera();
-                    auto &cam_transform = camera.get_component<TransformComponent>();
+                    auto &cam_transform = camera.get_transform();
                     auto &entity_transform = _selected_entity.get_component<WorldTransformComponent>();
                     cam_transform.position = glm::vec3(entity_transform.transform[3]) - cam_transform.get_forward() *
                                              0.5f;
@@ -168,30 +190,37 @@ namespace cologne
             }
             auto camera = Engine::get_scene()->get_scene_camera();
             auto camera_comp = camera.get_component<CameraComponent>();
-            auto transform = camera.get_component<TransformComponent>();
+            auto transform = camera.get_transform();
             glm::mat4 view = Renderer::get_camera_view(transform);
             glm::mat4 proj = Renderer::get_camera_projection(transform, camera_comp);
 
-            auto &tr = _selected_entity.get_component<TransformComponent>();
+            auto &tr = _selected_entity.get_transform();
             //         auto& tr = Engine::get_scene()->_registry.get<TransformComponent>(entity);
             glm::mat4 mat4 = tr.get_mat4();
             if (_selected_entity.has_component<ChildComponent>())
             {
-                mat4 = _selected_entity.get_component<ChildComponent>().parent.get_component<WorldTransformComponent>().
-                       transform * mat4;
+                auto parent_entity = Engine::get_scene()->get_entity_by_uuid(
+                    _selected_entity.get_component<ChildComponent>().parent);
+                if (parent_entity)
+                {
+                    mat4 = parent_entity.get_component<WorldTransformComponent>().transform * mat4;
+                }
             }
             bool changed = ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(proj),
-                                                current_operation, ImGuizmo::LOCAL, glm::value_ptr(mat4));
+                                                current_operation, ImGuizmo::LOCAL, glm::value_ptr(mat4), nullptr, snap ? &snap_threshold : nullptr);
             //
             if (changed)
             {
                 glm::mat4 world_mat = mat4;
                 if (_selected_entity.has_component<ChildComponent>())
                 {
-                    mat4 = glm::inverse(
-                               _selected_entity.get_component<ChildComponent>().parent.get_component<
-                                   WorldTransformComponent>().
-                               transform) * mat4;
+                    auto parent_entity = Engine::get_scene()->get_entity_by_uuid(
+                        _selected_entity.get_component<ChildComponent>().parent);
+                    if (parent_entity)
+                    {
+                        mat4 = glm::inverse(
+                                   parent_entity.get_component<WorldTransformComponent>().transform) * mat4;
+                    }
                 }
                 glm::quat orientation;
                 glm::vec3 translation;

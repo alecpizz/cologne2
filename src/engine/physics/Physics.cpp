@@ -23,6 +23,8 @@
 #include <Jolt/Physics/Character/Character.h>
 #include <Jolt/Physics/Character/CharacterVirtual.h>
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
+#include <Jolt/Physics/Collision/Shape/PlaneShape.h>
+#include <Jolt/Physics/Collision/Shape/ScaledShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
@@ -644,6 +646,9 @@ namespace cologne::Physics
         physics_system.OptimizeBroadPhase();
     }
 
+    float accumulation_time = 0.0f;
+    float fixed_delta_time = 1.0 / 60.0f;
+
     void update(float dt)
     {
         if (cologne::Input::key_pressed(Input::Key::P))
@@ -671,8 +676,13 @@ namespace cologne::Physics
                 p.character_position = glm::vec3(character->GetPosition().GetX(), character->GetPosition().GetY(),
                                                  character->GetPosition().GetZ());
             }
-            const int collisionSteps = 1;
-            physics_system.Update(dt, collisionSteps, temp_allocator, job_system);
+            const int collisionSteps = 4;
+            accumulation_time += dt;
+            while (accumulation_time >= fixed_delta_time)
+            {
+                physics_system.Update(fixed_delta_time, collisionSteps, temp_allocator, job_system);
+                accumulation_time -= fixed_delta_time;
+            }
         }
 
         if (drawing)
@@ -680,7 +690,7 @@ namespace cologne::Physics
             BodyManager::DrawSettings draw_settings;
             draw_settings.mDrawShape = true;
             draw_settings.mDrawShapeWireframe = true;
-            physics_system.DrawBodies(draw_settings, debug_renderer, &body_draw_filter);
+            physics_system.DrawBodies(draw_settings, debug_renderer);
         }
     }
 
@@ -860,11 +870,13 @@ namespace cologne::Physics
                 triangle_list.emplace_back(triangle);
             }
             JPH::MeshShapeSettings mesh_settings(triangle_list);
+            mesh_settings.mMaxTrianglesPerLeaf = 4;
+            mesh_settings.mBuildQuality = MeshShapeSettings::EBuildQuality::FavorRuntimePerformance;
             mesh_settings.SetEmbedded();
             auto result = mesh_settings.Create();
             mesh_shape = result.Get();
             //export now
-            std::ofstream file (path, std::ios::binary);
+            std::ofstream file(path, std::ios::binary);
             if (!file.is_open())
             {
                 LOG_ERROR("Couldn't open file to export collision shape!");
@@ -888,7 +900,8 @@ namespace cologne::Physics
             JPH::StreamInWrapper stream_in(file);
             JPH::Shape::IDToShapeMap id_to_shape_map;
             JPH::Shape::IDToMaterialMap id_to_material_map;
-            JPH::Shape::ShapeResult result = JPH::Shape::sRestoreWithChildren(stream_in, id_to_shape_map, id_to_material_map);
+            JPH::Shape::ShapeResult result = JPH::Shape::sRestoreWithChildren(
+                stream_in, id_to_shape_map, id_to_material_map);
             file.close();
             if (result.IsValid())
             {
@@ -900,29 +913,35 @@ namespace cologne::Physics
                 return -1;
             }
         }
-        auto settings = BodyCreationSettings(mesh_shape, JPH::Vec3::sZero(),
-                                             JPH::Quat::sIdentity(), JPH::EMotionType::Static,
-                                             cologne::Physics::NON_MOVING);
-
-        auto &body_interface = physics_system.GetBodyInterface();
-        auto id = body_interface.CreateAndAddBody(
-            settings, JPH::EActivation::DontActivate);
-        const auto shape = body_interface.GetShape(id);
-        const auto new_shape = shape->ScaleShape(glm_vec3_to_jph_vec3(transform.scale)).Get();
-        body_interface.SetShape(id, new_shape, true, EActivation::DontActivate);
         auto quat = glm_quat_to_jph_quat(transform.rotation);
         if (!quat.IsNormalized())
         {
             LOG_INFO("Quat isn't normalized!");
             quat = quat.sIdentity();
         }
-        body_interface.SetPositionAndRotation(id, glm_vec3_to_jph_vec3(transform.position),
-                                              quat,
-                                              EActivation::DontActivate);
+        auto settings = BodyCreationSettings(new ScaledShapeSettings(mesh_shape,
+                                                                     glm_vec3_to_jph_vec3(transform.scale)),
+                                             glm_vec3_to_jph_vec3(transform.position), quat, JPH::EMotionType::Static,
+                                             cologne::Physics::NON_MOVING);
+
+        auto &body_interface = physics_system.GetBodyInterface();
+        auto id = body_interface.CreateAndAddBody(
+            settings, JPH::EActivation::DontActivate);
         LOG_INFO("Created collider with id %d", id);
         colliders_static.push_back(id);
         physics_system.OptimizeBroadPhase();
         entity_to_collider_map[id] = entity;
+        return id.GetIndexAndSequenceNumber();
+    }
+
+    uint32_t create_infinite_ground_plane(glm::vec3 plane_normal, float constant)
+    {
+        auto id = physics_system.GetBodyInterface().CreateAndAddBody(
+            BodyCreationSettings(
+                new PlaneShape(Plane(JPH::Vec3(plane_normal.x, plane_normal.y, plane_normal.z).Normalized(), constant),
+                               nullptr, 100), RVec3(0, 0, 0), Quat::sIdentity(), EMotionType::Static,
+                Layers::NON_MOVING), EActivation::DontActivate);
+        colliders_static.emplace_back(id);
         return id.GetIndexAndSequenceNumber();
     }
 
@@ -944,16 +963,31 @@ namespace cologne::Physics
                 LOG_INFO("scale too smol");
                 scale = JPH::Vec3::sOne();
             }
-            auto &body_interface = physics_system.GetBodyInterface();
-            const auto shape = body_interface.GetShape(body_id);
-            const auto new_shape = shape->ScaleShape(scale).Get();
-            body_interface.SetShape(body_id, new_shape, true, EActivation::DontActivate);
-            if (!rot.IsNormalized())
+            BodyLockWrite lock(physics_system.GetBodyLockInterface(), body_id);
+            if (lock.Succeeded())
             {
-                LOG_INFO("Quat isn't normalized!");
-                rot = JPH::Quat::sIdentity();
+                Body &body = lock.GetBody();
+                const Shape *non_scaled_shape;
+                if (body.GetShape()->GetSubType() != EShapeSubType::Scaled)
+                {
+                    non_scaled_shape = body.GetShape();
+                }
+                else
+                {
+                    const auto *scaled_shape = reinterpret_cast<const ScaledShape *>(body.GetShape());
+                    non_scaled_shape = scaled_shape->GetInnerShape();
+                    if (!non_scaled_shape)
+                    {
+                        LOG_ERROR("no internal shape!");
+                        return;
+                    }
+                }
+                Shape::ShapeResult new_shape = non_scaled_shape->ScaleShape(scale);
+                physics_system.GetBodyInterfaceNoLock().SetShape(body.GetID(), new_shape.Get(), false,
+                                                                 EActivation::DontActivate);
+                physics_system.GetBodyInterfaceNoLock().SetPositionAndRotation(
+                    body_id, pos, rot, EActivation::DontActivate);
             }
-            body_interface.SetPositionAndRotation(body_id, pos, rot, EActivation::DontActivate);
         }
     }
 
@@ -989,11 +1023,18 @@ namespace cologne::Physics
         return true;
     }
 
-
-    void cleanup()
+    void delete_all_bodies()
     {
         physics_system.GetBodyInterface().RemoveBodies(colliders_static.data(), colliders_static.size());
         physics_system.GetBodyInterface().DestroyBodies(colliders_static.data(), colliders_static.size());
+        physics_players.clear();
+        colliders_static.clear();
+    }
+
+
+    void cleanup()
+    {
+        delete_all_bodies();
         UnregisterTypes();
         delete temp_allocator;
         delete debug_renderer;
@@ -1006,6 +1047,7 @@ namespace cologne::Physics
     {
         disable_body(body_id);
         physics_system.GetBodyInterface().DestroyBody(static_cast<BodyID>(body_id));
+        std::erase(colliders_static, static_cast<BodyID>(body_id));
     }
 
     void add_impulse_force_at_position(uint32_t body_id, glm::vec3 position, glm::vec3 force)
@@ -1143,4 +1185,6 @@ namespace cologne::Physics
         // to[3][3] = jolt_mat(3, 3);
         return to;
     }
+
+
 }

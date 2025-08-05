@@ -104,6 +104,9 @@ namespace cologne
         glDepthFunc(GL_LEQUAL);
         auto shader = get_shader_by_name("skybox");
         shader->bind();
+        CameraComponent temp_camera = _cam;
+        temp_camera.orthographic = false;
+        shader->set_mat4("projection_override", get_camera_projection(_camera_transform, temp_camera));
         glBindTextureUnit(0, _skybox_texture);
         render_cube();
         glEnable(GL_CULL_FACE);

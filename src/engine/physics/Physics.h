@@ -43,11 +43,15 @@ namespace cologne::Physics
     uint32_t create_static_mesh_collider(Entity entity, TransformComponent transform,
                                          const Mesh& mesh);
 
+    uint32_t create_infinite_ground_plane(glm::vec3 plane_normal, float constant);
+
     void sync_transform(Entity entity);
 
     bool raycast(glm::vec3 origin, glm::vec3 direction, float max_distance, uint32_t layers, RaycastHitInfo &info);
 
     // void create_static_mesh_collider(Model& model);
+    void delete_all_bodies();
+
     void cleanup();
 
     void destroy_body(uint32_t body_id);
@@ -63,4 +67,6 @@ namespace cologne::Physics
     void make_ragdoll_active(uint32_t ragdoll_id);
     void sync_ragdoll(uint32_t ragdoll_id, const std::unordered_map<std::string, glm::mat4>& ragdoll_transforms);
     glm::mat4 get_rigidbody_transform(uint32_t body_id);
+
+    uint32_t create_rigidbody(glm::vec3 vec);
 }

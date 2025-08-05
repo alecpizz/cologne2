@@ -14,6 +14,7 @@
 #include <misc/cpp/imgui_stdlib.h>
 
 #include "Editor.h"
+#include "engine/scene/ComponentRegistry.h"
 
 namespace cologne
 {
@@ -55,6 +56,53 @@ namespace cologne
         }
     }
 
+    static bool draw_component_editor(entt::entity entity, entt::meta_any instance, entt::meta_custom custom, int& guiID)
+    {
+        using namespace entt::literals;
+        auto meta = instance.type();
+        ComponentRegistry::PropertiesMap properties = {};
+        if (auto* mp = static_cast<const ComponentRegistry::PropertiesMap*>(custom))
+        {
+            properties = *mp;
+        }
+
+        bool changed = false;
+        if (auto write_func = meta.func("editor_write"_hs); write_func)
+        {
+            // changed |= write_func.invoke(instance, properties).cast<bool>();
+            write_func.invoke(instance, properties);
+        }
+        else if (auto read_func = meta.func("editor_read"_hs); read_func)
+        {
+            read_func.invoke(instance, properties);
+        }
+        else if (meta.is_sequence_container())
+        {
+            bool isOpen = false;
+            if (auto it = properties.find("name"_hs); it != properties.end())
+            {
+                //TODO: ts
+            }
+            ImGui::Text("TODO: sequence containers");
+        }
+        else if (meta.is_enum())
+        {
+            ImGui::Text("TODO: enum");
+        }
+        else
+        {
+            for (auto [id, data] : meta.data())
+            {
+                ImGui::PushID(guiID++);
+                ImGui::Indent();
+                changed |= draw_component_editor(entity, data.get(instance).as_ref(), data.custom(), guiID);
+                ImGui::Unindent();
+                ImGui::PopID();
+            }
+        }
+        return changed;
+    }
+
     void Editor::build_properties_panel()
     {
         ImGui::Begin("Properties", nullptr, _global_window_flags);
@@ -64,21 +112,43 @@ namespace cologne
             ImGui::InputText("Tag", &tag.tag);
 
             ImGui::Text("Entity ID: %d", static_cast<uint32_t>(_selected_entity));
+            ImGui::Text("Entity UUID %d", static_cast<uint64_t>(_selected_entity.get_uuid()));
             ImGui::Separator();
             if (ImGui::Checkbox("Active", &_selected_entity.get_component<ActiveComponent>().active))
             {
                 Audio::play_sound(_cancel_sound, 30);
             }
+
+
+            //TODO: figure out if i actually need this.
+            // for (int i = 0; auto&& [id, storage] : Engine::get_scene()->_registry.storage())
+            // {
+            //     if (!storage.contains(_selected_entity))
+            //     {
+            //         continue;
+            //     }
+            //     ImGui::SeparatorText(std::string(storage.type().name()).c_str());
+            //     if (auto meta = entt::resolve(id))
+            //     {
+            //         draw_component_editor(_selected_entity, meta.from_void(storage.value(_selected_entity)).as_ref(), meta.custom(), i);
+            //     }
+            // }
+
             ImGui::Text("Transform");
-            build_transform_entry(_selected_entity.get_component<TransformComponent>());
+            build_transform_entry(_selected_entity.get_transform());
             if (_selected_entity.has_component<ParentComponent>())
             {
-                for (auto child: _selected_entity.get_component<ParentComponent>().children)
+                for (auto child_id: _selected_entity.get_component<ParentComponent>().children)
                 {
+                    Entity child = Engine::get_scene()->get_entity_by_uuid(child_id);
+                    if (!child)
+                    {
+                        continue;
+                    }
                     if (child.has_component<MeshComponent>())
                     {
                         Engine::get_renderer()->submit_outline_render_item(RenderItem(
-                            child.get_component<MeshComponent>().mesh_idx,
+                            AssetManager::get_mesh_index_by_name(child.get_component<MeshComponent>().mesh_name),
                             child.get_component<
                                 WorldTransformComponent>(),
                             false,
@@ -86,7 +156,7 @@ namespace cologne
                     }
                     if (child.has_component<ModelComponent>())
                     {
-                        auto model = AssetManager::get_model_by_index(child.get_component<ModelComponent>().id);
+                        auto model = AssetManager::get_model_by_name(child.get_component<ModelComponent>().model_name);
                         for (auto mesh_index: model->get_mesh_indices())
                         {
                             Engine::get_renderer()->submit_outline_render_item(RenderItem(mesh_index,
@@ -99,8 +169,8 @@ namespace cologne
 
                     if (child.has_component<SkinnedModelComponent>())
                     {
-                        auto model = AssetManager::get_skinned_model_by_index(
-                            child.get_component<SkinnedModelComponent>().id);
+                        auto model = AssetManager::get_skinned_model_by_name(
+                            child.get_component<SkinnedModelComponent>().model_name);
                         if (model)
                         {
                             std::vector<glm::mat4> bones = std::vector<glm::mat4>();
@@ -121,6 +191,8 @@ namespace cologne
                     }
                 }
             }
+
+
             draw_component<ViewmodelComponent>("View Model", _selected_entity, true, [](auto &vm)
             {
                 ImGui::DragFloat("smoothing", &vm.smoothing, 0.1f);
@@ -142,7 +214,11 @@ namespace cologne
                                                         light.radius, light.color);
                 }
                 const char *items[] = {"DIRECTIONAL", "POINT", "SPOT"};
-                ImGui::Combo("LIGHT TYPE", &light.type, items, 3);
+                int type = light.type;
+                if (ImGui::Combo("LIGHT TYPE", &type, items, 3))
+                {
+                    light.type = static_cast<LightComponent::LightType>(type);
+                }
                 if (light.type == LightComponent::Spot)
                 {
                     ImGui::DragFloat("outer cutoff", &light.outer_cutoff, 0.01f);
@@ -155,27 +231,23 @@ namespace cologne
                 ImGui::Checkbox("CAST SHADOWS", &light.cast_shadows);
             });
 
-            draw_component<MeshComponent>("Mesh", _selected_entity, true, [this](auto &mesh_comp)
+            draw_component<MeshComponent>("Mesh", _selected_entity, true, [this](MeshComponent &mesh_comp)
             {
-                Engine::get_renderer()->submit_outline_render_item(RenderItem(mesh_comp.mesh_idx,
-                                                                              _selected_entity.get_component<
-                                                                                  WorldTransformComponent>(),
-                                                                              false,
-                                                                              static_cast<uint32_t>(_selected_entity)));
-                int id = mesh_comp.mesh_idx;
-                if (ImGui::InputInt("Mesh ID", &id))
-                {
-                    id = glm::clamp(id, 0, static_cast<int>(AssetManager::get_meshes().size()) - 1);
-                    mesh_comp.mesh_idx = id;
-                }
-                auto mesh = AssetManager::get_mesh_by_index(mesh_comp.mesh_idx);
+                Engine::get_renderer()->submit_outline_render_item(RenderItem(
+                    AssetManager::get_mesh_index_by_name(mesh_comp.mesh_name),
+                    _selected_entity.get_component<
+                        WorldTransformComponent>(),
+                    false,
+                    static_cast<uint32_t>(_selected_entity)));
+                auto mesh = AssetManager::get_mesh_by_name(mesh_comp.mesh_name);
                 std::string mesh_name = mesh->get_name();
                 ImGui::Text("Name %s Material %d", mesh_name.c_str(), mesh->get_material_index());
+                ImGui::Text("Metallic %f Roughness %f", AssetManager::get_material_by_index(mesh->get_material_index())->metallic_override, AssetManager::get_material_by_index(mesh->get_material_index())->roughness_override);
             });
 
-            draw_component<ModelComponent>("Model", _selected_entity, true, [this](auto &model)
+            draw_component<ModelComponent>("Model", _selected_entity, true, [this](ModelComponent &model)
             {
-                auto m = AssetManager::get_model_by_index(model.id);
+                auto m = AssetManager::get_model_by_name(model.model_name);
                 for (auto idx: m->get_mesh_indices())
                 {
                     Engine::get_renderer()->submit_outline_render_item(RenderItem(
@@ -184,47 +256,36 @@ namespace cologne
                         false,
                         static_cast<uint32_t>(_selected_entity)));
                 }
-                int id = static_cast<int>(model.id);
-                if (ImGui::InputInt("Model ID", &id))
-                {
-                    id = glm::clamp(id, 0,
-                                    static_cast<int>(AssetManager::get_models().size()) - 1);
-                    model.id = id;
-                }
-                std::string model_name = AssetManager::get_model_by_index(model.id)->get_name();
-                ImGui::Text("Name %s", model_name.c_str());
+                ImGui::Text("Name %s", model.model_name.c_str());
                 ImGui::Checkbox("GI Only", &model.gi_only);
             });
 
-            draw_component<SkinnedModelComponent>("Skinned Model", _selected_entity, true, [this](SkinnedModelComponent &model)
-            {
-                if (auto skinned_model = AssetManager::get_skinned_model_by_index(model.id))
-                {
-                    std::vector<glm::mat4> bones = std::vector<glm::mat4>();
-                    if (_selected_entity.has_component<AnimatorComponent>())
-                    {
-                        auto &anim = _selected_entity.get_component<AnimatorComponent>();
-                        bones = anim.get_skinning_matrices();
-                    }
-                    for (int32_t mesh_index: skinned_model->get_mesh_indices())
-                    {
-                        SkinnedRenderItem item;
-                        item.mesh_idx = mesh_index;
-                        item.transform = _selected_entity.get_component<WorldTransformComponent>();
-                        item.bones = bones;
-                        Engine::get_renderer()->submit_skinned_outline_render_item(item);
-                    }
-                }
-                int id = static_cast<int>(model.id);
-                if (ImGui::InputInt("Skinned Model ID", &id))
-                {
-                    id = glm::clamp(id, 0,
-                                    static_cast<int>(AssetManager::get_skinned_models().size()) - 1);
-                    model.id = id;
-                }
-                std::string model_name = AssetManager::get_skinned_model_by_index(model.id)->get_name();
-                ImGui::Text("Name %s", model_name.c_str());
-            });
+            draw_component<SkinnedModelComponent>("Skinned Model", _selected_entity, true,
+                                                  [this](SkinnedModelComponent &model)
+                                                  {
+                                                      if (auto skinned_model = AssetManager::get_skinned_model_by_name(
+                                                          model.model_name))
+                                                      {
+                                                          std::vector<glm::mat4> bones = std::vector<glm::mat4>();
+                                                          if (_selected_entity.has_component<AnimatorComponent>())
+                                                          {
+                                                              auto &anim = _selected_entity.get_component<
+                                                                  AnimatorComponent>();
+                                                              bones = anim.get_skinning_matrices();
+                                                          }
+                                                          for (int32_t mesh_index: skinned_model->get_mesh_indices())
+                                                          {
+                                                              SkinnedRenderItem item;
+                                                              item.mesh_idx = mesh_index;
+                                                              item.transform = _selected_entity.get_component<
+                                                                  WorldTransformComponent>();
+                                                              item.bones = bones;
+                                                              Engine::get_renderer()->
+                                                                      submit_skinned_outline_render_item(item);
+                                                          }
+                                                      }
+                                                      ImGui::Text("Name %s", model.model_name.c_str());
+                                                  });
 
             draw_component<StaticColliderComponent>("Static Collider", _selected_entity, false, [](auto &collider)
             {
@@ -244,18 +305,29 @@ namespace cologne
                     float radians = glm::radians(degrees);
                     camera.fov_radians = radians;
                 }
+                ImGui::Checkbox("Ortho", &camera.orthographic);
                 ImGui::BeginDisabled(true);
-
                 ImGui::Checkbox("Primary", &camera.primary);
                 ImGui::EndDisabled();
             });
 
             draw_component<PlayerComponent>("Player", _selected_entity, true, [](PlayerComponent &player)
             {
-#define IMGUI_WIDGET(type, name, ...) \
-                ImGui::DragFloat(#name, &player.name);
-                PLAYER_COMPONENT_FIELDS(IMGUI_WIDGET)
-#undef IMGUI_WIDGET
+                ImGui::InputFloat("GRAVITY", &player.gravity);
+                ImGui::InputFloat("MOVE SPEED", &player.move_speed);
+                ImGui::InputFloat("RUN ACCELERATION", &player.run_acceleration);
+                ImGui::InputFloat("RUN DECELERATION", &player.run_deceleration);
+                ImGui::InputFloat("AIR ACCELERATION", &player.air_acceleration);
+                ImGui::InputFloat("AIR DECELERATION", &player.air_deceleration);
+                ImGui::InputFloat("AIR CONTROL", &player.air_control);
+                ImGui::InputFloat("SIDE STRAFE ACCELERATION", &player.side_strafe_acceleration);
+                ImGui::InputFloat("SIDE STRAFE SPEED", &player.side_strafe_speed);
+                ImGui::InputFloat("JUMP SPEED", &player.jump_speed);
+                ImGui::InputFloat("FRICTION", &player.friction);
+                ImGui::InputFloat("MAX STEP VELOCITY", &player.maxStepVelocity);
+                ImGui::InputFloat("MIN STEP VELOCITY", &player.minStepVelocity);
+                ImGui::InputFloat("MIN STEP INTERVAL", &player.minStepInterval);
+                ImGui::InputFloat("MAX STEP INTERVAL", &player.maxStepInterval);
             });
 
 
@@ -366,14 +438,11 @@ namespace cologne
     {
         ImGui::DragFloat3("Position", glm::value_ptr(tr.position), 0.01f);
 
-        glm::vec3 euler = glm::eulerAngles(tr.rotation);
-        euler = glm::degrees(euler);
-        ImGui::DragFloat3("Rotation", glm::value_ptr(euler), 0.1f);
-        // euler.x = fmodf(euler.x, 360.0f);
-        // euler.y = fmodf(euler.y, 360.0f);
-        // euler.z = fmodf(euler.z, 360.0f);
-        euler = glm::radians(euler);
-        tr.rotation = glm::quat(euler);
+        glm::vec3 euler = glm::degrees(glm::eulerAngles(tr.rotation));
+        if (ImGui::DragFloat3("Rotation", glm::value_ptr(euler), 0.1f))
+        {
+            tr.rotation = glm::quat(glm::radians(euler));
+        }
 
         ImGui::DragFloat3("Scale", glm::value_ptr(tr.scale), 0.01f);
     }

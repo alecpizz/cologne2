@@ -45,7 +45,6 @@ namespace cologne
 
     SkinnedMesh::~SkinnedMesh()
     {
-        //todo
     }
 
     uint32_t SkinnedMesh::get_material_index() const

@@ -36,6 +36,8 @@ namespace cologne
         void show_mouse() const;
         bool mouse_visible() const;
 
+        void show_file_dialogue_window(const std::unordered_map<std::string, std::string>& filters, const std::string& path, void* callback);
+
     private:
         Window(uint32_t width, uint32_t height);
 

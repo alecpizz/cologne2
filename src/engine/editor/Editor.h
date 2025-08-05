@@ -42,10 +42,14 @@ namespace cologne
 
         static uint32_t get_viewport_height();
 
+        static void initialize_reflection_editor();
     private:
         Editor();
 
+
         void build_main_window();
+
+        void handle_hotkeys();
 
         void build_main_menu_bar();
 

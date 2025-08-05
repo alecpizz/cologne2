@@ -23,6 +23,7 @@ void main()
     mat4 model = model_matrices[gl_DrawID];
     vec4 vertex_position = vec4(position, 1.0f);
     vertex_position += vec4(normal, 1.0) * 0.0005f;
+    gl_Layer = idx;
     FragPos = light_space_matrices[idx] * model * vertex_position;
     gl_Position = FragPos;
 }
