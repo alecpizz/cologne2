@@ -3,6 +3,7 @@
 #include <engine/core/UUID.h>
 #include <engine/physics/Physics.h>
 #include <engine/util/Util.h>
+#include <entt/entt.hpp>
 #include <nlohmann/adl_serializer.hpp>
 
 #include "ScriptableEntity.h"
@@ -84,6 +85,7 @@ namespace cologne
     struct RigidbodyComponent
     {
         uint32_t body_id;
+
         glm::mat4 get_transform()
         {
             return Physics::get_rigidbody_transform(body_id);
@@ -223,6 +225,7 @@ namespace cologne
         void (*destroy_script)(NativeScriptComponent *) = nullptr;
 
         std::string type_name = std::string();
+
         template<typename T>
         void bind()
         {

@@ -69,11 +69,11 @@ namespace cologne
             auto &ns = _registry.get<NativeScriptComponent>(entity);
             if (!ns.instance)
             {
-                if (ns.type_name == entt::type_name<EditorCameraController>().value())
+                if (ns.type_name == "EditorCameraController")
                 {
                     ns.bind<EditorCameraController>();
                 }
-                else if (ns.type_name == entt::type_name<PlayerController>().value())
+                else if (ns.type_name == "PlayerController")
                 {
                     ns.bind<PlayerController>();
                 }
@@ -510,7 +510,7 @@ namespace cologne
         //todo: REMOVE NATIVE SCRIPT COMPONENT!
         auto &nc = player.add_component<NativeScriptComponent>();
         nc.bind<PlayerController>();
-        nc.type_name = entt::type_name<PlayerController>::value();
+        nc.type_name = "PlayerController";
         PlayerCreateInfo info;
         info.position = glm::vec3(pos);
         player.add_component<PlayerComponent>(Physics::create_player(info), camera.get_uuid(), viewModel.get_uuid());
@@ -525,7 +525,7 @@ namespace cologne
         cam.primary = false;
         auto &scn = scene_camera.add_component<NativeScriptComponent>();
         scn.bind<EditorCameraController>();
-        scn.type_name = entt::type_name<EditorCameraController>().value();
+        scn.type_name = "EditorCameraController";
         return scene_camera;
     }
 

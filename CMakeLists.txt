@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #! ! ! ! ! ! !
 #set this to true to ship the game!
@@ -131,7 +132,7 @@ if (MSVC) # If using the VS compiler...
 
     target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC _CRT_SECURE_NO_WARNINGS)
     #set_target_properties("${CMAKE_PROJECT_NAME}" PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup") #no console
-
+    target_compile_options("${CMAKE_PROJECT_NAME}" PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/Zc:preprocessor>)
 
 endif ()
 

@@ -2,13 +2,13 @@
     "entities": [
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 4877500027844702666
                 },
-                "cologne::ParentComponent": {
+                "ParentComponent": {
                     "children": [
                         15692729855064821526,
                         7026390755886680465,
@@ -37,10 +37,10 @@
                         12488897575204120871
                     ]
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "sponza2"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         0.0,
                         0.0,
@@ -58,7 +58,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -90,25 +90,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 15692729855064821526
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.485302209854126,
                         11.676187515258789,
@@ -126,7 +126,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -158,25 +158,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 7026390755886680465
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.001"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.001"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.001"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.49813926219940186,
                         0.9205667972564697,
@@ -194,7 +194,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -226,25 +226,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 2729813108554731534
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.002"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.002"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.002"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.9217716455459595,
                         0.2162950038909912,
@@ -262,7 +262,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -294,25 +294,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 3940604267047539332
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.003"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.003"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.003"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.5174335837364197,
                         -0.0313112735748291,
@@ -330,7 +330,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -362,25 +362,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 16936797757149997905
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.004"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.004"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.004"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -4.489065170288086,
                         2.9580225944519043,
@@ -398,7 +398,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -430,25 +430,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 17651264254134610571
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.005"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.005"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.005"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.23735475540161133,
                         5.565385818481445,
@@ -466,7 +466,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -498,25 +498,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 7528166765805187025
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.006"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.006"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.006"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.6819008588790894,
                         5.88134765625,
@@ -534,7 +534,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -566,25 +566,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 7757444581061446050
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.007"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.007"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.007"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.012294232845306396,
                         6.001372337341309,
@@ -602,7 +602,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -634,25 +634,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 15771291907266101674
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.008"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.008"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.008"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.5155513882637024,
                         1.3780227899551392,
@@ -670,7 +670,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -702,25 +702,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 12373054494133859641
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.009"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.009"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.009"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.5155087113380432,
                         2.2435548305511475,
@@ -738,7 +738,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -770,25 +770,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 4944246691126071504
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.010"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.010"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.010"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.5379714965820313,
                         4.345012664794922,
@@ -806,7 +806,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -838,25 +838,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 4371790289897637325
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.011"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.011"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.011"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         3.3383030891418457,
                         2.4986510276794434,
@@ -874,7 +874,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -906,25 +906,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 13370613158901276095
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.012"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.012"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.012"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.5148208737373352,
                         5.165515899658203,
@@ -942,7 +942,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -974,25 +974,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 686152530626977442
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.013"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.013"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.013"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.5083215236663818,
                         2.3812830448150635,
@@ -1010,7 +1010,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -1042,25 +1042,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 9288576872431259175
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.014"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.014"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.014"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.5073261857032776,
                         3.8363735675811768,
@@ -1078,7 +1078,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -1110,25 +1110,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 10887970225884841768
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.015"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.015"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.015"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.008290350437164307,
                         3.7801034450531006,
@@ -1146,7 +1146,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -1178,25 +1178,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 18085200841471511407
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.016"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.016"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.016"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -1.0812530517578125,
                         3.7798800468444824,
@@ -1214,7 +1214,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -1246,25 +1246,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 17251465105583974217
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.017"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.017"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.017"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.5432094931602478,
                         3.7797484397888184,
@@ -1282,7 +1282,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -1314,25 +1314,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 18307460737001106334
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.018"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.018"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.018"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         0.6447742581367493,
                         0.9799587726593018,
@@ -1350,7 +1350,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -1382,25 +1382,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 5017938002342821041
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.019"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.019"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.019"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.5118553042411804,
                         0.9951056241989136,
@@ -1418,7 +1418,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -1450,25 +1450,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 9798996347587339118
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.020"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.020"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.020"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -1.6507313251495361,
                         0.9799587726593018,
@@ -1486,7 +1486,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -1518,25 +1518,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 206976386609025065
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.021"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.021"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.021"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.6557071208953857,
                         1.23561429977417,
@@ -1554,7 +1554,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -1586,25 +1586,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 18052923903348558510
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.022"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.022"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.022"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.5278977155685425,
                         0.8024132251739502,
@@ -1622,7 +1622,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -1654,25 +1654,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 11382656784295170782
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.023"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.023"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.023"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.3115405738353729,
                         0.42900633811950684,
@@ -1690,7 +1690,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -1722,25 +1722,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 4877500027844702666
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 12488897575204120871
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "Mesh_0.024"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "Mesh_0.024"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Mesh_0.024"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.5139411687850952,
                         1.240036964416504,
@@ -1758,7 +1758,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -1790,10 +1790,10 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::AnimatorComponent": {
+                "AnimatorComponent": {
                     "base_clip": "man_Idle",
                     "current_clip": "man_Idle",
                     "current_state": 1,
@@ -1801,21 +1801,21 @@
                     "has_ragdoll": true,
                     "model_name": "man"
                 },
-                "cologne::EnemyComponent": {
+                "EnemyComponent": {
                     "dead": true,
                     "health": 0.0,
                     "hurt_sound": "/home/alecpizz/Repos/goonengine/resources/sounds/enemy_hurt.mp3"
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 11761260270411901909
                 },
-                "cologne::SkinnedModelComponent": {
+                "SkinnedModelComponent": {
                     "model_name": "man"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "man"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         0.0,
                         -0.25,
@@ -1833,7 +1833,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             5.960464477539063e-08,
@@ -1865,10 +1865,10 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::AnimatorComponent": {
+                "AnimatorComponent": {
                     "base_clip": "man_Idle",
                     "current_clip": "man_Idle",
                     "current_state": 0,
@@ -1876,16 +1876,16 @@
                     "has_ragdoll": false,
                     "model_name": "man"
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 5473320586695561989
                 },
-                "cologne::SkinnedModelComponent": {
+                "SkinnedModelComponent": {
                     "model_name": "man"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "man2"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         0.0,
                         -0.25,
@@ -1903,7 +1903,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -1935,10 +1935,10 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::AnimatorComponent": {
+                "AnimatorComponent": {
                     "base_clip": "deagle_Rig|Rig|MK_ReloadFull",
                     "current_clip": "deagle_Rig|Rig|MK_ReloadFull",
                     "current_state": 0,
@@ -1946,16 +1946,16 @@
                     "has_ragdoll": false,
                     "model_name": "deagle"
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 3787359230006449025
                 },
-                "cologne::SkinnedModelComponent": {
+                "SkinnedModelComponent": {
                     "model_name": "deagle"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "deagle"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         0.0,
                         0.0,
@@ -1973,7 +1973,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -2005,22 +2005,22 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::CameraComponent": {
+                "CameraComponent": {
                     "fov_radians": 0.7853981852531433,
                     "ortho_zoom": 5.0,
                     "orthographic": false,
                     "primary": true
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 2786574626833717084
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "camera"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -2.8243191242218018,
                         1.1293261051177979,
@@ -2038,7 +2038,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             0.092246413230896,
@@ -2070,10 +2070,10 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::AnimatorComponent": {
+                "AnimatorComponent": {
                     "base_clip": "vsk_Idle",
                     "current_clip": "vsk_Idle",
                     "current_state": 0,
@@ -2081,16 +2081,16 @@
                     "has_ragdoll": false,
                     "model_name": "vsk"
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 17775951712860775076
                 },
-                "cologne::SkinnedModelComponent": {
+                "SkinnedModelComponent": {
                     "model_name": "vsk"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "viewmodel"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -2.6791300773620605,
                         0.831413984298706,
@@ -2108,7 +2108,7 @@
                         1.0
                     ]
                 },
-                "cologne::ViewmodelComponent": {
+                "ViewmodelComponent": {
                     "amplitude": 0.009999999776482582,
                     "euler_offset": [
                         0.0,
@@ -2126,7 +2126,7 @@
                     "sway_multiplier": 100.0,
                     "vertical_velocity_multiplier": 0.009999999776482582
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             0.09337866306304932,
@@ -2158,16 +2158,16 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 18725235654037815
                 },
-                "cologne::NativeScriptComponent": {
-                    "type_name": "cologne::PlayerController"
+                "NativeScriptComponent": {
+                    "type_name": "PlayerController"
                 },
-                "cologne::PlayerComponent": {
+                "PlayerComponent": {
                     "air_acceleration": 2.0,
                     "air_control": 0.10000000149011612,
                     "air_deceleration": 2.0,
@@ -2186,10 +2186,10 @@
                     "side_strafe_speed": 1.0,
                     "viewmodel": 17775951712860775076
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "player"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -2.8243191242218018,
                         -0.32067394256591797,
@@ -2207,7 +2207,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -2239,23 +2239,23 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 729397038683449858
                 },
-                "cologne::ParentComponent": {
+                "ParentComponent": {
                     "children": [
                         15486691115028218993,
                         2676528621758122205,
                         3775289829509233270
                     ]
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Lantern"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         0.18000000715255737,
                         -0.33799999952316284,
@@ -2273,7 +2273,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             5.960464477539063e-08,
@@ -2305,25 +2305,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 729397038683449858
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 15486691115028218993
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "LanternPole_Body"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "LanternPole_Body"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "LanternPole_Body"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         0.19950899481773376,
                         1.7236459255218506,
@@ -2341,7 +2341,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             5.960464477539063e-08,
@@ -2373,25 +2373,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 729397038683449858
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 2676528621758122205
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "LanternPole_Chain"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "LanternPole_Chain"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "LanternPole_Chain"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         0.958199143409729,
                         2.106623649597168,
@@ -2409,7 +2409,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             5.960464477539063e-08,
@@ -2441,25 +2441,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 729397038683449858
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 3775289829509233270
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "LanternPole_Lantern"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "LanternPole_Lantern"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "LanternPole_Lantern"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         0.9578503370285034,
                         1.8984285593032837,
@@ -2477,7 +2477,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             5.960464477539063e-08,
@@ -2509,13 +2509,13 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 7249553884414166951
                 },
-                "cologne::LightComponent": {
+                "LightComponent": {
                     "cast_shadows": false,
                     "color": [
                         1.0,
@@ -2528,10 +2528,10 @@
                     "strength": 1.0,
                     "type": 2
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "spot light"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         0.0,
                         0.0,
@@ -2549,7 +2549,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -2581,13 +2581,13 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 17809036324860528111
                 },
-                "cologne::LightComponent": {
+                "LightComponent": {
                     "cast_shadows": false,
                     "color": [
                         1.0,
@@ -2600,10 +2600,10 @@
                     "strength": 6.0,
                     "type": 1
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "point light"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -6.0,
                         5.0,
@@ -2621,7 +2621,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -2653,13 +2653,13 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 13738194435019121164
                 },
-                "cologne::LightComponent": {
+                "LightComponent": {
                     "cast_shadows": false,
                     "color": [
                         0.20000000298023224,
@@ -2672,10 +2672,10 @@
                     "strength": 6.0,
                     "type": 1
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "point light2"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         6.0,
                         4.579999923706055,
@@ -2693,7 +2693,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -2725,13 +2725,13 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 12177164081805151958
                 },
-                "cologne::LightComponent": {
+                "LightComponent": {
                     "cast_shadows": false,
                     "color": [
                         0.07800000160932541,
@@ -2744,10 +2744,10 @@
                     "strength": 6.670000076293945,
                     "type": 1
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "point light3"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -6.699999809265137,
                         1.399999976158142,
@@ -2765,7 +2765,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -2797,13 +2797,13 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 8622311100642432409
                 },
-                "cologne::LightComponent": {
+                "LightComponent": {
                     "cast_shadows": false,
                     "color": [
                         1.0,
@@ -2816,10 +2816,10 @@
                     "strength": 1.0,
                     "type": 1
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "lantern light"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         0.24300000071525574,
                         1.0729999542236328,
@@ -2837,7 +2837,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -2869,13 +2869,13 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 11556985883549171447
                 },
-                "cologne::LightComponent": {
+                "LightComponent": {
                     "cast_shadows": false,
                     "color": [
                         1.0,
@@ -2888,10 +2888,10 @@
                     "strength": 7.0,
                     "type": 1
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "evil light"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -4.538000106811523,
                         1.0820000171661377,
@@ -2909,7 +2909,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -2941,13 +2941,13 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 8207130412725781825
                 },
-                "cologne::LightComponent": {
+                "LightComponent": {
                     "cast_shadows": false,
                     "color": [
                         1.0,
@@ -2960,10 +2960,10 @@
                     "strength": 5.909999847412109,
                     "type": 1
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "hall light"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         2.7950000762939453,
                         0.4189999997615814,
@@ -2981,7 +2981,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -3013,13 +3013,13 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 10247646716031441366
                 },
-                "cologne::LightComponent": {
+                "LightComponent": {
                     "cast_shadows": true,
                     "color": [
                         1.0,
@@ -3032,10 +3032,10 @@
                     "strength": 2.0,
                     "type": 0
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "directional light"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         0.7900000214576721,
                         18.867000579833984,
@@ -3053,7 +3053,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -3085,25 +3085,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": false
                 },
-                "cologne::CameraComponent": {
+                "CameraComponent": {
                     "fov_radians": 0.7853981852531433,
                     "ortho_zoom": 5.0,
                     "orthographic": false,
                     "primary": false
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 12069857974175197925
                 },
-                "cologne::NativeScriptComponent": {
-                    "type_name": "cologne::EditorCameraController"
+                "NativeScriptComponent": {
+                    "type_name": "EditorCameraController"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "Scene Camera"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -2.6668126583099365,
                         1.8465744256973267,
@@ -3121,7 +3121,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             0.6517756581306458,
@@ -3153,22 +3153,22 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 13540645836904867361
                 },
-                "cologne::ParentComponent": {
+                "ParentComponent": {
                     "children": [
                         74689655902892577,
                         119768899841706519
                     ]
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "sofa"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         -0.6000000238418579,
                         -0.5,
@@ -3186,7 +3186,7 @@
                         1.0
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -3218,25 +3218,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 13540645836904867361
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 74689655902892577
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "sofa_1-0"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "sofa_1-0"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "sofa_1-0"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         0.0,
                         0.0,
@@ -3254,7 +3254,7 @@
                         0.9999999403953552
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,
@@ -3286,25 +3286,25 @@
         },
         {
             "components": {
-                "cologne::ActiveComponent": {
+                "ActiveComponent": {
                     "active": true
                 },
-                "cologne::ChildComponent": {
+                "ChildComponent": {
                     "parent": 13540645836904867361
                 },
-                "cologne::IDComponent": {
+                "IDComponent": {
                     "id": 119768899841706519
                 },
-                "cologne::MeshComponent": {
+                "MeshComponent": {
                     "mesh_name": "sofa_1-1"
                 },
-                "cologne::StaticColliderComponent": {
+                "StaticColliderComponent": {
                     "mesh_name": "sofa_1-1"
                 },
-                "cologne::TagComponent": {
+                "TagComponent": {
                     "tag": "sofa_1-1"
                 },
-                "cologne::TransformComponent": {
+                "TransformComponent": {
                     "position": [
                         0.0,
                         0.0,
@@ -3322,7 +3322,7 @@
                         0.9999999403953552
                     ]
                 },
-                "cologne::WorldTransformComponent": {
+                "WorldTransformComponent": {
                     "transform": [
                         [
                             1.0,

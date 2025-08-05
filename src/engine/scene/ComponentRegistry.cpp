@@ -12,8 +12,10 @@
 
 namespace cologne::ComponentRegistry
 {
-#define REGISTER_COMPONENT(T) \
+    using namespace entt::literals;
+#define REGISTER_COMPONENT(T, name) \
 entt::meta_factory<T>() \
+.type(entt::hashed_string(name))\
 .func<[](entt::registry* registry, entt::entity entity, T& value) { \
         registry->emplace_or_replace<T>(entity, std::move(value)); }>("emplace"_hs)
 #define REGISTER_PROPERTY(Type, member, ...) \
@@ -97,53 +99,54 @@ entt::meta_factory<T>() \
                 .data<[](glm::mat4 &m) { return m[2]; }>("c2"_hs)
                 .data<[](glm::mat4 &m) { return m[3]; }>("c3"_hs);
 
-        REGISTER_COMPONENT(TransformComponent)
+        REGISTER_COMPONENT(TransformComponent, "TransformComponent")
                 REGISTER_PROPERTY(TransformComponent, position)
                 REGISTER_PROPERTY(TransformComponent, rotation)
                 REGISTER_PROPERTY(TransformComponent, scale);
 
         entt::meta_factory<UUID>().conv<uint64_t>()
+                .type("UUID"_hs)
                 REGISTER_PROPERTY(UUID, _uuid);
-        REGISTER_COMPONENT(IDComponent)
+        REGISTER_COMPONENT(IDComponent, "IDComponent")
                 REGISTER_PROPERTY(IDComponent, id);
 
-        REGISTER_COMPONENT(WorldTransformComponent)
+        REGISTER_COMPONENT(WorldTransformComponent, "WorldTransformComponent")
                 REGISTER_PROPERTY(WorldTransformComponent, transform);
 
-        REGISTER_COMPONENT(ChildComponent)
+        REGISTER_COMPONENT(ChildComponent, "ChildComponent")
                 REGISTER_PROPERTY(ChildComponent, parent);
 
-        REGISTER_COMPONENT(ActiveComponent)
+        REGISTER_COMPONENT(ActiveComponent, "ActiveComponent")
                 REGISTER_PROPERTY(ActiveComponent, active);
 
-        REGISTER_COMPONENT(ModelComponent)
+        REGISTER_COMPONENT(ModelComponent, "ModelComponent")
                 REGISTER_PROPERTY(ModelComponent, model_name)
                 REGISTER_PROPERTY(ModelComponent, gi_only);
 
-        REGISTER_COMPONENT(MeshComponent)
+        REGISTER_COMPONENT(MeshComponent, "MeshComponent")
                 REGISTER_PROPERTY(MeshComponent, mesh_name);
 
-        REGISTER_COMPONENT(SkinnedModelComponent)
+        REGISTER_COMPONENT(SkinnedModelComponent, "SkinnedModelComponent")
                 REGISTER_PROPERTY(SkinnedModelComponent, model_name);
 
-        REGISTER_COMPONENT(CameraComponent)
+        REGISTER_COMPONENT(CameraComponent, "CameraComponent")
                 REGISTER_PROPERTY(CameraComponent, fov_radians)
                 REGISTER_PROPERTY(CameraComponent, primary)
                 REGISTER_PROPERTY(CameraComponent, ortho_zoom)
                 REGISTER_PROPERTY(CameraComponent, orthographic);
 
-        REGISTER_COMPONENT(TagComponent)
+        REGISTER_COMPONENT(TagComponent, "TagComponent")
                 REGISTER_PROPERTY(TagComponent, tag);
 
-        REGISTER_COMPONENT(StaticColliderComponent)
+        REGISTER_COMPONENT(StaticColliderComponent, "StaticColliderComponent")
                 REGISTER_PROPERTY(StaticColliderComponent, mesh_name);
 
-        REGISTER_COMPONENT(RigidbodyComponent);
+        REGISTER_COMPONENT(RigidbodyComponent, "RigidbodyComponent");
 
-        REGISTER_COMPONENT(ConvexMeshColliderComponent)
+        REGISTER_COMPONENT(ConvexMeshColliderComponent, "ConvexMeshColliderComponent")
                 REGISTER_PROPERTY(ConvexMeshColliderComponent, mesh_name);
 
-        REGISTER_COMPONENT(PlayerComponent)
+        REGISTER_COMPONENT(PlayerComponent, "PlayerComponent")
                 REGISTER_PROPERTY(PlayerComponent, camera)
                 REGISTER_PROPERTY(PlayerComponent, viewmodel)
                 REGISTER_PROPERTY(PlayerComponent, gravity)
@@ -162,7 +165,7 @@ entt::meta_factory<T>() \
                 REGISTER_PROPERTY(PlayerComponent, maxStepInterval)
                 REGISTER_PROPERTY(PlayerComponent, minStepInterval);
 
-        REGISTER_COMPONENT(ViewmodelComponent)
+        REGISTER_COMPONENT(ViewmodelComponent, "ViewmodelComponent")
                 REGISTER_PROPERTY(ViewmodelComponent, position_offset)
                 REGISTER_PROPERTY(ViewmodelComponent, euler_offset)
                 REGISTER_PROPERTY(ViewmodelComponent, sway_multiplier)
@@ -172,17 +175,17 @@ entt::meta_factory<T>() \
                 REGISTER_PROPERTY(ViewmodelComponent, vertical_velocity_multiplier)
                 REGISTER_PROPERTY(ViewmodelComponent, max_vertical_offset);
 
-        REGISTER_COMPONENT(EnemyComponent)
+        REGISTER_COMPONENT(EnemyComponent, "EnemyComponent")
                 REGISTER_PROPERTY(EnemyComponent, health)
                 REGISTER_PROPERTY(EnemyComponent, dead)
                 REGISTER_PROPERTY(EnemyComponent, hurt_sound);
 
-        REGISTER_COMPONENT(BulletComponent)
+        REGISTER_COMPONENT(BulletComponent, "BulletComponent")
                 REGISTER_PROPERTY(BulletComponent, position)
                 REGISTER_PROPERTY(BulletComponent, direction)
                 REGISTER_PROPERTY(BulletComponent, damage);
 
-        REGISTER_COMPONENT(LightComponent)
+        REGISTER_COMPONENT(LightComponent, "LightComponent")
                 REGISTER_PROPERTY(LightComponent, color)
                 REGISTER_PROPERTY(LightComponent, strength)
                 REGISTER_PROPERTY(LightComponent, radius)
@@ -196,7 +199,7 @@ entt::meta_factory<T>() \
                 ENUMERATOR(LightComponent::LightType, Point)
                 ENUMERATOR(LightComponent::LightType, Spot);
 
-        REGISTER_COMPONENT(AnimatorComponent)
+        REGISTER_COMPONENT(AnimatorComponent, "AnimatorComponent")
                 .func<[](AnimatorComponent &comp, nlohmann::json &j)
                 {
                     serialize_animator(comp, j);
@@ -205,9 +208,9 @@ entt::meta_factory<T>() \
                 {
                     deserialize_animator(comp, j);
                 }>("deserialize"_hs);
-        REGISTER_COMPONENT(ParentComponent)
+        REGISTER_COMPONENT(ParentComponent, "ParentComponent")
                 REGISTER_PROPERTY(ParentComponent, children);
-        REGISTER_COMPONENT(NativeScriptComponent)
+        REGISTER_COMPONENT(NativeScriptComponent, "NativeScriptComponent")
                 REGISTER_PROPERTY(NativeScriptComponent, type_name);
     }
 }
