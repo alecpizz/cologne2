@@ -185,7 +185,14 @@ namespace cologne
                 auto old_scene = _impl->scene.release();
                 delete old_scene;
                 Physics::delete_all_bodies();
-                _impl->scene = std::make_unique<Scene>(_impl->next_scene.c_str());
+                if (_impl->next_scene.empty())
+                {
+                    _impl->scene = std::make_unique<Scene>();
+                }
+                else
+                {
+                    _impl->scene = std::make_unique<Scene>(_impl->next_scene.c_str());
+                }
                 _impl->scene_queued = false;
             }
             Input::update();

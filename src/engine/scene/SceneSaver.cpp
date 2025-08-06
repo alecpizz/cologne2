@@ -360,7 +360,14 @@ namespace cologne
                 {
                     continue;
                 }
-                if (auto meta = entt::resolve(id))
+                const auto hash = set.type().hash();
+                if (!ComponentRegistry::get_component_map().contains(hash))
+                {
+                    LOG_ERROR("Component map did not contain %s", std::string(set.type().name()).c_str());
+                    continue;
+                }
+                const std::string &name = ComponentRegistry::get_component_map().at(hash);
+                if (auto meta = entt::resolve(entt::hashed_string(name.c_str())))
                 {
                     nlohmann::json j_component_data;
                     entt::meta_any instance = meta.from_void(set.value(entity));
@@ -372,7 +379,7 @@ namespace cologne
                     {
                         save_component(instance, j_component_data);
                     }
-                    j_components[std::string(set.type().name())] = j_component_data;
+                    j_components[name] = j_component_data;
                 }
             }
             j_entity["components"] = j_components;

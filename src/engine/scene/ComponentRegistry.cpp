@@ -7,13 +7,13 @@
 #include <engine/asset_manager/AssetManager.h>
 #include <nlohmann/json.hpp>
 #include "Components.h"
-#include "SceneSaver.h"
 
 
 namespace cologne::ComponentRegistry
 {
     using namespace entt::literals;
 #define REGISTER_COMPONENT(T, name) \
+component_type_map[entt::type_hash<T>::value()] = name; \
 entt::meta_factory<T>() \
 .type(entt::hashed_string(name))\
 .func<[](entt::registry* registry, entt::entity entity, T& value) { \
@@ -27,6 +27,8 @@ entt::meta_factory<T>() \
 #define ENUMERATOR(E, Member, ...) \
         .data<E::Member>(#Member##_hs) \
         .custom<PropertiesMap>(PropertiesMap{{"name"_hs, #Member} __VA_OPT__(, __VA_ARGS__)})
+
+    static std::map<entt::id_type, std::string> component_type_map;
 
     void serialize_animator(const AnimatorComponent &comp, nlohmann::json &j)
     {
@@ -73,6 +75,11 @@ entt::meta_factory<T>() \
         }
         temp.set_current_progress(j["current_time"].get<float>());
         animator_component = temp;
+    }
+
+    const std::map<entt::id_type, std::string> &get_component_map()
+    {
+        return component_type_map;
     }
 
     void register_components()

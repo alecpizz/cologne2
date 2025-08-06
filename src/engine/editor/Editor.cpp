@@ -193,6 +193,10 @@ namespace cologne
         {
             if (ImGui::BeginMenu("File"))
             {
+                if (ImGui::MenuItem("New Scene"))
+                {
+
+                }
                 if (ImGui::MenuItem("Load Scene"))
                 {
                     Engine::get_window()->show_file_dialogue_window({{"Scene Files", "cscn"}, {"All Files", "*"}},
@@ -203,6 +207,10 @@ namespace cologne
                 {
                     SceneSaver saver(Engine::get_scene());
                     saver.serialize(RESOURCES_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name());
+                }
+                if (ImGui::MenuItem("Reload Scene"))
+                {
+                    Engine::load_scene((RESOURCES_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name()).c_str());
                 }
                 if (ImGui::MenuItem("Save Scene As"))
                 {
