@@ -26,6 +26,7 @@
 #include <Jolt/Physics/Collision/Shape/PlaneShape.h>
 #include <Jolt/Physics/Collision/Shape/ScaledShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
+#include <Jolt/Physics/Collision/Shape/ConvexHullShape.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 #include <Jolt/Physics/Collision/RayCast.h>
@@ -37,6 +38,8 @@
 
 #include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
 #include <fstream>
+#include <engine/asset_manager/AssetManager.h>
+
 #include "Jolt/Physics/Constraints/SwingTwistConstraint.h"
 #include "Jolt/Physics/Ragdoll/Ragdoll.h"
 
@@ -1186,5 +1189,43 @@ namespace cologne::Physics
         return to;
     }
 
+    uint32_t create_rigidbody(Entity entity)
+    {
+        JPH::Ref<Shape> result_shape;
+        if (entity.has_component<ConvexMeshColliderComponent>())
+        {
+            auto mesh = AssetManager::get_mesh_by_name(entity.get_component<ConvexMeshColliderComponent>().mesh_name);
+            if (!mesh)
+            {
+                LOG_ERROR("No mesh found with name %s", entity.get_component<ConvexMeshColliderComponent>().mesh_name.c_str());
+                return 0;
+            }
+            //TODO: BAKE ME BAKE ME BAKE ME
+            auto& in_verts = mesh->get_vertices();
+            std::vector<JPH::Vec3> convex_hull_verts;
+            convex_hull_verts.reserve(in_verts.size());
+            for (const auto& v : in_verts)
+            {
+                convex_hull_verts.emplace_back(v.position.x, v.position.y, v.position.z);
+            }
 
+            JPH::ConvexHullShapeSettings hull_settings(convex_hull_verts.data(), convex_hull_verts.size());
+            auto hull_result = hull_settings.Create();
+            if (!hull_result.IsValid())
+            {
+                LOG_ERROR("Error creating convex hull %s", hull_result.GetError().c_str());
+                return 0;
+            }
+
+            result_shape = hull_result.Get();
+        }
+
+        //TODO: scale me
+        BodyCreationSettings settings (result_shape, glm_vec3_to_jph_vec3(entity.get_transform().position),
+            glm_quat_to_jph_quat(entity.get_transform().rotation), EMotionType::Dynamic, Layers::MOVING);
+        auto body = physics_system.GetBodyInterface().CreateAndAddBody(settings, EActivation::Activate);
+        colliders_static.emplace_back(body);
+        entity_to_collider_map[body] = entity;
+        return body.GetIndexAndSequenceNumber();
+    }
 }

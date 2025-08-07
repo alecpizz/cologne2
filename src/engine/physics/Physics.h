@@ -68,5 +68,5 @@ namespace cologne::Physics
     void sync_ragdoll(uint32_t ragdoll_id, const std::unordered_map<std::string, glm::mat4>& ragdoll_transforms);
     glm::mat4 get_rigidbody_transform(uint32_t body_id);
 
-    uint32_t create_rigidbody(glm::vec3 vec);
+    uint32_t create_rigidbody(Entity entity);
 }

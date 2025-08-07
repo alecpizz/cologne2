@@ -109,6 +109,7 @@ namespace cologne
         if (_ragdoll_id != -1)
         {
             LOG_INFO("already had ragdoll!");
+            return;
         }
         SkeletonPose pose(_skeleton);
         for (size_t i = 0; i < _skeleton.get_bone_count(); i++)

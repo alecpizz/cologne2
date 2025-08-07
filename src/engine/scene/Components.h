@@ -113,7 +113,7 @@ namespace cologne
     struct MeshComponent
     {
         MeshComponent() = default;
-
+        MeshComponent(const std::string& name);
         MeshComponent(int idx);
 
         std::string mesh_name;

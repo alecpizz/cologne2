@@ -52,6 +52,19 @@ namespace cologne
             collider.body_id = body_id;
         }
 
+        for (auto entity : _registry.view<RigidbodyComponent, ConvexMeshColliderComponent>())
+        {
+            Entity e= {entity, this};
+            auto& rb = _registry.get<RigidbodyComponent>(entity);
+
+            if (rb.body_id != 0)
+            {
+                continue;
+            }
+
+            rb.body_id = Physics::create_rigidbody(e);
+        }
+
         for (const auto entity: _registry.view<PlayerComponent>())
         {
             auto &pc = _registry.get<PlayerComponent>(entity);
@@ -130,6 +143,11 @@ namespace cologne
         }
         SceneSaver saver_temp(this);
         saver_temp.deserialize(path);
+        auto e = create_entity("alarm clock physics");
+        e.get_transform().position = glm::vec3(0.0f, 4.0f, 0.0f);
+        e.add_component<RigidbodyComponent>();
+        e.add_component<MeshComponent>("alarm_clock_alarm_clock");
+        e.add_component<ConvexMeshColliderComponent>("alarm_clock_alarm_clock");
         initialize_special_types();
         Physics::create_infinite_ground_plane(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
         re_calculate_bounds();
@@ -138,6 +156,9 @@ namespace cologne
         LOG_INFO("Scene size is (%f, %f, %f)", _scene_bounds.size().x, _scene_bounds.size().y, _scene_bounds.size().z);
         _particles.emplace_back(Particles());
         _particles[0].init(_scene_bounds, 5);
+
+
+        //TEMP TEMP TEMP TEMP TEMP TEMP
     }
 
     Scene::~Scene()
@@ -229,6 +250,11 @@ namespace cologne
                                 }
                             }
                         }
+                        if (info.hit_entity.has_component<RigidbodyComponent>())
+                        {
+                            auto& rb = info.hit_entity.get_component<RigidbodyComponent>();
+                            Physics::add_impulse_force_at_position(rb.body_id, info.hit_point, -info.hit_normal * 20.0f);
+                        }
                     }
                 }
             }
@@ -279,6 +305,18 @@ namespace cologne
                 }
                 Engine::get_renderer()->draw_line(info.hit_point, info.hit_point + info.hit_normal * 0.1f,
                                                   glm::max(info.hit_normal, glm::vec3(0.1f, 0.1f, 0.1f)));
+            }
+
+            for (auto e : _registry.view<RigidbodyComponent, TransformComponent>())
+            {
+                auto& tr = _registry.get<TransformComponent>(e);
+                auto& rb = _registry.get<RigidbodyComponent>(e);
+                if (rb.body_id == 0)
+                {
+                    continue;
+                }
+                auto mat = Physics::get_rigidbody_transform(rb.body_id);
+                tr = TransformComponent(mat);
             }
         }
 
@@ -369,6 +407,11 @@ namespace cologne
                 Engine::get_renderer()->submit_skinned_render_item(item);
             }
         }
+    }
+
+    void Scene::on_enter_game()
+    {
+        initialize_special_types();
     }
 
     AABB Scene::re_calculate_bounds()

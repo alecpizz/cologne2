@@ -36,6 +36,7 @@ namespace cologne
         }
         else
         {
+            Engine::get_scene()->on_enter_game();
             Engine::get_window()->hide_mouse();
         }
     }

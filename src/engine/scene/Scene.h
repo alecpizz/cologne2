@@ -22,6 +22,8 @@ namespace cologne
 
         void update(float delta_time);
 
+        void on_enter_game();
+
         Scene(Scene &&) = delete;
 
         Scene(const Scene &) = delete;
