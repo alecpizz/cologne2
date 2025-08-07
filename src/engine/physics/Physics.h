@@ -56,7 +56,7 @@ namespace cologne::Physics
 
     void destroy_body(uint32_t body_id);
 
-    void add_impulse_force_at_position(uint32_t body_id, glm::vec3 position, glm::vec3 force);
+    void add_impulse_force_at_position(uint32_t body_id, glm::vec3 position, glm::vec3 force, bool ignore_mass = false);
 
     void disable_body(uint32_t body_id);
 

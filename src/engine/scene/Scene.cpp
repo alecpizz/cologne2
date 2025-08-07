@@ -14,8 +14,6 @@
 #include <engine/scripts/EditorCameraController.h>
 #include <engine/scripts/PlayerController.h>
 #include <engine/util/DebugScope.h>
-#include <engine/util/Frustum.h>
-#include <engine/util/Util.h>
 
 #include "Components.h"
 #include "Entity.h"
@@ -24,7 +22,6 @@
 
 namespace cologne
 {
-    Frustum cam_frustum;
 
     void Scene::initialize_special_types()
     {
@@ -143,11 +140,6 @@ namespace cologne
         }
         SceneSaver saver_temp(this);
         saver_temp.deserialize(path);
-        auto e = create_entity("alarm clock physics");
-        e.get_transform().position = glm::vec3(0.0f, 4.0f, 0.0f);
-        e.add_component<RigidbodyComponent>();
-        e.add_component<MeshComponent>("alarm_clock_alarm_clock");
-        e.add_component<ConvexMeshColliderComponent>("alarm_clock_alarm_clock");
         initialize_special_types();
         Physics::create_infinite_ground_plane(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
         re_calculate_bounds();
@@ -156,9 +148,6 @@ namespace cologne
         LOG_INFO("Scene size is (%f, %f, %f)", _scene_bounds.size().x, _scene_bounds.size().y, _scene_bounds.size().z);
         _particles.emplace_back(Particles());
         _particles[0].init(_scene_bounds, 5);
-
-
-        //TEMP TEMP TEMP TEMP TEMP TEMP
     }
 
     Scene::~Scene()
@@ -253,7 +242,7 @@ namespace cologne
                         if (info.hit_entity.has_component<RigidbodyComponent>())
                         {
                             auto& rb = info.hit_entity.get_component<RigidbodyComponent>();
-                            Physics::add_impulse_force_at_position(rb.body_id, info.hit_point, -info.hit_normal * 20.0f);
+                            Physics::add_impulse_force_at_position(rb.body_id, info.hit_point, -info.hit_normal * 20.0f, true);
                         }
                     }
                 }
@@ -269,7 +258,6 @@ namespace cologne
         auto tr = camera.get_transform();
         auto cm = camera.get_component<CameraComponent>();
         Engine::get_renderer()->submit_camera_transform(tr, cm);
-        cam_frustum.update(Renderer::get_camera_projection(tr, cm) * Renderer::get_camera_view(tr));
 
         for (auto entity: _registry.view<LightComponent, WorldTransformComponent, ActiveComponent>())
         {
@@ -279,11 +267,6 @@ namespace cologne
             {
                 continue;
             }
-            // //TEMP, need to figure out a better radius culling tech
-            // if (light.radius < 6.0f && !cam_frustum.intersect_point(transform.position))
-            // {
-            //     continue;
-            // }
             Engine::get_renderer()->submit_light(Light(light, TransformComponent(transform)));
         }
 
@@ -542,11 +525,9 @@ namespace cologne
         c.primary = true;
 
         Entity viewModel = create_entity("viewmodel");
-        viewModel.add_component<SkinnedModelComponent>("vsk");
-        auto &anim4 = viewModel.add_component<AnimatorComponent>("vsk");
-        anim4.play_base_animation(AssetManager::get_animation_by_name("vsk_Idle"));
-        // viewModel.add_component<SkinnedModelComponent>(AssetManager::get_skinned_model_index_by_name("deagle"));
-        // viewModel.add_component<AnimatorComponent>(AssetManager::get_animation_index_by_name("deagle_Rig|Rig|MK_Idle"));
+        viewModel.add_component<SkinnedModelComponent>("deagle");
+        auto &anim4 = viewModel.add_component<AnimatorComponent>("deagle");
+        anim4.play_base_animation(AssetManager::get_animation_by_name("deagle_Rig|Rig|MK_Idle"));
         viewModel.add_component<ViewmodelComponent>();
 
         Entity player = create_entity("player");

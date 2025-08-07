@@ -1048,12 +1048,21 @@ namespace cologne::Physics
 
     void destroy_body(uint32_t body_id)
     {
+        if (colliders_static.empty())
+        {
+            return;
+        }
+        auto jph_body = static_cast<BodyID>(body_id);
+        if (jph_body.IsInvalid())
+        {
+            return;
+        }
         disable_body(body_id);
         physics_system.GetBodyInterface().DestroyBody(static_cast<BodyID>(body_id));
         std::erase(colliders_static, static_cast<BodyID>(body_id));
     }
 
-    void add_impulse_force_at_position(uint32_t body_id, glm::vec3 position, glm::vec3 force)
+    void add_impulse_force_at_position(uint32_t body_id, glm::vec3 position, glm::vec3 force, bool ignore_mass)
     {
         BodyID id(body_id);
         if (id.IsInvalid())
@@ -1061,6 +1070,10 @@ namespace cologne::Physics
             return;
         }
 
+        if (ignore_mass)
+        {
+            force *= physics_system.GetBodyInterface().GetShape(id)->GetMassProperties().mMass;
+        }
         physics_system.GetBodyInterface().AddImpulse(id, glm_vec3_to_jph_vec3(force), glm_vec3_to_jph_vec3(position));
     }
 

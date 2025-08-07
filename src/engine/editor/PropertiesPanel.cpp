@@ -287,7 +287,7 @@ namespace cologne
                                                       ImGui::Text("Name %s", model.model_name.c_str());
                                                   });
 
-            draw_component<StaticColliderComponent>("Static Collider", _selected_entity, false, [](auto &collider)
+            draw_component<StaticColliderComponent>("Static Collider", _selected_entity, true, [](auto &collider)
             {
                 ImGui::BeginDisabled(true);
                 int id = static_cast<int>(collider.body_id);
@@ -404,6 +404,18 @@ namespace cologne
                     //             _selected_entity.get_component<SkinnedModelComponent>().id)->get_name()));
                     LOG_WARN("NOT IMPLEMENTED");
                     ImGui::CloseCurrentPopup();
+                }
+
+                if (!_selected_entity.has_component<ConvexMeshColliderComponent>() && _selected_entity.has_component<MeshComponent>() && ImGui::MenuItem("Convex Mesh Collider Component"))
+                {
+                    Audio::play_sound(_accept_sound, 30);
+                    _selected_entity.add_component<ConvexMeshColliderComponent>(_selected_entity.get_component<MeshComponent>().mesh_name);
+                }
+
+                if (_selected_entity.has_component<ConvexMeshColliderComponent>() && !_selected_entity.has_component<RigidbodyComponent>() && ImGui::MenuItem("Rigidbody Component"))
+                {
+                    Audio::play_sound(_accept_sound, 30);
+                    _selected_entity.add_component<RigidbodyComponent>();
                 }
 
                 if (!_selected_entity.has_component<NativeScriptComponent>() && ImGui::BeginMenu("Native Script"))

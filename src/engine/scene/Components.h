@@ -134,6 +134,7 @@ namespace cologne
         uint32_t body_id = 0;
         std::string mesh_name;
         bool body_enabled = true;
+        static void on_destroy(entt::registry &registry, const entt::entity entt);
     };
 
     struct CameraComponent

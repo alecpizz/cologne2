@@ -21,4 +21,10 @@ namespace cologne
         }
         mesh_name = mesh_by_index->get_name();
     }
+
+    void StaticColliderComponent::on_destroy(entt::registry &registry, const entt::entity entt)
+    {
+        auto col = registry.get<StaticColliderComponent>(entt);
+        Physics::destroy_body(col.body_id);
+    }
 }

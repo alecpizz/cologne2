@@ -303,7 +303,7 @@ namespace cologne
                 LOG_INFO("Bang");
                 Entity vm = Engine::get_scene()->get_entity_by_uuid(get_component<PlayerComponent>().viewmodel);
                 auto &anim = vm.get_component<AnimatorComponent>();
-                anim.play_one_shot_animation(AssetManager::get_animation_by_name("vsk_Fire"));
+                anim.play_one_shot_animation(AssetManager::get_animation_by_name("deagle_Rig|Rig|MK_Shot"));
                 Audio::play_sound(shoot_sound, 30);
                 auto cam = Engine::get_scene()->get_entity_by_uuid(get_component<PlayerComponent>().camera);
                 auto tr = cam.get_transform();
@@ -321,7 +321,7 @@ namespace cologne
                 _gun_time = _reload_time;
                 Entity vm = Engine::get_scene()->get_entity_by_uuid(get_component<PlayerComponent>().viewmodel);
                 auto &anim = vm.get_component<AnimatorComponent>();
-                anim.play_one_shot_animation(AssetManager::get_animation_by_name("vsk_Reload_Full"));
+                anim.play_one_shot_animation(AssetManager::get_animation_by_name("deagle_Rig|Rig|MK_ReloadFull"));
                 Audio::play_sound(reload_sound, 20);
                 _is_reloading = true;
                 _current_ammo = _max_ammo;
@@ -349,7 +349,7 @@ namespace cologne
         {
             Audio::add_sound(footstep_sound.c_str());
         }
-        auto anim = AssetManager::get_animation_by_name("vsk_Reload_Full");
+        auto anim = AssetManager::get_animation_by_name("deagle_Rig|Rig|MK_ReloadFull");
         _reload_time = anim->get_duration() / anim->get_ticks_per_second();
         Audio::add_sound(shoot_sound);
         Audio::add_sound(reload_sound);
