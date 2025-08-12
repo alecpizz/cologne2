@@ -20,13 +20,10 @@ namespace cologne
         get_ssbo_by_name("lights")->bind(2);
         output_fbo->bind();
         output_fbo->set_viewport();
-        // glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        shader->bind();
+        output_fbo->clear_attachment("color", 0.0f, 0.0f, 0.0f, 0.0f);
+        output_fbo->clear_depth_attachment();
 
-        // env_irradiance.bind(IRRADIANCE_INDEX);
-        // env_prefilter.bind(PREFILTER_INDEX);
-        // env_brdf.bind(BRDF_INDEX);
+        shader->bind();
 
         shader->set_int("voxel_grid_size", _voxel_data.voxel_dimensions);
         auto bounds = Engine::get_scene()->get_bounds();
@@ -40,10 +37,8 @@ namespace cologne
         shader->set_vec3("grid_min", (min));
         shader->set_vec3("grid_max", (max));
         shader->set_int("num_lights", _lights.size());
-        static float time = 0.0f;
-        time += Time::DeltaTime;
-        shader->set_float("time", time);
         shader->set_bool("indirect_lighting_active", _apply_indirect_lighting);
+        glBindImageTexture(0, output_fbo->get_color_attachment_handle_by_name("color"), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA16F);
         glBindTextureUnit(0, gbuffer_fbo->get_color_attachment_handle_by_name("position"));
         glBindTextureUnit(1, gbuffer_fbo->get_color_attachment_handle_by_name("normal"));
         glBindTextureUnit(2, gbuffer_fbo->get_color_attachment_handle_by_name("albedo"));
@@ -51,10 +46,15 @@ namespace cologne
         glBindTextureUnit(4, gbuffer_fbo->get_color_attachment_handle_by_name("emission"));
         glBindTextureUnit(5, _shadow_depth);
         glBindTextureUnit(6, _indirect_texture_high_res);
-        glBindTextureUnit(7, _bloom_texture);
         glBindTextureUnit(8, _env_brdf);
         glBindTextureUnit(9, _env_prefilter);
-        render_quad();
+        uint32_t work_group_size = 32;
+        uint32_t width = Engine::get_window()->get_width();
+        uint32_t height = Engine::get_window()->get_height();
+        uint32_t num_x = (width + work_group_size - 1) / work_group_size;
+        uint32_t num_y = (height + work_group_size - 1) / work_group_size;
+        shader->dispatch(num_x, num_y, 1);
+        shader->wait(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer_fbo->get_handle());
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, output_fbo->get_handle()); // write to output framebuffer
         glBlitFramebuffer(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height(), 0, 0,
@@ -62,6 +62,5 @@ namespace cologne
                           GL_DEPTH_BUFFER_BIT, GL_NEAREST);
         glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
     }
 }

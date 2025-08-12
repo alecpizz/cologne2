@@ -149,6 +149,8 @@ namespace cologne
 
         void bloom_pass();
 
+        void post_processing_pass();
+
         void skybox_pass();
 
         void init_framebuffers();

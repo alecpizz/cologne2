@@ -45,8 +45,7 @@ namespace cologne
         {
             shaders.clear();
         }
-        shaders["lit"] = Shader(RESOURCES_PATH "shaders/lit.vert",
-                                RESOURCES_PATH "shaders/lit.frag");
+        shaders["lit"] = Shader(RESOURCES_PATH "shaders/lit.comp");
 
         shaders["gbuffer"] = Shader(RESOURCES_PATH "shaders/gbuffer.vert",
                                     RESOURCES_PATH "shaders/gbuffer.frag");
@@ -84,6 +83,7 @@ namespace cologne
         shaders["compute_skinning"] = Shader(RESOURCES_PATH "shaders/skinning.comp");
         shaders["frustum_culling"] = Shader(RESOURCES_PATH "shaders/culling/frustum_cull.comp");
         shaders["clear_culling"] = Shader(RESOURCES_PATH "shaders/culling/clear_cull.comp");
+        shaders["post_processing"] = Shader(RESOURCES_PATH "shaders/post_processing/post_processing.comp");
     }
 
     void Renderer::init_ssbos()
@@ -523,6 +523,7 @@ namespace cologne
         indirect_pass();
         bloom_pass();
         lit_pass();
+        post_processing_pass();
         draw_fps();
         outline_pass();
         auto fbo = get_framebuffer_by_name("output");
