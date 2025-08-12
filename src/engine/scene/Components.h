@@ -1,11 +1,10 @@
 #pragma once
-#include <engine/audio/Audio.h>
 #include <engine/core/UUID.h>
 #include <engine/physics/Physics.h>
 #include <engine/util/Util.h>
 #include <entt/entt.hpp>
 #include <nlohmann/adl_serializer.hpp>
-
+#include <engine/renderer/types/LightHandle.h>
 #include "ScriptableEntity.h"
 
 namespace cologne
@@ -70,6 +69,8 @@ namespace cologne
         {
             return rotation * glm::vec3(1.0f, 0.0f, 0.0f);
         }
+
+        bool operator==(const TransformComponent & transform) const = default;
     };
 
     struct ParentComponent
@@ -214,6 +215,14 @@ namespace cologne
         float outer_cutoff = 17.5f;
         float inner_cutoff = 12.5f;
         bool cast_shadows = false;
+        static void on_construct(entt::registry &registry, const entt::entity entt);
+        static void on_destroy(entt::registry &registry, const entt::entity entt);
+    };
+
+
+    struct LightHandleComponent
+    {
+        LightHandle light_handle;
     };
 
 

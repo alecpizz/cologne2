@@ -119,7 +119,6 @@ namespace cologne
         ssbos["draw_cmds"].update(sizeof(MultiDrawElementsCommand) * _render_cmds.size(), _render_cmds.data());
         ssbos["skinned_draw_cmds"].update(sizeof(MultiDrawElementsCommand) * _skinned_render_cmds.size(),
                                           _skinned_render_cmds.data());
-        ssbos["lights"].update(sizeof(Light) * _lights.size(), _lights.data());
         ssbos["viewport"].update(sizeof(ViewportData), &data);
         ssbos["materials"].update(sizeof(GPUMaterial) * _gpu_materials.size(), _gpu_materials.data());
         ssbos["skinned_materials"].update(sizeof(GPUMaterial) * _skinned_gpu_materials.size(),
@@ -144,11 +143,6 @@ namespace cologne
         framebuffers["output"] = FrameBuffer();
         framebuffers["output"] = FrameBuffer();
         framebuffers["outline"] = FrameBuffer();
-    }
-
-    void Renderer::submit_light(Light light)
-    {
-        _lights.emplace_back(light);
     }
 
     void Renderer::submit_render_item(RenderItem item)
@@ -426,38 +420,38 @@ namespace cologne
         glDeleteBuffers(1, &_vertex_data_vbo);
         glDeleteBuffers(1, &_vertex_data_ebo);
 
-        glDeleteVertexArrays(1, & _skinned_bind_pose_vao);
+        glDeleteVertexArrays(1, &_skinned_bind_pose_vao);
         glDeleteBuffers(1, &_skinned_bind_pose_ebo);
         glDeleteBuffers(1, &_skinned_bind_pose_vbo);
 
         glDeleteVertexArrays(1, &_skinned_vao);
         glDeleteBuffers(1, &_skinned_vbo);
 
-        for (auto point_shadow_map : _point_shadow_maps)
+        for (auto& point_shadow_map: _point_shadow_maps)
         {
-            uint32_t handle = point_shadow_map.get_handle();
+            uint32_t handle = point_shadow_map.second.get_handle();
             glDeleteTextures(1, &handle);
         }
         _point_shadow_maps.clear();
 
-        for (auto tex : _dir_shadow_maps)
+        for (auto& tex: _dir_shadow_maps)
         {
-            uint32_t handle = tex.get_handle();
+            uint32_t handle = tex.second.get_handle();
             glDeleteTextures(1, &handle);
         }
 
         _dir_shadow_maps.clear();
-        for (auto framebuffer : framebuffers)
+        for (auto framebuffer: framebuffers)
         {
             framebuffer.second.clean_up();
         }
 
-        for (auto ssbo : ssbos)
+        for (auto ssbo: ssbos)
         {
             ssbo.second.cleanup();
         }
 
-        for (auto shader : shaders)
+        for (auto shader: shaders)
         {
             shader.second.cleanup();
         }
@@ -542,7 +536,6 @@ namespace cologne
         fbo->release();
         _render_items.clear();
         _skinned_render_items.clear();
-        _lights.clear();
         _outline_render_items.clear();
         _render_cmds.clear();
         _skinned_render_cmds.clear();
@@ -567,6 +560,70 @@ namespace cologne
         get_framebuffer_by_name("voxel_front")->resize(width, height);
         get_framebuffer_by_name("outline")->resize(width, height);
         // render_scene(*Engine::get_scene());
+    }
+
+    LightHandle Renderer::create_light(const Light &light)
+    {
+        const auto result = LightHandle(_next_light_id++);
+        _lights[result] = RendererLight(light, true, false);
+        return result;
+    }
+
+    void Renderer::update_light_transform(LightHandle handle, const TransformComponent &transform)
+    {
+        if (!handle.is_valid())
+        {
+            return;
+        }
+        if (!_lights.contains(handle))
+        {
+            return;
+        }
+        if (_lights[handle].transform != transform)
+        {
+            _lights[handle].dirty = true;
+            _lights[handle].transform = transform;
+            _lights[handle].light.position = glm::vec4(transform.position, 1.0f);
+            _lights[handle].light.direction = glm::vec4(transform.get_forward(), 1.0f);
+        }
+    }
+
+    void Renderer::update_light_properties(LightHandle handle, const LightComponent &light_component)
+    {
+        if (!handle.is_valid())
+        {
+            return;
+        }
+        if (!_lights.contains(handle))
+        {
+            return;
+        }
+        if (_lights[handle].light.is_similar(light_component))
+        {
+            return;
+        }
+        _lights[handle].dirty = true;
+        _lights[handle].light.color = glm::vec4(light_component.color, 1.0f);
+        _lights[handle].light.strength = light_component.strength;
+        _lights[handle].light.radius = light_component.radius;
+        _lights[handle].light.type = static_cast<LightType>(light_component.type);
+        _lights[handle].light.active = 1;
+        _lights[handle].light.outer_cutoff = light_component.outer_cutoff;
+        _lights[handle].light.inner_cutoff = light_component.inner_cutoff;
+        _lights[handle].cast_shadows = light_component.cast_shadows;
+    }
+
+    void Renderer::destroy_light(LightHandle handle)
+    {
+        if (!handle.is_valid())
+        {
+            return;
+        }
+        if (!_lights.contains(handle))
+        {
+            return;
+        }
+        _lights.erase(handle);
     }
 
     void Renderer::reload_shaders()

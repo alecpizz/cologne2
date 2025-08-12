@@ -259,15 +259,16 @@ namespace cologne
         auto cm = camera.get_component<CameraComponent>();
         Engine::get_renderer()->submit_camera_transform(tr, cm);
 
-        for (auto entity: _registry.view<LightComponent, WorldTransformComponent, ActiveComponent>())
+        for (auto entity: _registry.view<LightComponent, WorldTransformComponent, LightHandleComponent, ActiveComponent>())
         {
-            auto [light, transform, active] =
-                    _registry.get<LightComponent, WorldTransformComponent, ActiveComponent>(entity);
-            if (!active)
+            auto [light, transform, handle_comp, active] =
+                    _registry.get<LightComponent, WorldTransformComponent, LightHandleComponent, ActiveComponent>(entity);
+            if (!active || !handle_comp.light_handle.is_valid())
             {
                 continue;
             }
-            Engine::get_renderer()->submit_light(Light(light, TransformComponent(transform)));
+            Engine::get_renderer()->update_light_transform(handle_comp.light_handle, TransformComponent(transform));
+            Engine::get_renderer()->update_light_properties(handle_comp.light_handle, light);
         }
 
         glm::vec3 ray_start = tr.position, ray_dir = tr.get_forward();

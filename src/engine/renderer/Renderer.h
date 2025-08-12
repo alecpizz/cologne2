@@ -3,6 +3,9 @@
 #include "types/FrameBuffer.h"
 #include "engine/renderer/types/RenderItem.h"
 #include <filesystem>
+#include <queue>
+
+#include "types/Light.h"
 
 namespace cologne
 {
@@ -42,7 +45,12 @@ namespace cologne
 
         void window_resized(uint32_t width, uint32_t height);
 
-        void submit_light(Light light);
+        LightHandle create_light(const Light &light);
+
+        void update_light_transform(LightHandle handle, const TransformComponent& transform);
+        void update_light_properties(LightHandle handle, const LightComponent& light_component);
+
+        void destroy_light(LightHandle handle);
 
         void submit_render_item(RenderItem item);
 
@@ -93,6 +101,14 @@ namespace cologne
         struct VoxelData
         {
             int32_t voxel_dimensions = 256;
+        };
+
+        struct RendererLight
+        {
+            Light light;
+            bool dirty = true;
+            bool cast_shadows = false;
+            TransformComponent transform;
         };
 
         Renderer();
@@ -165,8 +181,10 @@ namespace cologne
 
         SSBO *get_ssbo_by_name(const char *name);
 
-        std::vector<Texture> _point_shadow_maps;
-        std::vector<Texture> _dir_shadow_maps;
+        std::unordered_map<uint64_t, Texture> _point_shadow_maps;
+        std::queue<Texture> _point_shadow_queue;
+        std::unordered_map<uint64_t, Texture> _dir_shadow_maps;
+        std::queue<Texture> _dir_shadow_queue;
         std::vector<RenderItem> _render_items;
         std::vector<SkinnedRenderItem> _skinned_render_items;
         std::vector<RenderItem> _outline_render_items;
@@ -180,8 +198,8 @@ namespace cologne
         std::vector<AABB> _skinned_AABBs;
         std::vector<GPUMaterial> _gpu_materials;
         std::vector<GPUMaterial> _skinned_gpu_materials;
-        std::vector<Light> _lights;
-
+        std::unordered_map<LightHandle, RendererLight> _lights;
+        uint32_t _next_light_id = 0;
         //global buffers
         uint32_t _vertex_data_vao = 0;
         uint32_t _vertex_data_vbo = 0;
