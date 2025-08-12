@@ -49,8 +49,6 @@ namespace cologne
 
         shaders["gbuffer"] = Shader(RESOURCES_PATH "shaders/gbuffer.vert",
                                     RESOURCES_PATH "shaders/gbuffer.frag");
-        shaders["skinned_gbuffer"] = Shader(RESOURCES_PATH "shaders/skinned_gbuffer.vert",
-                                            RESOURCES_PATH "shaders/gbuffer.frag");
         shaders["skybox"] = Shader(RESOURCES_PATH "shaders/skybox.vert",
                                    RESOURCES_PATH "shaders/skybox.frag");
         shaders["voxelize"] = Shader(RESOURCES_PATH "shaders/voxelize.vert",
