@@ -565,7 +565,7 @@ namespace cologne
     LightHandle Renderer::create_light(const Light &light)
     {
         const auto result = LightHandle(_next_light_id++);
-        _lights[result] = RendererLight(light, true, false);
+        _lights[result] = RendererLight(light, true, true);
         return result;
     }
 
@@ -622,6 +622,18 @@ namespace cologne
         if (!_lights.contains(handle))
         {
             return;
+        }
+        auto shadow_handle = _lights[handle].light.shadow_handle;
+        if (shadow_handle != 0)
+        {
+            if (_lights[handle].light.type == LightType::Point)
+            {
+                _dir_shadow_queue.emplace(_dir_shadow_maps[shadow_handle]);
+            }
+            else
+            {
+                _point_shadow_queue.emplace(_point_shadow_maps[shadow_handle]);
+            }
         }
         _lights.erase(handle);
     }

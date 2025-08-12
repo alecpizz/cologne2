@@ -89,7 +89,7 @@ namespace cologne
         auto texture = Texture(create_dir_shadow_texture(4096), 4096, 4096, 1);
         texture.make_resident();
         _dir_shadow_maps[texture.get_bindless_handle()] = texture;
-
+        _dir_shadow_queue.emplace(texture);
         glGenFramebuffers(1, &point_shadow_fbo);
         glBindFramebuffer(GL_FRAMEBUFFER, point_shadow_fbo);
         glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
@@ -129,7 +129,7 @@ namespace cologne
             if (light.shadow_handle == 0)
             {
                 //get a new handle!
-                if (!_dir_shadow_queue.empty() || _dir_shadow_maps.empty())
+                if (!_dir_shadow_queue.empty())
                 {
                     //empty list of ddir shadows, make new one
                     auto texture = Texture(create_dir_shadow_texture(1024), 1024, 1024, 1);
