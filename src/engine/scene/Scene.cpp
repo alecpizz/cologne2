@@ -263,12 +263,12 @@ namespace cologne
         {
             auto [light, transform, handle_comp, active] =
                     _registry.get<LightComponent, WorldTransformComponent, LightHandleComponent, ActiveComponent>(entity);
-            if (!active || !handle_comp.light_handle.is_valid())
+            if (!handle_comp.light_handle.is_valid())
             {
                 continue;
             }
             Engine::get_renderer()->update_light_transform(handle_comp.light_handle, TransformComponent(transform));
-            Engine::get_renderer()->update_light_properties(handle_comp.light_handle, light);
+            Engine::get_renderer()->update_light_properties(handle_comp.light_handle, light, active.active);
         }
 
         glm::vec3 ray_start = tr.position, ray_dir = tr.get_forward();

@@ -224,6 +224,7 @@ namespace cologne
                     ImGui::DragFloat("outer cutoff", &light.outer_cutoff, 0.01f);
                     ImGui::DragFloat("inner cutoff", &light.inner_cutoff, 0.01f);
                 }
+                ImGui::Checkbox("always updatet", &light.always_update_shadows);
                 ImGui::DragFloat("radius", &light.radius, 0.01f);
                 ImGui::DragFloat("strength", &light.strength, 0.01f);
                 ImGui::ColorEdit3("color", glm::value_ptr(light.color), ImGuiColorEditFlags_HDR

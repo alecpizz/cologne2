@@ -48,7 +48,7 @@ namespace cologne
         LightHandle create_light(const Light &light);
 
         void update_light_transform(LightHandle handle, const TransformComponent& transform);
-        void update_light_properties(LightHandle handle, const LightComponent& light_component);
+        void update_light_properties(LightHandle handle, const LightComponent& light_component, bool active);
 
         void destroy_light(LightHandle handle);
 

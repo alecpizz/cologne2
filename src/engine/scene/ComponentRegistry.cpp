@@ -199,6 +199,7 @@ entt::meta_factory<T>() \
                 REGISTER_PROPERTY(LightComponent, type)
                 REGISTER_PROPERTY(LightComponent, outer_cutoff)
                 REGISTER_PROPERTY(LightComponent, inner_cutoff)
+                REGISTER_PROPERTY(LightComponent, always_update_shadows)
                 REGISTER_PROPERTY(LightComponent, cast_shadows);
 
         REFLECT_ENUM(LightComponent::LightType)

@@ -215,6 +215,7 @@ namespace cologne
         float outer_cutoff = 17.5f;
         float inner_cutoff = 12.5f;
         bool cast_shadows = false;
+        bool always_update_shadows = true;
         static void on_construct(entt::registry &registry, const entt::entity entt);
         static void on_destroy(entt::registry &registry, const entt::entity entt);
     };

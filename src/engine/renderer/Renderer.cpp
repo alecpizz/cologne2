@@ -588,7 +588,7 @@ namespace cologne
         }
     }
 
-    void Renderer::update_light_properties(LightHandle handle, const LightComponent &light_component)
+    void Renderer::update_light_properties(LightHandle handle, const LightComponent &light_component, bool active)
     {
         if (!handle.is_valid())
         {
@@ -597,6 +597,11 @@ namespace cologne
         if (!_lights.contains(handle))
         {
             return;
+        }
+        _lights[handle].light.active = active;
+        if (light_component.always_update_shadows)
+        {
+            _lights[handle].dirty = true;
         }
         if (_lights[handle].light.is_similar(light_component))
         {
@@ -607,7 +612,6 @@ namespace cologne
         _lights[handle].light.strength = light_component.strength;
         _lights[handle].light.radius = light_component.radius;
         _lights[handle].light.type = static_cast<LightType>(light_component.type);
-        _lights[handle].light.active = 1;
         _lights[handle].light.outer_cutoff = light_component.outer_cutoff;
         _lights[handle].light.inner_cutoff = light_component.inner_cutoff;
         _lights[handle].cast_shadows = light_component.cast_shadows;
