@@ -226,6 +226,10 @@ namespace cologne
         LightHandle light_handle;
     };
 
+    struct HideInEditorComponent
+    {
+        
+    };
 
     struct NativeScriptComponent
     {

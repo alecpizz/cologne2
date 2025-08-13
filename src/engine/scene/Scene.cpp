@@ -546,6 +546,7 @@ namespace cologne
     Entity Scene::create_scene_camera_entity()
     {
         Entity scene_camera = create_entity("Scene Camera");
+        _registry.emplace<HideInEditorComponent>(scene_camera);
         auto &cam = scene_camera.add_component<CameraComponent>();
         cam.primary = false;
         auto &scn = scene_camera.add_component<NativeScriptComponent>();

@@ -21,6 +21,10 @@ namespace cologne
         for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
         {
             Entity e = {entity, Engine::get_scene()};
+            if (e.has_component<HideInEditorComponent>())
+            {
+                continue;
+            }
             if (!e.has_component<ChildComponent>())
             {
                 draw_entity_node(e);

@@ -8173,6 +8173,8 @@
                 "TagComponent": {
                     "tag": "Scene Camera"
                 },
+                 "HideInEditorComponent": {
+                                },
                 "TransformComponent": {
                     "position": [
                         0.5042943358421326,
