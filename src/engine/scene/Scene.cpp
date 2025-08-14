@@ -24,6 +24,7 @@
 #include "systems/PhysicsSystem.h"
 #include "systems/RendererSystem.h"
 #include "systems/System.h"
+#include "systems/TransformSystem.h"
 
 namespace cologne
 {
@@ -167,7 +168,6 @@ namespace cologne
 
     void Scene::update(float delta_time)
     {
-        update_transforms();
         for (const auto& system : _systems)
         {
             system->on_update(delta_time);
@@ -358,7 +358,6 @@ namespace cologne
                     sub_mesh, temp, *mesh);
                 col.body_id = body_id;
             }
-            update_transforms();
         }
         re_calculate_bounds();
         return parent;
@@ -536,22 +535,6 @@ namespace cologne
         scene_cam.get_transform().position = game_cam.get_transform().position;
     }
 
-    void Scene::update_transforms()
-    {
-        for (auto entity: _registry.view<WorldTransformComponent, TransformComponent>())
-        {
-            auto &tr = _registry.get<TransformComponent>(entity);
-            auto &wd = _registry.get<WorldTransformComponent>(entity);
-            wd.transform = tr.get_mat4();
-        }
-
-        auto parent_view = _registry.view<ParentComponent>();
-        for (auto entity: parent_view)
-        {
-            update_children(entity);
-        }
-    }
-
     void Scene::create_bullet(glm::vec3 pos, glm::vec3 dir, float damage)
     {
         static int bullet_count = 0;
@@ -567,6 +550,7 @@ namespace cologne
 
     void Scene::initialize_systems()
     {
+        add_system(std::make_unique<TransformSystem>());
         add_system(std::make_unique<AnimationSystem>());
         add_system(std::make_unique<BulletSystem>());
         add_system(std::make_unique<PhysicsSystem>());

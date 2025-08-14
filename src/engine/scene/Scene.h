@@ -67,8 +67,6 @@ namespace cologne
 
         void copy_scene_camera_to_primary_camera();
 
-        void update_transforms();
-
         void create_bullet(glm::vec3 pos, glm::vec3 dir, float damage);
 
         const std::string &get_scene_name() const { return _scene_name; }
