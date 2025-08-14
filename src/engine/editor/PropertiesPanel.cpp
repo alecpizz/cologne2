@@ -331,13 +331,6 @@ namespace cologne
                 ImGui::InputFloat("MAX STEP INTERVAL", &player.maxStepInterval);
             });
 
-
-            draw_component<NativeScriptComponent>("Native Script", _selected_entity, true,
-                                                  [](auto &script)
-                                                  {
-                                                      ImGui::TextDisabled("how should these components work lol");
-                                                  });
-
             draw_component<AnimatorComponent>("Animator", _selected_entity, true, [](AnimatorComponent &anim)
             {
                 float progress = anim.get_current_progress();
@@ -417,23 +410,6 @@ namespace cologne
                 {
                     Audio::play_sound(_accept_sound, 30);
                     _selected_entity.add_component<RigidbodyComponent>();
-                }
-
-                if (!_selected_entity.has_component<NativeScriptComponent>() && ImGui::BeginMenu("Native Script"))
-                {
-                    //TODO
-                    Audio::play_sound(_move_sound, 30);
-                    if (ImGui::MenuItem("Player Controller"))
-                    {
-                        Audio::play_sound(_accept_sound, 30);
-                        ImGui::CloseCurrentPopup();
-                    }
-                    if (ImGui::MenuItem("Editor Camera"))
-                    {
-                        Audio::play_sound(_accept_sound, 30);
-                        ImGui::CloseCurrentPopup();
-                    }
-                    ImGui::EndMenu();
                 }
 
                 ImGui::EndPopup();

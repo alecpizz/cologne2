@@ -27,6 +27,10 @@ namespace cologne::Audio
 
     void add_sound(const char *sound_path)
     {
+        if (sounds.contains(sound_path))
+        {
+            return;
+        }
         auto s = Mix_LoadWAV(sound_path);
         if (s == nullptr)
         {

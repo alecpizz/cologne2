@@ -61,6 +61,22 @@ namespace cologne::Util
         glm::decompose(matrix, scale, rotation, position, skew, persp);
     }
 
+    float inverse_lerp(float a, float b, float v)
+    {
+        return (v - a) / (b - a);
+    }
+
+    float lerp(float a, float b, float t)
+    {
+        return (1.0f - t) * a + b * t;
+    }
+
+    float remap(float in_min, float in_max, float out_min, float out_max, float v)
+    {
+        float t = inverse_lerp(in_min, in_max, v);
+        return lerp(out_min, out_max, t);
+    }
+
     void get_screen_to_world_ray(glm::vec2 position, glm::mat4 view, glm::mat4 proj, glm::vec3& origin, glm::vec3& dir)
     {
         int width = Engine::get_window()->get_width();

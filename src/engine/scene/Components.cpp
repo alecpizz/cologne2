@@ -30,6 +30,19 @@ namespace cologne
         Physics::destroy_body(col.body_id);
     }
 
+    void PlayerComponent::on_construct(entt::registry &registry, const entt::entity entt)
+    {
+        registry.emplace_or_replace<PlayerControllerComponent>(entt);
+    }
+
+    void PlayerComponent::on_destroy(entt::registry &registry, const entt::entity entt)
+    {
+        if (registry.any_of<PlayerControllerComponent>(entt))
+        {
+            registry.remove<PlayerControllerComponent>(entt);
+        }
+    }
+
     void LightComponent::on_construct(entt::registry &registry, const entt::entity entt)
     {
         auto& light_comp = registry.get<LightComponent>(entt);

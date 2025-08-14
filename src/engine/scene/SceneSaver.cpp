@@ -11,9 +11,6 @@
 #include <fstream>
 #include <engine/animation/AnimatorComponent.h>
 #include <engine/asset_manager/AssetManager.h>
-#include <engine/scripts/EditorCameraController.h>
-#include <engine/scripts/PlayerController.h>
-
 #include "ComponentRegistry.h"
 
 namespace nlohmann

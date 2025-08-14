@@ -220,7 +220,5 @@ entt::meta_factory<T>() \
                 }>("deserialize"_hs);
         REGISTER_COMPONENT(ParentComponent, "ParentComponent")
                 REGISTER_PROPERTY(ParentComponent, children);
-        REGISTER_COMPONENT(NativeScriptComponent, "NativeScriptComponent")
-                REGISTER_PROPERTY(NativeScriptComponent, type_name);
     }
 }

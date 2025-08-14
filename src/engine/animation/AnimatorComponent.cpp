@@ -10,6 +10,7 @@
 #include <engine/physics/Physics.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/SkinnedModel.h>
+#include <engine/scene/Entity.h>
 
 #include "AnimationClip.h"
 #include "Skeleton.h"

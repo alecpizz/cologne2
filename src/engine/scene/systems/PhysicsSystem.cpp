@@ -4,6 +4,8 @@
 
 #include "PhysicsSystem.h"
 #include <engine/scene/Components.h>
+#include <engine/scene/Entity.h>
+#include <engine/scene/Scene.h>
 
 namespace cologne
 {

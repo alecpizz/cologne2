@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <engine/scene/Components.h>
+#include <engine/scene/Entity.h>
 
 namespace cologne
 {

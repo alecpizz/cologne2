@@ -4,6 +4,7 @@
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/audio/Audio.h>
 #include <engine/core/Engine.h>
+#include <engine/scene/Entity.h>
 #include <misc/cpp/imgui_stdlib.h>
 #include "Editor.h"
 

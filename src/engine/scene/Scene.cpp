@@ -9,10 +9,9 @@
 #include <engine/core/Engine.h>
 #include <engine/core/UUID.h>
 #include <engine/physics/Physics.h>
+#include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Light.h>
 #include <engine/util/FileUtil.h>
-#include <engine/scripts/EditorCameraController.h>
-#include <engine/scripts/PlayerController.h>
 #include <engine/util/DebugScope.h>
 
 #include "Components.h"
@@ -23,6 +22,7 @@
 #include "systems/BulletSystem.h"
 #include "systems/EditorCameraControllerSystem.h"
 #include "systems/PhysicsSystem.h"
+#include "systems/PlayerControllerSystem.h"
 #include "systems/RendererSystem.h"
 #include "systems/System.h"
 #include "systems/TransformSystem.h"
@@ -79,26 +79,6 @@ namespace cologne
             PlayerCreateInfo info;
             info.position = _registry.get<TransformComponent>(entity).position;
             pc.id = Physics::create_player(info);
-        }
-
-        for (const auto entity: _registry.view<NativeScriptComponent>())
-        {
-            auto &ns = _registry.get<NativeScriptComponent>(entity);
-            if (!ns.instance)
-            {
-                if (ns.type_name == "EditorCameraController")
-                {
-                    LOG_WARN("deprecated");
-                }
-                else if (ns.type_name == "PlayerController")
-                {
-                    ns.bind<PlayerController>();
-                }
-                else
-                {
-                    LOG_ERROR("NO TYPE FOUND FOR %s", ns.type_name.c_str());
-                }
-            }
         }
 
         for (const auto entity: _registry.view<AnimatorComponent>())
@@ -180,44 +160,7 @@ namespace cologne
                 particle.simulate();
             }
         }
-
-        //native scripting
-        for (auto entity: _registry.view<NativeScriptComponent, ActiveComponent>())
-        {
-            auto &nsc = _registry.get<NativeScriptComponent>(entity);
-            if (!nsc.instantiate_script)
-            {
-                continue;
-            }
-            if (!nsc.instance)
-            {
-                nsc.instance = nsc.instantiate_script();
-                nsc.instance->_entity = Entity{entity, this};
-                nsc.instance->on_create();
-            }
-
-            if (!_registry.get<ActiveComponent>(entity).active)
-            {
-                continue;
-            }
-            if (Engine::in_edit_mode())
-            {
-                if (nsc.instance->get_runtime_mode() == RuntimeMode::EDITOR_ONLY
-                    || nsc.instance->get_runtime_mode() == RuntimeMode::EDITOR_AND_GAME)
-                {
-                    nsc.instance->on_update(delta_time);
-                }
-            }
-            else
-            {
-                if (nsc.instance->get_runtime_mode() == RuntimeMode::GAME_ONLY
-                    || nsc.instance->get_runtime_mode() == RuntimeMode::EDITOR_AND_GAME)
-                {
-                    nsc.instance->on_update(delta_time);
-                }
-            }
-        }
-
+        
         auto camera = !Engine::in_edit_mode() ? get_primary_camera() : get_scene_camera();
         auto tr = camera.get_transform();
         auto cm = camera.get_component<CameraComponent>();
@@ -381,10 +324,6 @@ namespace cologne
         viewModel.add_component<ViewmodelComponent>();
 
         Entity player = create_entity("player");
-        //todo: REMOVE NATIVE SCRIPT COMPONENT!
-        auto &nc = player.add_component<NativeScriptComponent>();
-        nc.bind<PlayerController>();
-        nc.type_name = "PlayerController";
         PlayerCreateInfo info;
         info.position = glm::vec3(pos);
         player.add_component<PlayerComponent>(Physics::create_player(info), camera.get_uuid(), viewModel.get_uuid());
@@ -398,9 +337,7 @@ namespace cologne
         _registry.emplace<HideInEditorComponent>(scene_camera);
         auto &cam = scene_camera.add_component<CameraComponent>();
         cam.primary = false;
-        auto &scn = scene_camera.add_component<NativeScriptComponent>();
-        scn.bind<EditorCameraController>();
-        scn.type_name = "EditorCameraController";
+        _registry.emplace_or_replace<EditorCameraComponent>(scene_camera);
         return scene_camera;
     }
 
@@ -561,5 +498,6 @@ namespace cologne
         add_system(std::make_unique<PhysicsSystem>());
         add_system(std::make_unique<RendererSystem>());
         add_system(std::make_unique<EditorCameraControllerSystem>());
+        add_system(std::make_unique<PlayerControllerSystem>());
     }
 }
