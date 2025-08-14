@@ -256,8 +256,7 @@ namespace cologne
             auto [tr, m] = view.get<TransformComponent, ModelComponent>(entity);
             const auto model = AssetManager::get_model_by_name(m.model_name);
             AABB aabb = model->get_aabb();
-            aabb.min *= glm::vec4(tr.scale, 1.0);
-            aabb.max *= glm::vec4(tr.scale, 1.0);
+            aabb = aabb.transform_by_mat4(tr.get_mat4());
             _scene_bounds.expand(aabb.min);
             _scene_bounds.expand(aabb.max);
         }
@@ -267,10 +266,7 @@ namespace cologne
             auto [tr, m] = view2.get<TransformComponent, MeshComponent>(entity);
             const auto mesh = AssetManager::get_mesh_by_name(m.mesh_name);
             AABB aabb = mesh->get_aabb();
-            aabb.min *= glm::vec4(tr.scale, 1.0);
-            aabb.max *= glm::vec4(tr.scale, 1.0);
-            aabb.min += glm::vec4(tr.position, 1.0);
-            aabb.max += glm::vec4(tr.position, 1.0);
+            aabb = aabb.transform_by_mat4(tr.get_mat4());
             _scene_bounds.expand(aabb.min);
             _scene_bounds.expand(aabb.max);
         }
