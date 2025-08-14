@@ -231,6 +231,17 @@ namespace cologne
         
     };
 
+    struct EditorCameraComponent
+    {
+        static void on_construct(entt::registry &registry, const entt::entity entt);
+        static void on_destroy(entt::registry &registry, const entt::entity entt);
+    };
+
+    struct EditorCameraControllerComponent
+    {
+        glm::vec2 rotation = glm::vec2(0.0f);
+    };
+
     struct NativeScriptComponent
     {
         ScriptableEntity *instance = nullptr;

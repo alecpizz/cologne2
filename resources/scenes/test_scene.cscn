@@ -3096,11 +3096,10 @@
                 },
                 "HideInEditorComponent": {
                 },
+                 "EditorCameraComponent":
+                                {},
                 "IDComponent": {
                     "id": 12069857974175197925
-                },
-                "NativeScriptComponent": {
-                    "type_name": "EditorCameraController"
                 },
                 "TagComponent": {
                     "tag": "Scene Camera"

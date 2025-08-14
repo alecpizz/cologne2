@@ -193,6 +193,7 @@ entt::meta_factory<T>() \
                 REGISTER_PROPERTY(BulletComponent, damage);
 
         REGISTER_COMPONENT(HideInEditorComponent, "HideInEditorComponent");
+        REGISTER_COMPONENT(EditorCameraComponent, "EditorCameraComponent");
         REGISTER_COMPONENT(LightComponent, "LightComponent")
                 REGISTER_PROPERTY(LightComponent, color)
                 REGISTER_PROPERTY(LightComponent, strength)

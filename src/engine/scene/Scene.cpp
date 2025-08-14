@@ -21,6 +21,7 @@
 #include "engine/physics/RaycastHitInfo.h"
 #include "systems/AnimationSystem.h"
 #include "systems/BulletSystem.h"
+#include "systems/EditorCameraControllerSystem.h"
 #include "systems/PhysicsSystem.h"
 #include "systems/RendererSystem.h"
 #include "systems/System.h"
@@ -87,7 +88,7 @@ namespace cologne
             {
                 if (ns.type_name == "EditorCameraController")
                 {
-                    ns.bind<EditorCameraController>();
+                    LOG_WARN("deprecated");
                 }
                 else if (ns.type_name == "PlayerController")
                 {
@@ -184,6 +185,10 @@ namespace cologne
         for (auto entity: _registry.view<NativeScriptComponent, ActiveComponent>())
         {
             auto &nsc = _registry.get<NativeScriptComponent>(entity);
+            if (!nsc.instantiate_script)
+            {
+                continue;
+            }
             if (!nsc.instance)
             {
                 nsc.instance = nsc.instantiate_script();
@@ -555,26 +560,6 @@ namespace cologne
         add_system(std::make_unique<BulletSystem>());
         add_system(std::make_unique<PhysicsSystem>());
         add_system(std::make_unique<RendererSystem>());
-    }
-
-    void Scene::update_children(entt::entity parent)
-    {
-        auto &parent_wld = _registry.get<WorldTransformComponent>(parent);
-        auto &parent_comp = _registry.get<ParentComponent>(parent);
-
-        for (auto child_id: parent_comp.children)
-        {
-            Entity child = get_entity_by_uuid(child_id);
-            if (_registry.valid(child))
-            {
-                auto &child_transform = _registry.get<TransformComponent>(child);
-                auto &child_world_transform = _registry.get<WorldTransformComponent>(child);
-                child_world_transform.transform = parent_wld.transform * child_transform.get_mat4();
-                if (_registry.any_of<ParentComponent>(child))
-                {
-                    update_children(child);
-                }
-            }
-        }
+        add_system(std::make_unique<EditorCameraControllerSystem>());
     }
 }

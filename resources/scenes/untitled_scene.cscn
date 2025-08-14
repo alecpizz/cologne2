@@ -8167,14 +8167,13 @@
                 "IDComponent": {
                     "id": 15144189278195231550
                 },
-                "NativeScriptComponent": {
-                    "type_name": "EditorCameraController"
-                },
                 "TagComponent": {
                     "tag": "Scene Camera"
                 },
                  "HideInEditorComponent": {
                                 },
+                "EditorCameraComponent":
+                {},
                 "TransformComponent": {
                     "position": [
                         0.5042943358421326,

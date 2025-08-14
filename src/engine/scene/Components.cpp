@@ -47,4 +47,17 @@ namespace cologne
             Engine::get_renderer()->destroy_light(handle_comp.light_handle);
         }
     }
+
+    void EditorCameraComponent::on_construct(entt::registry &registry, const entt::entity entt)
+    {
+        registry.emplace_or_replace<EditorCameraControllerComponent>(entt);
+    }
+
+    void EditorCameraComponent::on_destroy(entt::registry &registry, const entt::entity entt)
+    {
+        if (registry.any_of<EditorCameraControllerComponent>(entt))
+        {
+            registry.remove<EditorCameraControllerComponent>(entt);
+        }
+    }
 }

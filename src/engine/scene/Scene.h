@@ -75,7 +75,6 @@ namespace cologne
         void add_system(std::unique_ptr<System> system);
     private:
         void initialize_systems();
-        void update_children(entt::entity parent);
         void duplicate_recursive(Entity source, std::unordered_map<UUID, UUID>& old_to_new_map);
         void initialize_special_types();
 
