@@ -19,6 +19,11 @@
 #include "Entity.h"
 #include "SceneSaver.h"
 #include "engine/physics/RaycastHitInfo.h"
+#include "systems/AnimationSystem.h"
+#include "systems/BulletSystem.h"
+#include "systems/PhysicsSystem.h"
+#include "systems/RendererSystem.h"
+#include "systems/System.h"
 
 namespace cologne
 {
@@ -125,6 +130,7 @@ namespace cologne
         create_player_entity(glm::vec3(-3.0f, 2.0f, 0.0f));
         create_scene_camera_entity();
         initialize_special_types();
+        initialize_systems();
         Physics::create_infinite_ground_plane(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
         re_calculate_bounds();
         _particles.emplace_back(Particles());
@@ -141,6 +147,7 @@ namespace cologne
         SceneSaver saver_temp(this);
         saver_temp.deserialize(path);
         initialize_special_types();
+        initialize_systems();
         Physics::create_infinite_ground_plane(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
         re_calculate_bounds();
         LOG_INFO("Scene bounds are min (%f, %f, %f), max (%f, %f, %f)", _scene_bounds.min.x, _scene_bounds.min.y,
@@ -160,21 +167,16 @@ namespace cologne
 
     void Scene::update(float delta_time)
     {
+        update_transforms();
+        for (const auto& system : _systems)
+        {
+            system->on_update(delta_time);
+        }
         if (!Engine::in_edit_mode())
         {
             for (auto &particle: Engine::get_scene()->get_particles())
             {
                 particle.simulate();
-            }
-            auto animators = _registry.view<AnimatorComponent, ActiveComponent>();
-            for (auto entity: animators)
-            {
-                if (!_registry.get<ActiveComponent>(entity).active)
-                {
-                    continue;
-                }
-                auto &animator = _registry.get<AnimatorComponent>(entity);
-                animator.update(delta_time, _registry.get<WorldTransformComponent>(entity));
             }
         }
 
@@ -211,65 +213,12 @@ namespace cologne
             }
         }
 
-        if (!Engine::in_edit_mode())
-        {
-            auto bullets = _registry.view<BulletComponent>();
-            RaycastHitInfo info;
-            for (auto ent: bullets)
-            {
-                auto &bullet = _registry.get<BulletComponent>(ent);
-                if (Physics::raycast(bullet.position, bullet.direction, 20.0f, Physics::NON_MOVING | Physics::MOVING,
-                                     info))
-                {
-                    if (info.hit_entity)
-                    {
-                        if (info.hit_entity.has_component<EnemyComponent>())
-                        {
-                            auto &enemy = info.hit_entity.get_component<EnemyComponent>();
-                            enemy.health -= bullet.damage;
-                            Audio::play_sound(enemy.hurt_sound.c_str(), 40);
-                            if (enemy.health <= 0)
-                            {
-                                enemy.dead = true;
-                                if (info.hit_entity.has_component<AnimatorComponent>())
-                                {
-                                    info.hit_entity.get_component<AnimatorComponent>().to_ragdoll();
-                                    info.hit_entity.get_component<AnimatorComponent>().take_ragdoll_hit(
-                                        info.hit_point, info.hit_normal);
-                                }
-                            }
-                        }
-                        if (info.hit_entity.has_component<RigidbodyComponent>())
-                        {
-                            auto& rb = info.hit_entity.get_component<RigidbodyComponent>();
-                            Physics::add_impulse_force_at_position(rb.body_id, info.hit_point, -info.hit_normal * 20.0f, true);
-                        }
-                    }
-                }
-            }
-
-            for (auto entt: bullets)
-            {
-                destroy_entity({entt, this});
-            }
-        }
-
         auto camera = !Engine::in_edit_mode() ? get_primary_camera() : get_scene_camera();
         auto tr = camera.get_transform();
         auto cm = camera.get_component<CameraComponent>();
         Engine::get_renderer()->submit_camera_transform(tr, cm);
 
-        for (auto entity: _registry.view<LightComponent, WorldTransformComponent, LightHandleComponent, ActiveComponent>())
-        {
-            auto [light, transform, handle_comp, active] =
-                    _registry.get<LightComponent, WorldTransformComponent, LightHandleComponent, ActiveComponent>(entity);
-            if (!handle_comp.light_handle.is_valid())
-            {
-                continue;
-            }
-            Engine::get_renderer()->update_light_transform(handle_comp.light_handle, TransformComponent(transform));
-            Engine::get_renderer()->update_light_properties(handle_comp.light_handle, light, active.active);
-        }
+
 
         glm::vec3 ray_start = tr.position, ray_dir = tr.get_forward();
         RaycastHitInfo info;
@@ -289,106 +238,6 @@ namespace cologne
                 }
                 Engine::get_renderer()->draw_line(info.hit_point, info.hit_point + info.hit_normal * 0.1f,
                                                   glm::max(info.hit_normal, glm::vec3(0.1f, 0.1f, 0.1f)));
-            }
-
-            for (auto e : _registry.view<RigidbodyComponent, TransformComponent>())
-            {
-                auto& tr = _registry.get<TransformComponent>(e);
-                auto& rb = _registry.get<RigidbodyComponent>(e);
-                if (rb.body_id == 0)
-                {
-                    continue;
-                }
-                auto mat = Physics::get_rigidbody_transform(rb.body_id);
-                tr = TransformComponent(mat);
-            }
-        }
-
-
-        update_transforms();
-
-        if (Engine::in_edit_mode())
-        {
-            //temp?
-            auto view = _registry.view<StaticColliderComponent, WorldTransformComponent>();
-            for (auto entity: view)
-            {
-                Entity e = {entity, this};
-                if (e.get_component<ActiveComponent>().active)
-                {
-                    if (!e.get_component<StaticColliderComponent>().body_enabled)
-                    {
-                        Physics::enable_body(e.get_component<StaticColliderComponent>().body_id);
-                        e.get_component<StaticColliderComponent>().body_enabled = true;
-                    }
-                    Physics::sync_transform(e);
-                }
-                else
-                {
-                    if (e.get_component<StaticColliderComponent>().body_enabled)
-                    {
-                        Physics::disable_body(e.get_component<StaticColliderComponent>().body_id);
-                        e.get_component<StaticColliderComponent>().body_enabled = false;
-                    }
-                }
-            }
-        }
-        //submit draw calls
-        auto view = _registry.view<ModelComponent, WorldTransformComponent, ActiveComponent>();
-        for (auto entity: view)
-        {
-            auto [m, tr, active] =
-                    view.get<ModelComponent, WorldTransformComponent, ActiveComponent>(entity);
-            if (!active)
-            {
-                continue;
-            }
-            Model *model = AssetManager::get_model_by_name(m.model_name);
-            for (int32_t idx: model->get_mesh_indices())
-            {
-                Engine::get_renderer()->submit_render_item(
-                    RenderItem(idx, tr, m.gi_only, static_cast<uint32_t>(entity)));
-            }
-        }
-
-        auto view2 = _registry.view<MeshComponent, WorldTransformComponent, ActiveComponent>();
-        for (auto entity: view2)
-        {
-            auto [m, tr, active] = view2.get<MeshComponent, WorldTransformComponent, ActiveComponent>(entity);
-            if (!active)
-            {
-                continue;
-            }
-            Engine::get_renderer()->
-                    submit_render_item(RenderItem(AssetManager::get_mesh_index_by_name(m.mesh_name), tr, false,
-                                                  static_cast<uint32_t>(entity)));
-        }
-
-        auto view3 = _registry.view<SkinnedModelComponent, WorldTransformComponent, ActiveComponent>();
-        for (auto entity: view3)
-        {
-            auto [m, tr, active] =
-                    view3.get<SkinnedModelComponent, WorldTransformComponent, ActiveComponent>(entity);
-            //culling step would be here probably? though for GI i dunno. might have to pack into render item
-            if (!active)
-            {
-                continue;
-            }
-            SkinnedModel *skinned_model = AssetManager::get_skinned_model_by_name(m.model_name);
-            std::vector<glm::mat4> bones;
-            if (_registry.all_of<AnimatorComponent>(entity))
-            {
-                auto &animator = _registry.get<AnimatorComponent>(entity);
-                bones = animator.get_skinning_matrices();
-            }
-            for (int32_t mesh_index: skinned_model->get_mesh_indices())
-            {
-                SkinnedRenderItem item;
-                item.mesh_idx = mesh_index;
-                item.transform = tr;
-                item.entity_id = static_cast<uint32_t>(entity);
-                item.bones = bones;
-                Engine::get_renderer()->submit_skinned_render_item(item);
             }
         }
     }
@@ -712,6 +561,20 @@ namespace cologne
         static int bullet_count = 0;
         Entity e = create_entity("bullet" + bullet_count++);
         e.add_component<BulletComponent>(pos, dir, damage);
+    }
+
+    void Scene::add_system(std::unique_ptr<System> system)
+    {
+        system->on_create(this);
+        _systems.emplace_back(std::move(system));
+    }
+
+    void Scene::initialize_systems()
+    {
+        add_system(std::make_unique<AnimationSystem>());
+        add_system(std::make_unique<BulletSystem>());
+        add_system(std::make_unique<PhysicsSystem>());
+        add_system(std::make_unique<RendererSystem>());
     }
 
     void Scene::update_children(entt::entity parent)

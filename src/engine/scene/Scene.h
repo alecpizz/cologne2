@@ -7,6 +7,11 @@
 
 namespace cologne
 {
+    class System;
+}
+
+namespace cologne
+{
     struct TransformComponent;
     class Entity;
     class Editor;
@@ -68,15 +73,17 @@ namespace cologne
 
         const std::string &get_scene_name() const { return _scene_name; }
         void set_scene_name(const std::string &path) { _scene_name = path; }
-
+        entt::registry& get_raw_registry() { return _registry;}
+        void add_system(std::unique_ptr<System> system);
     private:
-        std::string _scene_name = "untitled_scene.cscn";
-
+        void initialize_systems();
         void update_children(entt::entity parent);
         void duplicate_recursive(Entity source, std::unordered_map<UUID, UUID>& old_to_new_map);
         void initialize_special_types();
 
+        std::string _scene_name = "untitled_scene.cscn";
         AABB _scene_bounds;
+        std::vector<std::unique_ptr<System>> _systems;
         std::vector<Particles> _particles;
         std::unordered_map<UUID, entt::entity> _entity_map;
         entt::registry _registry;
