@@ -640,6 +640,11 @@ namespace cologne
         _lights.erase(handle);
     }
 
+    void Renderer::clear_lights()
+    {
+        _lights.clear();
+    }
+
     void Renderer::reload_shaders()
     {
         init_shaders();

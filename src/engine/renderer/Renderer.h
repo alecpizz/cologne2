@@ -51,6 +51,8 @@ namespace cologne
 
         void destroy_light(LightHandle handle);
 
+        void clear_lights();
+
         void submit_render_item(RenderItem item);
 
         void submit_skinned_render_item(SkinnedRenderItem item);
