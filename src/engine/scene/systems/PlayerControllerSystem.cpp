@@ -42,11 +42,6 @@ namespace cologne
 
     void PlayerControllerSystem::on_update(float dt)
     {
-        if (Engine::in_edit_mode())
-        {
-            return;
-        }
-
         auto &registry = _scene->get_raw_registry();
         auto view = registry.view<PlayerComponent, PlayerControllerComponent, TransformComponent>();
         for (auto entity: view)

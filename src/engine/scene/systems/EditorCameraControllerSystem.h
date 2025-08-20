@@ -10,6 +10,10 @@ namespace cologne
     {
     public:
         void on_update(float dt) override;
+        UpdateFlags get_update_flags() override
+        {
+            return EDITOR;
+        }
     private:
         void free_cam(entt::registry& registry, entt::entity camera, float dt);
         void pan(entt::registry& registry, entt::entity camera, float dt);

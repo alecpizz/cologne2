@@ -14,10 +14,6 @@ namespace cologne
 {
     void InteractionSystem::on_update(float dt)
     {
-        if (Engine::in_edit_mode())
-        {
-            return;
-        }
         auto &registry = _scene->get_raw_registry();
         auto view = registry.view<InteractorComponent, InteractionControllerComponent, TransformComponent>();
         for (auto &entity: view)

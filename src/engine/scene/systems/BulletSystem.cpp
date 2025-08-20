@@ -15,10 +15,6 @@ namespace cologne
 {
     void BulletSystem::on_update(float dt)
     {
-        if (Engine::in_edit_mode())
-        {
-            return;
-        }
         auto& registry = _scene->get_raw_registry();
         auto bullets = registry.view<BulletComponent>();
         RaycastHitInfo info;

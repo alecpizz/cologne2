@@ -121,7 +121,7 @@ namespace cologne
     static bool has_voxelized = false;
     void Renderer::voxelize_scene()
     {
-        if (!Editor::in_edit_mode() && has_voxelized)
+        if (!Engine::in_edit_mode() && has_voxelized)
         {
             return;
         }

@@ -18,7 +18,7 @@
 
 namespace cologne
 {
-    bool active = false;
+    bool active = true;
 
     bool Editor::in_edit_mode()
     {
@@ -56,8 +56,8 @@ namespace cologne
 
     Editor::Editor()
     {
-        active = false;
-        _was_game_mode = true;
+        active = true;
+        _was_game_mode = false;
         _mouse_captured = false;
         cologne::DebugScope scope(__PRETTY_FUNCTION__);
         ImGui::CreateContext();
@@ -262,6 +262,7 @@ namespace cologne
             build_properties_panel();
             build_settings_panel();
             build_asset_browser();
+            build_game_overlay();
             build_game_view(dt);
             ImGui::End();
             ImGui::PopStyleColor();

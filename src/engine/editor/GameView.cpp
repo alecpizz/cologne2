@@ -11,9 +11,32 @@
 
 namespace cologne
 {
+    void Editor::build_game_overlay()
+    {
+        ImGui::Begin("##toolbar", nullptr, _global_window_flags | ImGuiWindowFlags_NoDecoration  | ImGuiWindowFlags_NoScrollWithMouse);
+        float size = ImGui::GetWindowHeight() - 4.0f;
+        ImGui::SetCursorPosX(ImGui::GetWindowContentRegionMax().x * 0.5f - size * 0.5f);
+        if (ImGui::Button("Toggle Ortho"))
+        {
+            auto& cam = Engine::get_scene()->get_scene_camera().get_component<CameraComponent>();
+            cam.orthographic = !cam.orthographic;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Play"))
+        {
+
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Stop"))
+        {
+
+        }
+        ImGui::End();
+    }
+
     void Editor::build_game_view(float dt)
     {
-        ImGui::Begin("Game View", nullptr, _global_window_flags);
+        ImGui::Begin("Game View", nullptr, _global_window_flags | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
         ImVec2 viewport_size = ImGui::GetContentRegionAvail();
         if (static_cast<int>(_prev_viewport_size.x) != static_cast<int>(viewport_size.x) || static_cast<int>(
                 _prev_viewport_size.y) != static_cast<int>(viewport_size.y))
@@ -97,11 +120,7 @@ namespace cologne
                 Engine::get_window()->show_mouse();
             }
         }
-        if (ImGui::Button("Toggle Ortho"))
-        {
-            auto& cam = Engine::get_scene()->get_scene_camera().get_component<CameraComponent>();
-            cam.orthographic = !cam.orthographic;
-        }
+
         ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(Renderer::get_output_image())), viewport_size,
                      ImVec2(0, 1), ImVec2(1, 0));
 

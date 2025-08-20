@@ -57,6 +57,8 @@ namespace cologne
 
         void build_properties_panel();
 
+        void build_game_overlay();
+
         void build_game_view(float dt);
 
         void build_settings_panel();

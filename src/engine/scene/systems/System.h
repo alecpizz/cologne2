@@ -8,6 +8,12 @@ namespace cologne
 {
     class Scene;
 
+    enum UpdateFlags : int
+    {
+        NONE = 0,
+        EDITOR = 1 << 0,
+        RUNTIME = 1 << 1
+    };
     class System
     {
     public:
@@ -23,6 +29,8 @@ namespace cologne
         virtual void on_destroy()
         {
         }
+
+        virtual UpdateFlags get_update_flags() = 0;
 
     protected:
         Scene *_scene = nullptr;

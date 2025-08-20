@@ -12,6 +12,10 @@ namespace cologne
         void on_create(Scene *scene) override;
 
         void on_update(float dt) override;
+        UpdateFlags get_update_flags() override
+        {
+            return RUNTIME;
+        }
 
     private:
         void update_camera(entt::registry &registry, entt::entity entity, float dt);

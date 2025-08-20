@@ -151,21 +151,38 @@ namespace cologne
     }
 
 
-    void Scene::update(float delta_time)
+    void Scene::update_runtime(float delta_time)
     {
         for (const auto &system: _systems)
         {
-            system->on_update(delta_time);
-        }
-        if (!Engine::in_edit_mode())
-        {
-            for (auto &particle: Engine::get_scene()->get_particles())
+            if (system->get_update_flags() & RUNTIME)
             {
-                particle.simulate();
+                system->on_update(delta_time);
             }
         }
 
-        auto camera = !Engine::in_edit_mode() ? get_primary_camera() : get_scene_camera();
+        for (auto &particle: Engine::get_scene()->get_particles())
+        {
+            particle.simulate();
+        }
+
+
+        auto camera = get_primary_camera();
+        auto tr = camera.get_transform();
+        auto cm = camera.get_component<CameraComponent>();
+        Engine::get_renderer()->submit_camera_transform(tr, cm);
+    }
+
+    void Scene::update_editor(float delta_time)
+    {
+        for (const auto &system: _systems)
+        {
+            if (system->get_update_flags() & EDITOR)
+            {
+                system->on_update(delta_time);
+            }
+        }
+        auto camera = get_scene_camera();
         auto tr = camera.get_transform();
         auto cm = camera.get_component<CameraComponent>();
         Engine::get_renderer()->submit_camera_transform(tr, cm);

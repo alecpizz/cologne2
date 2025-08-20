@@ -138,7 +138,8 @@ namespace cologne
             {
                 nlohmann::json j = nlohmann::json::parse(file);
                 std::string last_save_path = j["scene_name"];
-                _impl->scene = std::make_unique<Scene>((RESOURCES_PATH + std::string("scenes/") + last_save_path).c_str());
+                _impl->scene = std::make_unique<Scene>(
+                    (RESOURCES_PATH + std::string("scenes/") + last_save_path).c_str());
                 LOG_INFO("LOADED PREVIOUSLY USED SCENE %s", last_save_path.c_str());
             }
         }
@@ -198,9 +199,16 @@ namespace cologne
             }
             Input::update();
             _impl->event_manager->poll_events();
-            _impl->scene->update(et.elapsed);
+            if (in_edit_mode())
+            {
+                _impl->scene->update_editor(et.elapsed);
+            }
+            else
+            {
+                _impl->scene->update_runtime(et.elapsed);
+                Physics::update(et.elapsed);
+            }
             // _impl->player->update(et.elapsed);
-            Physics::update(et.elapsed);
             _impl->debug_ui->clear();
             _impl->window->clear();
             _impl->renderer->render_frame();

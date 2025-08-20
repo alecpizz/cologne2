@@ -10,5 +10,9 @@ namespace cologne
     {
     public:
         void on_update(float dt) override;
+        UpdateFlags get_update_flags() override
+        {
+            return static_cast<UpdateFlags>(EDITOR | RUNTIME);
+        }
     };
 }

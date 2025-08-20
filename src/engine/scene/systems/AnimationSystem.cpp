@@ -12,11 +12,6 @@ namespace cologne
 {
     void AnimationSystem::on_update(float dt)
     {
-        if (Engine::in_edit_mode())
-        {
-            return;
-        }
-
         auto& registry = _scene->get_raw_registry();
         auto animators = registry.view<AnimatorComponent, ActiveComponent>();
         for (auto entity: animators)

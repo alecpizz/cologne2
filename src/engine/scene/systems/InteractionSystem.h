@@ -8,6 +8,11 @@ namespace cologne
 {
     class InteractionSystem : public System
     {
+    public:
+        UpdateFlags get_update_flags() override
+        {
+            return RUNTIME;
+        }
         void on_update(float dt) override;
     };
 }
