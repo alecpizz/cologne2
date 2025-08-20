@@ -1,14 +1,4 @@
-﻿/*
-                           |  ____|           (_)
-   __ _  ___   ___  _ __   | |__   _ __   __ _ _ _ __   ___
-  / _` |/ _ \ / _ \| '_ \  |  __| | '_ \ / _` | | '_ \ / _ \
- | (_| | (_) | (_) | | | | | |____| | | | (_| | | | | |  __/
-  \__, |\___/ \___/|_| |_| |______|_| |_|\__, |_|_| |_|\___|
-   __/ |                                  __/ |
-  |___/                                  |___/
-
-*/
-#pragma once
+﻿#pragma once
 #include "../scene/Scene.h"
 #include "Window.h"
 #include "EventManager.h"
@@ -51,10 +41,10 @@ namespace cologne
         static void load_scene(const char* path);
 
         static bool in_edit_mode();
-
-    private:
-        inline static Engine *_instance;
-        struct Impl;
-        Impl *_impl;
+    //
+    // private:
+    //     inline static Engine *_instance;
+    //     struct Impl;
+    //     Impl *_impl;
     };
 }

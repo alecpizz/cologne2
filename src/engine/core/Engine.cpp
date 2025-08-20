@@ -23,19 +23,16 @@
 
 namespace cologne
 {
-    struct Engine::Impl
-    {
-        Ref<Window> window = nullptr;
-        Ref<Renderer> renderer = nullptr;
-        Ref<EventManager> event_manager = nullptr;
-        Ref<Editor> debug_ui = nullptr;
-        Ref<SceneManager> scene_manager = nullptr;
-        Ref<FileWatcher> file_watcher = nullptr;
-        std::queue<std::pair<std::filesystem::path, FileStatus> > file_status_queue;
-        std::string next_scene = std::string();
-        bool running = true;
-        bool scene_queued = false;
-    };
+    Ref<Window> window = nullptr;
+    Ref<Renderer> renderer = nullptr;
+    Ref<EventManager> event_manager = nullptr;
+    Ref<Editor> debug_ui = nullptr;
+    Ref<SceneManager> scene_manager = nullptr;
+    Ref<FileWatcher> file_watcher = nullptr;
+    std::queue<std::pair<std::filesystem::path, FileStatus> > file_status_queue;
+    std::string next_scene = std::string();
+    bool running = true;
+    bool scene_queued = false;
 
     struct ElapsedTime
     {
@@ -53,43 +50,46 @@ namespace cologne
 
     Engine::Engine()
     {
-        _instance = this;
-        _impl = new Impl();
         LOG_INFO("Starting up engine. the world is a shit place, and this is a shit engine. good luck!");
         LOG_INFO("C++ VERSION %d", __cplusplus);
     }
 
     Engine::~Engine()
     {
-        cologne::Physics::cleanup();
         cologne::Audio::destroy();
-        delete _impl;
+        cologne::Physics::cleanup();
+        renderer = nullptr;
+        event_manager = nullptr;
+        debug_ui = nullptr;
+        scene_manager = nullptr;
+        file_watcher = nullptr;
+        window = nullptr;
     }
 
     Ref<Renderer> Engine::get_renderer()
     {
-        return _instance->_impl->renderer;
+        return renderer;
     }
 
     Ref<Window> Engine::get_window()
     {
-        return _instance->_impl->window;
+        return window;
     }
 
     Ref<EventManager> Engine::get_event_manager()
     {
-        return _instance->_impl->event_manager;
+        return event_manager;
     }
 
     Ref<Scene> Engine::get_scene()
     {
-        return _instance->_impl->scene_manager->get_active_scene();
+        return scene_manager->get_active_scene();
     }
 
 
     Ref<Editor> Engine::get_debug_ui()
     {
-        return _instance->_impl->debug_ui;
+        return debug_ui;
     }
 
     static void file_changed(std::filesystem::path path, FileStatus status)
@@ -117,15 +117,15 @@ namespace cologne
     {
         ElapsedTime et;
         Audio::init();
-        _impl->debug_ui = create_ref<Editor>();
-        _impl->window = create_ref<Window>(width, height);
-        _impl->file_watcher = create_ref<FileWatcher>(
+        debug_ui = create_ref<Editor>();
+        window = create_ref<Window>(width, height);
+        file_watcher = create_ref<FileWatcher>(
             RESOURCES_PATH, [this](const std::filesystem::path &path, FileStatus status)
             {
-                _impl->file_status_queue.emplace(path, status);
+                file_status_queue.emplace(path, status);
             });
-        _impl->renderer = create_ref<Renderer>();
-        _impl->scene_manager = create_ref<SceneManager>();
+        renderer = create_ref<Renderer>();
+        scene_manager = create_ref<SceneManager>();
         Physics::init();
         AssetManager::init();
         AssetManager::print_all();
@@ -141,7 +141,8 @@ namespace cologne
             {
                 nlohmann::json j = nlohmann::json::parse(file);
                 std::string last_save_path = j["scene_name"];
-                _impl->scene_manager->set_editor_scene(create_ref<Scene>((RESOURCES_PATH + std::string("scenes/") + last_save_path).c_str()));
+                scene_manager->set_editor_scene(
+                    create_ref<Scene>((RESOURCES_PATH + std::string("scenes/") + last_save_path).c_str()));
                 LOG_INFO("LOADED PREVIOUSLY USED SCENE %s", last_save_path.c_str());
             }
         }
@@ -149,12 +150,12 @@ namespace cologne
         {
             Ref<Scene> scene = create_ref<Scene>();
             scene->setup_blank_scene();
-            _impl->scene_manager->set_editor_scene(scene);
+            scene_manager->set_editor_scene(scene);
             LOG_INFO("LOADED DEFAULT SCENE");
         }
 
-        _impl->event_manager = std::unique_ptr<EventManager>(new EventManager());
-        if (_impl->window == nullptr || _impl->renderer == nullptr)
+        event_manager = std::unique_ptr<EventManager>(new EventManager());
+        if (window == nullptr || renderer == nullptr)
         {
             LOG_ERROR("Failed to initialize window or renderer!");
             return false;
@@ -167,13 +168,13 @@ namespace cologne
 
     void Engine::run()
     {
-        _impl->running = true;
+        running = true;
         ElapsedTime et;
-        while (!_impl->event_manager->should_quit())
+        while (!event_manager->should_quit())
         {
-            if (!_impl->file_status_queue.empty())
+            if (!file_status_queue.empty())
             {
-                auto &cmd = _impl->file_status_queue.front();
+                auto &cmd = file_status_queue.front();
                 file_changed(cmd.first, cmd.second);
                 if (cmd.second == FileStatus::CREATED)
                 {
@@ -183,41 +184,41 @@ namespace cologne
                 {
                     Renderer::file_changed(cmd.first);
                 }
-                _impl->file_status_queue.pop();
+                file_status_queue.pop();
             }
             //TODO: move this scene manager
-            if (_impl->scene_queued)
+            if (scene_queued)
             {
                 Physics::delete_all_bodies();
-                if (_impl->next_scene.empty())
+                if (next_scene.empty())
                 {
                     Ref<Scene> scene = create_ref<Scene>();
                     scene->setup_blank_scene();
-                    _impl->scene_manager->set_editor_scene(scene);
+                    scene_manager->set_editor_scene(scene);
                 }
                 else
                 {
-                    _impl->scene_manager->set_editor_scene(create_ref<Scene>(_impl->next_scene.c_str()));
+                    scene_manager->set_editor_scene(create_ref<Scene>(next_scene.c_str()));
                 }
-                _impl->scene_queued = false;
+                scene_queued = false;
             }
             Input::update();
-            _impl->event_manager->poll_events();
+            event_manager->poll_events();
             if (in_edit_mode())
             {
-                _impl->scene_manager->get_active_scene()->update_editor(et.elapsed);
+                scene_manager->get_active_scene()->update_editor(et.elapsed);
             }
             else
             {
-                _impl->scene_manager->get_active_scene()->update_runtime(et.elapsed);
+                scene_manager->get_active_scene()->update_runtime(et.elapsed);
                 Physics::update(et.elapsed);
             }
-            // _impl->player->update(et.elapsed);
-            _impl->debug_ui->clear();
-            _impl->window->clear();
-            _impl->renderer->render_frame();
-            _impl->debug_ui->present(et.elapsed);
-            _impl->window->present();
+            // player->update(et.elapsed);
+            debug_ui->clear();
+            window->clear();
+            renderer->render_frame();
+            debug_ui->present(et.elapsed);
+            window->present();
             et.update();
             Time::DeltaTime = et.elapsed;
         }
@@ -225,8 +226,8 @@ namespace cologne
 
     void Engine::load_scene(const char *path)
     {
-        _instance->_impl->scene_queued = true;
-        _instance->_impl->next_scene = path;
+        scene_queued = true;
+        next_scene = path;
     }
 
     bool Engine::in_edit_mode()
