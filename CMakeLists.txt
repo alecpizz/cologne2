@@ -109,7 +109,7 @@ add_executable("${CMAKE_PROJECT_NAME}")
 set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY CXX_STANDARD 20)
 
 target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC GLFW_INCLUDE_NONE=1)
-
+target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC ENTT_NO_ETO)
 if (PRODUCTION_BUILD)
     # setup the ASSETS_PATH macro to be in the root folder of your exe
     target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RESOURCES_PATH="./resources/")

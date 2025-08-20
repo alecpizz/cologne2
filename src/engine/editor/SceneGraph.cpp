@@ -21,7 +21,7 @@ namespace cologne
         }
         for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
         {
-            Entity e = {entity, Engine::get_scene()};
+            Entity e = {entity, Engine::get_scene().get()};
             if (e.has_component<HideInEditorComponent>())
             {
                 continue;
@@ -39,7 +39,7 @@ namespace cologne
             {
                 uint32_t id = *(uint32_t *) payload->Data;
                 auto scene = Engine::get_scene();
-                Entity found_entity = {static_cast<entt::entity>(id), scene};
+                Entity found_entity = {static_cast<entt::entity>(id), scene.get()};
                 UUID found_entity_id = found_entity.get_component<IDComponent>().id;
                 //remove the entity from its parent entity
                 if (found_entity.has_component<ChildComponent>())
@@ -122,7 +122,7 @@ namespace cologne
             if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("GRAPH_ENTITY"))
             {
                 uint32_t id = *(uint32_t *) payload->Data;
-                Entity found_entity = {static_cast<entt::entity>(id), Engine::get_scene()};
+                Entity found_entity = {static_cast<entt::entity>(id), Engine::get_scene().get()};
 
                 bool bad_parent = found_entity.has_component<ParentComponent>() &&
                                   entity.has_component<ChildComponent>() && entity.get_component<ChildComponent>().

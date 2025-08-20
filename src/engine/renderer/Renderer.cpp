@@ -15,7 +15,6 @@
 #include "OpenGLDebugScope.h"
 #include "../renderer/types/FrameBuffer.h"
 #include "openglErrorReporting.h"
-#include "../scene/Scene.h"
 #include "../renderer/types/Shader.h"
 #include "TextRenderer.h"
 #include "../core/Time.h"
@@ -29,8 +28,8 @@ namespace cologne
 #define PREFILTER_INDEX 7
 #define BRDF_INDEX 8
 
-    std::shared_ptr<DebugRenderer> debug_renderer = nullptr;
-    std::shared_ptr<TextRenderer> text_renderer = nullptr;
+    Ref<DebugRenderer> debug_renderer = nullptr;
+    Ref<TextRenderer> text_renderer = nullptr;
     std::unordered_map<std::string, Shader> shaders = std::unordered_map<std::string, Shader>();
     std::unordered_map<std::string, FrameBuffer> framebuffers = std::unordered_map<std::string, FrameBuffer>();
     std::unordered_map<std::string, SSBO> ssbos = std::unordered_map<std::string, SSBO>();
@@ -671,9 +670,8 @@ namespace cologne
         glEnable(GL_CULL_FACE);
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         glEnable(GL_MULTISAMPLE);
-        debug_renderer = std::make_unique<DebugRenderer>();
-        text_renderer = std::unique_ptr<TextRenderer>(
-            new TextRenderer(RESOURCES_PATH "fonts/Montserrat-Regular.ttf"));
+        debug_renderer = create_ref<DebugRenderer>();
+        text_renderer = create_ref<TextRenderer>(RESOURCES_PATH "fonts/Montserrat-Regular.ttf");
 
         Engine::get_debug_ui()->add_bool_entry("Voxel Debug Visuals", _voxel_debug_visuals);
         Engine::get_debug_ui()->add_bool_entry("Indirect Lighting", _apply_indirect_lighting);

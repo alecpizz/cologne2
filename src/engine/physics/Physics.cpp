@@ -274,7 +274,7 @@ namespace cologne::Physics
 
 
         //build jolt skeleton
-        Ref<JPH::Skeleton> j_skeleton = new JPH::Skeleton;
+        JPH::Ref<JPH::Skeleton> j_skeleton = new JPH::Skeleton;
         uint hips = j_skeleton->AddJoint(hips_bone.name);
         uint lower_body = j_skeleton->AddJoint(lower_spine_bone.name, hips);
         uint mid_body = j_skeleton->AddJoint(middle_spine_bone.name, lower_body);
@@ -338,7 +338,7 @@ namespace cologne::Physics
         };
 
         //length of a bone: upper_arm_l position - lower_arm_l position length
-        Ref<Shape> shapes[] = {
+        JPH::Ref<Shape> shapes[] = {
             new CapsuleShape(
                 glm::length(
                     global_bind_transforms[hips_idx][3] - global_bind_transforms[lower_spine_idx][3]) * 0.5,
@@ -1090,7 +1090,7 @@ namespace cologne::Physics
     uint32_t create_ragdoll(Entity entity, std::unordered_map<std::string, uint32_t> &out_map, const Skeleton &skeleton,
                             const std::vector<glm::mat4> &global_bind_transforms)
     {
-        Ref<RagdollSettings> settings = create_ragdoll_settings(skeleton, global_bind_transforms);
+        JPH::Ref<RagdollSettings> settings = create_ragdoll_settings(skeleton, global_bind_transforms);
         auto ragdoll = settings->CreateRagdoll(0, 0, &physics_system);
         ragdoll->AddToPhysicsSystem(EActivation::Activate); //?
         uint32_t size = ragdolls.size();
@@ -1240,5 +1240,30 @@ namespace cologne::Physics
         colliders_static.emplace_back(body);
         entity_to_collider_map[body] = entity;
         return body.GetIndexAndSequenceNumber();
+    }
+
+    void destroy_entity(Entity entity)
+    {
+        if (!entity)
+        {
+            return;
+        }
+        if (entity.has_component<StaticColliderComponent>())
+        {
+            auto id = entity.get_component<StaticColliderComponent>().body_id;
+            if (id != 0)
+            {
+                destroy_body(id);
+            }
+        }
+
+        if (entity.has_component<RigidbodyComponent>())
+        {
+            auto id = entity.get_component<RigidbodyComponent>().body_id;
+            if (id != 0)
+            {
+                destroy_body(id);
+            }
+        }
     }
 }

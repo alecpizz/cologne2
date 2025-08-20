@@ -24,12 +24,12 @@ namespace cologne
 {
     struct Engine::Impl
     {
-        std::unique_ptr<Window> window = nullptr;
-        std::unique_ptr<Renderer> renderer = nullptr;
-        std::unique_ptr<EventManager> event_manager = nullptr;
-        std::unique_ptr<Editor> debug_ui = nullptr;
-        std::unique_ptr<Scene> scene = nullptr;
-        std::unique_ptr<FileWatcher> file_watcher = nullptr;
+        Ref<Window> window = nullptr;
+        Ref<Renderer> renderer = nullptr;
+        Ref<EventManager> event_manager = nullptr;
+        Ref<Editor> debug_ui = nullptr;
+        Ref<Scene> scene = nullptr;
+        Ref<FileWatcher> file_watcher = nullptr;
         std::queue<std::pair<std::filesystem::path, FileStatus> > file_status_queue;
         std::string next_scene = std::string();
         bool running = true;
@@ -65,30 +65,30 @@ namespace cologne
         delete _impl;
     }
 
-    Renderer *Engine::get_renderer()
+    Ref<Renderer> Engine::get_renderer()
     {
-        return _instance->_impl->renderer.get();
+        return _instance->_impl->renderer;
     }
 
-    Window *Engine::get_window()
+    Ref<Window> Engine::get_window()
     {
-        return _instance->_impl->window.get();
+        return _instance->_impl->window;
     }
 
-    EventManager *Engine::get_event_manager()
+    Ref<EventManager> Engine::get_event_manager()
     {
-        return _instance->_impl->event_manager.get();
+        return _instance->_impl->event_manager;
     }
 
-    Scene *Engine::get_scene()
+    Ref<Scene> Engine::get_scene()
     {
-        return _instance->_impl->scene.get();
+        return _instance->_impl->scene;
     }
 
 
-    Editor *Engine::get_debug_ui()
+    Ref<Editor> Engine::get_debug_ui()
     {
-        return _instance->_impl->debug_ui.get();
+        return _instance->_impl->debug_ui;
     }
 
     static void file_changed(std::filesystem::path path, FileStatus status)
@@ -116,14 +116,14 @@ namespace cologne
     {
         ElapsedTime et;
         Audio::init();
-        _impl->debug_ui = std::unique_ptr<Editor>(new Editor());
-        _impl->window = std::unique_ptr<Window>(new Window(width, height));
-        _impl->file_watcher = std::make_unique<FileWatcher>(
+        _impl->debug_ui = create_ref<Editor>();
+        _impl->window = create_ref<Window>(width, height);
+        _impl->file_watcher = create_ref<FileWatcher>(
             RESOURCES_PATH, [this](const std::filesystem::path &path, FileStatus status)
             {
                 _impl->file_status_queue.emplace(path, status);
             });
-        _impl->renderer = std::unique_ptr<Renderer>(new Renderer());
+        _impl->renderer = create_ref<Renderer>();
         Physics::init();
         AssetManager::init();
         AssetManager::print_all();
@@ -145,6 +145,7 @@ namespace cologne
         else
         {
             _impl->scene = std::make_unique<Scene>();
+            _impl->scene->setup_blank_scene();
             LOG_INFO("LOADED DEFAULT SCENE");
         }
 
@@ -182,16 +183,16 @@ namespace cologne
             }
             if (_impl->scene_queued)
             {
-                auto old_scene = _impl->scene.release();
-                delete old_scene;
+                _impl->scene = nullptr;
                 Physics::delete_all_bodies();
                 if (_impl->next_scene.empty())
                 {
-                    _impl->scene = std::make_unique<Scene>();
+                    _impl->scene = create_ref<Scene>();
+                    _impl->scene->setup_blank_scene();
                 }
                 else
                 {
-                    _impl->scene = std::make_unique<Scene>(_impl->next_scene.c_str());
+                    _impl->scene = create_ref<Scene>(_impl->next_scene.c_str());
                 }
                 _impl->scene_queued = false;
             }

@@ -222,6 +222,16 @@ namespace cologne
         ImGui::Text("%s: %f %f %f %f", label, mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
     }
 
+    static void editor_write_dummy()
+    {
+
+    }
+
+    static void editor_read_dummy()
+    {
+
+    }
+
     void Editor::initialize_reflection_editor()
     {
         entt::meta_factory<int>()
@@ -260,5 +270,9 @@ namespace cologne
         entt::meta_factory<glm::mat4>()
             .func<&write_mat4>("editor_write"_hs)
             .func<&read_mat4>("editor_read"_hs);
+
+        entt::meta_factory<TagComponent>()
+            .func<&editor_read_dummy>("editor_read"_hs)
+            .func<&editor_write_dummy>("editor_write"_hs);
     }
 }

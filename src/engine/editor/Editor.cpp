@@ -149,7 +149,7 @@ namespace cologne
         ImGuiKeyChord chord = ImGuiMod_Ctrl | ImGuiKey_S;
         if (ImGui::IsKeyChordPressed(chord))
         {
-            SceneSaver saver(Engine::get_scene());
+            SceneSaver saver(Engine::get_scene().get());
             saver.serialize(RESOURCES_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name());
         }
 
@@ -207,7 +207,7 @@ namespace cologne
                 }
                 if (ImGui::MenuItem("Save Scene"))
                 {
-                    SceneSaver saver(Engine::get_scene());
+                    SceneSaver saver(Engine::get_scene().get());
                     saver.serialize(RESOURCES_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name());
                 }
                 if (ImGui::MenuItem("Reload Scene"))
@@ -230,6 +230,10 @@ namespace cologne
                 if (ImGui::MenuItem("Re-Calculate Bounds"))
                 {
                     Engine::get_scene()->re_calculate_bounds();
+                }
+                if (ImGui::MenuItem("Test Copy Scene"))
+                {
+                    Scene::copy(Engine::get_scene());
                 }
                 ImGui::EndMenu();
             }

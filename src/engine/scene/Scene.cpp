@@ -14,6 +14,7 @@
 #include <engine/util/FileUtil.h>
 #include <engine/util/DebugScope.h>
 
+#include "ComponentRegistry.h"
 #include "Components.h"
 #include "Entity.h"
 #include "SceneSaver.h"
@@ -21,6 +22,7 @@
 #include "systems/AnimationSystem.h"
 #include "systems/BulletSystem.h"
 #include "systems/EditorCameraControllerSystem.h"
+#include "systems/InteractionSystem.h"
 #include "systems/PhysicsSystem.h"
 #include "systems/PlayerControllerSystem.h"
 #include "systems/RendererSystem.h"
@@ -29,13 +31,13 @@
 
 namespace cologne
 {
-
     void Scene::initialize_special_types()
     {
         for (const auto entity: _registry.view<IDComponent>())
         {
             _entity_map[_registry.get<IDComponent>(entity).id] = entity;
         }
+
         auto view = _registry.view<TransformComponent, StaticColliderComponent>();
         for (auto entity: view)
         {
@@ -56,10 +58,10 @@ namespace cologne
             collider.body_id = body_id;
         }
 
-        for (auto entity : _registry.view<RigidbodyComponent, ConvexMeshColliderComponent>())
+        for (auto entity: _registry.view<RigidbodyComponent, ConvexMeshColliderComponent>())
         {
-            Entity e= {entity, this};
-            auto& rb = _registry.get<RigidbodyComponent>(entity);
+            Entity e = {entity, this};
+            auto &rb = _registry.get<RigidbodyComponent>(entity);
 
             if (rb.body_id != 0)
             {
@@ -91,10 +93,8 @@ namespace cologne
         }
     }
 
-    Scene::Scene()
+    void Scene::setup_blank_scene()
     {
-        DebugScope scope(__PRETTY_FUNCTION__);
-
         Entity plane = create_static_model_entities("plane", {});
         plane.get_transform().scale = glm::vec3(10.0f, 1.0f, 10.0f);
 
@@ -108,15 +108,19 @@ namespace cologne
         dir_light.get_transform().position = glm::vec3(0.790f, 18.867f, 0.024f);
         dir_light.get_transform().rotation =
                 glm::quat(glm::radians(glm::vec3(88.500, 0.0f, 0.0f)));
-
+        Physics::create_infinite_ground_plane(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
         create_player_entity(glm::vec3(-3.0f, 2.0f, 0.0f));
         create_scene_camera_entity();
         initialize_special_types();
-        initialize_systems();
-        Physics::create_infinite_ground_plane(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
-        re_calculate_bounds();
         _particles.emplace_back(Particles());
-        _particles[0].init(_scene_bounds, 5);
+    }
+
+    Scene::Scene()
+    {
+        DebugScope scope(__PRETTY_FUNCTION__);
+        initialize_special_types();
+        initialize_systems();
+        re_calculate_bounds();
     }
 
     Scene::Scene(const char *path)
@@ -149,7 +153,7 @@ namespace cologne
 
     void Scene::update(float delta_time)
     {
-        for (const auto& system : _systems)
+        for (const auto &system: _systems)
         {
             system->on_update(delta_time);
         }
@@ -160,39 +164,44 @@ namespace cologne
                 particle.simulate();
             }
         }
-        
+
         auto camera = !Engine::in_edit_mode() ? get_primary_camera() : get_scene_camera();
         auto tr = camera.get_transform();
         auto cm = camera.get_component<CameraComponent>();
         Engine::get_renderer()->submit_camera_transform(tr, cm);
-
-
-
-        glm::vec3 ray_start = tr.position, ray_dir = tr.get_forward();
-        RaycastHitInfo info;
-        if (!Engine::in_edit_mode())
-        {
-            if (Physics::raycast(ray_start, ray_dir, 20.0f, Physics::NON_MOVING | Physics::MOVING, info))
-            {
-                if (Entity hit_entity = info.hit_entity)
-                {
-                    std::string name = hit_entity.get_component<TagComponent>().tag;
-                    Engine::get_renderer()->draw_text(name.c_str(),
-                                                      glm::vec3(0.0f, 400.0f, 0.0f),
-                                                      glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), .6f);
-                    Engine::get_renderer()->draw_text(std::to_string(info.hit_length).c_str(),
-                                                      glm::vec3(0.0f, 450.0f, 0.0f),
-                                                      glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), .6f);
-                }
-                Engine::get_renderer()->draw_line(info.hit_point, info.hit_point + info.hit_normal * 0.1f,
-                                                  glm::max(info.hit_normal, glm::vec3(0.1f, 0.1f, 0.1f)));
-            }
-        }
     }
 
     void Scene::on_enter_game()
     {
         initialize_special_types();
+    }
+
+    Ref<Scene> Scene::copy(Ref<Scene> scene)
+    {
+        Ref<Scene> result = create_ref<Scene>();
+
+        auto &src_registry = scene->get_raw_registry();
+        auto &dest_registry = result->get_raw_registry();
+
+        src_registry.view<entt::entity>().each([&](auto entity)
+        {
+            auto dest_entity = dest_registry.create();
+            assert(dest_entity != entt::null);
+        });
+        for (auto [id, storage]: src_registry.storage())
+        {
+            using namespace entt::literals;
+            if (!ComponentRegistry::get_component_map().contains(storage.type().hash()))
+            {
+                continue;
+            }
+
+            entt::resolve(storage.type()).invoke("copy"_hs, {}, entt::forward_as_meta(storage),
+                                                 entt::forward_as_meta(dest_registry));
+            LOG_INFO("Copied %s", ComponentRegistry::get_component_map().at(storage.type().hash()).c_str());
+        }
+
+        return result;
     }
 
     AABB Scene::re_calculate_bounds()
@@ -352,10 +361,6 @@ namespace cologne
                 destroy_entity(get_entity_by_uuid(e));
             }
         }
-        if (entity.has_component<StaticColliderComponent>())
-        {
-            Physics::destroy_body(entity.get_component<StaticColliderComponent>().body_id);
-        }
         _registry.destroy(entity);
     }
 
@@ -499,5 +504,6 @@ namespace cologne
         add_system(std::make_unique<RendererSystem>());
         add_system(std::make_unique<EditorCameraControllerSystem>());
         add_system(std::make_unique<PlayerControllerSystem>());
+        add_system(std::make_unique<InteractionSystem>());
     }
 }

@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "engine/scene/Scene.h"
 #include "types/FrameBuffer.h"
 #include "engine/renderer/types/RenderItem.h"
 #include <filesystem>
@@ -9,7 +8,6 @@
 
 namespace cologne
 {
-    class Scene;
     class Shader;
     class SSBO;
     struct Light;
@@ -19,6 +17,7 @@ namespace cologne
         friend class Engine;
 
     public:
+        Renderer();
         ~Renderer();
 
         Renderer(Renderer &&) = delete;
@@ -111,7 +110,7 @@ namespace cologne
             TransformComponent transform;
         };
 
-        Renderer();
+
 
         void render_geometry();
 

@@ -90,6 +90,8 @@ namespace cologne
         {
             return Physics::get_rigidbody_transform(body_id);
         }
+        static void on_construct(entt::registry &registry, const entt::entity entt);
+        static void on_destroy(entt::registry &registry, const entt::entity entt);
     };
 
     struct ConvexMeshColliderComponent
@@ -264,6 +266,20 @@ namespace cologne
         
     };
 
+    struct InteractorComponent
+    {
+        bool update_every_frame = true;
+        static void on_construct(entt::registry &registry, const entt::entity entt);
+        static void on_destroy(entt::registry &registry, const entt::entity entt);
+    };
+
+    struct InteractionControllerComponent
+    {
+        //dunno what can live in here yet :3
+        uint32_t last_entity = 0;
+        uint32_t current_entity =0;
+    };
+
     struct EditorCameraComponent
     {
         static void on_construct(entt::registry &registry, const entt::entity entt);
@@ -274,5 +290,4 @@ namespace cologne
     {
         glm::vec2 rotation = glm::vec2(0.0f);
     };
-
 }

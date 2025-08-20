@@ -7,7 +7,6 @@ namespace cologne
     class Editor
     {
         friend class Engine;
-
     public:
         ~Editor();
 
@@ -44,10 +43,8 @@ namespace cologne
         static uint32_t get_viewport_height();
 
         static void initialize_reflection_editor();
-    private:
         Editor();
-
-
+    private:
         void build_main_window();
 
         void handle_hotkeys();

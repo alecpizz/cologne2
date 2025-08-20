@@ -30,7 +30,7 @@ namespace cologne
     };
 
     std::unordered_map<char, Character> characters;
-    std::unique_ptr<Shader> text_shader;
+    Ref<Shader> text_shader;
     std::vector<DrawCmd> draw_cmds;
     uint32_t vao, vbo;
 
@@ -160,7 +160,7 @@ namespace cologne
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
         FT_Done_Face(face);
         FT_Done_FreeType(ft);
-        text_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/text.vert",
+        text_shader = create_ref<Shader>(RESOURCES_PATH "shaders/text.vert",
                                                RESOURCES_PATH "shaders/text.frag");
 
         glGenVertexArrays(1, &vao);

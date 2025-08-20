@@ -9,6 +9,16 @@
 
 namespace cologne
 {
+    void RigidbodyComponent::on_construct(entt::registry &registry, const entt::entity entt)
+    {
+    }
+
+    void RigidbodyComponent::on_destroy(entt::registry &registry, const entt::entity entt)
+    {
+        auto col = registry.get<RigidbodyComponent>(entt);
+        Physics::destroy_body(col.body_id);
+    }
+
     MeshComponent::MeshComponent(const std::string &name)
     {
         mesh_name = name;
@@ -58,6 +68,19 @@ namespace cologne
         if (handle_comp.light_handle.is_valid())
         {
             Engine::get_renderer()->destroy_light(handle_comp.light_handle);
+        }
+    }
+
+    void InteractorComponent::on_construct(entt::registry &registry, const entt::entity entt)
+    {
+        registry.emplace_or_replace<InteractionControllerComponent>(entt);
+    }
+
+    void InteractorComponent::on_destroy(entt::registry &registry, const entt::entity entt)
+    {
+        if (registry.any_of<InteractionControllerComponent>(entt))
+        {
+            registry.remove<InteractionControllerComponent>(entt);
         }
     }
 

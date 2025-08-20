@@ -37,6 +37,8 @@ namespace cologne
 
         Scene &operator=(const Scene &) = delete;
 
+        static Ref<Scene> copy(Ref<Scene> scene);
+
         AABB re_calculate_bounds();
 
         AABB get_bounds() const;
@@ -73,10 +75,12 @@ namespace cologne
         void set_scene_name(const std::string &path) { _scene_name = path; }
         entt::registry& get_raw_registry() { return _registry;}
         void add_system(std::unique_ptr<System> system);
+        void setup_blank_scene();
     private:
         void initialize_systems();
         void duplicate_recursive(Entity source, std::unordered_map<UUID, UUID>& old_to_new_map);
         void initialize_special_types();
+
 
         std::string _scene_name = "untitled_scene.cscn";
         AABB _scene_bounds;

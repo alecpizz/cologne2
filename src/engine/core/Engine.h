@@ -26,16 +26,16 @@ namespace cologne
 
         ~Engine();
 
-        static Renderer *get_renderer();
+        static Ref<Renderer> get_renderer();
 
-        static Window *get_window();
+        static Ref<Window> get_window();
 
-        static EventManager *get_event_manager();
+        static Ref<EventManager> get_event_manager();
 
-        static Scene *get_scene();
+        static Ref<Scene> get_scene();
 
 
-        static Editor *get_debug_ui();
+        static Ref<Editor> get_debug_ui();
 
         Engine(Engine &&) = delete;
 

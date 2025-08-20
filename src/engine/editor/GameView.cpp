@@ -43,7 +43,7 @@ namespace cologne
                 if (id != entt::null)
                 {
                     Audio::play_sound(_move_sound, 30);
-                    Entity temp = {static_cast<entt::entity>(id), Engine::get_scene()};
+                    Entity temp = {static_cast<entt::entity>(id), Engine::get_scene().get()};
 
                     if (temp.has_component<ChildComponent>())
                     {

@@ -7,17 +7,28 @@
 #include <engine/asset_manager/AssetManager.h>
 #include <nlohmann/json.hpp>
 #include "Components.h"
+#include <entt/entt.hpp>
 
 
 namespace cologne::ComponentRegistry
 {
+    template<typename T>
+    void copy(entt::sparse_set &base, entt::registry &to)
+    {
+        auto &src = static_cast<entt::storage_for_t<T> &>(base);
+        to.insert<T>(src.entt::sparse_set::begin(), src.entt::sparse_set::end(), src.begin());
+    }
+
     using namespace entt::literals;
 #define REGISTER_COMPONENT(T, name) \
 component_type_map[entt::type_hash<T>::value()] = name; \
 entt::meta_factory<T>() \
 .type(entt::hashed_string(name))\
 .func<[](entt::registry* registry, entt::entity entity, T& value) { \
-        registry->emplace_or_replace<T>(entity, std::move(value)); }>("emplace"_hs)
+        registry->emplace_or_replace<T>(entity, std::move(value)); }>("emplace"_hs) \
+.func<&copy<T>>("copy"_hs)
+
+
 #define REGISTER_PROPERTY(Type, member, ...) \
 .data<&Type::member, entt::as_ref_t>(#member##_hs) \
 .custom<PropertiesMap>(PropertiesMap{{"name"_hs, #member} __VA_OPT__(, __VA_ARGS__)})
@@ -203,6 +214,9 @@ entt::meta_factory<T>() \
                 REGISTER_PROPERTY(LightComponent, inner_cutoff)
                 REGISTER_PROPERTY(LightComponent, always_update_shadows)
                 REGISTER_PROPERTY(LightComponent, cast_shadows);
+
+        REGISTER_COMPONENT(InteractorComponent, "InteractorComponent")
+                REGISTER_PROPERTY(InteractorComponent, update_every_frame);
 
         REFLECT_ENUM(LightComponent::LightType)
                 ENUMERATOR(LightComponent::LightType, Directional)

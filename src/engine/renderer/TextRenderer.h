@@ -7,6 +7,7 @@ namespace cologne
     {
         friend class Renderer;
     public:
+        explicit TextRenderer(const char* font_path);
         ~TextRenderer();
 
         TextRenderer(TextRenderer &&) = delete;
@@ -19,7 +20,5 @@ namespace cologne
 
         void draw_text(const char* text, glm::vec3 position, glm::vec4 color, float size);
         void present();
-    private:
-        explicit TextRenderer(const char* font_path);
     };
 }

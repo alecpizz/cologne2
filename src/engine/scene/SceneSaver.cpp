@@ -360,7 +360,7 @@ namespace cologne
                 const auto hash = set.type().hash();
                 if (!ComponentRegistry::get_component_map().contains(hash))
                 {
-                    LOG_ERROR("Component map did not contain %s", std::string(set.type().name()).c_str());
+                    LOG_WARN("Component map did not contain %s", std::string(set.type().name()).c_str());
                     continue;
                 }
                 const std::string &name = ComponentRegistry::get_component_map().at(hash);

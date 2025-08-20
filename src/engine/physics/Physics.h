@@ -69,4 +69,6 @@ namespace cologne::Physics
     glm::mat4 get_rigidbody_transform(uint32_t body_id);
 
     uint32_t create_rigidbody(Entity entity);
+
+    void destroy_entity(Entity entity);
 }
