@@ -19,6 +19,7 @@
 #include <engine/scene/ComponentRegistry.h>
 #include <nlohmann/json.hpp>
 #include <fstream>
+#include "SceneManager.h"
 
 namespace cologne
 {
@@ -28,7 +29,7 @@ namespace cologne
         Ref<Renderer> renderer = nullptr;
         Ref<EventManager> event_manager = nullptr;
         Ref<Editor> debug_ui = nullptr;
-        Ref<Scene> scene = nullptr;
+        Ref<SceneManager> scene_manager = nullptr;
         Ref<FileWatcher> file_watcher = nullptr;
         std::queue<std::pair<std::filesystem::path, FileStatus> > file_status_queue;
         std::string next_scene = std::string();
@@ -82,7 +83,7 @@ namespace cologne
 
     Ref<Scene> Engine::get_scene()
     {
-        return _instance->_impl->scene;
+        return _instance->_impl->scene_manager->get_active_scene();
     }
 
 
@@ -124,6 +125,7 @@ namespace cologne
                 _impl->file_status_queue.emplace(path, status);
             });
         _impl->renderer = create_ref<Renderer>();
+        _impl->scene_manager = create_ref<SceneManager>();
         Physics::init();
         AssetManager::init();
         AssetManager::print_all();
@@ -131,6 +133,7 @@ namespace cologne
         // Audio::play_music(RESOURCES_PATH "sounds/music2.mp3");
         // Audio::set_music_volume(12);
         ComponentRegistry::register_components();
+        //TODO: move this to scene manager
         if (FileUtil::file_exists(RESOURCES_PATH "last_saved_scene.json"))
         {
             std::ifstream file(RESOURCES_PATH "last_saved_scene.json");
@@ -138,15 +141,15 @@ namespace cologne
             {
                 nlohmann::json j = nlohmann::json::parse(file);
                 std::string last_save_path = j["scene_name"];
-                _impl->scene = std::make_unique<Scene>(
-                    (RESOURCES_PATH + std::string("scenes/") + last_save_path).c_str());
+                _impl->scene_manager->set_editor_scene(create_ref<Scene>((RESOURCES_PATH + std::string("scenes/") + last_save_path).c_str()));
                 LOG_INFO("LOADED PREVIOUSLY USED SCENE %s", last_save_path.c_str());
             }
         }
         else
         {
-            _impl->scene = std::make_unique<Scene>();
-            _impl->scene->setup_blank_scene();
+            Ref<Scene> scene = create_ref<Scene>();
+            scene->setup_blank_scene();
+            _impl->scene_manager->set_editor_scene(scene);
             LOG_INFO("LOADED DEFAULT SCENE");
         }
 
@@ -182,18 +185,19 @@ namespace cologne
                 }
                 _impl->file_status_queue.pop();
             }
+            //TODO: move this scene manager
             if (_impl->scene_queued)
             {
-                _impl->scene = nullptr;
                 Physics::delete_all_bodies();
                 if (_impl->next_scene.empty())
                 {
-                    _impl->scene = create_ref<Scene>();
-                    _impl->scene->setup_blank_scene();
+                    Ref<Scene> scene = create_ref<Scene>();
+                    scene->setup_blank_scene();
+                    _impl->scene_manager->set_editor_scene(scene);
                 }
                 else
                 {
-                    _impl->scene = create_ref<Scene>(_impl->next_scene.c_str());
+                    _impl->scene_manager->set_editor_scene(create_ref<Scene>(_impl->next_scene.c_str()));
                 }
                 _impl->scene_queued = false;
             }
@@ -201,11 +205,11 @@ namespace cologne
             _impl->event_manager->poll_events();
             if (in_edit_mode())
             {
-                _impl->scene->update_editor(et.elapsed);
+                _impl->scene_manager->get_active_scene()->update_editor(et.elapsed);
             }
             else
             {
-                _impl->scene->update_runtime(et.elapsed);
+                _impl->scene_manager->get_active_scene()->update_runtime(et.elapsed);
                 Physics::update(et.elapsed);
             }
             // _impl->player->update(et.elapsed);
@@ -223,17 +227,6 @@ namespace cologne
     {
         _instance->_impl->scene_queued = true;
         _instance->_impl->next_scene = path;
-        FileUtil::create_directory_recursive(RESOURCES_PATH "last_saved_scene.json");
-        std::ofstream file2(RESOURCES_PATH "last_saved_scene.json");
-        if (!file2.is_open())
-        {
-            LOG_ERROR("error opening file for serialization!");
-            return;
-        }
-        nlohmann::json j;
-        j["scene_name"] = _instance->_impl->scene->get_scene_name();
-        file2 << j.dump(4);
-        file2.close();
     }
 
     bool Engine::in_edit_mode()

@@ -34,7 +34,6 @@ namespace cologne
 
         static Ref<Scene> get_scene();
 
-
         static Ref<Editor> get_debug_ui();
 
         Engine(Engine &&) = delete;
