@@ -12,6 +12,7 @@ namespace cologne
     public:
         SceneManager() = default;
         SceneManager(Ref<Scene> editor_scene);
+        void set_editor_scene(const std::string& path);
         void set_editor_scene(Ref<Scene> scene);
         void enter_play_mode();
         void exit_play_mode();

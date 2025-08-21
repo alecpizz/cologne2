@@ -188,7 +188,7 @@ namespace cologne
         Engine::get_renderer()->submit_camera_transform(tr, cm);
     }
 
-    void Scene::on_enter_game()
+    void Scene::on_enter_play_mode()
     {
         initialize_special_types();
     }

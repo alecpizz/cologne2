@@ -115,6 +115,10 @@ namespace cologne
 
     void Particles::render()
     {
+        if (_vao == 0)
+        {
+            return;
+        }
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, _position_buffer);
 
         glBindVertexArray(_vao);

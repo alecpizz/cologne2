@@ -46,6 +46,7 @@ namespace cologne
         }
     }
 
+
     void FileWatcher::check_files()
     {
         for (auto& file : std::filesystem::recursive_directory_iterator(_path))

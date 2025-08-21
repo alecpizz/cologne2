@@ -36,7 +36,7 @@ namespace cologne
         }
         else
         {
-            Engine::get_scene()->on_enter_game();
+            Engine::get_scene()->on_enter_play_mode();
             Engine::get_window()->hide_mouse();
         }
     }
@@ -262,8 +262,8 @@ namespace cologne
             build_properties_panel();
             build_settings_panel();
             build_asset_browser();
-            build_game_overlay();
             build_game_view(dt);
+            build_game_overlay();
             ImGui::End();
             ImGui::PopStyleColor();
         }

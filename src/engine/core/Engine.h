@@ -7,6 +7,11 @@
 
 namespace cologne
 {
+    class SceneManager;
+}
+
+namespace cologne
+{
     class Renderer;
 
     class Engine
@@ -25,6 +30,8 @@ namespace cologne
         static Ref<Scene> get_scene();
 
         static Ref<Editor> get_debug_ui();
+
+        static Ref<SceneManager> get_scene_manager();
 
         Engine(Engine &&) = delete;
 

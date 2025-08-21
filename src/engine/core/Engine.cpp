@@ -10,7 +10,6 @@
 #include "FileWatcher.h"
 #include "../physics/Physics.h"
 #include "../editor/Editor.h"
-#include "engine/renderer/DebugRenderer.h"
 #include "Input.h"
 #include "../audio/Audio.h"
 #include "Time.h"
@@ -92,6 +91,11 @@ namespace cologne
         return debug_ui;
     }
 
+    Ref<SceneManager> Engine::get_scene_manager()
+    {
+        return scene_manager;
+    }
+
     static void file_changed(std::filesystem::path path, FileStatus status)
     {
         std::string status_str;
@@ -133,7 +137,7 @@ namespace cologne
         // Audio::play_music(RESOURCES_PATH "sounds/music2.mp3");
         // Audio::set_music_volume(12);
         ComponentRegistry::register_components();
-        //TODO: move this to scene manager
+        //TODO: move this to scene manager?
         if (FileUtil::file_exists(RESOURCES_PATH "last_saved_scene.json"))
         {
             std::ifstream file(RESOURCES_PATH "last_saved_scene.json");
@@ -141,16 +145,14 @@ namespace cologne
             {
                 nlohmann::json j = nlohmann::json::parse(file);
                 std::string last_save_path = j["scene_name"];
-                scene_manager->set_editor_scene(
-                    create_ref<Scene>((RESOURCES_PATH + std::string("scenes/") + last_save_path).c_str()));
                 LOG_INFO("LOADED PREVIOUSLY USED SCENE %s", last_save_path.c_str());
+                scene_manager->set_editor_scene(RESOURCES_PATH + std::string("scenes/") + last_save_path);
             }
+            file.close();
         }
         else
         {
-            Ref<Scene> scene = create_ref<Scene>();
-            scene->setup_blank_scene();
-            scene_manager->set_editor_scene(scene);
+            scene_manager->set_editor_scene("");
             LOG_INFO("LOADED DEFAULT SCENE");
         }
 

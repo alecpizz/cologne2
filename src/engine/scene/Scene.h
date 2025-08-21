@@ -28,7 +28,7 @@ namespace cologne
         void update_runtime(float delta_time);
         void update_editor(float delta_time);
 
-        void on_enter_game();
+        void on_enter_play_mode();
 
         Scene(Scene &&) = delete;
 
@@ -55,10 +55,6 @@ namespace cologne
         Entity create_static_model_entities(const char *model_name, const TransformComponent &parent_transform,
                                             bool create_colliders = false);
 
-        Entity create_player_entity(glm::vec3 pos);
-
-        Entity create_physics_cube(glm::vec3 pos);
-        Entity create_scene_camera_entity();
 
         void destroy_entity(Entity entity);
 
@@ -81,6 +77,8 @@ namespace cologne
         void initialize_systems();
         void duplicate_recursive(Entity source, std::unordered_map<UUID, UUID>& old_to_new_map);
         void initialize_special_types();
+        Entity create_player_entity(glm::vec3 pos);
+        Entity create_scene_camera_entity();
 
 
         std::string _scene_name = "untitled_scene.cscn";
