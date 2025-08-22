@@ -9,14 +9,14 @@
 
 namespace cologne
 {
-    void PhysicsSystem::on_update(float dt)
+    void PhysicsSystem::on_update(Scene* scene, float dt)
     {
-        auto &registry = _scene->get_raw_registry();
+        auto &registry = scene->get_raw_registry();
         //temp?
         auto view = registry.view<StaticColliderComponent, WorldTransformComponent>();
         for (auto entity: view)
         {
-            Entity e = {entity, _scene};
+            Entity e = {entity, scene};
             if (e.get_component<ActiveComponent>().active)
             {
                 if (!e.get_component<StaticColliderComponent>().body_enabled)

@@ -9,36 +9,36 @@ namespace cologne
     class PlayerControllerSystem : public System
     {
     public:
-        void on_create(Scene *scene) override;
-
-        void on_update(float dt) override;
+        void on_create() override;
+        void on_scene_start(Scene *scene) override;
+        void on_update(Scene* scene, float dt) override;
         UpdateFlags get_update_flags() override
         {
             return RUNTIME;
         }
 
     private:
-        void update_camera(entt::registry &registry, entt::entity entity, float dt);
+        void update_camera(Scene *scene, entt::registry &registry, entt::entity entity, float dt);
 
-        void play_footstep(entt::registry &registry, entt::entity entity, float dt);
+        void play_footstep(Scene *scene, entt::registry &registry, entt::entity entity, float dt);
 
-        void move_viewmodel(entt::registry &registry, entt::entity entity, float dt);
+        void move_viewmodel(Scene *scene, entt::registry &registry, entt::entity entity, float dt);
 
-        void apply_friction(entt::registry &registry, entt::entity entity, float t, float dt);
+        void apply_friction(Scene *scene, entt::registry &registry, entt::entity entity, float t, float dt);
 
-        void acceleration(entt::registry &registry, entt::entity entity, glm::vec3 goal_dir, float goal_speed,
+        void acceleration(Scene *scene, entt::registry &registry, entt::entity entity, glm::vec3 goal_dir, float goal_speed,
                           float accel, float dt);
 
-        void ground_move(entt::registry &registry, entt::entity entity, glm::vec3 movement_input, float dt);
+        void ground_move(Scene *scene ,entt::registry &registry, entt::entity entity, glm::vec3 movement_input, float dt);
 
-        void air_move(entt::registry &registry, entt::entity entity, glm::vec3 movement_input, bool strafing_only,
+        void air_move(Scene *scene, entt::registry &registry, entt::entity entity, glm::vec3 movement_input, bool strafing_only,
                       float dt);
 
-        void air_control(entt::registry &registry, entt::entity entity, glm::vec3 movement_input, float target_speed,
+        void air_control(Scene *scene, entt::registry &registry, entt::entity entity, glm::vec3 movement_input, float target_speed,
                          bool only_forward, float dt);
 
-        void queue_jump(entt::registry &registry, entt::entity entity);
+        void queue_jump(Scene *scene,entt::registry &registry, entt::entity entity);
 
-        void update_gun(entt::registry &registry, entt::entity entity, float dt);
+        void update_gun(Scene *scene,entt::registry &registry, entt::entity entity, float dt);
     };
 }

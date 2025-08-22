@@ -9,12 +9,12 @@ namespace cologne
     class TransformSystem : public System
     {
     public:
-        void on_update(float dt) override;
+        void on_update(Scene* scene, float dt) override;
         UpdateFlags get_update_flags() override
         {
             return static_cast<UpdateFlags>(EDITOR | RUNTIME);
         }
     private:
-        void update_children(entt::entity parent, entt::registry& registry);
+        void update_children(Scene* scene, entt::entity parent, entt::registry& registry);
     };
 }

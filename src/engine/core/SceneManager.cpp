@@ -22,7 +22,6 @@ namespace cologne
         if (!path.empty())
         {
             Ref<Scene> scene = create_ref<Scene>(path.c_str());
-            scene->setup_blank_scene();
             set_editor_scene(scene);
         }
         else
@@ -35,6 +34,8 @@ namespace cologne
 
     void SceneManager::set_editor_scene(Ref<Scene> scene)
     {
+        Physics::delete_all_bodies();
+        Engine::get_renderer()->clear_lights();
         _editor_scene = scene;
         _active_scene = _editor_scene;
     }
@@ -42,10 +43,11 @@ namespace cologne
     void SceneManager::enter_play_mode()
     {
         //dupe the scene
-        _runtime_scene = Scene::copy(_editor_scene);
-        _active_scene = _runtime_scene;
+
         Physics::delete_all_bodies();
         Engine::get_renderer()->clear_lights();
+        _runtime_scene = Scene::copy(_editor_scene);
+        _active_scene = _runtime_scene;
         _active_scene->on_enter_play_mode();
     }
 

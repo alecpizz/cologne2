@@ -16,18 +16,26 @@
 
 namespace cologne
 {
-    void PlayerControllerSystem::on_create(Scene *scene)
+    void PlayerControllerSystem::on_create()
     {
-        System::on_create(scene);
-        auto &registry = _scene->get_raw_registry();
+        System::on_create();
+        
+    }
+
+    void PlayerControllerSystem::on_scene_start(Scene *scene)
+    {
+        auto &registry = scene->get_raw_registry();
         auto view = registry.view<PlayerComponent, PlayerControllerComponent>();
         for (auto entity: view)
         {
             auto &controller = registry.get<PlayerControllerComponent>(entity);
-            controller.footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_1.wav");
-            controller.footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_2.wav");
-            controller.footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_3.wav");
-            controller.footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_4.wav");
+            if (controller.footstep_sounds.empty())
+            {
+                controller.footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_1.wav");
+                controller.footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_2.wav");
+                controller.footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_3.wav");
+                controller.footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_4.wav");
+            }
             for (const auto &footstep_sound: controller.footstep_sounds)
             {
                 Audio::add_sound(footstep_sound.c_str());
@@ -40,22 +48,22 @@ namespace cologne
         }
     }
 
-    void PlayerControllerSystem::on_update(float dt)
+    void PlayerControllerSystem::on_update(Scene *scene, float dt)
     {
-        auto &registry = _scene->get_raw_registry();
+        auto &registry = scene->get_raw_registry();
         auto view = registry.view<PlayerComponent, PlayerControllerComponent, TransformComponent>();
         for (auto entity: view)
         {
             auto &controller = registry.get<PlayerControllerComponent>(entity);
             auto &player = registry.get<PlayerComponent>(entity);
-            update_camera(registry, entity, dt);
+            update_camera(scene, registry, entity, dt);
             if (controller.is_free_cam)
             {
                 player.teleport_to_position(
-                    _scene->get_entity_by_uuid(player.camera)
+                    scene->get_entity_by_uuid(player.camera)
                     .get_transform().position
                     - glm::vec3(0.0f, 1.45f, 0.0f));
-                move_viewmodel(registry, entity, dt);
+                move_viewmodel(scene, registry, entity, dt);
                 continue;
             }
             float x = 0.0f;
@@ -76,11 +84,11 @@ namespace cologne
             {
                 y += 1.0f;
             }
-            queue_jump(registry, entity);
+            queue_jump(scene, registry, entity);
             bool crouch = cologne::Input::key_pressed(cologne::Input::Key::LeftCtrl);
 
             glm::vec3 movement = glm::vec3(-y, 0.0f, x);
-            movement = _scene->get_entity_by_uuid(player.camera)
+            movement = scene->get_entity_by_uuid(player.camera)
                        .get_transform().rotation * movement;
             movement.y = 0.0f;
             if (abs(movement.x) > 0.0f || abs(movement.y) > 0.0f)
@@ -97,13 +105,13 @@ namespace cologne
             controller.grounded = Physics::player_is_grounded(player.id);
             if (controller.grounded)
             {
-                ground_move(registry, entity, movement, dt);
+                ground_move(scene,registry, entity, movement, dt);
             }
             else
             {
                 //air move
                 bool strafing_only = y == 0 && x != 0;
-                air_move(registry, entity, movement, !strafing_only, dt);
+                air_move(scene,registry, entity, movement, !strafing_only, dt);
             }
 
             PlayerMovementCommand cmd;
@@ -113,19 +121,19 @@ namespace cologne
 
             Physics::move_player(player.id, cmd);
 
-            play_footstep(registry, entity, dt);
+            play_footstep(scene, registry, entity, dt);
             glm::vec3 player_pos = Physics::get_player_position(
                 player.id);
             glm::vec3 camera_pos = player_pos + glm::vec3(0.0f, 1.45f, 0.0f);
-            _scene->get_entity_by_uuid(player.camera)
+            scene->get_entity_by_uuid(player.camera)
                     .get_transform().position = camera_pos;
             registry.get<TransformComponent>(entity).position = player_pos;
-            update_gun(registry, entity, dt);
-            move_viewmodel(registry, entity, dt);
+            update_gun(scene, registry, entity, dt);
+            move_viewmodel(scene, registry, entity, dt);
         }
     }
 
-    void PlayerControllerSystem::update_camera(entt::registry &registry, entt::entity entity, float dt)
+    void PlayerControllerSystem::update_camera(Scene *scene, entt::registry &registry, entt::entity entity, float dt)
     {
         auto &controller = registry.get<PlayerControllerComponent>(entity);
         auto &player = registry.get<PlayerComponent>(entity);
@@ -151,7 +159,7 @@ namespace cologne
         glm::quat y_quat = glm::angleAxis(glm::radians(controller.rotation.y),
                                           glm::vec3(1.0f, 0.0f, 0.0f));
         glm::quat target_rotation = x_quat * y_quat;
-        Entity camera = _scene->get_entity_by_uuid(player.camera);
+        Entity camera = scene->get_entity_by_uuid(player.camera);
         camera.get_transform().rotation = target_rotation;
         glm::vec3 fwd = target_rotation * glm::vec3(0.0f, 0.0f, 1.0f);
         glm::vec3 right = target_rotation * glm::vec3(1.0f, 0.0f, 0.0f);
@@ -200,7 +208,7 @@ namespace cologne
         }
     }
 
-    void PlayerControllerSystem::play_footstep(entt::registry &registry, entt::entity entity, float dt)
+    void PlayerControllerSystem::play_footstep(Scene *scene, entt::registry &registry, entt::entity entity, float dt)
     {
         auto &controller = registry.get<PlayerControllerComponent>(entity);
         auto &player = registry.get<PlayerComponent>(entity);
@@ -231,12 +239,12 @@ namespace cologne
         }
     }
 
-    void PlayerControllerSystem::move_viewmodel(entt::registry &registry, entt::entity entity, float dt)
+    void PlayerControllerSystem::move_viewmodel(Scene *scene, entt::registry &registry, entt::entity entity, float dt)
     {
         auto &controller = registry.get<PlayerControllerComponent>(entity);
         auto &player = registry.get<PlayerComponent>(entity);
         glm::vec2 mouse = Input::get_relative_mouse();
-        Entity viewmodel_entity = _scene->get_entity_by_uuid(
+        Entity viewmodel_entity = scene->get_entity_by_uuid(
             player.viewmodel);
         auto &viewmodel = viewmodel_entity.get_component<ViewmodelComponent>();
         float mouse_x = mouse.x * viewmodel.sway_multiplier * dt;
@@ -272,7 +280,7 @@ namespace cologne
         controller.prev_transform.rotation = new_rotation;
 
         glm::mat4 gun_mat = glm::mat4(1.0f);
-        Entity camera = _scene->get_entity_by_uuid(player.camera);
+        Entity camera = scene->get_entity_by_uuid(player.camera);
         auto &cam_transform = camera.get_transform();
         gun_mat = glm::translate(gun_mat, new_position);
         gun_mat *= glm::toMat4(new_rotation);
@@ -288,7 +296,7 @@ namespace cologne
         viewmodel_entity.get_transform().rotation = orientation;
     }
 
-    void PlayerControllerSystem::apply_friction(entt::registry &registry, entt::entity entity, float t, float dt)
+    void PlayerControllerSystem::apply_friction(Scene *scene, entt::registry &registry, entt::entity entity, float t, float dt)
     {
         auto &controller = registry.get<PlayerControllerComponent>(entity);
         auto &player = registry.get<PlayerComponent>(entity);
@@ -318,7 +326,7 @@ namespace cologne
         controller.velocity.z *= new_speed;
     }
 
-    void PlayerControllerSystem::acceleration(entt::registry &registry, entt::entity entity, glm::vec3 goal_dir,
+    void PlayerControllerSystem::acceleration(Scene *scene, entt::registry &registry, entt::entity entity, glm::vec3 goal_dir,
                                               float goal_speed, float accel, float dt)
     {
         auto &controller = registry.get<PlayerControllerComponent>(entity);
@@ -338,18 +346,18 @@ namespace cologne
         controller.velocity.z += accel_speed * goal_dir.z;
     }
 
-    void PlayerControllerSystem::ground_move(entt::registry &registry, entt::entity entity, glm::vec3 movement_input,
+    void PlayerControllerSystem::ground_move(Scene *scene,entt::registry &registry, entt::entity entity, glm::vec3 movement_input,
                                              float dt)
     {
         auto &controller = registry.get<PlayerControllerComponent>(entity);
         auto &player = registry.get<PlayerComponent>(entity);
-        apply_friction(registry, entity, !controller.jump_queued ? 1.0f : 0.0f, dt);
+        apply_friction(scene, registry, entity, !controller.jump_queued ? 1.0f : 0.0f, dt);
         if (length2(movement_input) != 0.0f)
         {
             movement_input = normalize(movement_input);
         }
         float goal_speed = length(movement_input) * player.move_speed;
-        acceleration(registry, entity, movement_input, goal_speed, player.run_acceleration, dt);
+        acceleration(scene, registry, entity, movement_input, goal_speed, player.run_acceleration, dt);
         controller.velocity.y = -player.gravity * dt;
         if (controller.jump_queued)
         {
@@ -362,7 +370,7 @@ namespace cologne
         }
     }
 
-    void PlayerControllerSystem::air_move(entt::registry &registry, entt::entity entity, glm::vec3 movement_input,
+    void PlayerControllerSystem::air_move(Scene *scene, entt::registry &registry, entt::entity entity, glm::vec3 movement_input,
                                           bool strafing_only, float dt)
     {
         auto &controller = registry.get<PlayerControllerComponent>(entity);
@@ -393,15 +401,15 @@ namespace cologne
             }
             accel = player.side_strafe_acceleration;
         }
-        acceleration(registry, entity, movement_input, wish_speed, accel, dt);
+        acceleration(scene, registry, entity, movement_input, wish_speed, accel, dt);
         if (player.air_control > 0)
         {
-            air_control(registry, entity, movement_input, wish_speed2, !strafing_only, dt);
+            air_control(scene, registry, entity, movement_input, wish_speed2, !strafing_only, dt);
         }
         controller.velocity.y -= player.gravity * dt;
     }
 
-    void PlayerControllerSystem::air_control(entt::registry &registry, entt::entity entity, glm::vec3 movement_input,
+    void PlayerControllerSystem::air_control(Scene *scene, entt::registry &registry, entt::entity entity, glm::vec3 movement_input,
                                              float target_speed, bool only_forward, float dt)
     {
         if (!only_forward || glm::abs(target_speed) < 0.0001f)
@@ -433,7 +441,7 @@ namespace cologne
         controller.velocity.z *= speed;
     }
 
-    void PlayerControllerSystem::queue_jump(entt::registry &registry, entt::entity entity)
+    void PlayerControllerSystem::queue_jump(Scene *scene, entt::registry &registry, entt::entity entity)
     {
         auto &controller = registry.get<PlayerControllerComponent>(entity);
         if (Input::key_pressed(Input::Key::Space))
@@ -446,7 +454,7 @@ namespace cologne
         }
     }
 
-    void PlayerControllerSystem::update_gun(entt::registry &registry, entt::entity entity, float dt)
+    void PlayerControllerSystem::update_gun(Scene *scene, entt::registry &registry, entt::entity entity, float dt)
     {
         auto &player = registry.get<PlayerComponent>(entity);
         auto &controller = registry.get<PlayerControllerComponent>(entity);
@@ -465,13 +473,13 @@ namespace cologne
             if (Input::mouse_pressed(Input::MouseButton::Left) && controller.current_ammo > 0)
             {
                 LOG_INFO("Bang");
-                Entity vm = _scene->get_entity_by_uuid(player.viewmodel);
+                Entity vm = scene->get_entity_by_uuid(player.viewmodel);
                 auto &anim = vm.get_component<AnimatorComponent>();
                 anim.play_one_shot_animation(AssetManager::get_animation_by_name("deagle_Rig|Rig|MK_Shot"));
                 Audio::play_sound(controller.shoot_sound, 30);
-                auto cam = _scene->get_entity_by_uuid(player.camera);
+                auto cam = scene->get_entity_by_uuid(player.camera);
                 auto tr = cam.get_transform();
-                _scene->create_bullet(tr.position, tr.get_forward(), 25);
+                scene->create_bullet(tr.position, tr.get_forward(), 25);
                 controller.shot_timer = 0.0f;
                 controller.gun_time = controller.rpm;
                 controller.current_ammo--;
@@ -483,7 +491,7 @@ namespace cologne
                 LOG_INFO("RELOADING!");
                 controller.shot_timer = 0.0f;
                 controller.gun_time = controller.reload_time;
-                Entity vm = _scene->get_entity_by_uuid(player.viewmodel);
+                Entity vm = scene->get_entity_by_uuid(player.viewmodel);
                 auto &anim = vm.get_component<AnimatorComponent>();
                 anim.play_one_shot_animation(AssetManager::get_animation_by_name("deagle_Rig|Rig|MK_ReloadFull"));
                 Audio::play_sound(controller.reload_sound, 20);

@@ -31,6 +31,7 @@
 
 namespace cologne
 {
+    static std::vector<std::unique_ptr<System>> systems;
     void Scene::initialize_special_types()
     {
         for (const auto entity: _registry.view<IDComponent>())
@@ -44,10 +45,10 @@ namespace cologne
             Entity e = {entity, this};
             auto &transform = _registry.get<TransformComponent>(entity);
             auto &collider = _registry.get<StaticColliderComponent>(entity);
-            if (collider.body_id > 0)
-            {
-                continue;
-            }
+            // if (collider.body_id > 0)
+            // {
+            //     continue;
+            // }
             auto mesh = AssetManager::get_mesh_by_name(collider.mesh_name);
             if (!mesh)
             {
@@ -62,11 +63,11 @@ namespace cologne
         {
             Entity e = {entity, this};
             auto &rb = _registry.get<RigidbodyComponent>(entity);
-
-            if (rb.body_id != 0)
-            {
-                continue;
-            }
+            //
+            // if (rb.body_id != 0)
+            // {
+            //     continue;
+            // }
 
             rb.body_id = Physics::create_rigidbody(e);
         }
@@ -74,10 +75,10 @@ namespace cologne
         for (const auto entity: _registry.view<PlayerComponent>())
         {
             auto &pc = _registry.get<PlayerComponent>(entity);
-            if (pc.id > 0)
-            {
-                continue;
-            }
+            // if (pc.id > 0)
+            // {
+            //     continue;
+            // }
             PlayerCreateInfo info;
             info.position = _registry.get<TransformComponent>(entity).position;
             pc.id = Physics::create_player(info);
@@ -111,16 +112,21 @@ namespace cologne
         Physics::create_infinite_ground_plane(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
         create_player_entity(glm::vec3(-3.0f, 2.0f, 0.0f));
         create_scene_camera_entity();
-        initialize_special_types();
         _particles.emplace_back(Particles());
+        for (const auto entity: _registry.view<IDComponent>())
+        {
+            _entity_map[_registry.get<IDComponent>(entity).id] = entity;
+        }
     }
 
     Scene::Scene()
     {
         DebugScope scope(__PRETTY_FUNCTION__);
-        initialize_special_types();
-        initialize_systems();
         re_calculate_bounds();
+        for (const auto entity: _registry.view<IDComponent>())
+        {
+            _entity_map[_registry.get<IDComponent>(entity).id] = entity;
+        }
     }
 
     Scene::Scene(const char *path)
@@ -132,8 +138,6 @@ namespace cologne
         }
         SceneSaver saver_temp(this);
         saver_temp.deserialize(path);
-        initialize_special_types();
-        initialize_systems();
         Physics::create_infinite_ground_plane(glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
         re_calculate_bounds();
         LOG_INFO("Scene bounds are min (%f, %f, %f), max (%f, %f, %f)", _scene_bounds.min.x, _scene_bounds.min.y,
@@ -141,6 +145,10 @@ namespace cologne
         LOG_INFO("Scene size is (%f, %f, %f)", _scene_bounds.size().x, _scene_bounds.size().y, _scene_bounds.size().z);
         _particles.emplace_back(Particles());
         _particles[0].init(_scene_bounds, 5);
+        for (const auto entity: _registry.view<IDComponent>())
+        {
+            _entity_map[_registry.get<IDComponent>(entity).id] = entity;
+        }
     }
 
     Scene::~Scene()
@@ -153,11 +161,12 @@ namespace cologne
 
     void Scene::update_runtime(float delta_time)
     {
-        for (const auto &system: _systems)
+        assert(_scene_name == "RUNTIME_SCENE");
+        for (const auto &system: systems)
         {
             if (system->get_update_flags() & RUNTIME)
             {
-                system->on_update(delta_time);
+                system->on_update(this, delta_time);
             }
         }
 
@@ -175,11 +184,11 @@ namespace cologne
 
     void Scene::update_editor(float delta_time)
     {
-        for (const auto &system: _systems)
+        for (const auto &system: systems)
         {
             if (system->get_update_flags() & EDITOR)
             {
-                system->on_update(delta_time);
+                system->on_update(this, delta_time);
             }
         }
         auto camera = get_scene_camera();
@@ -191,6 +200,14 @@ namespace cologne
     void Scene::on_enter_play_mode()
     {
         initialize_special_types();
+        re_calculate_bounds();
+        for (const auto &system: systems)
+        {
+            if (system->get_update_flags() & RUNTIME)
+            {
+                system->on_scene_start(this);
+            }
+        }
     }
 
     Ref<Scene> Scene::copy(Ref<Scene> scene)
@@ -217,7 +234,7 @@ namespace cologne
                                                  entt::forward_as_meta(dest_registry));
             LOG_INFO("Copied %s", ComponentRegistry::get_component_map().at(storage.type().hash()).c_str());
         }
-
+        result->_scene_name = "RUNTIME_SCENE";
         return result;
     }
 
@@ -506,10 +523,11 @@ namespace cologne
         e.add_component<BulletComponent>(pos, dir, damage);
     }
 
+
     void Scene::add_system(std::unique_ptr<System> system)
     {
-        system->on_create(this);
-        _systems.emplace_back(std::move(system));
+        system->on_create();
+        systems.emplace_back(std::move(system));
     }
 
     void Scene::initialize_systems()

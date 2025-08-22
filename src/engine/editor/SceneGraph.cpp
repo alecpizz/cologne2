@@ -19,9 +19,16 @@ namespace cologne
         {
             Engine::get_scene()->set_scene_name(scene_name);
         }
+        static std::string search_string = "";
+        ImGui::InputText("Entity Name", &search_string);
         for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
         {
             Entity e = {entity, Engine::get_scene().get()};
+            bool valid_search = search_string.empty() || e.get_name().find(search_string) != std::string::npos;
+            if (!valid_search)
+            {
+                continue;
+            }
             if (e.has_component<HideInEditorComponent>())
             {
                 continue;

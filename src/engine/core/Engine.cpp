@@ -130,6 +130,7 @@ namespace cologne
             });
         renderer = create_ref<Renderer>();
         scene_manager = create_ref<SceneManager>();
+        Scene::initialize_systems();
         Physics::init();
         AssetManager::init();
         AssetManager::print_all();

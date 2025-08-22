@@ -72,9 +72,9 @@ namespace cologne
         void set_scene_name(const std::string &path) { _scene_name = path; }
         entt::registry& get_raw_registry() { return _registry;}
         void setup_blank_scene();
+        static void initialize_systems();
     private:
-        void add_system(std::unique_ptr<System> system);
-        void initialize_systems();
+        static void add_system(std::unique_ptr<System> system);
         void duplicate_recursive(Entity source, std::unordered_map<UUID, UUID>& old_to_new_map);
         void initialize_special_types();
         Entity create_player_entity(glm::vec3 pos);
@@ -83,7 +83,6 @@ namespace cologne
 
         std::string _scene_name = "untitled_scene.cscn";
         AABB _scene_bounds;
-        std::vector<std::unique_ptr<System>> _systems;
         std::vector<std::unique_ptr<System>> _editor_system;
         std::vector<Particles> _particles;
         std::unordered_map<UUID, entt::entity> _entity_map;

@@ -14,10 +14,10 @@
 
 namespace cologne
 {
-    void RendererSystem::on_update(float dt)
+    void RendererSystem::on_update(Scene* scene, float dt)
     {
         //submit draw calls
-        auto& registry = _scene->get_raw_registry();
+        auto& registry = scene->get_raw_registry();
         auto view = registry.view<ModelComponent, WorldTransformComponent, ActiveComponent>();
         for (auto entity: view)
         {

@@ -13,9 +13,9 @@
 
 namespace cologne
 {
-    void BulletSystem::on_update(float dt)
+    void BulletSystem::on_update(Scene* scene, float dt)
     {
-        auto& registry = _scene->get_raw_registry();
+        auto& registry = scene->get_raw_registry();
         auto bullets = registry.view<BulletComponent>();
         RaycastHitInfo info;
         for (auto ent: bullets)
@@ -53,7 +53,7 @@ namespace cologne
 
         for (auto entt: bullets)
         {
-            _scene->destroy_entity({entt, _scene});
+            scene->destroy_entity({entt, scene});
         }
     }
 }

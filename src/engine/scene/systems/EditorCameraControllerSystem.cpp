@@ -10,9 +10,9 @@
 
 namespace cologne
 {
-    void EditorCameraControllerSystem::on_update(float dt)
+    void EditorCameraControllerSystem::on_update(Scene* scene, float dt)
     {
-        auto& registry = _scene->get_raw_registry();
+        auto& registry = scene->get_raw_registry();
         auto view = registry.view<EditorCameraComponent, TransformComponent, EditorCameraControllerComponent, ActiveComponent>();
         for (auto entity : view)
         {

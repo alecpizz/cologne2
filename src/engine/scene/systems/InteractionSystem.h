@@ -13,6 +13,6 @@ namespace cologne
         {
             return RUNTIME;
         }
-        void on_update(float dt) override;
+        void on_update(Scene* scene, float dt) override;
     };
 }

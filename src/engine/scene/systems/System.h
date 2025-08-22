@@ -19,20 +19,19 @@ namespace cologne
     public:
         virtual ~System() = default;
 
-        virtual void on_create(Scene *scene)
+        virtual void on_create()
         {
-            _scene = scene;
         }
 
-        virtual void on_update(float dt) = 0;
+        virtual void on_scene_start(Scene* scene)
+        {}
+
+        virtual void on_update(Scene* scene, float dt) = 0;
 
         virtual void on_destroy()
         {
         }
 
         virtual UpdateFlags get_update_flags() = 0;
-
-    protected:
-        Scene *_scene = nullptr;
     };
 }

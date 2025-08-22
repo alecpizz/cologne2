@@ -9,7 +9,7 @@ namespace cologne
     class RendererSystem : public System
     {
     public:
-        void on_update(float dt) override;
+        void on_update(Scene* scene, float dt) override;
         UpdateFlags get_update_flags() override
         {
             return static_cast<UpdateFlags>(EDITOR | RUNTIME);
