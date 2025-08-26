@@ -79,8 +79,8 @@ namespace cologne::Util
 
     void get_screen_to_world_ray(glm::vec2 position, glm::mat4 view, glm::mat4 proj, glm::vec3& origin, glm::vec3& dir)
     {
-        int width = Engine::get_window()->get_width();
-        int height = Engine::get_window()->get_height();
+        int width = Engine::get_render_target_width();
+        int height = Engine::get_render_target_height();
 
         float x_ndc = (2.0f * position.x) / width - 1.0f;
         float y_ndc = 1.0f - (2.0f * position.y) / height;

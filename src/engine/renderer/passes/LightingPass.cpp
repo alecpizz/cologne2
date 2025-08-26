@@ -8,6 +8,7 @@
 #include <engine/renderer/types/Shader.h>
 #include <engine/renderer/types/Light.h>
 #include <engine/renderer/types/SSBO.h>
+#include <engine/scene/Scene.h>
 
 namespace cologne
 {
@@ -49,16 +50,16 @@ namespace cologne
         glBindTextureUnit(8, _env_brdf);
         glBindTextureUnit(9, _env_prefilter);
         uint32_t work_group_size = 32;
-        uint32_t width = Engine::get_window()->get_width();
-        uint32_t height = Engine::get_window()->get_height();
+        uint32_t width = Engine::get_render_target_width();
+        uint32_t height = Engine::get_render_target_height();
         uint32_t num_x = (width + work_group_size - 1) / work_group_size;
         uint32_t num_y = (height + work_group_size - 1) / work_group_size;
         shader->dispatch(num_x, num_y, 1);
         shader->wait(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer_fbo->get_handle());
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, output_fbo->get_handle()); // write to output framebuffer
-        glBlitFramebuffer(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height(), 0, 0,
-                          Engine::get_window()->get_width(), Engine::get_window()->get_height(),
+        glBlitFramebuffer(0, 0, Engine::get_render_target_width(), Engine::get_render_target_height(), 0, 0,
+                          Engine::get_render_target_width(), Engine::get_render_target_height(),
                           GL_DEPTH_BUFFER_BIT, GL_NEAREST);
         glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);

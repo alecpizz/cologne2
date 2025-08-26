@@ -13,34 +13,13 @@
 #include "engine/imguiThemes.h"
 #include <imgui.h>
 #include <engine/audio/Audio.h>
+#include <engine/core/EventManager.h>
+#include <engine/core/Window.h>
 #include <engine/scene/SceneSaver.h>
 #include <misc/cpp/imgui_stdlib.h>
 
 namespace cologne
 {
-    bool active = true;
-
-    bool Editor::in_edit_mode()
-    {
-        return active;
-    }
-
-    void Editor::toggle_edit_mode(bool b)
-    {
-        active = b;
-        //do something with edit mode here
-        if (active)
-        {
-            _was_game_mode = true;
-            Engine::get_window()->show_mouse();
-        }
-        else
-        {
-            Engine::get_scene()->on_enter_play_mode();
-            Engine::get_window()->hide_mouse();
-        }
-    }
-
     uint32_t Editor::get_viewport_width()
     {
         return _prev_viewport_size.x;
@@ -56,7 +35,6 @@ namespace cologne
 
     Editor::Editor()
     {
-        active = true;
         _was_game_mode = false;
         _mouse_captured = false;
         cologne::DebugScope scope(__PRETTY_FUNCTION__);
@@ -95,15 +73,6 @@ namespace cologne
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplSDL3_Shutdown();
         ImGui::DestroyContext();
-    }
-
-    void Editor::clear()
-    {
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL3_NewFrame();
-        ImGui::NewFrame();
-        ImGuizmo::BeginFrame();
-        ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->ID);
     }
 
     void Editor::build_main_window()
@@ -196,7 +165,6 @@ namespace cologne
             {
                 if (ImGui::MenuItem("New Scene"))
                 {
-
                 }
                 if (ImGui::MenuItem("Load Scene"))
                 {
@@ -212,7 +180,8 @@ namespace cologne
                 }
                 if (ImGui::MenuItem("Reload Scene"))
                 {
-                    Engine::load_scene((RESOURCES_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name()).c_str());
+                    Engine::load_scene(
+                        (RESOURCES_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name()).c_str());
                     _selected_entity = {};
                 }
                 if (ImGui::MenuItem("Save Scene As"))
@@ -253,25 +222,22 @@ namespace cologne
 
     void Editor::present(float dt)
     {
-        if (active)
-        {
-            handle_hotkeys();
-            build_main_window();
-            build_main_menu_bar();
-            build_scene_graph();
-            build_properties_panel();
-            build_settings_panel();
-            build_asset_browser();
-            build_game_view(dt);
-            build_game_overlay();
-            ImGui::End();
-            ImGui::PopStyleColor();
-        }
-        else
-        {
-            // ImGuiStyle &style = ImGui::GetStyle();
-            // style.Colors[ImGuiCol_WindowBg].w = 0.0f;
-        }
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL3_NewFrame();
+        ImGui::NewFrame();
+        ImGuizmo::BeginFrame();
+        ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->ID);
+        handle_hotkeys();
+        build_main_window();
+        build_main_menu_bar();
+        build_scene_graph();
+        build_properties_panel();
+        build_settings_panel();
+        build_asset_browser();
+        build_game_view(dt);
+        build_game_overlay();
+        ImGui::End();
+        ImGui::PopStyleColor();
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

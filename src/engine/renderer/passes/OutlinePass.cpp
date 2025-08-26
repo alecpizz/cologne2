@@ -26,13 +26,13 @@ namespace cologne
     void Renderer::init_outline()
     {
         auto fbo = get_framebuffer_by_name("outline");
-        fbo->create("outline", Engine::get_window()->get_width(), Engine::get_window()->get_height());
+        fbo->create("outline", Engine::get_render_target_width(), Engine::get_render_target_height());
         fbo->create_attachment("mask", GL_R8, GL_LINEAR, GL_LINEAR);
         fbo->create_attachment("result", GL_R8, GL_LINEAR, GL_LINEAR);
-        Engine::get_debug_ui()->add_image_entry("mask", fbo->get_color_attachment_handle_by_name("mask"),
-                                                Engine::get_window()->get_dimensions());
-        Engine::get_debug_ui()->add_image_entry("outline result", fbo->get_color_attachment_handle_by_name("result"),
-                                                Engine::get_window()->get_dimensions());
+        Engine::get_editor()->add_image_entry("mask", fbo->get_color_attachment_handle_by_name("mask"),
+                                                Engine::get_render_target_dimensions());
+        Engine::get_editor()->add_image_entry("outline result", fbo->get_color_attachment_handle_by_name("result"),
+                                                Engine::get_render_target_dimensions());
     }
 
     void Renderer::outline_pass()

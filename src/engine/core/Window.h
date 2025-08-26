@@ -16,12 +16,6 @@ namespace cologne
 
         Window &operator=(const Window &) = delete;
 
-        uint32_t get_width() const;
-
-        uint32_t get_height() const;
-
-        glm::vec2 get_dimensions() const;
-
         void clear() const;
 
         void resize() const;
@@ -40,6 +34,11 @@ namespace cologne
 
         Window(uint32_t width, uint32_t height);
     private:
+        uint32_t get_width() const;
+
+        uint32_t get_height() const;
+
+        glm::vec2 get_dimensions() const;
         struct Impl;
         Impl *_impl;
     };

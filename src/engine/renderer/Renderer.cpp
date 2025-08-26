@@ -243,13 +243,13 @@ namespace cologne
         if (cam.orthographic)
         {
             float scale = cam.ortho_zoom;
-            float aspect = static_cast<float>(Engine::get_window()->get_width()) / static_cast<float>(
-                               Engine::get_window()->get_height());
+            float aspect = static_cast<float>(Engine::get_render_target_width()) / static_cast<float>(
+                               Engine::get_render_target_height());
             return glm::ortho(-aspect * scale, aspect * scale, -scale, scale, -300.0f, 300.0f);
         }
         return glm::perspective(cam.fov_radians,
-                                static_cast<float>(Engine::get_window()->get_width()) /
-                                static_cast<float>(Engine::get_window()->get_height()),
+                                static_cast<float>(Engine::get_render_target_width()) /
+                                static_cast<float>(Engine::get_render_target_height()),
                                 0.01f, 300.0f);
     }
 
@@ -529,7 +529,7 @@ namespace cologne
         debug_renderer->present();
         text_renderer->present();
         fbo->blit_to_default_frame_buffer("color", 0, 0,
-                                          Engine::get_window()->get_width(), Engine::get_window()->get_height(),
+                                          Engine::get_render_target_width(), Engine::get_render_target_height(),
                                           GL_COLOR_BUFFER_BIT, GL_NEAREST);
         fbo->release();
         _render_items.clear();
@@ -694,9 +694,9 @@ namespace cologne
         debug_renderer = create_ref<DebugRenderer>();
         text_renderer = create_ref<TextRenderer>(RESOURCES_PATH "fonts/Montserrat-Regular.ttf");
 
-        Engine::get_debug_ui()->add_bool_entry("Voxel Debug Visuals", _voxel_debug_visuals);
-        Engine::get_debug_ui()->add_bool_entry("Indirect Lighting", _apply_indirect_lighting);
-        Engine::get_debug_ui()->add_bool_entry("Light Debug Visuals", _light_debug_visuals);
+        Engine::get_editor()->add_bool_entry("Voxel Debug Visuals", _voxel_debug_visuals);
+        Engine::get_editor()->add_bool_entry("Indirect Lighting", _apply_indirect_lighting);
+        Engine::get_editor()->add_bool_entry("Light Debug Visuals", _light_debug_visuals);
         init_shaders();
         init_ssbos();
         init_bloom();

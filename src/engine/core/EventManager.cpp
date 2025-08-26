@@ -3,19 +3,17 @@
 //
 
 #include "EventManager.h"
-
-#include <engine/editor/Editor.h>
 #include <engine/renderer/Renderer.h>
 
 #include "Engine.h"
 #include "Input.h"
+#include "Window.h"
 
 namespace cologne
 {
     struct EventManager::Impl
     {
         bool should_quit = false;
-        bool paused = false;
     };
 
     EventManager::~EventManager()
@@ -36,11 +34,10 @@ namespace cologne
             if (event.type == SDL_EVENT_KEY_DOWN)
             {
                 Input::update_key_down(static_cast<uint32_t>(event.key.scancode));
-                if (event.key.scancode == SDL_SCANCODE_TAB)
+                if (event.key.scancode == SDL_SCANCODE_ESCAPE)
                 {
-                    _impl->paused = !_impl->paused;
-                    Editor::toggle_edit_mode(_impl->paused);
-                    invoke_resize(Engine::get_window()->get_width(), Engine::get_window()->get_height());
+                    Engine::exit_play_mode();
+                    invoke_resize(Engine::get_render_target_width(), Engine::get_render_target_height());
                 }
             }
             if (event.type == SDL_EVENT_KEY_UP)

@@ -29,8 +29,8 @@ namespace cologne
         glBindTextureUnit(1, _bloom_texture);
         shader->bind();
         uint32_t work_group_size = 32;
-        uint32_t width = Engine::get_window()->get_width();
-        uint32_t height = Engine::get_window()->get_height();
+        uint32_t width = Engine::get_render_target_width();
+        uint32_t height = Engine::get_render_target_height();
         uint32_t num_x = (width + work_group_size - 1) / work_group_size;
         uint32_t num_y = (height + work_group_size - 1) / work_group_size;
         shader->dispatch(num_x, num_y, 1);

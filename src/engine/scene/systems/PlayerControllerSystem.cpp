@@ -137,18 +137,18 @@ namespace cologne
     {
         auto &controller = registry.get<PlayerControllerComponent>(entity);
         auto &player = registry.get<PlayerComponent>(entity);
-        if (cologne::Input::key_pressed(Input::Key::Escape))
-        {
-            controller.show_mouse = !controller.show_mouse;
-            if (controller.show_mouse)
-            {
-                Engine::get_window()->show_mouse();
-            }
-            else
-            {
-                Engine::get_window()->hide_mouse();
-            }
-        }
+        // if (cologne::Input::key_pressed(Input::Key::Escape))
+        // {
+        //     controller.show_mouse = !controller.show_mouse;
+        //     if (controller.show_mouse)
+        //     {
+        //         Engine::get_window()->show_mouse();
+        //     }
+        //     else
+        //     {
+        //         Engine::get_window()->hide_mouse();
+        //     }
+        // }
         auto mouse = Input::get_relative_mouse();
         constexpr float sensitivity = 30.0f;
         controller.rotation.x += mouse.x * sensitivity * dt;
@@ -503,14 +503,14 @@ namespace cologne
         std::string text = (std::string("Ammo ") + std::to_string(controller.current_ammo) + "/" + std::to_string(
                                 controller.max_ammo));
         Engine::get_renderer()->draw_text(text.c_str(),
-                                          glm::vec3(Engine::get_window()->get_width() - (text.length() * 48.0f),
+                                          glm::vec3(Engine::get_render_target_width() - (text.length() * 48.0f),
                                                     660.0f, 0.0f), glm::vec4(1.0f), 0.6f);
         auto vel = controller.velocity;
         vel.y = 0.0f;
         float speed = glm::length(vel);
         std::string speed_text = std::string("Speed ") + std::to_string(speed);
         Engine::get_renderer()->draw_text(speed_text.c_str(),
-                                          glm::vec3(Engine::get_window()->get_width() - (speed_text.length() * 48.0f),
+                                          glm::vec3(Engine::get_render_target_width() - (speed_text.length() * 48.0f),
                                                     690.0f, 0.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 0.6f);
     }
 }

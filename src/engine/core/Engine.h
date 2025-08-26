@@ -1,17 +1,18 @@
 ﻿#pragma once
-#include "../scene/Scene.h"
-#include "Window.h"
-#include "EventManager.h"
 #include "engine/GoodGPUs.h"
-
 
 namespace cologne
 {
+    class Window;
+    class Editor;
+    class Scene;
     class SceneManager;
+    class EventManager;
 }
 
 namespace cologne
 {
+    enum class RuntimeState;
     class Renderer;
 
     class Engine
@@ -29,7 +30,7 @@ namespace cologne
 
         static Ref<Scene> get_scene();
 
-        static Ref<Editor> get_debug_ui();
+        static Ref<Editor> get_editor();
 
         static Ref<SceneManager> get_scene_manager();
 
@@ -47,7 +48,22 @@ namespace cologne
 
         static void load_scene(const char* path);
 
-        static bool in_edit_mode();
+        static void enter_play_mode();
+
+        static void exit_play_mode();
+
+        static void enable_editor();
+
+        static void disable_editor();
+
+        static RuntimeState get_runtime_state();
+
+        static uint32_t get_render_target_width() ;
+
+        static uint32_t get_render_target_height() ;
+
+        static glm::vec2 get_render_target_dimensions() ;
+
     //
     // private:
     //     inline static Engine *_instance;

@@ -18,20 +18,26 @@
 #include <engine/scene/ComponentRegistry.h>
 #include <nlohmann/json.hpp>
 #include <fstream>
+
+#include "EventManager.h"
 #include "SceneManager.h"
+#include "RuntimeState.h"
+#include "Window.h"
 
 namespace cologne
 {
     Ref<Window> window = nullptr;
     Ref<Renderer> renderer = nullptr;
     Ref<EventManager> event_manager = nullptr;
-    Ref<Editor> debug_ui = nullptr;
+    Ref<Editor> editor = nullptr;
     Ref<SceneManager> scene_manager = nullptr;
     Ref<FileWatcher> file_watcher = nullptr;
     std::queue<std::pair<std::filesystem::path, FileStatus> > file_status_queue;
     std::string next_scene = std::string();
     bool running = true;
     bool scene_queued = false;
+    RuntimeState current_runtime_state = RuntimeState::EDIT_MODE;
+    bool editor_active = true;
 
     struct ElapsedTime
     {
@@ -60,7 +66,7 @@ namespace cologne
         cologne::Physics::cleanup();
         renderer = nullptr;
         event_manager = nullptr;
-        debug_ui = nullptr;
+        editor = nullptr;
         file_watcher = nullptr;
         window = nullptr;
     }
@@ -86,9 +92,9 @@ namespace cologne
     }
 
 
-    Ref<Editor> Engine::get_debug_ui()
+    Ref<Editor> Engine::get_editor()
     {
-        return debug_ui;
+        return editor;
     }
 
     Ref<SceneManager> Engine::get_scene_manager()
@@ -121,7 +127,7 @@ namespace cologne
     {
         ElapsedTime et;
         Audio::init();
-        debug_ui = create_ref<Editor>();
+        editor = create_ref<Editor>();
         window = create_ref<Window>(width, height);
         file_watcher = create_ref<FileWatcher>(
             RESOURCES_PATH, [this](const std::filesystem::path &path, FileStatus status)
@@ -207,7 +213,7 @@ namespace cologne
             }
             Input::update();
             event_manager->poll_events();
-            if (in_edit_mode())
+            if (current_runtime_state == RuntimeState::EDIT_MODE)
             {
                 scene_manager->get_active_scene()->update_editor(et.elapsed);
             }
@@ -216,11 +222,14 @@ namespace cologne
                 scene_manager->get_active_scene()->update_runtime(et.elapsed);
                 Physics::update(et.elapsed);
             }
+            Physics::draw();
             // player->update(et.elapsed);
-            debug_ui->clear();
             window->clear();
             renderer->render_frame();
-            debug_ui->present(et.elapsed);
+            if (editor_active)
+            {
+                editor->present(et.elapsed);
+            }
             window->present();
             et.update();
             Time::DeltaTime = et.elapsed;
@@ -233,8 +242,66 @@ namespace cologne
         next_scene = path;
     }
 
-    bool Engine::in_edit_mode()
+    void Engine::enter_play_mode()
     {
-        return Editor::in_edit_mode();
+        if (current_runtime_state == RuntimeState::PLAY_MODE)
+        {
+            return;
+        }
+        current_runtime_state = RuntimeState::PLAY_MODE;
+        disable_editor();
+        event_manager->invoke_resize(window->get_width(), window->get_height());
+        scene_manager->on_enter_play_mode();
+    }
+
+    void Engine::exit_play_mode()
+    {
+        if (current_runtime_state == RuntimeState::EDIT_MODE)
+        {
+            return;
+        }
+        current_runtime_state = RuntimeState::EDIT_MODE;
+        enable_editor();
+        scene_manager->on_exit_play_mode();
+    }
+
+    void Engine::enable_editor()
+    {
+        editor_active = true;
+        window->show_mouse();
+    }
+
+    void Engine::disable_editor()
+    {
+        editor_active = false;
+        window->hide_mouse();
+    }
+
+    RuntimeState Engine::get_runtime_state()
+    {
+        return current_runtime_state;
+    }
+
+    uint32_t Engine::get_render_target_width()
+    {
+        if (Engine::get_runtime_state() == RuntimeState::EDIT_MODE)
+        {
+            return Editor::get_viewport_width();
+        }
+        return window->get_width();
+    }
+
+    uint32_t Engine::get_render_target_height()
+    {
+        if (Engine::get_runtime_state() == RuntimeState::EDIT_MODE)
+        {
+            return Editor::get_viewport_height();
+        }
+        return window->get_height();
+    }
+
+    glm::vec2 Engine::get_render_target_dimensions()
+    {
+        return glm::vec2(get_render_target_height(), get_render_target_width());
     }
 } // cologne

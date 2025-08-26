@@ -5,8 +5,8 @@
 #include "AnimationSystem.h"
 
 #include <engine/animation/AnimatorComponent.h>
-#include <engine/core/Engine.h>
 #include <engine/scene/Components.h>
+#include <engine/scene/Scene.h>
 
 namespace cologne
 {

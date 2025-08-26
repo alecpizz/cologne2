@@ -654,11 +654,6 @@ namespace cologne::Physics
 
     void update(float dt)
     {
-        if (cologne::Input::key_pressed(Input::Key::P))
-        {
-            drawing = !drawing;
-        }
-
         for (auto &physics_player: physics_players)
         {
             auto &p = physics_player.second;
@@ -685,8 +680,14 @@ namespace cologne::Physics
             physics_system.Update(fixed_delta_time, collisionSteps, temp_allocator, job_system);
             accumulation_time -= fixed_delta_time;
         }
+    }
 
-
+    void draw()
+    {
+        if (cologne::Input::key_pressed(Input::Key::P))
+        {
+            drawing = !drawing;
+        }
         if (drawing)
         {
             BodyManager::DrawSettings draw_settings;

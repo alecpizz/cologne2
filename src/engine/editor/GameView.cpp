@@ -3,8 +3,10 @@
 //
 #include <engine/audio/Audio.h>
 #include <engine/core/Engine.h>
+#include <engine/core/EventManager.h>
 #include <engine/core/Input.h>
 #include <engine/core/SceneManager.h>
+#include <engine/core/Window.h>
 #include <engine/renderer/Renderer.h>
 
 #include "Editor.h"
@@ -25,13 +27,13 @@ namespace cologne
         ImGui::SameLine();
         if (ImGui::Button("Play"))
         {
-            Engine::get_scene_manager()->enter_play_mode();
+            Engine::enter_play_mode();
         }
-        ImGui::SameLine();
-        if (ImGui::Button("Stop Play"))
-        {
-            Engine::get_scene_manager()->exit_play_mode();
-        }
+        // ImGui::SameLine();
+        // if (ImGui::Button("Stop Play"))
+        // {
+        //     Engine::get_scene_manager()->exit_play_mode();
+        // }
         ImGui::End();
     }
 

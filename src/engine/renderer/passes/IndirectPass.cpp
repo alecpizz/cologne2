@@ -9,7 +9,7 @@ namespace cologne
     const uint32_t pixel_ratio = 4;
     void Renderer::init_indirect()
     {
-        init_indirect(Engine::get_window()->get_width(), Engine::get_window()->get_height());
+        init_indirect(Engine::get_render_target_width(), Engine::get_render_target_height());
     }
 
     void Renderer::init_indirect(uint32_t width, uint32_t height)
@@ -25,7 +25,7 @@ namespace cologne
         glTextureParameteri(_indirect_texture_low_res, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTextureStorage2D(_indirect_texture_low_res, 1, GL_RGBA8,
                            width / pixel_ratio, height / pixel_ratio);
-        Engine::get_debug_ui()->add_image_entry("Indirect_Lighting_Low_res", _indirect_texture_low_res,
+        Engine::get_editor()->add_image_entry("Indirect_Lighting_Low_res", _indirect_texture_low_res,
             {width / pixel_ratio, height / pixel_ratio});
 
 
@@ -39,7 +39,7 @@ namespace cologne
         glTextureParameteri(_indirect_texture_high_res, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTextureParameteri(_indirect_texture_high_res, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTextureStorage2D(_indirect_texture_high_res, 1, GL_RGBA8, width, height);
-        Engine::get_debug_ui()->add_image_entry("Indirect_Lighting_high_res", _indirect_texture_high_res,
+        Engine::get_editor()->add_image_entry("Indirect_Lighting_high_res", _indirect_texture_high_res,
             {width, height});
     }
     void Renderer::indirect_pass()
@@ -77,8 +77,8 @@ namespace cologne
         glBindTextureUnit(4, _voxel_texture_normal);
 
         const uint32_t work_group_size = 16;
-        uint32_t width = Engine::get_window()->get_width() / pixel_ratio;
-        uint32_t height = Engine::get_window()->get_height() / pixel_ratio;
+        uint32_t width = Engine::get_render_target_width() / pixel_ratio;
+        uint32_t height = Engine::get_render_target_height() / pixel_ratio;
         uint32_t num_x = (width + work_group_size - 1) / work_group_size;
         uint32_t num_y = (height + work_group_size - 1) / work_group_size;
         shader->dispatch(num_x, num_y, 1);
@@ -92,8 +92,8 @@ namespace cologne
         glBindTextureUnit(1, gbuffer->get_color_attachment_handle_by_name("normal"));
         glBindTextureUnit(2, gbuffer->get_depth_attachment_handle());
         glBindTextureUnit(3, _indirect_texture_low_res);
-        width = Engine::get_window()->get_width();
-        height = Engine::get_window()->get_height();
+        width = Engine::get_render_target_width();
+        height = Engine::get_render_target_height();
         num_x = (width + work_group_size - 1) / work_group_size;
         num_y = (height + work_group_size - 1) / work_group_size;
         shader->dispatch(num_x, num_y, 1);

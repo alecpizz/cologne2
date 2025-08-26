@@ -98,8 +98,8 @@ namespace cologne
         glReadBuffer(GL_NONE);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        Engine::get_debug_ui()->add_float_entry("shadow near_plane", shadow_near);
-        Engine::get_debug_ui()->add_float_entry("shadow far_plane", shadow_far);
+        Engine::get_editor()->add_float_entry("shadow near_plane", shadow_near);
+        Engine::get_editor()->add_float_entry("shadow far_plane", shadow_far);
     }
 
     void Renderer::dir_shadow_pass()
@@ -252,6 +252,6 @@ namespace cologne
         glCullFace(GL_BACK);
         glDisable(GL_DEPTH_CLAMP);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
+        glViewport(0, 0, Engine::get_render_target_width(), Engine::get_render_target_height());
     }
 }

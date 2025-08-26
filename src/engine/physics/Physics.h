@@ -16,6 +16,8 @@ namespace cologne::Physics
 
     void update(float dt);
 
+    void draw();
+
     static constexpr uint8_t NON_MOVING(0);
     static constexpr uint8_t MOVING(1);
     static constexpr uint8_t PLAYER(2);

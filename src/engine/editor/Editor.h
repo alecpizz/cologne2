@@ -10,8 +10,6 @@ namespace cologne
     public:
         ~Editor();
 
-        void clear();
-
         void present(float dt);
 
         void add_float_entry(const char *name, float &value);
@@ -33,10 +31,6 @@ namespace cologne
         Editor &operator=(Editor &&) = delete;
 
         Editor &operator=(const Editor &) = delete;
-
-        static bool in_edit_mode();
-
-        static void toggle_edit_mode(bool b);
 
         static uint32_t get_viewport_width();
 

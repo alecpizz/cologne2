@@ -9,6 +9,7 @@
 #include <engine/scene/Scene.h>
 
 #include "Engine.h"
+#include "RuntimeState.h"
 
 namespace cologne
 {
@@ -38,7 +39,7 @@ namespace cologne
         Engine::get_renderer()->clear_lights();
         if (_active_scene)
         {
-            if (Engine::in_edit_mode())
+            if (Engine::get_runtime_state() == RuntimeState::EDIT_MODE)
             {
                 _active_scene->on_exit_edit_mode();
             }
@@ -49,7 +50,7 @@ namespace cologne
         }
         _editor_scene = scene;
         _active_scene = _editor_scene;
-        if (Engine::in_edit_mode())
+        if (Engine::get_runtime_state() == RuntimeState::EDIT_MODE)
         {
             _active_scene->on_enter_edit_mode();
         }
@@ -59,7 +60,7 @@ namespace cologne
         }
     }
 
-    void SceneManager::enter_play_mode()
+    void SceneManager::on_enter_play_mode()
     {
         //dupe the scene
         if (_active_scene)
@@ -71,7 +72,7 @@ namespace cologne
         _active_scene->on_enter_play_mode();
     }
 
-    void SceneManager::exit_play_mode()
+    void SceneManager::on_exit_play_mode()
     {
         if (_active_scene)
         {
