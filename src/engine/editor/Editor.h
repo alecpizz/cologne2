@@ -55,7 +55,7 @@ namespace cologne
 
         void build_game_view(float dt);
 
-        void build_settings_panel();
+        void build_images_window();
 
         void draw_entity_node(Entity entity);
 
@@ -64,6 +64,7 @@ namespace cologne
         const char *_cancel_sound = RESOURCES_PATH "sounds/menus/cancel.wav";
         uint32_t _global_window_flags = 0;
         bool _mouse_captured = false;
+        bool _image_window_active = false;
         inline static bool _was_game_mode;
 #define DEFAULT_WIDTH 1600
 #define DEFAULT_HEIGHT 900

@@ -143,83 +143,6 @@ namespace cologne
         }
     }
 
-    void open_scene_callback(void *userdata, const char *const*filelist, int filter)
-    {
-        if (!filelist)
-        {
-            return;
-        }
-        const char *file = *filelist;
-        if (!file)
-        {
-            return;
-        }
-        Engine::load_scene(file);
-    }
-
-    void Editor::build_main_menu_bar()
-    {
-        if (ImGui::BeginMainMenuBar())
-        {
-            if (ImGui::BeginMenu("File"))
-            {
-                if (ImGui::MenuItem("New Scene"))
-                {
-                }
-                if (ImGui::MenuItem("Load Scene"))
-                {
-                    Engine::get_window()->show_file_dialogue_window({{"Scene Files", "cscn"}, {"All Files", "*"}},
-                                                                    RESOURCES_PATH "scenes",
-                                                                    reinterpret_cast<void *>(open_scene_callback));
-                    _selected_entity = {};
-                }
-                if (ImGui::MenuItem("Save Scene"))
-                {
-                    SceneSaver saver(Engine::get_scene().get());
-                    saver.serialize(RESOURCES_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name());
-                }
-                if (ImGui::MenuItem("Reload Scene"))
-                {
-                    Engine::load_scene(
-                        (RESOURCES_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name()).c_str());
-                    _selected_entity = {};
-                }
-                if (ImGui::MenuItem("Save Scene As"))
-                {
-                    //open a save file dialogue
-                }
-                if (ImGui::MenuItem("Exit"))
-                {
-                    Engine::get_event_manager()->set_should_quit(true);
-                }
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Edit"))
-            {
-                if (ImGui::MenuItem("Re-Calculate Bounds"))
-                {
-                    Engine::get_scene()->re_calculate_bounds();
-                }
-                if (ImGui::MenuItem("Test Copy Scene"))
-                {
-                    Scene::copy(Engine::get_scene());
-                }
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Settings"))
-            {
-                if (ImGui::MenuItem("Save Layout"))
-                {
-                    ImGui::SaveIniSettingsToDisk(RESOURCES_PATH "editor/imgui_config.ini");
-                }
-                ImGui::EndMenu();
-            }
-
-            ImGui::Text("FPS %.f", ImGui::GetIO().Framerate);
-            ImGui::EndMainMenuBar();
-        }
-    }
-
     void Editor::present(float dt)
     {
         ImGui_ImplOpenGL3_NewFrame();
@@ -232,7 +155,7 @@ namespace cologne
         build_main_menu_bar();
         build_scene_graph();
         build_properties_panel();
-        build_settings_panel();
+        build_images_window();
         build_asset_browser();
         build_game_view(dt);
         build_game_overlay();

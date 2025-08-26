@@ -29,11 +29,6 @@ namespace cologne
         {
             Engine::enter_play_mode();
         }
-        // ImGui::SameLine();
-        // if (ImGui::Button("Stop Play"))
-        // {
-        //     Engine::get_scene_manager()->exit_play_mode();
-        // }
         ImGui::End();
     }
 
@@ -63,7 +58,7 @@ namespace cologne
         {
             uint32_t x = static_cast<uint32_t>(mouse_pos_relative.x);
             uint32_t y = static_cast<uint32_t>(mouse_pos_relative.y);
-            if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && !ImGuizmo::IsOver())
+            if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && !ImGuizmo::IsOver() && ImGui::IsWindowHovered())
             {
                 uint32_t id = Renderer::read_fbo_pixel("gbuffer", "entity_id", x, y);
                 if (id != entt::null)
@@ -217,7 +212,6 @@ namespace cologne
             glm::mat4 proj = Renderer::get_camera_projection(transform, camera_comp);
 
             auto &tr = _selected_entity.get_transform();
-            //         auto& tr = Engine::get_scene()->_registry.get<TransformComponent>(entity);
             glm::mat4 mat4 = tr.get_mat4();
             if (_selected_entity.has_component<ChildComponent>())
             {
@@ -233,7 +227,6 @@ namespace cologne
             //
             if (changed)
             {
-                glm::mat4 world_mat = mat4;
                 if (_selected_entity.has_component<ChildComponent>())
                 {
                     auto parent_entity = Engine::get_scene()->get_entity_by_uuid(
