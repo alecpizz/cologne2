@@ -36,16 +36,36 @@ namespace cologne
     {
         Physics::delete_all_bodies();
         Engine::get_renderer()->clear_lights();
+        if (_active_scene)
+        {
+            if (Engine::in_edit_mode())
+            {
+                _active_scene->on_exit_edit_mode();
+            }
+            else
+            {
+                _active_scene->on_exit_play_mode();
+            }
+        }
         _editor_scene = scene;
         _active_scene = _editor_scene;
+        if (Engine::in_edit_mode())
+        {
+            _active_scene->on_enter_edit_mode();
+        }
+        else
+        {
+            _active_scene->on_enter_play_mode();
+        }
     }
 
     void SceneManager::enter_play_mode()
     {
         //dupe the scene
-
-        Physics::delete_all_bodies();
-        Engine::get_renderer()->clear_lights();
+        if (_active_scene)
+        {
+            _active_scene->on_exit_edit_mode();
+        }
         _runtime_scene = Scene::copy(_editor_scene);
         _active_scene = _runtime_scene;
         _active_scene->on_enter_play_mode();
@@ -53,10 +73,13 @@ namespace cologne
 
     void SceneManager::exit_play_mode()
     {
-        Physics::delete_all_bodies();
-        Engine::get_renderer()->clear_lights();
-        _active_scene = _editor_scene;
+        if (_active_scene)
+        {
+            _active_scene->on_exit_play_mode();
+        }
         _runtime_scene = nullptr;
+        _active_scene = _editor_scene;
+        _active_scene->on_enter_edit_mode();
     }
 
     Ref<Scene> SceneManager::get_active_scene()

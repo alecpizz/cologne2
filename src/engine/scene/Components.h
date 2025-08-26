@@ -259,6 +259,7 @@ namespace cologne
     struct LightHandleComponent
     {
         LightHandle light_handle;
+        static void on_destroy(entt::registry &registry, const entt::entity entt);
     };
 
     struct HideInEditorComponent

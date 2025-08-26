@@ -115,6 +115,10 @@ namespace cologne
             {
                 continue;
             }
+            if (pair.second.light.active == 0)
+            {
+                continue;
+            }
             if (!pair.second.cast_shadows)
             {
                 continue;
@@ -211,12 +215,11 @@ namespace cologne
                 _point_shadow_queue.pop();
             }
 
+            glBindFramebuffer(GL_FRAMEBUFFER, point_shadow_fbo);
             glViewport(0, 0, _point_shadow_maps[rl.light.shadow_handle].get_width(),
                        _point_shadow_maps[rl.light.shadow_handle].get_height());
             glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
                                  _point_shadow_maps[rl.light.shadow_handle].get_handle(), 0);
-            glDrawBuffer(GL_NONE);
-            glReadBuffer(GL_NONE);
             glClear(GL_DEPTH_BUFFER_BIT);
             glm::vec3 position = rl.light.position;
 

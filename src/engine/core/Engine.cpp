@@ -55,12 +55,12 @@ namespace cologne
 
     Engine::~Engine()
     {
+        scene_manager = nullptr;
         cologne::Audio::destroy();
         cologne::Physics::cleanup();
         renderer = nullptr;
         event_manager = nullptr;
         debug_ui = nullptr;
-        scene_manager = nullptr;
         file_watcher = nullptr;
         window = nullptr;
     }

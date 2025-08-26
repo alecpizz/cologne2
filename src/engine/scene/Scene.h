@@ -29,6 +29,12 @@ namespace cologne
         void update_editor(float delta_time);
 
         void on_enter_play_mode();
+        void on_exit_play_mode();
+
+
+
+        void on_enter_edit_mode();
+        void on_exit_edit_mode();
 
         Scene(Scene &&) = delete;
 
@@ -76,10 +82,10 @@ namespace cologne
     private:
         static void add_system(std::unique_ptr<System> system);
         void duplicate_recursive(Entity source, std::unordered_map<UUID, UUID>& old_to_new_map);
-        void initialize_special_types();
+        void initialize_physics_world();
         Entity create_player_entity(glm::vec3 pos);
         Entity create_scene_camera_entity();
-
+        void setup_entity_map();
 
         std::string _scene_name = "untitled_scene.cscn";
         AABB _scene_bounds;

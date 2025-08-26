@@ -642,7 +642,23 @@ namespace cologne
 
     void Renderer::clear_lights()
     {
-        _lights.clear();
+        for (auto& light : _lights)
+        {
+            if (light.second.light.shadow_handle != 0)
+            {
+                if (light.second.light.type == LightType::Point)
+                {
+                    _dir_shadow_queue.emplace(_dir_shadow_maps[light.second.light.shadow_handle]);
+                }
+                else
+                {
+                    _point_shadow_queue.emplace(_point_shadow_maps[light.second.light.shadow_handle]);
+                }
+            }
+            light.second.light.shadow_handle = 0;
+            light.second.light.active = false;
+        }
+        LOG_INFO("Light count %d", _lights.size());
     }
 
     void Renderer::reload_shaders()

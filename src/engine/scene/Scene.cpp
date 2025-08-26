@@ -32,13 +32,8 @@
 namespace cologne
 {
     static std::vector<std::unique_ptr<System>> systems;
-    void Scene::initialize_special_types()
+    void Scene::initialize_physics_world()
     {
-        for (const auto entity: _registry.view<IDComponent>())
-        {
-            _entity_map[_registry.get<IDComponent>(entity).id] = entity;
-        }
-
         auto view = _registry.view<TransformComponent, StaticColliderComponent>();
         for (auto entity: view)
         {
@@ -199,7 +194,8 @@ namespace cologne
 
     void Scene::on_enter_play_mode()
     {
-        initialize_special_types();
+        setup_entity_map();
+        initialize_physics_world();
         re_calculate_bounds();
         for (const auto &system: systems)
         {
@@ -208,6 +204,35 @@ namespace cologne
                 system->on_scene_start(this);
             }
         }
+    }
+
+    void Scene::on_exit_play_mode()
+    {
+        Physics::delete_all_bodies();
+        Engine::get_renderer()->clear_lights();
+    }
+
+    void Scene::setup_entity_map()
+    {
+        _entity_map.clear();
+        for (const auto entity: _registry.view<IDComponent>())
+        {
+            _entity_map[_registry.get<IDComponent>(entity).id] = entity;
+        }
+    }
+
+    void Scene::on_enter_edit_mode()
+    {
+        Physics::delete_all_bodies();
+        Engine::get_renderer()->clear_lights();
+        setup_entity_map();
+        re_calculate_bounds();
+    }
+
+    void Scene::on_exit_edit_mode()
+    {
+        Engine::get_renderer()->clear_lights();
+        Physics::delete_all_bodies();
     }
 
     Ref<Scene> Scene::copy(Ref<Scene> scene)

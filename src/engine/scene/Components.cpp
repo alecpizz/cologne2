@@ -59,12 +59,21 @@ namespace cologne
         auto& transform = registry.get_or_emplace<WorldTransformComponent>(entt);
 
         LightHandle handle = Engine::get_renderer()->create_light(Light(light_comp, TransformComponent(transform)));
-        registry.emplace_or_replace<LightHandleComponent>(entt, handle);
+        registry.emplace<LightHandleComponent>(entt, handle);
+        LOG_INFO("Added light handle to %d entity", entt);
     }
 
     void LightComponent::on_destroy(entt::registry &registry, const entt::entity entt)
     {
-        auto& handle_comp = registry.get_or_emplace<LightHandleComponent>(entt);
+        if (registry.all_of<LightHandleComponent>(entt))
+        {
+            registry.remove<LightHandleComponent>(entt);
+        }
+    }
+
+    void LightHandleComponent::on_destroy(entt::registry &registry, const entt::entity entt)
+    {
+        auto& handle_comp = registry.get<LightHandleComponent>(entt);
         if (handle_comp.light_handle.is_valid())
         {
             Engine::get_renderer()->destroy_light(handle_comp.light_handle);
