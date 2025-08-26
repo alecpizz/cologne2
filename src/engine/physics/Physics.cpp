@@ -274,7 +274,7 @@ namespace cologne::Physics
 
 
         //build jolt skeleton
-        Ref<JPH::Skeleton> j_skeleton = new JPH::Skeleton;
+        JPH::Ref<JPH::Skeleton> j_skeleton = new JPH::Skeleton;
         uint hips = j_skeleton->AddJoint(hips_bone.name);
         uint lower_body = j_skeleton->AddJoint(lower_spine_bone.name, hips);
         uint mid_body = j_skeleton->AddJoint(middle_spine_bone.name, lower_body);
@@ -338,7 +338,7 @@ namespace cologne::Physics
         };
 
         //length of a bone: upper_arm_l position - lower_arm_l position length
-        Ref<Shape> shapes[] = {
+        JPH::Ref<Shape> shapes[] = {
             new CapsuleShape(
                 glm::length(
                     global_bind_transforms[hips_idx][3] - global_bind_transforms[lower_spine_idx][3]) * 0.5,
@@ -654,40 +654,40 @@ namespace cologne::Physics
 
     void update(float dt)
     {
+        for (auto &physics_player: physics_players)
+        {
+            auto &p = physics_player.second;
+            auto &character = p.character;
+            JPH::CharacterVirtual::ExtendedUpdateSettings update_settings;
+            update_settings.mStickToFloorStepDown = -character->GetUp() * update_settings.mStickToFloorStepDown.
+                                                    Length();
+            update_settings.mWalkStairsStepUp = character->GetUp() * update_settings.mWalkStairsStepUp.Length();
+            character->ExtendedUpdate(
+                dt, character->GetUp() * physics_system.GetGravity().Length(), update_settings,
+                physics_system.GetDefaultBroadPhaseLayerFilter(1),
+                physics_system.GetDefaultLayerFilter(1),
+                {},
+                {},
+                *temp_allocator);
+
+            p.character_position = glm::vec3(character->GetPosition().GetX(), character->GetPosition().GetY(),
+                                             character->GetPosition().GetZ());
+        }
+        const int collisionSteps = 4;
+        accumulation_time += dt;
+        while (accumulation_time >= fixed_delta_time)
+        {
+            physics_system.Update(fixed_delta_time, collisionSteps, temp_allocator, job_system);
+            accumulation_time -= fixed_delta_time;
+        }
+    }
+
+    void draw()
+    {
         if (cologne::Input::key_pressed(Input::Key::P))
         {
             drawing = !drawing;
         }
-        if (!Engine::in_edit_mode())
-        {
-            for (auto &physics_player: physics_players)
-            {
-                auto &p = physics_player.second;
-                auto &character = p.character;
-                JPH::CharacterVirtual::ExtendedUpdateSettings update_settings;
-                update_settings.mStickToFloorStepDown = -character->GetUp() * update_settings.mStickToFloorStepDown.
-                                                        Length();
-                update_settings.mWalkStairsStepUp = character->GetUp() * update_settings.mWalkStairsStepUp.Length();
-                character->ExtendedUpdate(
-                    dt, character->GetUp() * physics_system.GetGravity().Length(), update_settings,
-                    physics_system.GetDefaultBroadPhaseLayerFilter(1),
-                    physics_system.GetDefaultLayerFilter(1),
-                    {},
-                    {},
-                    *temp_allocator);
-
-                p.character_position = glm::vec3(character->GetPosition().GetX(), character->GetPosition().GetY(),
-                                                 character->GetPosition().GetZ());
-            }
-            const int collisionSteps = 4;
-            accumulation_time += dt;
-            while (accumulation_time >= fixed_delta_time)
-            {
-                physics_system.Update(fixed_delta_time, collisionSteps, temp_allocator, job_system);
-                accumulation_time -= fixed_delta_time;
-            }
-        }
-
         if (drawing)
         {
             BodyManager::DrawSettings draw_settings;
@@ -1090,7 +1090,7 @@ namespace cologne::Physics
     uint32_t create_ragdoll(Entity entity, std::unordered_map<std::string, uint32_t> &out_map, const Skeleton &skeleton,
                             const std::vector<glm::mat4> &global_bind_transforms)
     {
-        Ref<RagdollSettings> settings = create_ragdoll_settings(skeleton, global_bind_transforms);
+        JPH::Ref<RagdollSettings> settings = create_ragdoll_settings(skeleton, global_bind_transforms);
         auto ragdoll = settings->CreateRagdoll(0, 0, &physics_system);
         ragdoll->AddToPhysicsSystem(EActivation::Activate); //?
         uint32_t size = ragdolls.size();
@@ -1210,14 +1210,15 @@ namespace cologne::Physics
             auto mesh = AssetManager::get_mesh_by_name(entity.get_component<ConvexMeshColliderComponent>().mesh_name);
             if (!mesh)
             {
-                LOG_ERROR("No mesh found with name %s", entity.get_component<ConvexMeshColliderComponent>().mesh_name.c_str());
+                LOG_ERROR("No mesh found with name %s",
+                          entity.get_component<ConvexMeshColliderComponent>().mesh_name.c_str());
                 return 0;
             }
             //TODO: BAKE ME BAKE ME BAKE ME
-            auto& in_verts = mesh->get_vertices();
+            auto &in_verts = mesh->get_vertices();
             std::vector<JPH::Vec3> convex_hull_verts;
             convex_hull_verts.reserve(in_verts.size());
-            for (const auto& v : in_verts)
+            for (const auto &v: in_verts)
             {
                 convex_hull_verts.emplace_back(v.position.x, v.position.y, v.position.z);
             }
@@ -1234,11 +1235,37 @@ namespace cologne::Physics
         }
 
         //TODO: scale me
-        BodyCreationSettings settings (result_shape, glm_vec3_to_jph_vec3(entity.get_transform().position),
-            glm_quat_to_jph_quat(entity.get_transform().rotation), EMotionType::Dynamic, Layers::MOVING);
+        BodyCreationSettings settings(result_shape, glm_vec3_to_jph_vec3(entity.get_transform().position),
+                                      glm_quat_to_jph_quat(entity.get_transform().rotation), EMotionType::Dynamic,
+                                      Layers::MOVING);
         auto body = physics_system.GetBodyInterface().CreateAndAddBody(settings, EActivation::Activate);
         colliders_static.emplace_back(body);
         entity_to_collider_map[body] = entity;
         return body.GetIndexAndSequenceNumber();
+    }
+
+    void destroy_entity(Entity entity)
+    {
+        if (!entity)
+        {
+            return;
+        }
+        if (entity.has_component<StaticColliderComponent>())
+        {
+            auto id = entity.get_component<StaticColliderComponent>().body_id;
+            if (id != 0)
+            {
+                destroy_body(id);
+            }
+        }
+
+        if (entity.has_component<RigidbodyComponent>())
+        {
+            auto id = entity.get_component<RigidbodyComponent>().body_id;
+            if (id != 0)
+            {
+                destroy_body(id);
+            }
+        }
     }
 }

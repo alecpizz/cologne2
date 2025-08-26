@@ -30,7 +30,7 @@ namespace cologne
     };
 
     std::unordered_map<char, Character> characters;
-    std::unique_ptr<Shader> text_shader;
+    Ref<Shader> text_shader;
     std::vector<DrawCmd> draw_cmds;
     uint32_t vao, vbo;
 
@@ -54,8 +54,8 @@ namespace cologne
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         text_shader->bind();
         glm::mat4 projection = glm::ortho(0.0f,
-                                          static_cast<float>(Engine::get_window()->get_width()),
-                                          0.0f, static_cast<float>(Engine::get_window()->get_height()));
+                                          static_cast<float>(Engine::get_render_target_width()),
+                                          0.0f, static_cast<float>(Engine::get_render_target_height()));
         text_shader->set_mat4("projection", (projection));
         glBindVertexArray(vao);
         for (auto &cmd: draw_cmds)
@@ -160,7 +160,7 @@ namespace cologne
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
         FT_Done_Face(face);
         FT_Done_FreeType(ft);
-        text_shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/text.vert",
+        text_shader = create_ref<Shader>(RESOURCES_PATH "shaders/text.vert",
                                                RESOURCES_PATH "shaders/text.frag");
 
         glGenVertexArrays(1, &vao);

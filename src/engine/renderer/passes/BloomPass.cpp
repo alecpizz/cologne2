@@ -29,7 +29,7 @@ namespace cologne
         glm::vec2 mip_size;
         if (width == 0)
         {
-            mip_size = Engine::get_window()->get_dimensions();
+            mip_size = Engine::get_render_target_dimensions();
         }
         else
         {
@@ -79,7 +79,7 @@ namespace cologne
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
-        Engine::get_debug_ui()->add_image_entry("Bloom result", mips[0].texture, mips[0].size);
+        Engine::get_editor()->add_image_entry("Bloom result", mips[0].texture, mips[0].size);
     }
 
     void Renderer::bloom_pass()
@@ -92,7 +92,7 @@ namespace cologne
             return;
         }
         downsample_shader->bind();
-        downsample_shader->set_vec2("src_resolution", 1.0f / Engine::get_window()->get_dimensions());
+        downsample_shader->set_vec2("src_resolution", 1.0f / Engine::get_render_target_dimensions());
         glBindFramebuffer(GL_FRAMEBUFFER, bloom_fbo);
         glBindTextureUnit(0, gbuffer->get_color_attachment_handle_by_name("emission"));
         //downsamples
@@ -112,8 +112,8 @@ namespace cologne
         upsample_shader->bind();
         upsample_shader->set_float("filter_radius", filter_radius);
         upsample_shader->set_float("src_aspect_ratio",
-                                   static_cast<float>(Engine::get_window()->get_width()) / static_cast<float>(
-                                       Engine::get_window()->get_height()));
+                                   static_cast<float>(Engine::get_render_target_width()) / static_cast<float>(
+                                       Engine::get_render_target_height()));
 
         for (int i = mips.size() - 1; i > 0; i--)
         {
@@ -127,6 +127,6 @@ namespace cologne
         }
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
+        glViewport(0, 0, Engine::get_render_target_width(), Engine::get_render_target_height());
     }
 }

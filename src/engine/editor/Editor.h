@@ -1,16 +1,14 @@
 ﻿#pragma once
 #include <engine/scene/Components.h>
+#include <engine/scene/Entity.h>
 
 namespace cologne
 {
     class Editor
     {
         friend class Engine;
-
     public:
         ~Editor();
-
-        void clear();
 
         void present(float dt);
 
@@ -34,19 +32,13 @@ namespace cologne
 
         Editor &operator=(const Editor &) = delete;
 
-        static bool in_edit_mode();
-
-        static void toggle_edit_mode(bool b);
-
         static uint32_t get_viewport_width();
 
         static uint32_t get_viewport_height();
 
         static void initialize_reflection_editor();
-    private:
         Editor();
-
-
+    private:
         void build_main_window();
 
         void handle_hotkeys();
@@ -59,9 +51,11 @@ namespace cologne
 
         void build_properties_panel();
 
+        void build_game_overlay();
+
         void build_game_view(float dt);
 
-        void build_settings_panel();
+        void build_images_window();
 
         void draw_entity_node(Entity entity);
 
@@ -70,6 +64,7 @@ namespace cologne
         const char *_cancel_sound = RESOURCES_PATH "sounds/menus/cancel.wav";
         uint32_t _global_window_flags = 0;
         bool _mouse_captured = false;
+        bool _image_window_active = false;
         inline static bool _was_game_mode;
 #define DEFAULT_WIDTH 1600
 #define DEFAULT_HEIGHT 900

@@ -25,13 +25,33 @@ namespace cologne
             radius = light_component.radius;
             type = static_cast<LightType>(light_component.type);
             active = 1;
-            outer_cutoff = glm::cos(glm::radians(light_component.outer_cutoff));
-            inner_cutoff = glm::cos(glm::radians(light_component.inner_cutoff));
-            if (light_component.cast_shadows)
-            {
-                shadow_handle = 1;
-            }
+            outer_cutoff = light_component.outer_cutoff;
+            inner_cutoff = light_component.inner_cutoff;
             light_space_matrix = glm::mat4(1.0f);
+        }
+
+        bool is_similar(const Light &other)
+        {
+            return position == other.position &&
+                   direction == other.direction &&
+                   color == other.color &&
+                   radius == other.radius &&
+                   strength == other.strength &&
+                   type == other.type &&
+                   active == other.active &&
+                   outer_cutoff == other.outer_cutoff &&
+                   inner_cutoff == other.inner_cutoff;
+        }
+
+        bool is_similar(const LightComponent& comp)
+        {
+            return
+                   color == glm::vec4(comp.color, 1.0f) &&
+                   radius == comp.radius &&
+                   strength == comp.strength &&
+                   type == static_cast<LightType>(comp.type) &&
+                   outer_cutoff == comp.outer_cutoff &&
+                   inner_cutoff == comp.inner_cutoff;
         }
 
         Light() = default;

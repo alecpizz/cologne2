@@ -24,7 +24,7 @@
 #include <glad/glad.h>
 
 #include "engine/core/Log.h"
-
+#include <engine/core/Ref.h>
 
 #define SDL_MAIN_HANDLED
 #include <SDL3/SDL.h>

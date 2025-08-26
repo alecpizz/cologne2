@@ -18,8 +18,8 @@ namespace cologne
 {
     void Renderer::init_gbuffer()
     {
-        auto width = Engine::get_window()->get_width();
-        auto height = Engine::get_window()->get_height();
+        auto width = Engine::get_render_target_width();
+        auto height = Engine::get_render_target_height();
         auto fbo = get_framebuffer_by_name("gbuffer");
         fbo->create("gbuffer", width, height);
         fbo->bind();
@@ -34,20 +34,20 @@ namespace cologne
         std::vector attachments = {"position", "normal", "albedo", "orm", "emission", "entity_id"};
         fbo->draw_buffers(attachments.data(), static_cast<uint32_t>(attachments.size()));
 
-        Engine::get_debug_ui()->add_image_entry("G_Normals", fbo->get_color_attachment_handle_by_name("normal"),
+        Engine::get_editor()->add_image_entry("G_Normals", fbo->get_color_attachment_handle_by_name("normal"),
                                                 glm::vec2(width, height));
-        Engine::get_debug_ui()->add_image_entry("G_Position",
+        Engine::get_editor()->add_image_entry("G_Position",
                                                 fbo->get_color_attachment_handle_by_name("position"),
                                                 glm::vec2(width, height));
-        Engine::get_debug_ui()->add_image_entry("G_Albedo", fbo->get_color_attachment_handle_by_name("albedo"),
+        Engine::get_editor()->add_image_entry("G_Albedo", fbo->get_color_attachment_handle_by_name("albedo"),
                                                 glm::vec2(width, height));
-        Engine::get_debug_ui()->add_image_entry("G_ORM", fbo->get_color_attachment_handle_by_name("orm"),
+        Engine::get_editor()->add_image_entry("G_ORM", fbo->get_color_attachment_handle_by_name("orm"),
                                                 glm::vec2(width, height));
-        Engine::get_debug_ui()->add_image_entry("G_Depth", fbo->get_depth_attachment_handle(),
+        Engine::get_editor()->add_image_entry("G_Depth", fbo->get_depth_attachment_handle(),
                                                 glm::vec2(width, height));
-        Engine::get_debug_ui()->add_image_entry("G_Emission", fbo->get_color_attachment_handle_by_name("emission"),
+        Engine::get_editor()->add_image_entry("G_Emission", fbo->get_color_attachment_handle_by_name("emission"),
                                                 glm::vec2(width, height));
-        Engine::get_debug_ui()->add_image_entry("G_Entity_ID", fbo->get_color_attachment_handle_by_name("entity_id"),
+        Engine::get_editor()->add_image_entry("G_Entity_ID", fbo->get_color_attachment_handle_by_name("entity_id"),
                                                 glm::vec2(width, height));
 
         fbo->release();
@@ -56,7 +56,7 @@ namespace cologne
         fbo->create("output", width, height);
         fbo->create_attachment("color", GL_RGBA16F, GL_LINEAR, GL_LINEAR);
         fbo->create_depth_attachment(GL_DEPTH_COMPONENT32F, GL_NEAREST, GL_NEAREST, GL_REPEAT);
-        Engine::get_debug_ui()->add_image_entry("output", fbo->get_color_attachment_handle_by_name("color"),
+        Engine::get_editor()->add_image_entry("output", fbo->get_color_attachment_handle_by_name("color"),
                                                 glm::vec2(width, height));
         fbo->release();
     }

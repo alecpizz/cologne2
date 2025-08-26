@@ -8,8 +8,6 @@
 
 namespace cologne
 {
-    size_t dir_light_counter = 0;
-    size_t point_light_counter = 0;
     uint32_t point_shadow_fbo = 0;
     uint32_t dir_shadow_size = 1024;
     float shadow_near = 0.1f;
@@ -90,18 +88,18 @@ namespace cologne
     {
         auto texture = Texture(create_dir_shadow_texture(4096), 4096, 4096, 1);
         texture.make_resident();
-        _dir_shadow_maps.emplace_back(texture);
-
+        _dir_shadow_maps[texture.get_bindless_handle()] = texture;
+        _dir_shadow_queue.emplace(texture);
         glGenFramebuffers(1, &point_shadow_fbo);
         glBindFramebuffer(GL_FRAMEBUFFER, point_shadow_fbo);
         glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                             _dir_shadow_maps[0].get_handle(), 0);
+                             _dir_shadow_maps[texture.get_bindless_handle()].get_handle(), 0);
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        Engine::get_debug_ui()->add_float_entry("shadow near_plane", shadow_near);
-        Engine::get_debug_ui()->add_float_entry("shadow far_plane", shadow_far);
+        Engine::get_editor()->add_float_entry("shadow near_plane", shadow_near);
+        Engine::get_editor()->add_float_entry("shadow far_plane", shadow_far);
     }
 
     void Renderer::dir_shadow_pass()
@@ -110,33 +108,50 @@ namespace cologne
         OpenGLDebugScope scope("Renderer::dir_shadow_pass");
         auto shadow_shader = get_shader_by_name("dir_shadow");
 
-        for (auto &light: _lights)
+        for (auto &pair: _lights)
         {
+            auto& light = pair.second.light;
             if (light.type != Directional && light.type != Spot)
             {
                 continue;
             }
-            if (light.shadow_handle != 1)
+            if (pair.second.light.active == 0)
             {
-                light.shadow_handle = 0;
+                continue;
+            }
+            if (!pair.second.cast_shadows)
+            {
+                continue;
+            }
+            if (!pair.second.dirty)
+            {
                 continue;
             }
 
-            if (dir_light_counter > _dir_shadow_maps.size() - 1 || _dir_shadow_maps.empty())
-            {
-                auto& texture = _dir_shadow_maps.emplace_back(create_dir_shadow_texture(1024), 1024, 1024, 1);
-                texture.make_resident();
-            }
-            light.shadow_handle = _dir_shadow_maps[dir_light_counter].get_bindless_handle();
+            pair.second.dirty = false;
 
-            glViewport(0, 0, _dir_shadow_maps[dir_light_counter].get_width(),
-                       _dir_shadow_maps[dir_light_counter].get_height());
+            if (light.shadow_handle == 0)
+            {
+                //get a new handle!
+                if (!_dir_shadow_queue.empty())
+                {
+                    //empty list of ddir shadows, make new one
+                    auto texture = Texture(create_dir_shadow_texture(1024), 1024, 1024, 1);
+                    texture.make_resident();
+                    _dir_shadow_maps[texture.get_bindless_handle()] = texture;
+                    _dir_shadow_queue.emplace(texture);
+                }
+                light.shadow_handle = _dir_shadow_queue.front().get_bindless_handle();
+                _dir_shadow_queue.pop();
+            }
+
+            glViewport(0, 0, _dir_shadow_maps[light.shadow_handle].get_width(),
+                       _dir_shadow_maps[light.shadow_handle].get_height());
             glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                 _dir_shadow_maps[dir_light_counter].get_handle(), 0);
+                                 _dir_shadow_maps[light.shadow_handle].get_handle(), 0);
             glDrawBuffer(GL_NONE);
             glReadBuffer(GL_NONE);
             glClear(GL_DEPTH_BUFFER_BIT);
-            dir_light_counter++;
             glm::mat4 light_projection;
             if (light.type == Directional)
             {
@@ -167,37 +182,49 @@ namespace cologne
         OpenGLDebugScope scope("Renderer::point_shadow_pass");
         auto point_shadow_shader = get_shader_by_name("point_shadow");
 
-        for (auto &light: _lights)
+        for (auto &pair: _lights)
         {
-            if (light.type != Point)
+            auto& rl = pair.second;
+            if (rl.light.type != Point)
             {
                 continue;
             }
-            if (light.shadow_handle != 1)
+            if (!pair.second.cast_shadows)
             {
-                light.shadow_handle = 0;
+                continue;
+            }
+            if (!pair.second.dirty)
+            {
                 continue;
             }
 
-            if (point_light_counter > _point_shadow_maps.size() - 1 || _point_shadow_maps.empty())
-            {
-                auto& texture = _point_shadow_maps.emplace_back(create_point_shadow_texture(), 512, 512, 1);
-                texture.make_resident();
-            }
-            light.shadow_handle = _point_shadow_maps[point_light_counter].get_bindless_handle();
+            rl.dirty = false;
 
-            glViewport(0, 0, _point_shadow_maps[point_light_counter].get_width(),
-                       _point_shadow_maps[point_light_counter].get_height());
+            if (rl.light.shadow_handle == 0)
+            {
+                //get a new handle!
+                if (_point_shadow_queue.empty())
+                {
+                    //empty list of ddir shadows, make new one
+                    auto texture = Texture(create_point_shadow_texture(), 512, 512, 1);
+                    texture.make_resident();
+                    _point_shadow_maps[texture.get_bindless_handle()] = texture;
+                    _point_shadow_queue.emplace(texture);
+                }
+                rl.light.shadow_handle = _point_shadow_queue.front().get_bindless_handle();
+                _point_shadow_queue.pop();
+            }
+
+            glBindFramebuffer(GL_FRAMEBUFFER, point_shadow_fbo);
+            glViewport(0, 0, _point_shadow_maps[rl.light.shadow_handle].get_width(),
+                       _point_shadow_maps[rl.light.shadow_handle].get_height());
             glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                 _point_shadow_maps[point_light_counter].get_handle(), 0);
-            glDrawBuffer(GL_NONE);
-            glReadBuffer(GL_NONE);
+                                 _point_shadow_maps[rl.light.shadow_handle].get_handle(), 0);
             glClear(GL_DEPTH_BUFFER_BIT);
-            point_light_counter++;
-            glm::vec3 position = light.position;
+            glm::vec3 position = rl.light.position;
 
             point_shadow_shader->bind();
-            point_shadow_shader->set_mat4("light_space_matrices", create_shadow_projection_matrices(position, light.radius));
+            point_shadow_shader->set_mat4("light_space_matrices", create_shadow_projection_matrices(position, rl.light.radius));
             for (int i = 0; i < 6; i++)
             {
                 point_shadow_shader->set_int("idx", i);
@@ -212,14 +239,19 @@ namespace cologne
         OpenGLDebugScope scope("Renderer::shadow_pass");
         glCullFace(GL_FRONT);
         glEnable(GL_DEPTH_CLAMP);
-        point_light_counter = 0;
-        dir_light_counter = 0;
         dir_shadow_pass();
         point_shadow_pass();
-        get_ssbo_by_name("lights")->update(sizeof(Light) * _lights.size(), _lights.data());
+        std::vector<Light> lights;
+        for (auto &rl: _lights | std::views::values)
+        {
+            auto& light = lights.emplace_back(rl.light);
+            light.outer_cutoff = glm::cos(glm::radians(light.outer_cutoff));
+            light.inner_cutoff = glm::cos(glm::radians(light.inner_cutoff));
+        }
+        get_ssbo_by_name("lights")->update(sizeof(Light) * lights.size(), lights.data());
         glCullFace(GL_BACK);
         glDisable(GL_DEPTH_CLAMP);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
+        glViewport(0, 0, Engine::get_render_target_width(), Engine::get_render_target_height());
     }
 }

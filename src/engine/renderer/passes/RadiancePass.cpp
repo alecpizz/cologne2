@@ -173,6 +173,6 @@ namespace cologne
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glDeleteFramebuffers(1, &captureFBO);
         glDeleteRenderbuffers(1, &captureRBO);
-        glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
+        glViewport(0, 0, Engine::get_render_target_width(), Engine::get_render_target_height());
     }
 }

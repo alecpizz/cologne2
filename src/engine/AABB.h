@@ -31,6 +31,19 @@ namespace cologne
             max = center + half;
         }
 
+        AABB transform_by_mat4(glm::mat4 mat) const
+        {
+            const auto center = (max + min) * 0.5f;
+            const auto extents = (max - min) * 0.5f;
+
+            const auto world_center = glm::vec4(mat * center);
+            const auto world_extents = abs(extents.x * mat[0]) + abs(extents.y * mat[1]) + abs(extents.z * mat[2]);
+
+            const auto world_min = world_center - world_extents;
+            const auto world_max = world_center + world_extents;
+            return {world_min, world_max};
+        }
+
         glm::vec4 center() const
         {
             return 0.5f * (min + max);

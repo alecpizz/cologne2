@@ -13,34 +13,13 @@
 #include "engine/imguiThemes.h"
 #include <imgui.h>
 #include <engine/audio/Audio.h>
+#include <engine/core/EventManager.h>
+#include <engine/core/Window.h>
 #include <engine/scene/SceneSaver.h>
 #include <misc/cpp/imgui_stdlib.h>
 
 namespace cologne
 {
-    bool active = false;
-
-    bool Editor::in_edit_mode()
-    {
-        return active;
-    }
-
-    void Editor::toggle_edit_mode(bool b)
-    {
-        active = b;
-        //do something with edit mode here
-        if (active)
-        {
-            _was_game_mode = true;
-            Engine::get_window()->show_mouse();
-        }
-        else
-        {
-            Engine::get_scene()->on_enter_game();
-            Engine::get_window()->hide_mouse();
-        }
-    }
-
     uint32_t Editor::get_viewport_width()
     {
         return _prev_viewport_size.x;
@@ -56,8 +35,7 @@ namespace cologne
 
     Editor::Editor()
     {
-        active = false;
-        _was_game_mode = true;
+        _was_game_mode = false;
         _mouse_captured = false;
         cologne::DebugScope scope(__PRETTY_FUNCTION__);
         ImGui::CreateContext();
@@ -95,15 +73,6 @@ namespace cologne
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplSDL3_Shutdown();
         ImGui::DestroyContext();
-    }
-
-    void Editor::clear()
-    {
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL3_NewFrame();
-        ImGui::NewFrame();
-        ImGuizmo::BeginFrame();
-        ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->ID);
     }
 
     void Editor::build_main_window()
@@ -149,7 +118,7 @@ namespace cologne
         ImGuiKeyChord chord = ImGuiMod_Ctrl | ImGuiKey_S;
         if (ImGui::IsKeyChordPressed(chord))
         {
-            SceneSaver saver(Engine::get_scene());
+            SceneSaver saver(Engine::get_scene().get());
             saver.serialize(RESOURCES_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name());
         }
 
@@ -174,99 +143,24 @@ namespace cologne
         }
     }
 
-    void open_scene_callback(void *userdata, const char *const*filelist, int filter)
-    {
-        if (!filelist)
-        {
-            return;
-        }
-        const char *file = *filelist;
-        if (!file)
-        {
-            return;
-        }
-        Engine::load_scene(file);
-    }
-
-    void Editor::build_main_menu_bar()
-    {
-        if (ImGui::BeginMainMenuBar())
-        {
-            if (ImGui::BeginMenu("File"))
-            {
-                if (ImGui::MenuItem("New Scene"))
-                {
-
-                }
-                if (ImGui::MenuItem("Load Scene"))
-                {
-                    Engine::get_window()->show_file_dialogue_window({{"Scene Files", "cscn"}, {"All Files", "*"}},
-                                                                    RESOURCES_PATH "scenes",
-                                                                    reinterpret_cast<void *>(open_scene_callback));
-                    _selected_entity = {};
-                }
-                if (ImGui::MenuItem("Save Scene"))
-                {
-                    SceneSaver saver(Engine::get_scene());
-                    saver.serialize(RESOURCES_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name());
-                }
-                if (ImGui::MenuItem("Reload Scene"))
-                {
-                    Engine::load_scene((RESOURCES_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name()).c_str());
-                    _selected_entity = {};
-                }
-                if (ImGui::MenuItem("Save Scene As"))
-                {
-                    //open a save file dialogue
-                }
-                if (ImGui::MenuItem("Exit"))
-                {
-                    Engine::get_event_manager()->set_should_quit(true);
-                }
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Edit"))
-            {
-                if (ImGui::MenuItem("Re-Calculate Bounds"))
-                {
-                    Engine::get_scene()->re_calculate_bounds();
-                }
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Settings"))
-            {
-                if (ImGui::MenuItem("Save Layout"))
-                {
-                    ImGui::SaveIniSettingsToDisk(RESOURCES_PATH "editor/imgui_config.ini");
-                }
-                ImGui::EndMenu();
-            }
-
-            ImGui::Text("FPS %.f", ImGui::GetIO().Framerate);
-            ImGui::EndMainMenuBar();
-        }
-    }
-
     void Editor::present(float dt)
     {
-        if (active)
-        {
-            handle_hotkeys();
-            build_main_window();
-            build_main_menu_bar();
-            build_scene_graph();
-            build_properties_panel();
-            build_settings_panel();
-            build_asset_browser();
-            build_game_view(dt);
-            ImGui::End();
-            ImGui::PopStyleColor();
-        }
-        else
-        {
-            // ImGuiStyle &style = ImGui::GetStyle();
-            // style.Colors[ImGuiCol_WindowBg].w = 0.0f;
-        }
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL3_NewFrame();
+        ImGui::NewFrame();
+        ImGuizmo::BeginFrame();
+        ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->ID);
+        handle_hotkeys();
+        build_main_window();
+        build_main_menu_bar();
+        build_scene_graph();
+        build_properties_panel();
+        build_images_window();
+        build_asset_browser();
+        build_game_view(dt);
+        build_game_overlay();
+        ImGui::End();
+        ImGui::PopStyleColor();
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

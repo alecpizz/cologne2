@@ -1,5 +1,6 @@
 ﻿#include <engine/asset_manager/AssetManager.h>
 #include <engine/core/Engine.h>
+#include <engine/core/RuntimeState.h>
 #include <engine/renderer/OpenGLDebugScope.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Shader.h>
@@ -60,21 +61,21 @@ namespace cologne
         // delete[] norm_data;
         auto voxel_back_fbo = get_framebuffer_by_name("voxel_back");
         auto voxel_front_fbo = get_framebuffer_by_name("voxel_front");
-        voxel_back_fbo->create("voxel cube back", Engine::get_window()->get_width(),
-                               Engine::get_window()->get_height());
+        voxel_back_fbo->create("voxel cube back", Engine::get_render_target_width(),
+                               Engine::get_render_target_height());
         voxel_back_fbo->create_attachment("color", GL_RGBA16F, GL_NEAREST, GL_NEAREST);
-        voxel_front_fbo->create("voxel cube front", Engine::get_window()->get_width(),
-                                Engine::get_window()->get_height());
+        voxel_front_fbo->create("voxel cube front", Engine::get_render_target_width(),
+                                Engine::get_render_target_height());
         voxel_front_fbo->create_attachment("color", GL_RGBA16F, GL_NEAREST, GL_NEAREST);
-        Engine::get_debug_ui()->add_image_entry("Voxel cube front",
+        Engine::get_editor()->add_image_entry("Voxel cube front",
                                                 voxel_front_fbo->get_color_attachment_handle_by_name("color"),
-                                                glm::vec2(Engine::get_window()->get_width(),
-                                                          Engine::get_window()->get_height()));
-        Engine::get_debug_ui()->add_image_entry("Voxel cube back",
+                                                glm::vec2(Engine::get_render_target_width(),
+                                                          Engine::get_render_target_height()));
+        Engine::get_editor()->add_image_entry("Voxel cube back",
                                                 voxel_back_fbo->get_color_attachment_handle_by_name("color"),
-                                                glm::vec2(Engine::get_window()->get_width(),
-                                                          Engine::get_window()->get_height()));
-        Engine::get_debug_ui()->add_button("Voxelize Scene", [&]()
+                                                glm::vec2(Engine::get_render_target_width(),
+                                                          Engine::get_render_target_height()));
+        Engine::get_editor()->add_button("Voxelize Scene", [&]()
         {
             voxelize_scene();
         });
@@ -107,8 +108,8 @@ namespace cologne
         glBindTextureUnit(1, _skybox_texture);
 
         const uint32_t work_group_size = 8;
-        uint32_t width = Engine::get_window()->get_width();
-        uint32_t height = Engine::get_window()->get_height();
+        uint32_t width = Engine::get_render_target_width();
+        uint32_t height = Engine::get_render_target_height();
         uint32_t num_x = (width + work_group_size - 1) / work_group_size;
         uint32_t num_y = (height + work_group_size - 1) / work_group_size;
         voxelize_debug_shader->dispatch(num_x, num_y, 1);
@@ -121,7 +122,7 @@ namespace cologne
     static bool has_voxelized = false;
     void Renderer::voxelize_scene()
     {
-        if (!Editor::in_edit_mode() && has_voxelized)
+        if (Engine::get_runtime_state() == RuntimeState::PLAY_MODE && has_voxelized)
         {
             return;
         }
@@ -209,6 +210,6 @@ namespace cologne
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
         // glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, Engine::get_window()->get_width(), Engine::get_window()->get_height());
+        glViewport(0, 0, Engine::get_render_target_width(), Engine::get_render_target_height());
     }
 }

@@ -1,12 +1,10 @@
 #pragma once
-#include <engine/audio/Audio.h>
 #include <engine/core/UUID.h>
 #include <engine/physics/Physics.h>
 #include <engine/util/Util.h>
 #include <entt/entt.hpp>
 #include <nlohmann/adl_serializer.hpp>
-
-#include "ScriptableEntity.h"
+#include <engine/renderer/types/LightHandle.h>
 
 namespace cologne
 {
@@ -70,6 +68,8 @@ namespace cologne
         {
             return rotation * glm::vec3(1.0f, 0.0f, 0.0f);
         }
+
+        bool operator==(const TransformComponent & transform) const = default;
     };
 
     struct ParentComponent
@@ -90,6 +90,8 @@ namespace cologne
         {
             return Physics::get_rigidbody_transform(body_id);
         }
+        static void on_construct(entt::registry &registry, const entt::entity entt);
+        static void on_destroy(entt::registry &registry, const entt::entity entt);
     };
 
     struct ConvexMeshColliderComponent
@@ -170,6 +172,40 @@ namespace cologne
         {
             cologne::Physics::teleport_player(id, pos);
         }
+        static void on_construct(entt::registry &registry, const entt::entity entt);
+        static void on_destroy(entt::registry &registry, const entt::entity entt);
+    };
+
+    struct PlayerControllerComponent
+    {
+        std::vector<std::string> footstep_sounds;
+        glm::vec2 rotation = glm::vec2(0.0f);
+        bool is_free_cam = false;
+        bool show_mouse = false;
+        bool allow_sliding = true;
+        bool was_grounded = false;
+        bool grounded = true;
+        glm::vec3 desired_velocity;
+        bool footstep_played = false;
+        float bob_time = 0.0f;
+        float bob_offset = 0.0f;
+        glm::vec3 velocity = glm::vec3(0.0f);
+        bool jump_queued = false;
+        float step_timer = 0.0f;
+        float step_time = .01f;
+        float rpm = 60.0f / 350.0f;
+        float reload_time = 0.25f;
+        float shot_timer = 0.0f;
+        int max_ammo = 10;
+        int current_ammo = 0;
+        float gun_time = 0.0f;
+        bool is_firing = false;
+        bool is_reloading = false;
+        const char *shoot_sound = RESOURCES_PATH "sounds/vsk_fire.ogg";
+        const char *reload_sound = RESOURCES_PATH "sounds/vsk_reload_empty.ogg";
+        //view model stuff
+        float time = 0.0f;
+        TransformComponent prev_transform;
     };
 
     struct ViewmodelComponent
@@ -214,28 +250,45 @@ namespace cologne
         float outer_cutoff = 17.5f;
         float inner_cutoff = 12.5f;
         bool cast_shadows = false;
+        bool always_update_shadows = true;
+        static void on_construct(entt::registry &registry, const entt::entity entt);
+        static void on_destroy(entt::registry &registry, const entt::entity entt);
     };
 
 
-    struct NativeScriptComponent
+    struct LightHandleComponent
     {
-        ScriptableEntity *instance = nullptr;
+        LightHandle light_handle;
+        static void on_destroy(entt::registry &registry, const entt::entity entt);
+    };
 
-        ScriptableEntity * (*instantiate_script)() = nullptr;
+    struct HideInEditorComponent
+    {
+        
+    };
 
-        void (*destroy_script)(NativeScriptComponent *) = nullptr;
+    struct InteractorComponent
+    {
+        bool update_every_frame = true;
+        static void on_construct(entt::registry &registry, const entt::entity entt);
+        static void on_destroy(entt::registry &registry, const entt::entity entt);
+    };
 
-        std::string type_name = std::string();
+    struct InteractionControllerComponent
+    {
+        //dunno what can live in here yet :3
+        uint32_t last_entity = 0;
+        uint32_t current_entity =0;
+    };
 
-        template<typename T>
-        void bind()
-        {
-            instantiate_script = []() { return static_cast<ScriptableEntity *>(new T()); };
-            destroy_script = [](NativeScriptComponent *nsc)
-            {
-                delete nsc->instance;
-                nsc->instance = nullptr;
-            };
-        }
+    struct EditorCameraComponent
+    {
+        static void on_construct(entt::registry &registry, const entt::entity entt);
+        static void on_destroy(entt::registry &registry, const entt::entity entt);
+    };
+
+    struct EditorCameraControllerComponent
+    {
+        glm::vec2 rotation = glm::vec2(0.0f);
     };
 }

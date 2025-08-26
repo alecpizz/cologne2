@@ -15,7 +15,6 @@
 #include "OpenGLDebugScope.h"
 #include "../renderer/types/FrameBuffer.h"
 #include "openglErrorReporting.h"
-#include "../scene/Scene.h"
 #include "../renderer/types/Shader.h"
 #include "TextRenderer.h"
 #include "../core/Time.h"
@@ -29,8 +28,8 @@ namespace cologne
 #define PREFILTER_INDEX 7
 #define BRDF_INDEX 8
 
-    std::shared_ptr<DebugRenderer> debug_renderer = nullptr;
-    std::shared_ptr<TextRenderer> text_renderer = nullptr;
+    Ref<DebugRenderer> debug_renderer = nullptr;
+    Ref<TextRenderer> text_renderer = nullptr;
     std::unordered_map<std::string, Shader> shaders = std::unordered_map<std::string, Shader>();
     std::unordered_map<std::string, FrameBuffer> framebuffers = std::unordered_map<std::string, FrameBuffer>();
     std::unordered_map<std::string, SSBO> ssbos = std::unordered_map<std::string, SSBO>();
@@ -45,13 +44,10 @@ namespace cologne
         {
             shaders.clear();
         }
-        shaders["lit"] = Shader(RESOURCES_PATH "shaders/lit.vert",
-                                RESOURCES_PATH "shaders/lit.frag");
+        shaders["lit"] = Shader(RESOURCES_PATH "shaders/lit.comp");
 
         shaders["gbuffer"] = Shader(RESOURCES_PATH "shaders/gbuffer.vert",
                                     RESOURCES_PATH "shaders/gbuffer.frag");
-        shaders["skinned_gbuffer"] = Shader(RESOURCES_PATH "shaders/skinned_gbuffer.vert",
-                                            RESOURCES_PATH "shaders/gbuffer.frag");
         shaders["skybox"] = Shader(RESOURCES_PATH "shaders/skybox.vert",
                                    RESOURCES_PATH "shaders/skybox.frag");
         shaders["voxelize"] = Shader(RESOURCES_PATH "shaders/voxelize.vert",
@@ -84,6 +80,7 @@ namespace cologne
         shaders["compute_skinning"] = Shader(RESOURCES_PATH "shaders/skinning.comp");
         shaders["frustum_culling"] = Shader(RESOURCES_PATH "shaders/culling/frustum_cull.comp");
         shaders["clear_culling"] = Shader(RESOURCES_PATH "shaders/culling/clear_cull.comp");
+        shaders["post_processing"] = Shader(RESOURCES_PATH "shaders/post_processing/post_processing.comp");
     }
 
     void Renderer::init_ssbos()
@@ -119,7 +116,6 @@ namespace cologne
         ssbos["draw_cmds"].update(sizeof(MultiDrawElementsCommand) * _render_cmds.size(), _render_cmds.data());
         ssbos["skinned_draw_cmds"].update(sizeof(MultiDrawElementsCommand) * _skinned_render_cmds.size(),
                                           _skinned_render_cmds.data());
-        ssbos["lights"].update(sizeof(Light) * _lights.size(), _lights.data());
         ssbos["viewport"].update(sizeof(ViewportData), &data);
         ssbos["materials"].update(sizeof(GPUMaterial) * _gpu_materials.size(), _gpu_materials.data());
         ssbos["skinned_materials"].update(sizeof(GPUMaterial) * _skinned_gpu_materials.size(),
@@ -144,11 +140,6 @@ namespace cologne
         framebuffers["output"] = FrameBuffer();
         framebuffers["output"] = FrameBuffer();
         framebuffers["outline"] = FrameBuffer();
-    }
-
-    void Renderer::submit_light(Light light)
-    {
-        _lights.emplace_back(light);
     }
 
     void Renderer::submit_render_item(RenderItem item)
@@ -252,13 +243,13 @@ namespace cologne
         if (cam.orthographic)
         {
             float scale = cam.ortho_zoom;
-            float aspect = static_cast<float>(Engine::get_window()->get_width()) / static_cast<float>(
-                               Engine::get_window()->get_height());
+            float aspect = static_cast<float>(Engine::get_render_target_width()) / static_cast<float>(
+                               Engine::get_render_target_height());
             return glm::ortho(-aspect * scale, aspect * scale, -scale, scale, -300.0f, 300.0f);
         }
         return glm::perspective(cam.fov_radians,
-                                static_cast<float>(Engine::get_window()->get_width()) /
-                                static_cast<float>(Engine::get_window()->get_height()),
+                                static_cast<float>(Engine::get_render_target_width()) /
+                                static_cast<float>(Engine::get_render_target_height()),
                                 0.01f, 300.0f);
     }
 
@@ -426,38 +417,38 @@ namespace cologne
         glDeleteBuffers(1, &_vertex_data_vbo);
         glDeleteBuffers(1, &_vertex_data_ebo);
 
-        glDeleteVertexArrays(1, & _skinned_bind_pose_vao);
+        glDeleteVertexArrays(1, &_skinned_bind_pose_vao);
         glDeleteBuffers(1, &_skinned_bind_pose_ebo);
         glDeleteBuffers(1, &_skinned_bind_pose_vbo);
 
         glDeleteVertexArrays(1, &_skinned_vao);
         glDeleteBuffers(1, &_skinned_vbo);
 
-        for (auto point_shadow_map : _point_shadow_maps)
+        for (auto& point_shadow_map: _point_shadow_maps)
         {
-            uint32_t handle = point_shadow_map.get_handle();
+            uint32_t handle = point_shadow_map.second.get_handle();
             glDeleteTextures(1, &handle);
         }
         _point_shadow_maps.clear();
 
-        for (auto tex : _dir_shadow_maps)
+        for (auto& tex: _dir_shadow_maps)
         {
-            uint32_t handle = tex.get_handle();
+            uint32_t handle = tex.second.get_handle();
             glDeleteTextures(1, &handle);
         }
 
         _dir_shadow_maps.clear();
-        for (auto framebuffer : framebuffers)
+        for (auto framebuffer: framebuffers)
         {
             framebuffer.second.clean_up();
         }
 
-        for (auto ssbo : ssbos)
+        for (auto ssbo: ssbos)
         {
             ssbo.second.cleanup();
         }
 
-        for (auto shader : shaders)
+        for (auto shader: shaders)
         {
             shader.second.cleanup();
         }
@@ -529,6 +520,7 @@ namespace cologne
         indirect_pass();
         bloom_pass();
         lit_pass();
+        post_processing_pass();
         draw_fps();
         outline_pass();
         auto fbo = get_framebuffer_by_name("output");
@@ -537,12 +529,11 @@ namespace cologne
         debug_renderer->present();
         text_renderer->present();
         fbo->blit_to_default_frame_buffer("color", 0, 0,
-                                          Engine::get_window()->get_width(), Engine::get_window()->get_height(),
+                                          Engine::get_render_target_width(), Engine::get_render_target_height(),
                                           GL_COLOR_BUFFER_BIT, GL_NEAREST);
         fbo->release();
         _render_items.clear();
         _skinned_render_items.clear();
-        _lights.clear();
         _outline_render_items.clear();
         _render_cmds.clear();
         _skinned_render_cmds.clear();
@@ -567,6 +558,107 @@ namespace cologne
         get_framebuffer_by_name("voxel_front")->resize(width, height);
         get_framebuffer_by_name("outline")->resize(width, height);
         // render_scene(*Engine::get_scene());
+    }
+
+    LightHandle Renderer::create_light(const Light &light)
+    {
+        const auto result = LightHandle(_next_light_id++);
+        _lights[result] = RendererLight(light, true, true);
+        return result;
+    }
+
+    void Renderer::update_light_transform(LightHandle handle, const TransformComponent &transform)
+    {
+        if (!handle.is_valid())
+        {
+            return;
+        }
+        if (!_lights.contains(handle))
+        {
+            return;
+        }
+        if (_lights[handle].transform != transform)
+        {
+            _lights[handle].dirty = true;
+            _lights[handle].transform = transform;
+            _lights[handle].light.position = glm::vec4(transform.position, 1.0f);
+            _lights[handle].light.direction = glm::vec4(transform.get_forward(), 1.0f);
+        }
+    }
+
+    void Renderer::update_light_properties(LightHandle handle, const LightComponent &light_component, bool active)
+    {
+        if (!handle.is_valid())
+        {
+            return;
+        }
+        if (!_lights.contains(handle))
+        {
+            return;
+        }
+        _lights[handle].light.active = active;
+        if (light_component.always_update_shadows)
+        {
+            _lights[handle].dirty = true;
+        }
+        if (_lights[handle].light.is_similar(light_component))
+        {
+            return;
+        }
+        _lights[handle].dirty = true;
+        _lights[handle].light.color = glm::vec4(light_component.color, 1.0f);
+        _lights[handle].light.strength = light_component.strength;
+        _lights[handle].light.radius = light_component.radius;
+        _lights[handle].light.type = static_cast<LightType>(light_component.type);
+        _lights[handle].light.outer_cutoff = light_component.outer_cutoff;
+        _lights[handle].light.inner_cutoff = light_component.inner_cutoff;
+        _lights[handle].cast_shadows = light_component.cast_shadows;
+    }
+
+    void Renderer::destroy_light(LightHandle handle)
+    {
+        if (!handle.is_valid())
+        {
+            return;
+        }
+        if (!_lights.contains(handle))
+        {
+            return;
+        }
+        auto shadow_handle = _lights[handle].light.shadow_handle;
+        if (shadow_handle != 0)
+        {
+            if (_lights[handle].light.type == LightType::Point)
+            {
+                _dir_shadow_queue.emplace(_dir_shadow_maps[shadow_handle]);
+            }
+            else
+            {
+                _point_shadow_queue.emplace(_point_shadow_maps[shadow_handle]);
+            }
+        }
+        _lights.erase(handle);
+    }
+
+    void Renderer::clear_lights()
+    {
+        for (auto& light : _lights)
+        {
+            if (light.second.light.shadow_handle != 0)
+            {
+                if (light.second.light.type == LightType::Point)
+                {
+                    _dir_shadow_queue.emplace(_dir_shadow_maps[light.second.light.shadow_handle]);
+                }
+                else
+                {
+                    _point_shadow_queue.emplace(_point_shadow_maps[light.second.light.shadow_handle]);
+                }
+            }
+            light.second.light.shadow_handle = 0;
+            light.second.light.active = false;
+        }
+        LOG_INFO("Light count %d", _lights.size());
     }
 
     void Renderer::reload_shaders()
@@ -599,13 +691,12 @@ namespace cologne
         glEnable(GL_CULL_FACE);
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         glEnable(GL_MULTISAMPLE);
-        debug_renderer = std::make_unique<DebugRenderer>();
-        text_renderer = std::unique_ptr<TextRenderer>(
-            new TextRenderer(RESOURCES_PATH "fonts/Montserrat-Regular.ttf"));
+        debug_renderer = create_ref<DebugRenderer>();
+        text_renderer = create_ref<TextRenderer>(RESOURCES_PATH "fonts/Montserrat-Regular.ttf");
 
-        Engine::get_debug_ui()->add_bool_entry("Voxel Debug Visuals", _voxel_debug_visuals);
-        Engine::get_debug_ui()->add_bool_entry("Indirect Lighting", _apply_indirect_lighting);
-        Engine::get_debug_ui()->add_bool_entry("Light Debug Visuals", _light_debug_visuals);
+        Engine::get_editor()->add_bool_entry("Voxel Debug Visuals", _voxel_debug_visuals);
+        Engine::get_editor()->add_bool_entry("Indirect Lighting", _apply_indirect_lighting);
+        Engine::get_editor()->add_bool_entry("Light Debug Visuals", _light_debug_visuals);
         init_shaders();
         init_ssbos();
         init_bloom();

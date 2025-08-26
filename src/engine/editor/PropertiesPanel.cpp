@@ -121,18 +121,23 @@ namespace cologne
 
 
             //TODO: figure out if i actually need this.
-            // for (int i = 0; auto&& [id, storage] : Engine::get_scene()->_registry.storage())
-            // {
-            //     if (!storage.contains(_selected_entity))
-            //     {
-            //         continue;
-            //     }
-            //     ImGui::SeparatorText(std::string(storage.type().name()).c_str());
-            //     if (auto meta = entt::resolve(id))
-            //     {
-            //         draw_component_editor(_selected_entity, meta.from_void(storage.value(_selected_entity)).as_ref(), meta.custom(), i);
-            //     }
-            // }
+            for (int i = 0; auto&& [id, storage] : Engine::get_scene()->_registry.storage())
+            {
+                if (!storage.contains(_selected_entity))
+                {
+                    continue;
+                }
+                if (!ComponentRegistry::get_component_map().contains(storage.type().hash()))
+                {
+                    continue;
+                }
+                auto& type_name = ComponentRegistry::get_component_map().at(storage.type().hash());
+                ImGui::SeparatorText(type_name.c_str());
+                if (auto meta = entt::resolve(entt::hashed_string(type_name.c_str())))
+                {
+                    draw_component_editor(_selected_entity, meta.from_void(storage.value(_selected_entity)).as_ref(), meta.custom(), i);
+                }
+            }
 
             ImGui::Text("Transform");
             build_transform_entry(_selected_entity.get_transform());
@@ -224,6 +229,7 @@ namespace cologne
                     ImGui::DragFloat("outer cutoff", &light.outer_cutoff, 0.01f);
                     ImGui::DragFloat("inner cutoff", &light.inner_cutoff, 0.01f);
                 }
+                ImGui::Checkbox("always updatet", &light.always_update_shadows);
                 ImGui::DragFloat("radius", &light.radius, 0.01f);
                 ImGui::DragFloat("strength", &light.strength, 0.01f);
                 ImGui::ColorEdit3("color", glm::value_ptr(light.color), ImGuiColorEditFlags_HDR
@@ -330,13 +336,6 @@ namespace cologne
                 ImGui::InputFloat("MAX STEP INTERVAL", &player.maxStepInterval);
             });
 
-
-            draw_component<NativeScriptComponent>("Native Script", _selected_entity, true,
-                                                  [](auto &script)
-                                                  {
-                                                      ImGui::TextDisabled("how should these components work lol");
-                                                  });
-
             draw_component<AnimatorComponent>("Animator", _selected_entity, true, [](AnimatorComponent &anim)
             {
                 float progress = anim.get_current_progress();
@@ -365,34 +364,33 @@ namespace cologne
 
             if (ImGui::BeginPopup("AddComponent"))
             {
-                if (!_selected_entity.has_component<LightComponent>() && ImGui::Button("Light Component"))
+                for (auto&& [id, storage] : Engine::get_scene()->_registry.storage())
                 {
-                    Audio::play_sound(_accept_sound, 30);
-                    _selected_entity.add_component<LightComponent>();
-                    ImGui::CloseCurrentPopup();
+                    if (storage.contains(_selected_entity))
+                    {
+                        continue;
+                    }
+                    if (!ComponentRegistry::get_component_map().contains(id))
+                    {
+                        continue;
+                    }
+                    if (ImGui::MenuItem(ComponentRegistry::get_component_map().at(id).c_str()))
+                    {
+                        if (auto meta = entt::resolve(entt::hashed_string(ComponentRegistry::get_component_map().at(id).c_str())))
+                        {
+                            //add component meta
+                            auto instance = meta.construct();
+                            if (auto emplace_func = instance.type().func(entt::hashed_string("emplace")); emplace_func)
+                            {
+                                emplace_func.invoke({}, &Engine::get_scene()->_registry, static_cast<entt::entity>(_selected_entity), instance.as_ref());
+                            }
+                            Audio::play_sound(_accept_sound, 30);
+                        }
+
+                        ImGui::CloseCurrentPopup();
+                    }
                 }
 
-                if (!_selected_entity.has_component<ModelComponent>() && ImGui::MenuItem("Model Component"))
-                {
-                    Audio::play_sound(_accept_sound, 30);
-                    _selected_entity.add_component<ModelComponent>();
-                    ImGui::CloseCurrentPopup();
-                }
-
-                if (!_selected_entity.has_component<MeshComponent>() && ImGui::MenuItem("Mesh Component"))
-                {
-                    Audio::play_sound(_accept_sound, 30);
-                    _selected_entity.add_component<MeshComponent>();
-                    ImGui::CloseCurrentPopup();
-                }
-
-                if (!_selected_entity.has_component<SkinnedModelComponent>() && ImGui::MenuItem(
-                        "Skinned Model Component"))
-                {
-                    Audio::play_sound(_accept_sound, 30);
-                    _selected_entity.add_component<SkinnedModelComponent>();
-                    ImGui::CloseCurrentPopup();
-                }
 
                 if (!_selected_entity.has_component<AnimatorComponent>() && _selected_entity.has_component<
                         SkinnedModelComponent>() && ImGui::MenuItem("Animator Component"))
@@ -404,35 +402,6 @@ namespace cologne
                     //             _selected_entity.get_component<SkinnedModelComponent>().id)->get_name()));
                     LOG_WARN("NOT IMPLEMENTED");
                     ImGui::CloseCurrentPopup();
-                }
-
-                if (!_selected_entity.has_component<ConvexMeshColliderComponent>() && _selected_entity.has_component<MeshComponent>() && ImGui::MenuItem("Convex Mesh Collider Component"))
-                {
-                    Audio::play_sound(_accept_sound, 30);
-                    _selected_entity.add_component<ConvexMeshColliderComponent>(_selected_entity.get_component<MeshComponent>().mesh_name);
-                }
-
-                if (_selected_entity.has_component<ConvexMeshColliderComponent>() && !_selected_entity.has_component<RigidbodyComponent>() && ImGui::MenuItem("Rigidbody Component"))
-                {
-                    Audio::play_sound(_accept_sound, 30);
-                    _selected_entity.add_component<RigidbodyComponent>();
-                }
-
-                if (!_selected_entity.has_component<NativeScriptComponent>() && ImGui::BeginMenu("Native Script"))
-                {
-                    //TODO
-                    Audio::play_sound(_move_sound, 30);
-                    if (ImGui::MenuItem("Player Controller"))
-                    {
-                        Audio::play_sound(_accept_sound, 30);
-                        ImGui::CloseCurrentPopup();
-                    }
-                    if (ImGui::MenuItem("Editor Camera"))
-                    {
-                        Audio::play_sound(_accept_sound, 30);
-                        ImGui::CloseCurrentPopup();
-                    }
-                    ImGui::EndMenu();
                 }
 
                 ImGui::EndPopup();

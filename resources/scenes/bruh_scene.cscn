@@ -14,9 +14,8 @@
                 "IDComponent": {
                     "id": 3191168736057741902
                 },
-                "NativeScriptComponent": {
-                    "type_name": "EditorCameraController"
-                },
+                 "EditorCameraComponent":
+                                {},
                 "TagComponent": {
                     "tag": "Scene Camera"
                 },

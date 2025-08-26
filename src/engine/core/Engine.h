@@ -1,22 +1,18 @@
-﻿/*
-                           |  ____|           (_)
-   __ _  ___   ___  _ __   | |__   _ __   __ _ _ _ __   ___
-  / _` |/ _ \ / _ \| '_ \  |  __| | '_ \ / _` | | '_ \ / _ \
- | (_| | (_) | (_) | | | | | |____| | | | (_| | | | | |  __/
-  \__, |\___/ \___/|_| |_| |______|_| |_|\__, |_|_| |_|\___|
-   __/ |                                  __/ |
-  |___/                                  |___/
-
-*/
-#pragma once
-#include "../scene/Scene.h"
-#include "Window.h"
-#include "EventManager.h"
+﻿#pragma once
 #include "engine/GoodGPUs.h"
-
 
 namespace cologne
 {
+    class Window;
+    class Editor;
+    class Scene;
+    class SceneManager;
+    class EventManager;
+}
+
+namespace cologne
+{
+    enum class RuntimeState;
     class Renderer;
 
     class Engine
@@ -26,16 +22,17 @@ namespace cologne
 
         ~Engine();
 
-        static Renderer *get_renderer();
+        static Ref<Renderer> get_renderer();
 
-        static Window *get_window();
+        static Ref<Window> get_window();
 
-        static EventManager *get_event_manager();
+        static Ref<EventManager> get_event_manager();
 
-        static Scene *get_scene();
+        static Ref<Scene> get_scene();
 
+        static Ref<Editor> get_editor();
 
-        static Editor *get_debug_ui();
+        static Ref<SceneManager> get_scene_manager();
 
         Engine(Engine &&) = delete;
 
@@ -51,11 +48,26 @@ namespace cologne
 
         static void load_scene(const char* path);
 
-        static bool in_edit_mode();
+        static void enter_play_mode();
 
-    private:
-        inline static Engine *_instance;
-        struct Impl;
-        Impl *_impl;
+        static void exit_play_mode();
+
+        static void enable_editor();
+
+        static void disable_editor();
+
+        static RuntimeState get_runtime_state();
+
+        static uint32_t get_render_target_width() ;
+
+        static uint32_t get_render_target_height() ;
+
+        static glm::vec2 get_render_target_dimensions() ;
+
+    //
+    // private:
+    //     inline static Engine *_instance;
+    //     struct Impl;
+    //     Impl *_impl;
     };
 }

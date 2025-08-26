@@ -4,6 +4,7 @@
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/audio/Audio.h>
 #include <engine/core/Engine.h>
+#include <engine/scene/Entity.h>
 #include <misc/cpp/imgui_stdlib.h>
 #include "Editor.h"
 
@@ -18,9 +19,20 @@ namespace cologne
         {
             Engine::get_scene()->set_scene_name(scene_name);
         }
+        static std::string search_string = "";
+        ImGui::InputText("Entity Name", &search_string);
         for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
         {
-            Entity e = {entity, Engine::get_scene()};
+            Entity e = {entity, Engine::get_scene().get()};
+            bool valid_search = search_string.empty() || e.get_name().find(search_string) != std::string::npos;
+            if (!valid_search)
+            {
+                continue;
+            }
+            if (e.has_component<HideInEditorComponent>())
+            {
+                continue;
+            }
             if (!e.has_component<ChildComponent>())
             {
                 draw_entity_node(e);
@@ -34,7 +46,7 @@ namespace cologne
             {
                 uint32_t id = *(uint32_t *) payload->Data;
                 auto scene = Engine::get_scene();
-                Entity found_entity = {static_cast<entt::entity>(id), scene};
+                Entity found_entity = {static_cast<entt::entity>(id), scene.get()};
                 UUID found_entity_id = found_entity.get_component<IDComponent>().id;
                 //remove the entity from its parent entity
                 if (found_entity.has_component<ChildComponent>())
@@ -117,7 +129,7 @@ namespace cologne
             if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("GRAPH_ENTITY"))
             {
                 uint32_t id = *(uint32_t *) payload->Data;
-                Entity found_entity = {static_cast<entt::entity>(id), Engine::get_scene()};
+                Entity found_entity = {static_cast<entt::entity>(id), Engine::get_scene().get()};
 
                 bool bad_parent = found_entity.has_component<ParentComponent>() &&
                                   entity.has_component<ChildComponent>() && entity.get_component<ChildComponent>().

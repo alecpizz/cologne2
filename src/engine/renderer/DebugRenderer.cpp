@@ -27,13 +27,13 @@ namespace cologne
         uint32_t VAO, VBO;
         uint32_t allocated_buffer_size;
         uint32_t vertex_count;
-        std::unique_ptr<Shader> shader = nullptr;
+        Ref<Shader> shader = nullptr;
         bool is_drawing = true;
 
         void init()
         {
             is_drawing = true;
-            shader = std::make_unique<Shader>(RESOURCES_PATH "shaders/debug.vert", RESOURCES_PATH "shaders/debug.frag");
+            shader = create_ref<Shader>(RESOURCES_PATH "shaders/debug.vert", RESOURCES_PATH "shaders/debug.frag");
         }
 
         void update_vertex_data(std::vector<DebugVertex> &vertices)

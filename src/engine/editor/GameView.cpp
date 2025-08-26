@@ -3,7 +3,10 @@
 //
 #include <engine/audio/Audio.h>
 #include <engine/core/Engine.h>
+#include <engine/core/EventManager.h>
 #include <engine/core/Input.h>
+#include <engine/core/SceneManager.h>
+#include <engine/core/Window.h>
 #include <engine/renderer/Renderer.h>
 
 #include "Editor.h"
@@ -11,9 +14,27 @@
 
 namespace cologne
 {
+    void Editor::build_game_overlay()
+    {
+        ImGui::Begin("##toolbar", nullptr, _global_window_flags | ImGuiWindowFlags_NoDecoration  | ImGuiWindowFlags_NoScrollWithMouse);
+        float size = ImGui::GetWindowHeight() - 4.0f;
+        ImGui::SetCursorPosX(ImGui::GetWindowContentRegionMax().x * 0.5f - size * 0.5f);
+        if (ImGui::Button("Toggle Ortho"))
+        {
+            auto& cam = Engine::get_scene()->get_scene_camera().get_component<CameraComponent>();
+            cam.orthographic = !cam.orthographic;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Play"))
+        {
+            Engine::enter_play_mode();
+        }
+        ImGui::End();
+    }
+
     void Editor::build_game_view(float dt)
     {
-        ImGui::Begin("Game View", nullptr, _global_window_flags);
+        ImGui::Begin("Game View", nullptr, _global_window_flags | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
         ImVec2 viewport_size = ImGui::GetContentRegionAvail();
         if (static_cast<int>(_prev_viewport_size.x) != static_cast<int>(viewport_size.x) || static_cast<int>(
                 _prev_viewport_size.y) != static_cast<int>(viewport_size.y))
@@ -37,13 +58,13 @@ namespace cologne
         {
             uint32_t x = static_cast<uint32_t>(mouse_pos_relative.x);
             uint32_t y = static_cast<uint32_t>(mouse_pos_relative.y);
-            if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && !ImGuizmo::IsOver())
+            if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && !ImGuizmo::IsOver() && ImGui::IsWindowHovered())
             {
                 uint32_t id = Renderer::read_fbo_pixel("gbuffer", "entity_id", x, y);
                 if (id != entt::null)
                 {
                     Audio::play_sound(_move_sound, 30);
-                    Entity temp = {static_cast<entt::entity>(id), Engine::get_scene()};
+                    Entity temp = {static_cast<entt::entity>(id), Engine::get_scene().get()};
 
                     if (temp.has_component<ChildComponent>())
                     {
@@ -97,11 +118,7 @@ namespace cologne
                 Engine::get_window()->show_mouse();
             }
         }
-        if (ImGui::Button("Toggle Ortho"))
-        {
-            auto& cam = Engine::get_scene()->get_scene_camera().get_component<CameraComponent>();
-            cam.orthographic = !cam.orthographic;
-        }
+
         ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(Renderer::get_output_image())), viewport_size,
                      ImVec2(0, 1), ImVec2(1, 0));
 
@@ -195,7 +212,6 @@ namespace cologne
             glm::mat4 proj = Renderer::get_camera_projection(transform, camera_comp);
 
             auto &tr = _selected_entity.get_transform();
-            //         auto& tr = Engine::get_scene()->_registry.get<TransformComponent>(entity);
             glm::mat4 mat4 = tr.get_mat4();
             if (_selected_entity.has_component<ChildComponent>())
             {
@@ -211,7 +227,6 @@ namespace cologne
             //
             if (changed)
             {
-                glm::mat4 world_mat = mat4;
                 if (_selected_entity.has_component<ChildComponent>())
                 {
                     auto parent_entity = Engine::get_scene()->get_entity_by_uuid(
