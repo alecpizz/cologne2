@@ -21,22 +21,28 @@ namespace cologne
         }
         static std::string search_string = "";
         ImGui::InputText("Entity Name", &search_string);
-        for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
+        const ImGuiTableFlags table_flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInner;
+
+        if (ImGui::BeginTable("HiearchyTable", 1, table_flags))
         {
-            Entity e = {entity, Engine::get_scene().get()};
-            bool valid_search = search_string.empty() || e.get_name().find(search_string) != std::string::npos;
-            if (!valid_search)
+            for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
             {
-                continue;
+                Entity e = {entity, Engine::get_scene().get()};
+                bool valid_search = search_string.empty() || e.get_name().find(search_string) != std::string::npos;
+                if (!valid_search)
+                {
+                    continue;
+                }
+                if (e.has_component<HideInEditorComponent>())
+                {
+                    continue;
+                }
+                if (!e.has_component<ChildComponent>())
+                {
+                    draw_entity_node(e);
+                }
             }
-            if (e.has_component<HideInEditorComponent>())
-            {
-                continue;
-            }
-            if (!e.has_component<ChildComponent>())
-            {
-                draw_entity_node(e);
-            }
+            ImGui::EndTable();
         }
 
         if (ImGui::BeginDragDropTarget())
@@ -100,10 +106,14 @@ namespace cologne
         {
             return;
         }
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+
         auto &tag = entity.get_component<TagComponent>();
         ImGuiTreeNodeFlags flags = ((_selected_entity == entity) ? ImGuiTreeNodeFlags_Selected : 0) |
                                    ImGuiTreeNodeFlags_OpenOnArrow |
-                                   ImGuiTreeNodeFlags_SpanAvailWidth;
+                                   ImGuiTreeNodeFlags_SpanFullWidth;
         bool is_child = !entity.has_component<ParentComponent>();
         if (is_child)
         {

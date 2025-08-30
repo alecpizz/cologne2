@@ -207,8 +207,8 @@ namespace cologne
                                                                        ImGuiTreeNodeFlags_AllowItemOverlap |
                                                                        ImGuiTreeNodeFlags_FramePadding;
                         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{4, 4});
-                        bool open = ImGui::TreeNodeEx(format_component_name(type_name).c_str(), tree_node_flags,
-                                                      type_name.c_str());
+                        bool open = ImGui::TreeNodeEx(type_name.c_str(), tree_node_flags,
+                                                      format_component_name(type_name).c_str());
                         ImGui::PopStyleVar();
 
                         if (open)
