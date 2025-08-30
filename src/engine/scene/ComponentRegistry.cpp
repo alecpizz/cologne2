@@ -26,6 +26,8 @@ entt::meta_factory<T>() \
 .traits(tr) \
 .func<[](entt::registry* registry, entt::entity entity, T& value) { \
         registry->emplace_or_replace<T>(entity, std::move(value)); }>("emplace"_hs) \
+.func<[](entt::registry* registry, entt::entity entity) { \
+registry->remove<T>(entity); }>("remove"_hs) \
 .func<&copy<T>>("copy"_hs)
 
 #define REGISTER_PROPERTY(Type, member, ...) \

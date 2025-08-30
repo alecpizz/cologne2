@@ -261,6 +261,35 @@ namespace cologne
         return c0 || c1 || c2 || c3;
     }
 
+    static bool write_light(LightComponent& light, const PropertiesMap& properties)
+    {
+        bool changed = false;
+        const char *items[] = {"Directional", "Point", "Spot"};
+        int type = light.type;
+        if (ImGui::Combo("Light Type", &type, items, 3))
+        {
+            light.type = type;
+            changed = true;
+        }
+        if (light.type == LightComponent::Spot)
+        {
+            changed |= ImGui::DragFloat("outer cutoff", &light.outer_cutoff, 0.01f);
+            changed |= ImGui::DragFloat("inner cutoff", &light.inner_cutoff, 0.01f);
+        }
+        changed |= ImGui::Checkbox("Cast Shadows", &light.cast_shadows);
+        changed |= ImGui::Checkbox("Always Update Shadows", &light.always_update_shadows);
+        changed |= ImGui::DragFloat("Radius", &light.radius, 0.01f);
+        changed |= ImGui::DragFloat("Strength", &light.strength, 0.01f);
+        changed |= ImGui::ColorEdit3("Color", glm::value_ptr(light.color), ImGuiColorEditFlags_HDR
+                                                                | ImGuiColorEditFlags_Float);
+        return changed;
+    }
+
+    static void read_light(const LightComponent& light, const PropertiesMap& properties)
+    {
+
+    }
+
     static void read_mat4(const glm::mat4 &mat, const PropertiesMap &properties)
     {
         const char *label = "mat4";
@@ -323,5 +352,9 @@ namespace cologne
         entt::meta_factory<TagComponent>()
                 .func<&editor_read_dummy>("editor_read"_hs)
                 .func<&editor_write_dummy>("editor_write"_hs);
+
+        entt::meta_factory<LightComponent>()
+            .func<&write_light>("editor_write"_hs)
+            .func<&read_light>("editor_read"_hs);
     }
 }
