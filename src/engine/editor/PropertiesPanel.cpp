@@ -70,8 +70,8 @@ namespace cologne
         bool changed = false;
         if (auto write_func = meta.func("editor_write"_hs); write_func)
         {
-            // changed |= write_func.invoke(instance, properties).cast<bool>();
-            write_func.invoke(instance, properties);
+             changed |= write_func.invoke(instance, properties).cast<bool>();
+            //write_func.invoke(instance, properties);
         }
         else if (auto read_func = meta.func("editor_read"_hs); read_func)
         {

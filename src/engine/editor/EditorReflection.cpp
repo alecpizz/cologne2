@@ -108,71 +108,109 @@ namespace cologne
         throw "Error: unsupported type";
     }
 
-    static void get_editor_name(const char*& label, const PropertiesMap& properties)
+    static std::string format_snake_case_member(const std::string& input)
     {
-        if (auto it = properties.find("name"_hs); it != properties.end())
+        if (input.empty())
         {
-            label = *it->second.try_cast<const char*>();
+            return "";
         }
+
+        std::string result;
+        result.reserve(input.length());
+        bool capitalize = true;
+        for (const char c : input)
+        {
+            if (c == '_')
+            {
+                result += ' ';
+                capitalize = true;
+            }
+            else
+            {
+                if (capitalize)
+                {
+                    result += static_cast<char>(toupper(c));
+                    capitalize = false;
+                }
+                else
+                {
+                    result += c;
+                }
+            }
+        }
+        return result;
+    }
+
+    static std::string get_editor_name(const char* label, const PropertiesMap& properties)
+    {
+        std::string label_str = label;
+        if (const auto it = properties.find("name"_hs); it != properties.end())
+        {
+            if (const auto str = *it->second.try_cast<const char*>())
+            {
+                label_str = str;
+            }
+        }
+        return format_snake_case_member(label_str);
     }
 
     template <typename Scalar>
     static bool editor_write_scalar(Scalar& f, const PropertiesMap& properties)
     {
         const char* label = "float";
-        get_editor_name(label, properties);
+        const auto name = get_editor_name(label, properties).c_str();
         if constexpr (std::is_same_v<Scalar, bool>)
         {
-            return ImGui::Checkbox(label, &f);
+            return ImGui::Checkbox(name, &f);
         }
         else
         {
-            return ImGui::DragScalar(label, scalar_to_imgui_data_type<Scalar>(), &f);
+            return ImGui::DragScalar(name, scalar_to_imgui_data_type<Scalar>(), &f);
         }
     }
 
     template <typename Scalar>
-    static void editor_read_scalar(Scalar s, const PropertiesMap& prop)
+    static void editor_read_scalar(Scalar s, const PropertiesMap& properties)
     {
         const char* label = "scalar";
-        get_editor_name(label, prop);
-        ImGui::Text((std::string("%s: ") + scalar_to_format<Scalar>()).c_str(), label, s);
+        const auto name = get_editor_name(label, properties).c_str();
+        ImGui::Text((std::string("%s: ") + scalar_to_format<Scalar>()).c_str(), name, s);
     }
 
     static bool write_vec3(glm::vec3& v, const PropertiesMap& properties)
     {
         const char* label = "vec3";
-        get_editor_name(label, properties);
-        return ImGui::DragFloat3(label, glm::value_ptr(v));
+        const auto name = get_editor_name(label, properties).c_str();
+        return ImGui::DragFloat3(name, glm::value_ptr(v));
     }
 
     static void read_vec3(glm::vec3 v, const PropertiesMap& properties)
     {
         const char* label = "vec3";
-        get_editor_name(label, properties);
-        ImGui::Text("%s: %f, %f, %f", label, v.x, v.y, v.z);
+        const auto name = get_editor_name(label, properties).c_str();
+        ImGui::Text("%s: %f, %f, %f", name, v.x, v.y, v.z);
     }
 
     static bool write_vec4(glm::vec4& v, const PropertiesMap& properties)
     {
         const char* label = "vec4";
-        get_editor_name(label, properties);
-        return ImGui::DragFloat4(label, glm::value_ptr(v));
+        const auto name = get_editor_name(label, properties).c_str();
+        return ImGui::DragFloat4(name, glm::value_ptr(v));
     }
 
     static void read_vec4(glm::vec4 v, const PropertiesMap& properties)
     {
         const char* label = "vec4";
-        get_editor_name(label, properties);
-        ImGui::Text("%s: %f %f %f %f", label, v.x, v.y, v.z, v.w);
+        const auto name = get_editor_name(label, properties).c_str();
+        ImGui::Text("%s: %f %f %f %f", name, v.x, v.y, v.z, v.w);
     }
 
     static bool write_quat(glm::quat& q, const PropertiesMap& properties)
     {
         const char* label = "quat";
-        get_editor_name(label, properties);
+        const auto name = get_editor_name(label, properties).c_str();
         auto euler = glm::degrees(glm::eulerAngles(q));
-        bool changed = ImGui::DragFloat3(label, glm::value_ptr(euler));
+        bool changed = ImGui::DragFloat3(name, glm::value_ptr(euler));
         if (changed)
         {
             q = glm::quat(glm::radians(euler));
@@ -183,48 +221,48 @@ namespace cologne
     static void read_quat(glm::quat q, const PropertiesMap& properties)
     {
         const char* label = "quat";
-        get_editor_name(label, properties);
-        ImGui::Text("%s: %f %f %f %f", label, q.x, q.y, q.z, q.w);
+        const auto name = get_editor_name(label, properties).c_str();
+        ImGui::Text("%s: %f %f %f %f", name, q.x, q.y, q.z, q.w);
     }
 
     static bool write_string(std::string& s, const PropertiesMap& properties)
     {
         const char* label = "string";
-        get_editor_name(label, properties);
-        return ImGui::InputText(label, &s, ImGuiInputTextFlags_EnterReturnsTrue);
+        const auto name = get_editor_name(label, properties).c_str();
+        return ImGui::InputText(name, &s, ImGuiInputTextFlags_EnterReturnsTrue);
     }
 
     static void read_string(const std::string& s, const PropertiesMap& properties)
     {
         const char* label = "string";
-        get_editor_name(label, properties);
-        ImGui::Text("%.*s", static_cast<int>(s.size()), s.c_str());
+        const auto name = get_editor_name(label, properties).c_str();
+        ImGui::LabelText(name, "%.*s", static_cast<int>(s.size()), s.c_str());
     }
 
     static bool write_mat4(glm::mat4& mat, const PropertiesMap& properties)
     {
         const char* label = "mat4";
-        get_editor_name(label, properties);
-        bool c0 = ImGui::DragFloat4(std::string(std::string(label) + "col 0").c_str(), &mat[0][0]);
-        bool c1 = ImGui::DragFloat4(std::string(std::string(label) + "col 1").c_str(), &mat[1][0]);
-        bool c2 = ImGui::DragFloat4(std::string(std::string(label) + "col 2").c_str(), &mat[2][0]);
-        bool c3 = ImGui::DragFloat4(std::string(std::string(label) + "col 3").c_str(), &mat[3][0]);
+        const auto name = get_editor_name(label, properties).c_str();
+        bool c0 = ImGui::DragFloat4(std::string(std::string(name) + "col 0").c_str(), &mat[0][0]);
+        bool c1 = ImGui::DragFloat4(std::string(std::string(name) + "col 1").c_str(), &mat[1][0]);
+        bool c2 = ImGui::DragFloat4(std::string(std::string(name) + "col 2").c_str(), &mat[2][0]);
+        bool c3 = ImGui::DragFloat4(std::string(std::string(name) + "col 3").c_str(), &mat[3][0]);
         return c0 || c1 || c2 || c3;
     }
 
     static void read_mat4(const glm::mat4& mat, const PropertiesMap& properties)
     {
         const char* label = "mat4";
-        get_editor_name(label, properties);
-        ImGui::Text("%s: %f %f %f %f", label, mat[0][0], mat[0][1], mat[0][2], mat[0][3]);
-        ImGui::Text("%s: %f %f %f %f", label, mat[1][0], mat[1][1], mat[1][2], mat[1][3]);
-        ImGui::Text("%s: %f %f %f %f", label, mat[2][0], mat[2][1], mat[2][2], mat[2][3]);
-        ImGui::Text("%s: %f %f %f %f", label, mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
+        const auto name = get_editor_name(label, properties).c_str();
+        ImGui::Text("%s: %f %f %f %f", name, mat[0][0], mat[0][1], mat[0][2], mat[0][3]);
+        ImGui::Text("%s: %f %f %f %f", name, mat[1][0], mat[1][1], mat[1][2], mat[1][3]);
+        ImGui::Text("%s: %f %f %f %f", name, mat[2][0], mat[2][1], mat[2][2], mat[2][3]);
+        ImGui::Text("%s: %f %f %f %f", name, mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
     }
 
-    static void editor_write_dummy()
+    static bool editor_write_dummy()
     {
-
+        return true;
     }
 
     static void editor_read_dummy()
