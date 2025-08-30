@@ -56,12 +56,13 @@ namespace cologne
         }
     }
 
-    static bool draw_component_editor(entt::entity entity, entt::meta_any instance, entt::meta_custom custom, int& guiID)
+    static bool draw_component_editor(entt::entity entity, entt::meta_any instance, entt::meta_custom custom,
+                                      int &guiID)
     {
         using namespace entt::literals;
         auto meta = instance.type();
         ComponentRegistry::PropertiesMap properties = {};
-        if (auto* mp = static_cast<const ComponentRegistry::PropertiesMap*>(custom))
+        if (auto *mp = static_cast<const ComponentRegistry::PropertiesMap *>(custom))
         {
             properties = *mp;
         }
@@ -91,7 +92,7 @@ namespace cologne
         }
         else
         {
-            for (auto [id, data] : meta.data())
+            for (auto [id, data]: meta.data())
             {
                 ImGui::PushID(guiID++);
                 ImGui::Indent();
@@ -101,6 +102,35 @@ namespace cologne
             }
         }
         return changed;
+    }
+
+    static std::string format_component_name(const std::string &input)
+    {
+        if (input.empty())
+        {
+            return "";
+        }
+
+        std::string result;
+        result.reserve(input.length() * 2);
+
+        result += input[0];
+
+        for (size_t i = 1; i < input.length(); i++)
+        {
+            if (isupper(input[i]))
+            {
+                result += ' ';
+            }
+            result += input[i];
+        }
+
+        std::string suffix = " Component";
+        if (result.length() >= suffix.length() && result.substr(result.length() - suffix.length()) == suffix)
+        {
+            result = result.substr(0, result.length() - suffix.length());
+        }
+        return result;
     }
 
     void Editor::build_properties_panel()
@@ -121,7 +151,7 @@ namespace cologne
 
 
             //TODO: figure out if i actually need this.
-            for (int i = 0; auto&& [id, storage] : Engine::get_scene()->_registry.storage())
+            for (int i = 0; auto &&[id, storage]: Engine::get_scene()->_registry.storage())
             {
                 if (!storage.contains(_selected_entity))
                 {
@@ -131,11 +161,17 @@ namespace cologne
                 {
                     continue;
                 }
-                auto& type_name = ComponentRegistry::get_component_map().at(storage.type().hash());
-                ImGui::SeparatorText(type_name.c_str());
+                auto &type_name = ComponentRegistry::get_component_map().at(storage.type().hash());
                 if (auto meta = entt::resolve(entt::hashed_string(type_name.c_str())))
                 {
-                    draw_component_editor(_selected_entity, meta.from_void(storage.value(_selected_entity)).as_ref(), meta.custom(), i);
+                    auto traits = meta.traits<ComponentRegistry::Traits>();
+                    if ((traits & ComponentRegistry::Traits::EDITOR_READ_WRITE) == ComponentRegistry::Traits::EDITOR_READ_WRITE)
+                    {
+                        ImGui::SeparatorText(format_component_name(type_name).c_str());
+                        draw_component_editor(_selected_entity,
+                                              meta.from_void(storage.value(_selected_entity)).as_ref(),
+                                              meta.custom(), i);
+                    }
                 }
             }
 
@@ -248,7 +284,9 @@ namespace cologne
                 auto mesh = AssetManager::get_mesh_by_name(mesh_comp.mesh_name);
                 std::string mesh_name = mesh->get_name();
                 ImGui::Text("Name %s Material %d", mesh_name.c_str(), mesh->get_material_index());
-                ImGui::Text("Metallic %f Roughness %f", AssetManager::get_material_by_index(mesh->get_material_index())->metallic_override, AssetManager::get_material_by_index(mesh->get_material_index())->roughness_override);
+                ImGui::Text("Metallic %f Roughness %f",
+                            AssetManager::get_material_by_index(mesh->get_material_index())->metallic_override,
+                            AssetManager::get_material_by_index(mesh->get_material_index())->roughness_override);
             });
 
             draw_component<ModelComponent>("Model", _selected_entity, true, [this](ModelComponent &model)
@@ -364,7 +402,7 @@ namespace cologne
 
             if (ImGui::BeginPopup("AddComponent"))
             {
-                for (auto&& [id, storage] : Engine::get_scene()->_registry.storage())
+                for (auto &&[id, storage]: Engine::get_scene()->_registry.storage())
                 {
                     if (storage.contains(_selected_entity))
                     {
@@ -376,13 +414,15 @@ namespace cologne
                     }
                     if (ImGui::MenuItem(ComponentRegistry::get_component_map().at(id).c_str()))
                     {
-                        if (auto meta = entt::resolve(entt::hashed_string(ComponentRegistry::get_component_map().at(id).c_str())))
+                        if (auto meta = entt::resolve(
+                            entt::hashed_string(ComponentRegistry::get_component_map().at(id).c_str())))
                         {
                             //add component meta
                             auto instance = meta.construct();
                             if (auto emplace_func = instance.type().func(entt::hashed_string("emplace")); emplace_func)
                             {
-                                emplace_func.invoke({}, &Engine::get_scene()->_registry, static_cast<entt::entity>(_selected_entity), instance.as_ref());
+                                emplace_func.invoke({}, &Engine::get_scene()->_registry,
+                                                    static_cast<entt::entity>(_selected_entity), instance.as_ref());
                             }
                             Audio::play_sound(_accept_sound, 30);
                         }

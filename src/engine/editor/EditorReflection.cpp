@@ -239,7 +239,7 @@ namespace cologne
             .func<&editor_read_scalar<int>>("editor_read"_hs);
         entt::meta_factory<uint64_t>()
             .func<&editor_write_scalar<uint64_t>>("editor_write"_hs)
-            .func<&editor_write_scalar<uint64_t>>("editor_write"_hs);
+            .func<&editor_read_scalar<uint64_t>>("editor_read"_hs);
         entt::meta_factory<uint32_t>()
             .func<&editor_write_scalar<uint32_t>>("editor_write"_hs)
             .func<&editor_read_scalar<uint32_t>>("editor_read"_hs);

@@ -7,7 +7,6 @@
 #include <engine/asset_manager/AssetManager.h>
 #include <nlohmann/json.hpp>
 #include "Components.h"
-#include <entt/entt.hpp>
 
 
 namespace cologne::ComponentRegistry
@@ -20,18 +19,19 @@ namespace cologne::ComponentRegistry
     }
 
     using namespace entt::literals;
-#define REGISTER_COMPONENT(T, name) \
+#define REGISTER_COMPONENT(T, name, tr) \
 component_type_map[entt::type_hash<T>::value()] = name; \
 entt::meta_factory<T>() \
 .type(entt::hashed_string(name))\
+.traits(tr) \
 .func<[](entt::registry* registry, entt::entity entity, T& value) { \
         registry->emplace_or_replace<T>(entity, std::move(value)); }>("emplace"_hs) \
 .func<&copy<T>>("copy"_hs)
 
-
 #define REGISTER_PROPERTY(Type, member, ...) \
 .data<&Type::member, entt::as_ref_t>(#member##_hs) \
 .custom<PropertiesMap>(PropertiesMap{{"name"_hs, #member} __VA_OPT__(, __VA_ARGS__)})
+
 
 #define REFLECT_ENUM(T) \
         entt::meta_factory<T>()
@@ -117,7 +117,7 @@ entt::meta_factory<T>() \
                 .data<[](glm::mat4 &m) { return m[2]; }>("c2"_hs)
                 .data<[](glm::mat4 &m) { return m[3]; }>("c3"_hs);
 
-        REGISTER_COMPONENT(TransformComponent, "TransformComponent")
+        REGISTER_COMPONENT(TransformComponent, "TransformComponent", NO_EDITOR)
                 REGISTER_PROPERTY(TransformComponent, position)
                 REGISTER_PROPERTY(TransformComponent, rotation)
                 REGISTER_PROPERTY(TransformComponent, scale);
@@ -125,46 +125,50 @@ entt::meta_factory<T>() \
         entt::meta_factory<UUID>().conv<uint64_t>()
                 .type("UUID"_hs)
                 REGISTER_PROPERTY(UUID, _uuid);
-        REGISTER_COMPONENT(IDComponent, "IDComponent")
+
+        REGISTER_COMPONENT(IDComponent, "IDComponent", NO_EDITOR)
                 REGISTER_PROPERTY(IDComponent, id);
 
-        REGISTER_COMPONENT(WorldTransformComponent, "WorldTransformComponent")
+        REGISTER_COMPONENT(WorldTransformComponent, "WorldTransformComponent", NO_EDITOR)
                 REGISTER_PROPERTY(WorldTransformComponent, transform);
 
-        REGISTER_COMPONENT(ChildComponent, "ChildComponent")
+        REGISTER_COMPONENT(ChildComponent, "ChildComponent", NO_EDITOR)
                 REGISTER_PROPERTY(ChildComponent, parent);
 
-        REGISTER_COMPONENT(ActiveComponent, "ActiveComponent")
+        REGISTER_COMPONENT(ActiveComponent, "ActiveComponent", NO_EDITOR)
                 REGISTER_PROPERTY(ActiveComponent, active);
 
-        REGISTER_COMPONENT(ModelComponent, "ModelComponent")
+        REGISTER_COMPONENT(ModelComponent, "ModelComponent", EDITOR_READ_WRITE)
                 REGISTER_PROPERTY(ModelComponent, model_name)
                 REGISTER_PROPERTY(ModelComponent, gi_only);
-
-        REGISTER_COMPONENT(MeshComponent, "MeshComponent")
+        //
+         REGISTER_COMPONENT(MeshComponent, "MeshComponent", EDITOR_READ_WRITE)
+        //     .traits(Traits::TRANSIENT)
+        //     .type("MeshComponent"_hs)
                 REGISTER_PROPERTY(MeshComponent, mesh_name);
 
-        REGISTER_COMPONENT(SkinnedModelComponent, "SkinnedModelComponent")
+
+        REGISTER_COMPONENT(SkinnedModelComponent, "SkinnedModelComponent", EDITOR_READ_WRITE)
                 REGISTER_PROPERTY(SkinnedModelComponent, model_name);
 
-        REGISTER_COMPONENT(CameraComponent, "CameraComponent")
+        REGISTER_COMPONENT(CameraComponent, "CameraComponent", EDITOR_READ_WRITE)
                 REGISTER_PROPERTY(CameraComponent, fov_radians)
                 REGISTER_PROPERTY(CameraComponent, primary)
                 REGISTER_PROPERTY(CameraComponent, ortho_zoom)
                 REGISTER_PROPERTY(CameraComponent, orthographic);
 
-        REGISTER_COMPONENT(TagComponent, "TagComponent")
+        REGISTER_COMPONENT(TagComponent, "TagComponent", NO_EDITOR)
                 REGISTER_PROPERTY(TagComponent, tag);
 
-        REGISTER_COMPONENT(StaticColliderComponent, "StaticColliderComponent")
+        REGISTER_COMPONENT(StaticColliderComponent, "StaticColliderComponent", EDITOR_READ_ONLY)
                 REGISTER_PROPERTY(StaticColliderComponent, mesh_name);
 
-        REGISTER_COMPONENT(RigidbodyComponent, "RigidbodyComponent");
+        REGISTER_COMPONENT(RigidbodyComponent, "RigidbodyComponent", EDITOR_READ_ONLY);
 
-        REGISTER_COMPONENT(ConvexMeshColliderComponent, "ConvexMeshColliderComponent")
+        REGISTER_COMPONENT(ConvexMeshColliderComponent, "ConvexMeshColliderComponent", EDITOR_READ_WRITE)
                 REGISTER_PROPERTY(ConvexMeshColliderComponent, mesh_name);
 
-        REGISTER_COMPONENT(PlayerComponent, "PlayerComponent")
+        REGISTER_COMPONENT(PlayerComponent, "PlayerComponent", EDITOR_READ_WRITE)
                 REGISTER_PROPERTY(PlayerComponent, camera)
                 REGISTER_PROPERTY(PlayerComponent, viewmodel)
                 REGISTER_PROPERTY(PlayerComponent, gravity)
@@ -183,7 +187,7 @@ entt::meta_factory<T>() \
                 REGISTER_PROPERTY(PlayerComponent, maxStepInterval)
                 REGISTER_PROPERTY(PlayerComponent, minStepInterval);
 
-        REGISTER_COMPONENT(ViewmodelComponent, "ViewmodelComponent")
+        REGISTER_COMPONENT(ViewmodelComponent, "ViewmodelComponent", EDITOR_READ_WRITE)
                 REGISTER_PROPERTY(ViewmodelComponent, position_offset)
                 REGISTER_PROPERTY(ViewmodelComponent, euler_offset)
                 REGISTER_PROPERTY(ViewmodelComponent, sway_multiplier)
@@ -193,19 +197,19 @@ entt::meta_factory<T>() \
                 REGISTER_PROPERTY(ViewmodelComponent, vertical_velocity_multiplier)
                 REGISTER_PROPERTY(ViewmodelComponent, max_vertical_offset);
 
-        REGISTER_COMPONENT(EnemyComponent, "EnemyComponent")
+        REGISTER_COMPONENT(EnemyComponent, "EnemyComponent", EDITOR_READ_WRITE)
                 REGISTER_PROPERTY(EnemyComponent, health)
                 REGISTER_PROPERTY(EnemyComponent, dead)
                 REGISTER_PROPERTY(EnemyComponent, hurt_sound);
 
-        REGISTER_COMPONENT(BulletComponent, "BulletComponent")
+        REGISTER_COMPONENT(BulletComponent, "BulletComponent", EDITOR_READ_WRITE)
                 REGISTER_PROPERTY(BulletComponent, position)
                 REGISTER_PROPERTY(BulletComponent, direction)
                 REGISTER_PROPERTY(BulletComponent, damage);
 
-        REGISTER_COMPONENT(HideInEditorComponent, "HideInEditorComponent");
-        REGISTER_COMPONENT(EditorCameraComponent, "EditorCameraComponent");
-        REGISTER_COMPONENT(LightComponent, "LightComponent")
+        REGISTER_COMPONENT(HideInEditorComponent, "HideInEditorComponent", NO_EDITOR);
+        REGISTER_COMPONENT(EditorCameraComponent, "EditorCameraComponent", NO_EDITOR);
+        REGISTER_COMPONENT(LightComponent, "LightComponent", EDITOR_READ_WRITE)
                 REGISTER_PROPERTY(LightComponent, color)
                 REGISTER_PROPERTY(LightComponent, strength)
                 REGISTER_PROPERTY(LightComponent, radius)
@@ -215,7 +219,7 @@ entt::meta_factory<T>() \
                 REGISTER_PROPERTY(LightComponent, always_update_shadows)
                 REGISTER_PROPERTY(LightComponent, cast_shadows);
 
-        REGISTER_COMPONENT(InteractorComponent, "InteractorComponent")
+        REGISTER_COMPONENT(InteractorComponent, "InteractorComponent", EDITOR_READ_WRITE)
                 REGISTER_PROPERTY(InteractorComponent, update_every_frame);
 
         REFLECT_ENUM(LightComponent::LightType)
@@ -223,7 +227,7 @@ entt::meta_factory<T>() \
                 ENUMERATOR(LightComponent::LightType, Point)
                 ENUMERATOR(LightComponent::LightType, Spot);
 
-        REGISTER_COMPONENT(AnimatorComponent, "AnimatorComponent")
+        REGISTER_COMPONENT(AnimatorComponent, "AnimatorComponent", EDITOR_READ_WRITE)
                 .func<[](AnimatorComponent &comp, nlohmann::json &j)
                 {
                     serialize_animator(comp, j);
@@ -232,7 +236,7 @@ entt::meta_factory<T>() \
                 {
                     deserialize_animator(comp, j);
                 }>("deserialize"_hs);
-        REGISTER_COMPONENT(ParentComponent, "ParentComponent")
+        REGISTER_COMPONENT(ParentComponent, "ParentComponent", NO_EDITOR)
                 REGISTER_PROPERTY(ParentComponent, children);
     }
 }
