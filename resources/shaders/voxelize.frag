@@ -40,9 +40,7 @@ struct Material
 {
     uvec2 albedo;
     uvec2 normal;
-    uvec2 metallic;
-    uvec2 roughness;
-    uvec2 ao;
+    uvec2 orm;
     uvec2 emission;
     float roughness_mod;
     float metallic_mod;
@@ -184,26 +182,18 @@ vec4 pbr()
     vec3 albedo = pow(albedo_texture.rgb, vec3(2.2));
     float metallic;
     float roughness;
-    if(mat.metallic == uvec2(0))
+    vec3 orm = texture2D(sampler2D(mat.orm), TexCoords).rgb;
+    metallic = orm.b;
+    roughness = orm.g;
+
     {
-        metallic = mat.metallic_mod;
-    }
-    else
-    {
-        metallic = texture2D(sampler2D(mat.metallic), TexCoords).r;
         metallic *= mat.metallic_mod;
     }
 
-    if(mat.roughness == uvec2(0))
     {
-        roughness = mat.roughness_mod;
-    }
-    else
-    {
-        roughness = texture2D(sampler2D(mat.roughness), TexCoords).g;
         roughness *= mat.roughness_mod;
     }
-    float ao = texture2D(sampler2D(mat.ao), TexCoords).b + 0.2;
+
 
     vec3 N;
     if(mat.normal == vec2(0))

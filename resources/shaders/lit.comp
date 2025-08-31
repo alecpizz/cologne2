@@ -60,7 +60,6 @@ layout (binding = 2, std430) restrict readonly buffer lights_buffer
 };
 
 uniform float far_plane = 20.0f;
-uniform float ao_strength = 0.2;
 
 vec3 WorldPos;
 
@@ -161,9 +160,9 @@ void main()
     vec3 albedo = pow(albedo_texture.rgb, vec3(2.2));
     //    vec3 albedo = albedo_texture.rgb;
     vec3 orm = texture2D(gORM, uv).rgb;
-    float metallic = orm.r;
+    float metallic = orm.b;
     float roughness = orm.g;
-    float ao = orm.b + ao_strength;
+    float ao = orm.r;
 
     vec3 N = texture2D(gNormal, uv).rgb;
     vec3 V = normalize(camera_position.xyz - FragPos);

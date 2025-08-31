@@ -45,23 +45,23 @@ namespace cologne
         uint32_t dwReserved2;
     };
 
-    const uint32_t DDSD_CAPS        = 0x1;
-    const uint32_t DDSD_HEIGHT      = 0x2;
-    const uint32_t DDSD_WIDTH       = 0x4;
-    const uint32_t DDSD_PITCH       = 0x8;
+    const uint32_t DDSD_CAPS = 0x1;
+    const uint32_t DDSD_HEIGHT = 0x2;
+    const uint32_t DDSD_WIDTH = 0x4;
+    const uint32_t DDSD_PITCH = 0x8;
     const uint32_t DDSD_PIXELFORMAT = 0x1000;
     const uint32_t DDSD_MIPMAPCOUNT = 0x20000;
-    const uint32_t DDSD_LINEARSIZE  = 0x80000;
-    const uint32_t DDSD_DEPTH       = 0x800000;
+    const uint32_t DDSD_LINEARSIZE = 0x80000;
+    const uint32_t DDSD_DEPTH = 0x800000;
 
     const uint32_t DDPF_ALPHAPIXELS = 0x1;
-    const uint32_t DDPF_ALPHA       = 0x2;
-    const uint32_t DDPF_FOURCC      = 0x4;
-    const uint32_t DDPF_RGB         = 0x40;
+    const uint32_t DDPF_ALPHA = 0x2;
+    const uint32_t DDPF_FOURCC = 0x4;
+    const uint32_t DDPF_RGB = 0x40;
 
-    const uint32_t DDSCAPS_COMPLEX  = 0x8;
-    const uint32_t DDSCAPS_MIPMAP   = 0x400000;
-    const uint32_t DDSCAPS_TEXTURE  = 0x1000;
+    const uint32_t DDSCAPS_COMPLEX = 0x8;
+    const uint32_t DDSCAPS_MIPMAP = 0x400000;
+    const uint32_t DDSCAPS_TEXTURE = 0x1000;
 
 
     Texture::Texture(const char *texture_path)
@@ -96,19 +96,12 @@ namespace cologne
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    Texture::Texture(unsigned char *data, uint32_t width, uint32_t height)
+    Texture::Texture(unsigned char *data, uint32_t width, uint32_t height, uint32_t channels)
     {
-        // int new_width, new_height, new_channels;
         _width = width;
         _height = height;
-        if (height == 0)
-        {
-            _data = std::vector<unsigned char>(data, data + width);
-        }
-        else
-        {
-            _data = std::vector<unsigned char>(data, data + (width * height));
-        }
+        _channels = channels;
+        _data = std::vector<unsigned char>(data, data + (width * height * channels));
     }
 
     Texture::Texture(uint32_t handle, uint32_t width, uint32_t height, uint32_t channels)
@@ -180,14 +173,14 @@ namespace cologne
         {
             return;
         }
-        stbi_set_flip_vertically_on_load(false);
-        int new_width = 0, new_height = 0, new_channels = 0;
-        stbi_uc *img_data =
-                stbi_load_from_memory(_data.data(), static_cast<int>(_data.size()),
-                                      &new_width, &new_height, &new_channels, 0);
-        _width = new_width;
-        _height = new_height;
-        _channels = new_channels;
+       // stbi_set_flip_vertically_on_load (false);
+       //  int new_width = 0, new_height = 0, new_channels = 0;
+       //  stbi_uc *img_data =
+       //          stbi_load_from_memory(_data.data(), static_cast<int>(_data.size()),
+       //                                &new_width, &new_height, &new_channels, 0);
+       //  _width = new_width;
+       //  _height = new_height;
+       //  _channels = new_channels;
 
         glCreateTextures(GL_TEXTURE_2D, 1, &_handle);
         glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -215,9 +208,8 @@ namespace cologne
         int32_t mips = floor(log2(std::max(_width, _height))) + 1;
         glTextureStorage2D(_handle, mips, format_internal, _width, _height);
         glTextureSubImage2D(_handle, 0, 0, 0, _width, _height, format, GL_UNSIGNED_BYTE,
-                            img_data);
+                            _data.data());
         glGenerateTextureMipmap(_handle);
-        stbi_image_free(img_data);
         _data.clear();
         _data.shrink_to_fit();
     }
@@ -293,9 +285,9 @@ namespace cologne
         std::streampos begin = file.tellg();
         file.seekg(0, std::ios::end);
         std::streampos end = file.tellg();
-        std::vector<uint8_t> all_img_data (end - begin); //determine how big the total data is
+        std::vector<uint8_t> all_img_data(end - begin); //determine how big the total data is
         file.seekg(begin); //go back andd re-read it
-        file.read(reinterpret_cast<char*>(all_img_data.data()), all_img_data.size());
+        file.read(reinterpret_cast<char *>(all_img_data.data()), all_img_data.size());
         file.close();
 
 
@@ -319,7 +311,8 @@ namespace cologne
         {
             int cFlags = squish::kDxt1;
             uint32_t size = squish::GetStorageRequirements(current_width, current_height, cFlags);
-            glCompressedTextureSubImage2D(_handle, level, 0, 0, current_width, current_height, format_internal, size, all_img_data.data() + offset);
+            glCompressedTextureSubImage2D(_handle, level, 0, 0, current_width, current_height, format_internal, size,
+                                          all_img_data.data() + offset);
 
             offset += size;
             current_width = std::max(1u, current_width / 2);
@@ -365,12 +358,7 @@ namespace cologne
             LOG_ERROR("No data to compress!");
             return;
         }
-        int new_width;
-        int new_height;
-        int new_channels;
-        stbi_set_flip_vertically_on_load(false);
-        stbi_uc *img_data = stbi_load_from_memory(_data.data(), static_cast<int>(_data.size()),
-                                      &new_width, &new_height, &new_channels, 4);
+
         FileUtil::create_directory_recursive(path);
         std::ofstream outfile(path, std::ios::binary);
         if (outfile.fail())
@@ -378,14 +366,18 @@ namespace cologne
             LOG_ERROR("Couldn't open output file %s %s", path, strerror(errno));
             return;
         }
-        int original_width = new_width;
-        int original_height = new_height;
+        int original_width = _width;
+        int original_height = _height;
+        int new_width = original_width;
+        int new_height = original_height;
 
         const int MAX_DIMENSION = 2048;
-        uint8_t* processing_data = img_data;
+        std::vector working_data(_data);
+        uint8_t* processing_data = working_data.data();
+
         if (original_width > MAX_DIMENSION || original_height > MAX_DIMENSION)
         {
-            LOG_ERROR("Texture dimensions (%d x %d) exceed max of %d." ,original_width, original_height, MAX_DIMENSION);
+            LOG_ERROR("Texture dimensions (%d x %d) exceed max of %d.", original_width, original_height, MAX_DIMENSION);
 
             if (original_width > original_height)
             {
@@ -401,28 +393,28 @@ namespace cologne
             new_width = std::max(1, new_width);
             new_height = std::max(1, new_height);
 
-            uint8_t* resized_data = new uint8_t[new_width * new_height * 4];
-            stbir_resize_uint8_linear(img_data, original_width, original_height, 0,
-                                  resized_data, new_width, new_height, 0, STBIR_RGBA);
+            uint8_t *resized_data = new uint8_t[new_width * new_height * 4];
+            stbir_resize_uint8_linear(_data.data(), original_width, original_height, 0,
+                                      resized_data, new_width, new_height, 0, STBIR_RGBA);
             processing_data = resized_data;
         }
-
-
 
 
         int mip_count = floor(log2(std::max(new_width, new_height))) + 1;
         std::vector<uint8_t> all_mip_data;
         int current_width = new_width;
         int current_height = new_height;
-        uint8_t* previous_mip_data = processing_data;
+        uint8_t *previous_mip_data = processing_data;
         for (int i = 0; i < mip_count; i++)
         {
-            uint8_t* current_mip = previous_mip_data;
+            unsigned char *current_mip = previous_mip_data;
             if (i > 0)
             {
                 current_mip = new uint8_t[current_width * current_height * 4];
-                stbir_resize_uint8_linear(previous_mip_data, (i == 1) ? new_width : current_width * 2, (i == 1) ? new_height : current_height * 2,
-                    0, current_mip, current_width, current_height, 0, stbir_pixel_layout::STBIR_RGBA);
+                stbir_resize_uint8_linear(previous_mip_data, (i == 1) ? new_width : current_width * 2,
+                                          (i == 1) ? new_height : current_height * 2,
+                                          0, current_mip, current_width, current_height, 0,
+                                          STBIR_RGBA);
                 if (i > 1)
                 {
                     delete[] previous_mip_data;
@@ -433,7 +425,8 @@ namespace cologne
             int cFlags = squish::kDxt1;
             int comprssed_size = squish::GetStorageRequirements(current_width, current_height, cFlags);
             std::vector<uint8_t> compressed_data(comprssed_size);
-            squish::CompressImage(current_mip, current_width, current_height, current_width * 4, compressed_data.data(), cFlags);
+            squish::CompressImage(current_mip, current_width, current_height, current_width * 4, compressed_data.data(),
+                                  cFlags);
             all_mip_data.insert(all_mip_data.end(), compressed_data.begin(), compressed_data.end());
             current_width = std::max(1, current_width / 2);
             current_height = std::max(1, current_height / 2);
@@ -443,12 +436,11 @@ namespace cologne
         {
             delete[] previous_mip_data;
         }
-        if (processing_data != img_data)
+
+        if (processing_data != working_data.data())
         {
             delete[] processing_data;
         }
-
-        stbi_image_free(img_data);
 
 
         DDS_HEADER header = {};
@@ -469,5 +461,10 @@ namespace cologne
         outfile.write(reinterpret_cast<const char *>(all_mip_data.data()), all_mip_data.size());
 
         outfile.close();
+    }
+
+    const std::vector<unsigned char> & Texture::get_raw_data() const
+    {
+        return _data;
     }
 }

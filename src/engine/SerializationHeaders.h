@@ -54,9 +54,7 @@ namespace cologne
     {
         char albedo_path[512];
         char normal_path[512];
-        char metallic_path[512];
-        char roughness_path[512];
-        char ao_path[512];
+        char orm_path[512];
         char emission_path[512];
         float roughness_override = 1.0f;
         float metallic_override = 1.0f;

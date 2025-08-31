@@ -27,11 +27,13 @@ namespace cologne::FileUtil
 
     void process_materials(std::vector<Material> &mats, const aiScene *scene);
 
-    void process_all_skinned_meshes(const aiScene* scene, std::vector<SkinnedMeshData>& out_meshes, const Skeleton& skeleton);
+    void process_all_skinned_meshes(const aiScene *scene, std::vector<SkinnedMeshData> &out_meshes,
+                                    const Skeleton &skeleton);
 
-    SkinnedMeshData process_single_skinned_mesh(const aiMesh* mesh, const Skeleton& skeleton);
+    SkinnedMeshData process_single_skinned_mesh(const aiMesh *mesh, const Skeleton &skeleton);
 
-    void extract_bone_weights_for_mesh(std::vector<WeightedVertex>& vertices, const aiMesh* mesh, const Skeleton& skeleton);
+    void extract_bone_weights_for_mesh(std::vector<WeightedVertex> &vertices, const aiMesh *mesh,
+                                       const Skeleton &skeleton);
 
     void process_node(std::vector<MeshData> &meshes, const aiNode *node, const aiScene *scene,
                       const aiMatrix4x4 &parentTransform)
@@ -131,6 +133,54 @@ namespace cologne::FileUtil
     }
 
 
+    Texture create_orm_texture(const Texture &occlusion, const Texture &roughness, const Texture &metallic)
+    {
+        if (!roughness.contains_data())
+        {
+            LOG_ERROR("roughness!");
+            return {};
+        }
+        uint32_t width = roughness.get_width();
+        uint32_t height = roughness.get_height();
+
+        bool has_ao = occlusion.contains_data();
+        bool has_metal = metallic.contains_data();
+        const auto *occ_data = occlusion.get_raw_data().data();
+        const auto *rough_data = roughness.get_raw_data().data();
+        const auto *metal_data = metallic.get_raw_data().data();
+
+        const auto occ_channels = has_ao ? occlusion.get_channels() : 1;
+        const auto rough_channels = roughness.get_channels();
+        const auto metal_channels = has_metal ? metallic.get_channels() : 1;
+
+        const uint32_t dest_channels = 4;
+        size_t total_pixels = width * height;
+        std::vector<uint8_t> packed_data(total_pixels * dest_channels);
+
+        for (size_t i = 0; i < total_pixels; i++)
+        {
+            const size_t occ_idx = i * occ_channels;
+            const size_t rough_idx = i * rough_channels;
+            const size_t metal_idx = i * metal_channels;
+
+            const size_t dest_idx = i * dest_channels;
+
+            packed_data[dest_idx + 0] = has_ao ? occ_data[occ_idx] : 255;
+            packed_data[dest_idx + 1] = rough_data[rough_idx + (rough_channels > 1 ? 1 : 0)];
+            if (has_metal)
+            {
+                packed_data[dest_idx + 2] = metal_data[metal_idx + (metal_channels > 2 ? 2 : 0)];
+            }
+            else
+            {
+                packed_data[dest_idx + 2] = 0;
+            }
+
+            packed_data[dest_idx + 3] = 255;
+        }
+        return Texture(packed_data.data(), width, height, dest_channels);
+    }
+
     void process_materials(std::vector<Material> &mats, const aiScene *scene)
     {
         for (size_t i = 0; i < scene->mNumMaterials; i++)
@@ -143,8 +193,14 @@ namespace cologne::FileUtil
             {
                 if (auto texture = scene->GetEmbeddedTexture(diffuse_path.C_Str()); texture != nullptr)
                 {
-                    mat.albedo = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
-                                         texture->mHeight);
+                    stbi_set_flip_vertically_on_load(false);
+                    int new_width = 0, new_height = 0, new_channels = 0;
+                    int size = texture->mHeight == 0 ? texture->mWidth : texture->mHeight * texture->mWidth;
+                    stbi_uc *img_data =
+                            stbi_load_from_memory(reinterpret_cast<unsigned char *>(texture->pcData),
+                                                  size, &new_width, &new_height, &new_channels, 4);
+                    mat.albedo = Texture(img_data, new_width, new_height, 4);
+                    stbi_image_free(img_data);
                 }
             }
 
@@ -154,39 +210,14 @@ namespace cologne::FileUtil
             {
                 if (auto texture = scene->GetEmbeddedTexture(normalPath.C_Str()); texture != nullptr)
                 {
-                    mat.normal = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
-                                         texture->mHeight);
-                }
-            }
-
-            aiString ambient_path;
-            if (material->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &ambient_path) == aiReturn_SUCCESS ||
-                material->GetTexture(aiTextureType_AMBIENT, 0, &ambient_path) == aiReturn_SUCCESS)
-            {
-                if (auto texture = scene->GetEmbeddedTexture(ambient_path.C_Str()); texture != nullptr)
-                {
-                    mat.ao = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
-                                     texture->mHeight);
-                }
-            }
-
-            aiString roughness_path;
-            if (material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &roughness_path) == aiReturn_SUCCESS)
-            {
-                if (auto texture = scene->GetEmbeddedTexture(roughness_path.C_Str()); texture != nullptr)
-                {
-                    mat.roughness = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
-                                            texture->mHeight);
-                }
-            }
-
-            aiString metallic_path;
-            if (material->GetTexture(aiTextureType_METALNESS, 0, &metallic_path) == aiReturn_SUCCESS)
-            {
-                if (auto texture = scene->GetEmbeddedTexture(metallic_path.C_Str()); texture != nullptr)
-                {
-                    mat.metallic = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
-                                           texture->mHeight);
+                    stbi_set_flip_vertically_on_load(false);
+                    int new_width = 0, new_height = 0, new_channels = 0;
+                    int size = texture->mHeight == 0 ? texture->mWidth : texture->mHeight * texture->mWidth;
+                    stbi_uc *img_data =
+                            stbi_load_from_memory(reinterpret_cast<unsigned char *>(texture->pcData),
+                                                  size, &new_width, &new_height, &new_channels, 4);
+                    mat.normal = Texture(img_data, new_width, new_height, 4);
+                    stbi_image_free(img_data);
                 }
             }
 
@@ -196,8 +227,14 @@ namespace cologne::FileUtil
             {
                 if (auto texture = scene->GetEmbeddedTexture(emission_path.C_Str()); texture != nullptr)
                 {
-                    mat.emission = Texture(reinterpret_cast<unsigned char *>(texture->pcData), texture->mWidth,
-                                           texture->mHeight);
+                    stbi_set_flip_vertically_on_load(false);
+                    int new_width = 0, new_height = 0, new_channels = 0;
+                    int size = texture->mHeight == 0 ? texture->mWidth : texture->mHeight * texture->mWidth;
+                    stbi_uc *img_data =
+                            stbi_load_from_memory(reinterpret_cast<unsigned char *>(texture->pcData),
+                                                  size, &new_width, &new_height, &new_channels, 4);
+                    mat.emission = Texture(img_data, new_width, new_height, 4);
+                    stbi_image_free(img_data);
                 }
             }
 
@@ -209,6 +246,77 @@ namespace cologne::FileUtil
                     LOG_INFO("FOUND MISC TEXTURE AT: %s", texture->mFilename.C_Str());
                 }
             }
+
+            Texture occlusion;
+            Texture metallic;
+            Texture roughness;
+
+            aiString roughness_path;
+            if (material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &roughness_path) == aiReturn_SUCCESS)
+            {
+                if (auto texture = scene->GetEmbeddedTexture(roughness_path.C_Str()); texture != nullptr)
+                {
+                    stbi_set_flip_vertically_on_load(false);
+                    int new_width = 0, new_height = 0, new_channels = 0;
+                    int size = texture->mHeight == 0 ? texture->mWidth : texture->mHeight * texture->mWidth;
+                    stbi_uc *img_data =
+                            stbi_load_from_memory(reinterpret_cast<unsigned char *>(texture->pcData),
+                                                  size, &new_width, &new_height, &new_channels, 4);
+                    roughness = Texture(img_data, new_width, new_height, 4);
+                    stbi_image_free(img_data);
+                }
+            }
+
+            aiString occlusion_path;
+            if (material->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &occlusion_path) == aiReturn_SUCCESS ||
+                material->GetTexture(aiTextureType_AMBIENT, 0, &occlusion_path) == aiReturn_SUCCESS)
+            {
+                if (strcmp(occlusion_path.C_Str(), roughness_path.C_Str()) == 0)
+                {
+                    occlusion = roughness;
+                }
+                else
+                {
+                    if (auto texture = scene->GetEmbeddedTexture(occlusion_path.C_Str()); texture != nullptr)
+                    {
+                        stbi_set_flip_vertically_on_load(false);
+                        int new_width = 0, new_height = 0, new_channels = 0;
+                        int size = texture->mHeight == 0 ? texture->mWidth : texture->mHeight * texture->mWidth;
+                        stbi_uc *img_data =
+                                stbi_load_from_memory(reinterpret_cast<unsigned char *>(texture->pcData),
+                                                      size, &new_width, &new_height, &new_channels, 1);
+                        occlusion = Texture(img_data, new_width, new_height, 1);
+                        stbi_image_free(img_data);
+                    }
+                }
+            }
+
+
+            aiString metallic_path;
+            if (material->GetTexture(aiTextureType_METALNESS, 0, &metallic_path) == aiReturn_SUCCESS)
+            {
+                if (strcmp(metallic_path.C_Str(), roughness_path.C_Str()) == 0)
+                {
+                    metallic = roughness;
+                }
+                else
+                {
+                    if (auto texture = scene->GetEmbeddedTexture(metallic_path.C_Str()); texture != nullptr)
+                    {
+                        stbi_set_flip_vertically_on_load(false);
+                        int new_width = 0, new_height = 0, new_channels = 0;
+                        int size = texture->mHeight == 0 ? texture->mWidth : texture->mHeight * texture->mWidth;
+                        stbi_uc *img_data =
+                                stbi_load_from_memory(reinterpret_cast<unsigned char *>(texture->pcData),
+                                                      size, &new_width, &new_height, &new_channels, 4);
+                        metallic = Texture(img_data, new_width, new_height, 4);
+                        stbi_image_free(img_data);
+                    }
+                }
+            }
+
+            mat.orm = create_orm_texture(occlusion, roughness, metallic);
+
 
             ai_real roughness_factor;
             if (material->Get(AI_MATKEY_ROUGHNESS_FACTOR, roughness_factor) == aiReturn_SUCCESS)
@@ -255,7 +363,6 @@ namespace cologne::FileUtil
         }
         return result_data;
     }
-
 
 
     void build_skeleton_recursive(const aiNode *node, int parent_idx, Skeleton &out_skeleton,
@@ -339,7 +446,7 @@ namespace cologne::FileUtil
     }
 
     void process_all_skinned_meshes(const aiScene *scene, std::vector<SkinnedMeshData> &out_meshes,
-        const Skeleton &skeleton)
+                                    const Skeleton &skeleton)
     {
         for (size_t i = 0; i < scene->mNumMeshes; i++)
         {
@@ -384,7 +491,7 @@ namespace cologne::FileUtil
     }
 
     void extract_bone_weights_for_mesh(std::vector<WeightedVertex> &vertices, const aiMesh *mesh,
-        const Skeleton &skeleton)
+                                       const Skeleton &skeleton)
     {
         for (size_t bone_idx = 0; bone_idx < mesh->mNumBones; bone_idx++)
         {

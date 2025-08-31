@@ -39,21 +39,13 @@ namespace cologne::AssetManager
             {
                 copy_name(material_header.albedo_path, "", 512);
             }
-            if (material.roughness.contains_data())
+            if (material.orm.contains_data())
             {
-                copy_name(material_header.roughness_path, path + "/roughness.ctext", 512);
+                copy_name(material_header.orm_path, path + "/orm.ctext", 512);
             }
             else
             {
-                copy_name(material_header.roughness_path, "", 512);
-            }
-            if (material.ao.contains_data())
-            {
-                copy_name(material_header.ao_path, path + "/ao.ctext", 512);
-            }
-            else
-            {
-                copy_name(material_header.ao_path, "", 512);
+                copy_name(material_header.orm_path, "", 512);
             }
             if (material.emission.contains_data())
             {
@@ -62,14 +54,6 @@ namespace cologne::AssetManager
             else
             {
                 copy_name(material_header.emission_path, "", 512);
-            }
-            if (material.metallic.contains_data())
-            {
-                copy_name(material_header.metallic_path, path + "/metallic.ctext", 512);
-            }
-            else
-            {
-                copy_name(material_header.metallic_path, "", 512);
             }
             if (material.normal.contains_data())
             {
@@ -97,25 +81,15 @@ namespace cologne::AssetManager
                 std::string albedo_path = path + "/albedo.ctext";
                 material.albedo.export_to_compressed((RESOURCES_PATH + albedo_path).c_str());
             }
-            if (material.roughness.contains_data())
+            if (material.orm.contains_data())
             {
-                std::string roughness_path = path + "/roughness.ctext";
-                material.roughness.export_to_compressed((RESOURCES_PATH + roughness_path).c_str());
-            }
-            if (material.ao.contains_data())
-            {
-                std::string ao_path = path + "/ao.ctext";
-                material.ao.export_to_compressed((RESOURCES_PATH + ao_path).c_str());
+                std::string orm_path = path + "/orm.ctext";
+                material.orm.export_to_compressed((RESOURCES_PATH + orm_path).c_str());
             }
             if (material.emission.contains_data())
             {
                 std::string emission_path = path + "/emission.ctext";
                 material.emission.export_to_compressed((RESOURCES_PATH + emission_path).c_str());
-            }
-            if (material.metallic.contains_data())
-            {
-                std::string metallic_path = path + "/metallic.ctext";
-                material.metallic.export_to_compressed((RESOURCES_PATH + metallic_path).c_str());
             }
             if (material.normal.contains_data())
             {
@@ -316,10 +290,8 @@ namespace cologne::AssetManager
             file.read(reinterpret_cast<char *>(&material_header), sizeof(MaterialCacheHeader));
 
             material.albedo.set_path(std::string(RESOURCES_PATH) + material_header.albedo_path);
-            material.ao.set_path(std::string(RESOURCES_PATH) + material_header.ao_path);
+            material.orm.set_path(std::string(RESOURCES_PATH) + material_header.orm_path);
             material.emission.set_path(std::string(RESOURCES_PATH) + material_header.emission_path);
-            material.metallic.set_path(std::string(RESOURCES_PATH) + material_header.metallic_path);
-            material.roughness.set_path(std::string(RESOURCES_PATH) + material_header.roughness_path);
             material.normal.set_path(std::string(RESOURCES_PATH)  + material_header.normal_path);
             material.roughness_override = material_header.roughness_override;
             material.metallic_override = material_header.metallic_override;
@@ -380,10 +352,8 @@ namespace cologne::AssetManager
             file.read(reinterpret_cast<char *>(&material_header), sizeof(MaterialCacheHeader));
 
             material.albedo.set_path(std::string(RESOURCES_PATH) + material_header.albedo_path);
-            material.ao.set_path(std::string(RESOURCES_PATH) + material_header.ao_path);
+            material.orm.set_path(std::string(RESOURCES_PATH) + material_header.orm_path);
             material.emission.set_path(std::string(RESOURCES_PATH) + material_header.emission_path);
-            material.metallic.set_path(std::string(RESOURCES_PATH) + material_header.metallic_path);
-            material.roughness.set_path(std::string(RESOURCES_PATH) + material_header.roughness_path);
             material.normal.set_path(std::string(RESOURCES_PATH)  + material_header.normal_path);
             material.roughness_override = material_header.roughness_override;
             material.metallic_override = material_header.metallic_override;

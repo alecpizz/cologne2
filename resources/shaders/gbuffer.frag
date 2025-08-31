@@ -28,9 +28,7 @@ struct Material
 {
     uvec2 albedo;
     uvec2 normal;
-    uvec2 metallic;
-    uvec2 roughness;
-    uvec2 ao;
+    uvec2 orm;
     uvec2 emission;
     float roughness_mod;
     float metallic_mod;
@@ -82,27 +80,17 @@ void main()
 
     gEmission = texture(sampler2D(mat.emission), TexCoords).rgb;
     gl_FragDepth = gl_FragCoord.z;
-    if(mat.metallic == uvec2(0))
+    gORM.rgb = texture(sampler2D(mat.orm), TexCoords).rgb;
+
     {
-        gORM.r = mat.metallic_mod;
-    }
-    else
-    {
-        gORM.r = texture(sampler2D(mat.metallic), TexCoords).b;
-        gORM.r *= mat.metallic_mod;
+        gORM.b *= mat.metallic_mod;
     }
 
-    if(mat.roughness == uvec2(0))
+
     {
-        gORM.g = mat.roughness_mod;
-    }
-    else
-    {
-        gORM.g = texture(sampler2D(mat.roughness), TexCoords).g;
         gORM.g *= mat.roughness_mod;
     }
 
-    gORM.b = texture(sampler2D(mat.ao), TexCoords).b;
 
     bool allow_dither = false;
     if (allow_dither)
