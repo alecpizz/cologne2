@@ -20,6 +20,8 @@
 
 namespace cologne
 {
+    std::vector<LogRecord> Editor::_records;
+    std::shared_timed_mutex Editor::_records_mutex;
     uint32_t Editor::get_viewport_width()
     {
         return _prev_viewport_size.x;
@@ -66,6 +68,14 @@ namespace cologne
         Audio::add_sound(_cancel_sound);
         Audio::add_sound(_move_sound);
         initialize_reflection_editor();
+        _records = std::vector<LogRecord>();
+    }
+
+
+    void Editor::submit_log_record(LogRecord record)
+    {
+        std::unique_lock lock(_records_mutex);
+        _records.emplace_back(std::move(record));
     }
 
     Editor::~Editor()
@@ -157,6 +167,7 @@ namespace cologne
         build_properties_panel();
         build_images_window();
         build_asset_browser();
+        build_console();
         build_game_view(dt);
         build_game_overlay();
         ImGui::End();

@@ -1,9 +1,16 @@
 ﻿#pragma once
+#include <shared_mutex>
 #include <engine/scene/Components.h>
 #include <engine/scene/Entity.h>
 
 namespace cologne
 {
+    struct LogRecord
+    {
+        std::string message;
+        ImVec4 color;
+    };
+
     class Editor
     {
         friend class Engine;
@@ -38,6 +45,7 @@ namespace cologne
 
         static void initialize_reflection_editor();
         Editor();
+        static void submit_log_record(LogRecord record);
     private:
         void build_main_window();
 
@@ -55,6 +63,8 @@ namespace cologne
 
         void build_game_view(float dt);
 
+        void build_console();
+
         void build_images_window();
 
         void draw_entity_node(Entity entity);
@@ -69,7 +79,8 @@ namespace cologne
 #define DEFAULT_WIDTH 1600
 #define DEFAULT_HEIGHT 900
         inline static ImVec2 _prev_viewport_size;
-
+        static std::vector<LogRecord> _records;
+        static std::shared_timed_mutex _records_mutex;
         static void build_transform_entry(TransformComponent &tr);
 
         Entity _selected_entity = {};

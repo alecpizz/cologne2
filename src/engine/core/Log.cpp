@@ -1,5 +1,8 @@
-﻿#include <../../../vendor/spdlog/include/spdlog/spdlog.h>
-#include "../../../vendor/spdlog/include/spdlog/sinks/stdout_color_sinks.h"
+﻿#include <spdlog/spdlog.h>
+#include <engine/editor/Editor.h>
+#include <engine/editor/ImGuiSink.h>
+
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/async.h"
 #include "spdlog/sinks/basic_file_sink.h"
 
@@ -15,16 +18,23 @@ namespace cologne
 {
     struct Log::Impl
     {
+        std::vector<spdlog::sink_ptr> sinks;
         std::shared_ptr<spdlog::async_logger> logger;
 
         void init()
         {
             spdlog::set_pattern("%^[%T] %n: %v%$");
             spdlog::init_thread_pool(8192, 1);
-            auto stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-            logger = std::make_shared<spdlog::async_logger>("cologne", stdout_sink, spdlog::thread_pool(), spdlog::async_overflow_policy::block);
+            sinks.push_back( std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
+            sinks.push_back( std::make_shared<spdlog::sinks::basic_file_sink_mt>(RESOURCES_PATH "logs/cologne.log"));
+            sinks.push_back(std::make_shared<ImGuiSink>());
+            logger = std::make_shared<spdlog::async_logger>("cologne", std::begin(sinks), std::end(sinks), spdlog::thread_pool(), spdlog::async_overflow_policy::block);
             spdlog::register_logger(logger);
             logger->set_level(spdlog::level::trace);
+        }
+        void add_sink(spdlog::sink_ptr sink)
+        {
+            spdlog::get("cologne")->sinks().push_back(sink);
         }
     };
 

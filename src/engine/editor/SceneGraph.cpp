@@ -10,17 +10,14 @@
 
 namespace cologne
 {
+    ImGuiTextFilter search_filter;
     void Editor::build_scene_graph()
     {
-        ImGui::Begin("Scene Hiearchy", nullptr, _global_window_flags);
+        const std::string scene_name = Engine::get_scene()->get_scene_name();
+        const std::string title_name = scene_name + "###Scene Hiearchy";
+        ImGui::Begin(title_name.c_str(), nullptr, _global_window_flags);
 
-        std::string scene_name = Engine::get_scene()->get_scene_name();
-        if (ImGui::InputText("Scene Name", &scene_name))
-        {
-            Engine::get_scene()->set_scene_name(scene_name);
-        }
-        static std::string search_string = "";
-        ImGui::InputText("Entity Name", &search_string);
+        search_filter.Draw("Search", -100.0f);
         const ImGuiTableFlags table_flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInner;
 
         if (ImGui::BeginTable("HiearchyTable", 1, table_flags))
@@ -28,12 +25,11 @@ namespace cologne
             for (auto entity: Engine::get_scene()->_registry.view<entt::entity>())
             {
                 Entity e = {entity, Engine::get_scene().get()};
-                bool valid_search = search_string.empty() || e.get_name().find(search_string) != std::string::npos;
-                if (!valid_search)
+                if (e.has_component<HideInEditorComponent>())
                 {
                     continue;
                 }
-                if (e.has_component<HideInEditorComponent>())
+                if (!search_filter.PassFilter(e.get_name().c_str()))
                 {
                     continue;
                 }
