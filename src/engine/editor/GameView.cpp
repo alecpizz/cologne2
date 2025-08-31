@@ -49,6 +49,7 @@ namespace cologne
             }
             _prev_viewport_size = viewport_size;
         }
+        static ImVec2 last_mouse_pos = ImGui::GetMousePos();
         ImVec2 mouse_pos = ImGui::GetMousePos();
         ImVec2 viewport_pos = ImGui::GetCursorScreenPos();
         ImVec2 mouse_pos_relative = ImVec2(mouse_pos.x - viewport_pos.x, mouse_pos.y - viewport_pos.y);
@@ -91,12 +92,14 @@ namespace cologne
             auto &active = Engine::get_scene()->get_scene_camera().get_component<ActiveComponent>();
             if (ImGui::IsMouseDown(ImGuiMouseButton_Right) || ImGui::IsMouseDown(ImGuiMouseButton_Middle))
             {
+                last_mouse_pos = ImGui::GetMousePos();
                 _mouse_captured = true;
                 active.active = true;
                 Engine::get_window()->hide_mouse();
             }
-            else
+            else if (ImGui::IsMouseReleased(ImGuiMouseButton_Right) || ImGui::IsMouseReleased(ImGuiMouseButton_Middle))
             {
+                Engine::get_window()->set_cursor_pos(last_mouse_pos.x, last_mouse_pos.y);
                 _mouse_captured = false;
                 active.active = false;
                 Engine::get_window()->show_mouse();

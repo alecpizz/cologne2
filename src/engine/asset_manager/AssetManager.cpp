@@ -305,6 +305,10 @@ namespace cologne::AssetManager
 
     int32_t get_mesh_index_by_name(const std::string &name)
     {
+        if (!mesh_index_map.contains(name))
+        {
+            return 0;
+        }
         return mesh_index_map[name];
     }
 
@@ -419,6 +423,10 @@ namespace cologne::AssetManager
 
     int32_t get_model_index_by_name(const std::string &name)
     {
+        if (!model_index_map.contains(name))
+        {
+            return 0;
+        }
         return model_index_map[name];
     }
 
@@ -434,6 +442,10 @@ namespace cologne::AssetManager
 
     int32_t get_skinned_model_index_by_name(const std::string &name)
     {
+        if (!skinned_model_index_map.contains(name))
+        {
+            return 0;
+        }
         return skinned_model_index_map[name];
     }
 

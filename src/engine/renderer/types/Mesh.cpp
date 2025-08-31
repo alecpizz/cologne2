@@ -47,7 +47,7 @@ namespace cologne
         return _indices_count;
     }
 
-    std::string Mesh::get_name() const
+    const std::string& Mesh::get_name() const
     {
         return _name;
     }

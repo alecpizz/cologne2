@@ -26,7 +26,7 @@ namespace cologne
 
         uint32_t get_indices_count() const;
 
-        std::string get_name() const;
+        const std::string& get_name() const;
 
         AABB get_aabb() const;
 

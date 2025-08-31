@@ -25,63 +25,69 @@ namespace cologne
             icon_texture = Texture(RESOURCES_PATH "icons/file.png");
         }
 
-        if (current_directory != assets_directory)
+
+        constexpr float thumbnail_size = 16.0f;
+        const int column_count = 2;
+        const ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerH;
+
+
+        if (ImGui::BeginTable("Asset Browser", column_count, flags))
         {
-            if (ImGui::Button("<-"))
+            ImGui::TableSetupColumn("Icon", ImGuiTableColumnFlags_WidthFixed, thumbnail_size);
+            ImGui::TableSetupColumn("Filename", ImGuiTableColumnFlags_WidthStretch);
+
+            if (current_directory / "" != assets_directory)
             {
-                current_directory = current_directory.parent_path();
-                Audio::play_sound(_move_sound, 30);
-            }
-        }
-
-        static float padding = 0.6f;
-        static float thumbnail_size = 38.0f;
-        float cell_size = thumbnail_size / padding;
-
-        const float panel_width = ImGui::GetContentRegionAvail().x;
-        int column_count = static_cast<int>(panel_width / cell_size);
-        if (column_count < 1)
-        {
-            column_count = 1;
-        }
-
-        ImGui::Columns(column_count, 0, false);
-
-        for (auto &dir_entry: std::filesystem::directory_iterator(current_directory))
-        {
-            const auto &path = dir_entry.path();
-            std::string filename_str = path.filename().string();
-
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-            uint32_t handle = dir_entry.is_directory() ? folder_texture.get_handle() : icon_texture.get_handle();
-            ImGui::ImageButton(filename_str.c_str(), static_cast<ImTextureID>(static_cast<intptr_t>(handle)),
-                               {thumbnail_size, thumbnail_size}, {0, 1}, {1, 0});
-
-            if (ImGui::BeginDragDropSource())
-            {
-                std::filesystem::path relative_path(path);
-                const auto item_path = relative_path.string().c_str();
-                ImGui::SetDragDropPayload("ASSET_BROWSER_ENTRY", item_path, strlen(item_path) * sizeof(char));
-                ImGui::Text("%s", item_path);
-                ImGui::EndDragDropSource();
-            }
-
-            ImGui::PopStyleColor();
-            if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-            {
-                if (dir_entry.is_directory())
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(1);
+                if (ImGui::Selectable("...", false, ImGuiSelectableFlags_SpanAllColumns))
                 {
-                    current_directory /= path.filename();
+
+                }
+                if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+                {
+                    current_directory = current_directory.parent_path();
                     Audio::play_sound(_move_sound, 30);
                 }
             }
-            ImGui::TextWrapped(filename_str.c_str());
-            ImGui::NextColumn();
-        }
 
-        ImGui::Columns(1);
-        ImGui::SliderFloat("Thumbnail Size", &thumbnail_size, 16, 512);
-        ImGui::SliderFloat("Padding", &padding, 0, 32);
+            for (auto &dir_entry: std::filesystem::directory_iterator(current_directory))
+            {
+                const auto &path = dir_entry.path();
+                std::string filename_str = path.filename().string();
+
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                uint32_t handle = dir_entry.is_directory() ? folder_texture.get_handle() : icon_texture.get_handle();
+                ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(handle)),
+                             {thumbnail_size, thumbnail_size}, {0, 1}, {1, 0});
+                ImGui::TableSetColumnIndex(1);
+                if (ImGui::Selectable(filename_str.c_str(), false, ImGuiSelectableFlags_SpanAllColumns))
+                {
+
+                }
+
+                if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+                {
+                    if (dir_entry.is_directory())
+                    {
+                        current_directory /= path.filename();
+                        Audio::play_sound(_move_sound, 30);
+                    }
+                }
+
+                if (ImGui::BeginDragDropSource())
+                {
+                    std::filesystem::path relative_path(path);
+                    const auto item_path = relative_path.string().c_str();
+                    ImGui::SetDragDropPayload("ASSET_BROWSER_ENTRY", item_path, strlen(item_path) * sizeof(char));
+                    ImGui::Text("%s", item_path);
+                    ImGui::EndDragDropSource();
+                }
+            }
+
+            ImGui::EndTable();
+        }
 
         ImGui::End();
     }

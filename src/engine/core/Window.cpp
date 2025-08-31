@@ -140,6 +140,11 @@ namespace cologne
         return _impl->mouse_visible;
     }
 
+    void Window::set_cursor_pos(float x, float y) const
+    {
+        SDL_WarpMouseInWindow(_impl->window, x, y);
+    }
+
     void Window::show_file_dialogue_window(const std::unordered_map<std::string, std::string> &filters,
                                            const std::string &path, void *callback)
     {
