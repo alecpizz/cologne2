@@ -378,12 +378,43 @@ namespace cologne
             LOG_ERROR("Couldn't open output file %s %s", path, strerror(errno));
             return;
         }
+        int original_width = new_width;
+        int original_height = new_height;
+
+        const int MAX_DIMENSION = 2048;
+        uint8_t* processing_data = img_data;
+        if (original_width > MAX_DIMENSION || original_height > MAX_DIMENSION)
+        {
+            LOG_ERROR("Texture dimensions (%d x %d) exceed max of %d." ,original_width, original_height, MAX_DIMENSION);
+
+            if (original_width > original_height)
+            {
+                new_width = MAX_DIMENSION;
+                new_height = static_cast<int>(original_height * (static_cast<float>(MAX_DIMENSION) / original_width));
+            }
+            else
+            {
+                new_height = MAX_DIMENSION;
+                new_width = static_cast<int>(original_width * (static_cast<float>(MAX_DIMENSION) / original_width));
+            }
+
+            new_width = std::max(1, new_width);
+            new_height = std::max(1, new_height);
+
+            uint8_t* resized_data = new uint8_t[new_width * new_height * 4];
+            stbir_resize_uint8_linear(img_data, original_width, original_height, 0,
+                                  resized_data, new_width, new_height, 0, STBIR_RGBA);
+            processing_data = resized_data;
+        }
+
+
+
 
         int mip_count = floor(log2(std::max(new_width, new_height))) + 1;
         std::vector<uint8_t> all_mip_data;
         int current_width = new_width;
         int current_height = new_height;
-        uint8_t* previous_mip_data = img_data;
+        uint8_t* previous_mip_data = processing_data;
         for (int i = 0; i < mip_count; i++)
         {
             uint8_t* current_mip = previous_mip_data;
@@ -412,6 +443,11 @@ namespace cologne
         {
             delete[] previous_mip_data;
         }
+        if (processing_data != img_data)
+        {
+            delete[] processing_data;
+        }
+
         stbi_image_free(img_data);
 
 
