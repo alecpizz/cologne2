@@ -355,7 +355,51 @@ namespace cologne
         return false;
     }
 
+    static bool write_skinned_model_component(SkinnedModelComponent& skinned_model_component, const PropertiesMap& properties)
+    {
+        bool changed = false;
+        if (ImGui::BeginCombo("Skinned Model", skinned_model_component.model_name.c_str()))
+        {
+            for (const auto &model: AssetManager::get_skinned_models())
+            {
+                auto name = model.get_name();
+                if (ImGui::Selectable(name.c_str()))
+                {
+                    skinned_model_component.model_name = name;
+                    changed = true;
+                }
+            }
+            ImGui::EndCombo();
+        }
 
+        return changed;
+    }
+
+    static bool write_animation_component(AnimatorComponent2& animator, const PropertiesMap& properties)
+    {
+        std::vector<const char*> animation_clip_names;
+        for (auto& anim : AssetManager::get_animations())
+        {
+            const std::string& anim_name = anim.get_name();
+            animation_clip_names.emplace_back(anim_name.c_str());
+        }
+        int idx = AssetManager::get_animation_index_by_name(animator.base_animation_clip);
+
+        bool changed = false;
+
+        if (ImGui::Combo("Base Animation", &idx, animation_clip_names.data(), animation_clip_names.size()))
+        {
+            animator.base_animation_clip = animation_clip_names[idx];
+            changed = true;
+        }
+        if (ImGui::Combo("One Shot Animation", &idx, animation_clip_names.data(), animation_clip_names.size()))
+        {
+            animator.one_shot_animation_clip = animation_clip_names[idx];
+            changed = true;
+        }
+        changed |= ImGui::DragFloat("Speed", &animator.speed);
+        return changed;
+    }
 
 
     static bool editor_write_dummy()
@@ -419,5 +463,13 @@ namespace cologne
            .func<&write_mesh>("editor_write"_hs);
         entt::meta_factory<ConvexMeshColliderComponent>()
            .func<&write_convex_mesh>("editor_write"_hs);
+
+        entt::meta_factory<AnimatorComponent2>()
+            .func<&write_animation_component>("editor_write"_hs);
+
+        entt::meta_factory<SkinnedModelComponent>()
+            .func<&write_skinned_model_component>("editor_write"_hs);
+
+
     }
 }

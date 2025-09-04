@@ -124,6 +124,8 @@ namespace cologne
     struct SkinnedModelComponent
     {
         std::string model_name;
+        static void on_construct(entt::registry &registry, const entt::entity entt);
+        static void on_destroy(entt::registry &registry, const entt::entity entt);
     };
 
     struct TagComponent
@@ -291,4 +293,59 @@ namespace cologne
     {
         glm::vec2 rotation = glm::vec2(0.0f);
     };
+
+    struct AnimatorComponent2
+    {
+        std::string base_animation_clip;
+        std::string one_shot_animation_clip;
+        float speed = 1.0f;
+
+        //runtime
+        float current_time = 0.0f;
+        bool is_playing_one_shot = false;
+
+        enum class StateRequest
+        {
+            NONE,
+            TO_RAGDOLL,
+            TO_KINEMATIC
+        };
+        StateRequest requested_state = StateRequest::NONE;
+    };
+
+    struct SkeletonComponent
+    {
+        std::string skinned_model_id;
+
+        //runtime
+        Skeleton skeleton;
+       // std::unordered_map<std::string, uint32_t> bone_to_index_map;
+        static void on_construct(entt::registry &registry, const entt::entity entt);
+        static void on_destroy(entt::registry &registry, const entt::entity entt);
+    };
+
+    struct SkeletonPoseComponent
+    {
+        std::vector<glm::mat4> skinning_matrices;
+        std::vector<glm::mat4> local_transforms;
+        std::vector<glm::mat4> global_transforms;
+    };
+
+    struct RagdollComponent
+    {
+        //all runtime baybe
+        uint32_t ragdoll_id = 0;
+
+        std::unordered_map<std::string, uint32_t> bone_to_rigidbody_map;
+
+        enum class State
+        {
+            KINEMATIC,
+            ACTIVE
+        };
+
+        State current_state = State::KINEMATIC;
+    };
+
+
 }

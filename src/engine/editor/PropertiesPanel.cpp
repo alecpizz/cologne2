@@ -159,7 +159,7 @@ namespace cologne
                 case LightType::Point:
                     Engine::get_renderer()->draw_sphere(mat.transform[3],
                                                         light.radius, light.color);
-                break;
+                    break;
                 default:
                     break;
             }
@@ -224,7 +224,7 @@ namespace cologne
                                 if (auto remove_func = meta.func(entt::hashed_string("remove")); remove_func)
                                 {
                                     remove_func.invoke({}, &Engine::get_scene()->_registry,
-                                                    static_cast<entt::entity>(_selected_entity));
+                                                       static_cast<entt::entity>(_selected_entity));
                                     LOG_INFO("Remove component of type %s", type_name.c_str());
                                 }
                             }
@@ -262,32 +262,38 @@ namespace cologne
 
             if (ImGui::BeginPopup("AddComponent"))
             {
-                for (auto &&[id, storage]: Engine::get_scene()->_registry.storage())
+                for (const auto &[id, name]: ComponentRegistry::get_component_map())
                 {
-                    if (storage.contains(_selected_entity))
+                    auto storage = Engine::get_scene()->_registry.storage(id);
+                    if (storage && storage->contains(_selected_entity))
                     {
                         continue;
                     }
-                    if (!ComponentRegistry::get_component_map().contains(id))
+
+                    auto meta = entt::resolve(
+                        entt::hashed_string(ComponentRegistry::get_component_map().at(id).c_str()));
+                    if (!meta)
                     {
                         continue;
                     }
-                    if (ImGui::MenuItem(ComponentRegistry::get_component_map().at(id).c_str()))
+
+                    auto traits = meta.traits<ComponentRegistry::Traits>();
+                    if (traits & ComponentRegistry::Traits::EDITOR_READ_ONLY || traits &
+                        ComponentRegistry::Traits::EDITOR_WRITE_ONLY)
                     {
-                        if (auto meta = entt::resolve(
-                            entt::hashed_string(ComponentRegistry::get_component_map().at(id).c_str())))
+                        if (ImGui::MenuItem(ComponentRegistry::get_component_map().at(id).c_str()))
                         {
                             //add component meta
                             auto instance = meta.construct();
-                            if (auto emplace_func = instance.type().func(entt::hashed_string("emplace")); emplace_func)
+                            if (auto emplace_func = instance.type().func(entt::hashed_string("emplace"));
+                                emplace_func)
                             {
                                 emplace_func.invoke({}, &Engine::get_scene()->_registry,
                                                     static_cast<entt::entity>(_selected_entity), instance.as_ref());
                             }
                             Audio::play_sound(_accept_sound, 30);
+                            ImGui::CloseCurrentPopup();
                         }
-
-                        ImGui::CloseCurrentPopup();
                     }
                 }
                 ImGui::EndPopup();

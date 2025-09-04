@@ -20,11 +20,13 @@
 #include "SceneSaver.h"
 #include "engine/physics/RaycastHitInfo.h"
 #include "systems/AnimationSystem.h"
+#include "systems/AnimationSystem2.h"
 #include "systems/BulletSystem.h"
 #include "systems/EditorCameraControllerSystem.h"
 #include "systems/InteractionSystem.h"
 #include "systems/PhysicsSystem.h"
 #include "systems/PlayerControllerSystem.h"
+#include "systems/RagdollSystem.h"
 #include "systems/RendererSystem.h"
 #include "systems/System.h"
 #include "systems/TransformSystem.h"
@@ -565,5 +567,7 @@ namespace cologne
         add_system(std::make_unique<EditorCameraControllerSystem>());
         add_system(std::make_unique<PlayerControllerSystem>());
         add_system(std::make_unique<InteractionSystem>());
+        add_system(std::make_unique<AnimationSystem2>());
+        add_system(std::make_unique<RagdollSystem>());
     }
 }
