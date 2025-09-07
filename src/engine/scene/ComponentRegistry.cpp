@@ -125,8 +125,7 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 REGISTER_PROPERTY(TransformComponent, scale);
 
         entt::meta_factory<UUID>().conv<uint64_t>()
-                .type("UUID"_hs)
-                REGISTER_PROPERTY(UUID, _uuid);
+            .data<&UUID::_uuid>("_uuid"_hs);
 
         REGISTER_COMPONENT(IDComponent, "IDComponent", NO_EDITOR)
                 REGISTER_PROPERTY(IDComponent, id);

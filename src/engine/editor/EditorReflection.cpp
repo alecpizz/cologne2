@@ -263,6 +263,14 @@ namespace cologne
         return c0 || c1 || c2 || c3;
     }
 
+    static bool write_uuid(UUID &uuid, const PropertiesMap& properties)
+    {
+        const char *label = "uuid";
+        const auto name_str = get_editor_name(label, properties);
+        const auto name = name_str.c_str();
+        return ImGui::DragScalar(name, ImGuiDataType_U64, &uuid._uuid);
+    }
+
     static bool write_light(LightComponent &light, const PropertiesMap &properties)
     {
         bool changed = false;
@@ -355,9 +363,6 @@ namespace cologne
         return false;
     }
 
-
-
-
     static bool editor_write_dummy()
     {
         return true;
@@ -405,6 +410,9 @@ namespace cologne
         entt::meta_factory<glm::mat4>()
                 .func<&write_mat4>("editor_write"_hs)
                 .func<&read_mat4>("editor_read"_hs);
+
+        entt::meta_factory<UUID>()
+            .func<&write_uuid>("editor_read"_hs);
 
 
         entt::meta_factory<TagComponent>()
