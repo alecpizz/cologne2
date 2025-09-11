@@ -29376,3 +29376,1379 @@ cologne::Scene::Scene() 0.012390 ms
 [2025-09-11 18:39:30.577] [cologne] [info] Cleaning Up Scene
 [2025-09-11 18:39:30.577] [cologne] [info] CLEANING UP PARTICLES!
 [2025-09-11 18:39:31.350] [cologne] [info] File Watcher Stopped
+[2025-09-11 18:48:29.682] [cologne] [info] Starting up engine. the world is a shit place, and this is a shit engine. good luck!
+[2025-09-11 18:48:29.682] [cologne] [info] C++ VERSION 202002
+[2025-09-11 18:48:29.682] [cologne] [info] AUDIO INTI
+[2025-09-11 18:48:29.703] [cologne] [info] Audio Mixer started succesfully
+[2025-09-11 18:48:29.703] [cologne] [info] 
+
+Audio::init 20.688375 ms
+[2025-09-11 18:48:29.704] [cologne] [info] 
+
+cologne::Editor::Editor() 0.662526 ms
+[2025-09-11 18:48:29.887] [cologne] [info] Created window for GPU: NVIDIA Corporation NVIDIA GeForce RTX 3070/PCIe/SSE2
+[2025-09-11 18:48:29.887] [cologne] [info] 
+
+cologne::Window::Window(uint32_t, uint32_t) 182.925790 ms
+[2025-09-11 18:48:29.893] [cologne] [info] File Watcher Started
+[2025-09-11 18:48:29.893] [cologne] [info] Starting DebugRenderer
+[2025-09-11 18:48:29.900] [cologne] [info] Started Text Renderer
+[2025-09-11 18:48:30.922] [cologne] [info] Renderer initialized
+[2025-09-11 18:48:30.922] [cologne] [info] 
+
+cologne::Renderer::Renderer() 1029.798025 ms
+[2025-09-11 18:48:30.922] [cologne] [info] Initializing Physics
+[2025-09-11 18:48:30.925] [cologne] [info] 
+
+Physics::init 2.559066 ms
+[2025-09-11 18:48:30.943] [cologne] [info] 
+
+load models 0.000160 ms
+[2025-09-11 18:48:31.154] [cologne] [info] 
+
+load models 211.178772 ms
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL glowCube
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL Lantern
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL sponza2
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL sofa
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL wall_1
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL sofa2
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL Gas_Range
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL Kitchen_Dresser
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL Pot
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL alarm_clock
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL armchair_leather
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL bookshelf
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL cabinet
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL cabinet_a
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL candle_holder
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL ceiling1
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL ceiling2
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL ceiling3
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL ceiling4
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL ceiling5
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL chair_a
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL chair_dining
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL coffee_table
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL curtain
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL decal_1
+[2025-09-11 18:48:31.154] [cologne] [info] MODEL door
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL drawer_a
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL drawer_b
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL drawer_c
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL fabric_lace1
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL fabric_lace2
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL fabric_lace3
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL fan_ceiling
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL fan_ceiling_emissive
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL floor1
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL floor2
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL floor3
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL floor4
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL floor5
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL floor6
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL fluorescent_light
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL fluorescent_light_emissive
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL foil
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL fork
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL knife
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL lamp_desk
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL lamp_desk_emissive
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL lamp_wall
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL lamp_wall_emissive
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL mirror_a
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL mirror_b
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL mirror_organizer
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL pan1
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL pan2
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL picture_frame_a
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL picture_frame_b
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL plane
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL plate
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL pot1
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL radiator
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL range_hood
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL refrigerator
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL rod_curtain
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL shelf_storage
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL sink_kitchen
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL sofa_chesterfield
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL table_dining
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL table_shelf
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL table_shelf_w_cloth
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL table_tv_stand
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL tv
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL wall_modular_01
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL wall_modular_02
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL wall_modular_03
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL wall_modular_04
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL wall_modular_05
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL wall_modular_06
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL wall_modular_07
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL wall_modular_08
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL wall_modular_09
+[2025-09-11 18:48:31.155] [cologne] [info] SKINNED MODEL vsk
+[2025-09-11 18:48:31.155] [cologne] [info] SKINNED MODEL deagle
+[2025-09-11 18:48:31.155] [cologne] [info] SKINNED MODEL man
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION vsk_Fire
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION vsk_Idle
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION vsk_Reload_Full
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION vsk_Reload_Not_Full
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION vsk_Run
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION vsk_Sprint
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION deagle_Rig|Rig|DefaultPose
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_Idle
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_ReloadFast
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_ReloadFull
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_Shot
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION man_Idle
+[2025-09-11 18:48:31.155] [cologne] [info] 
+
+void cologne::AssetManager::init() 229.530720 ms
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL glowCube
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL Lantern
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL sponza2
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL sofa
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL wall_1
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL sofa2
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL Gas_Range
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL Kitchen_Dresser
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL Pot
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL alarm_clock
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL armchair_leather
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL bookshelf
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL cabinet
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL cabinet_a
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL candle_holder
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL ceiling1
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL ceiling2
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL ceiling3
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL ceiling4
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL ceiling5
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL chair_a
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL chair_dining
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL coffee_table
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL curtain
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL decal_1
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL door
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL drawer_a
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL drawer_b
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL drawer_c
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL fabric_lace1
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL fabric_lace2
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL fabric_lace3
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL fan_ceiling
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL fan_ceiling_emissive
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL floor1
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL floor2
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL floor3
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL floor4
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL floor5
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL floor6
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL fluorescent_light
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL fluorescent_light_emissive
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL foil
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL fork
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL knife
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL lamp_desk
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL lamp_desk_emissive
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL lamp_wall
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL lamp_wall_emissive
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL mirror_a
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL mirror_b
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL mirror_organizer
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL pan1
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL pan2
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL picture_frame_a
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL picture_frame_b
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL plane
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL plate
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL pot1
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL radiator
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL range_hood
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL refrigerator
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL rod_curtain
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL shelf_storage
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL sink_kitchen
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL sofa_chesterfield
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL table_dining
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL table_shelf
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL table_shelf_w_cloth
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL table_tv_stand
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL tv
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL wall_modular_01
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL wall_modular_02
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL wall_modular_03
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL wall_modular_04
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL wall_modular_05
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL wall_modular_06
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL wall_modular_07
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL wall_modular_08
+[2025-09-11 18:48:31.155] [cologne] [info] MODEL wall_modular_09
+[2025-09-11 18:48:31.155] [cologne] [info] SKINNED MODEL vsk
+[2025-09-11 18:48:31.155] [cologne] [info] SKINNED MODEL deagle
+[2025-09-11 18:48:31.155] [cologne] [info] SKINNED MODEL man
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION vsk_Fire
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION vsk_Idle
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION vsk_Reload_Full
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION vsk_Reload_Not_Full
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION vsk_Run
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION vsk_Sprint
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION deagle_Rig|Rig|DefaultPose
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_Idle
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_ReloadFast
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_ReloadFull
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_Shot
+[2025-09-11 18:48:31.155] [cologne] [info] ANIMATION man_Idle
+[2025-09-11 18:48:31.155] [cologne] [info] LOADED PREVIOUSLY USED SCENE untitled_scene.cscn
+[2025-09-11 18:48:31.168] [cologne] [info] Added light handle to 13 entity
+[2025-09-11 18:48:31.168] [cologne] [info] Added light handle to 25 entity
+[2025-09-11 18:48:31.169] [cologne] [info] Added light handle to 27 entity
+[2025-09-11 18:48:31.173] [cologne] [info] Added light handle to 103 entity
+[2025-09-11 18:48:31.174] [cologne] [info] Added light handle to 117 entity
+[2025-09-11 18:48:31.177] [cologne] [info] Scene bounds are min (-11.558832, -1.662668, -2.358888), max (6.290165, 3.856379, 6.290165)
+[2025-09-11 18:48:31.177] [cologne] [info] Scene size is (20.488037, 5.519047, 8.649053)
+[2025-09-11 18:48:31.177] [cologne] [info] CLEANING UP PARTICLES!
+[2025-09-11 18:48:31.177] [cologne] [info] Light count 5
+[2025-09-11 18:48:31.177] [cologne] [info] Light count 5
+[2025-09-11 18:48:31.177] [cologne] [info] Event manager initialized
+[2025-09-11 18:48:31.177] [cologne] [info] Engine initialized successfully!
+[2025-09-11 18:48:31.177] [cologne] [info] Engine initialized in 1.494994 time
+[2025-09-11 18:48:31.184] [cologne] [info] GENERATING MIPS 5
+[2025-09-11 18:48:31.184] [cologne] [info] GENERATING MIPS 5
+[2025-09-11 18:48:31.913] [cologne] [info] file changed /home/alecpizz/Repos/goonengine/resources/logs/cologne.log MODIFIED
+[2025-09-11 18:48:32.496] [cologne] [info] Light count 5
+[2025-09-11 18:48:32.497] [cologne] [info] 
+
+cologne::Scene::Scene() 0.011010 ms
+[2025-09-11 18:48:32.497] [cologne] [info] Copied ActiveComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Copied IDComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Copied MeshComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Copied StaticColliderComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Copied TagComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Copied TransformComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Copied WorldTransformComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Copied ChildComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Copied ParentComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Added light handle to 117 entity
+[2025-09-11 18:48:32.497] [cologne] [info] Added light handle to 103 entity
+[2025-09-11 18:48:32.497] [cologne] [info] Added light handle to 27 entity
+[2025-09-11 18:48:32.497] [cologne] [info] Added light handle to 25 entity
+[2025-09-11 18:48:32.497] [cologne] [info] Added light handle to 13 entity
+[2025-09-11 18:48:32.497] [cologne] [info] Copied LightComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Copied ConvexMeshColliderComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Copied RigidbodyComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Copied CameraComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Copied InteractorComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Copied AnimatorComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Copied SkinnedModelComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Copied ViewmodelComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Copied PlayerComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Copied EditorCameraComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Copied HideInEditorComponent
+[2025-09-11 18:48:32.497] [cologne] [info] Copied ModelComponent
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 16777216
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388609
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388610
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388611
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388612
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388613
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388614
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388615
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388616
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388617
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388618
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388619
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388620
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388621
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388622
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388623
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388624
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388625
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388626
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388627
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388628
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388629
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388630
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388631
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388632
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388633
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388634
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388635
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388636
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388637
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388638
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388639
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388640
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388641
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388642
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388643
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388644
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388645
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388646
+[2025-09-11 18:48:32.498] [cologne] [info] Created collider with id 8388647
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388648
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388649
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388650
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388651
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388652
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388653
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388654
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388655
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388656
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388657
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388658
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388659
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388660
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388661
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388662
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388663
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388664
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388665
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388666
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388667
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388668
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388669
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388670
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388671
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388672
+[2025-09-11 18:48:32.499] [cologne] [info] Created collider with id 8388673
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388674
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388675
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388676
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388677
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388678
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388679
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388680
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388681
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388682
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388683
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388684
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388685
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388686
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388687
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388688
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388689
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388690
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388691
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388692
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388693
+[2025-09-11 18:48:32.500] [cologne] [info] Created collider with id 8388694
+[2025-09-11 18:48:32.501] [cologne] [info] Created collider with id 8388695
+[2025-09-11 18:48:32.501] [cologne] [info] Created collider with id 8388696
+[2025-09-11 18:48:32.501] [cologne] [info] Created collider with id 8388697
+[2025-09-11 18:48:32.501] [cologne] [info] Created collider with id 8388698
+[2025-09-11 18:48:32.501] [cologne] [info] Created collider with id 8388699
+[2025-09-11 18:48:32.501] [cologne] [info] Created collider with id 8388700
+[2025-09-11 18:48:32.501] [cologne] [info] Created collider with id 8388701
+[2025-09-11 18:48:32.501] [cologne] [info] Created collider with id 8388702
+[2025-09-11 18:48:32.501] [cologne] [info] Created collider with id 8388703
+[2025-09-11 18:48:32.501] [cologne] [info] Created collider with id 8388704
+[2025-09-11 18:48:32.919] [cologne] [info] file changed /home/alecpizz/Repos/goonengine/resources/logs/cologne.log MODIFIED
+[2025-09-11 18:48:33.786] [cologne] [info] Light count 10
+[2025-09-11 18:48:33.786] [cologne] [info] Cleaning Up Scene
+[2025-09-11 18:48:33.786] [cologne] [info] Light count 5
+[2025-09-11 18:48:34.623] [cologne] [info] Cleaning Up Scene
+[2025-09-11 18:48:34.623] [cologne] [info] CLEANING UP PARTICLES!
+[2025-09-11 18:48:34.920] [cologne] [info] File Watcher Stopped
+[2025-09-11 18:48:51.266] [cologne] [info] Starting up engine. the world is a shit place, and this is a shit engine. good luck!
+[2025-09-11 18:48:51.266] [cologne] [info] C++ VERSION 202002
+[2025-09-11 18:48:51.266] [cologne] [info] AUDIO INTI
+[2025-09-11 18:48:51.289] [cologne] [info] Audio Mixer started succesfully
+[2025-09-11 18:48:51.289] [cologne] [info] 
+
+Audio::init 22.434345 ms
+[2025-09-11 18:48:51.290] [cologne] [info] 
+
+cologne::Editor::Editor() 0.933035 ms
+[2025-09-11 18:48:51.476] [cologne] [info] Created window for GPU: NVIDIA Corporation NVIDIA GeForce RTX 3070/PCIe/SSE2
+[2025-09-11 18:48:51.476] [cologne] [info] 
+
+cologne::Window::Window(uint32_t, uint32_t) 185.848613 ms
+[2025-09-11 18:48:51.481] [cologne] [info] File Watcher Started
+[2025-09-11 18:48:51.481] [cologne] [info] Starting DebugRenderer
+[2025-09-11 18:48:51.488] [cologne] [info] Started Text Renderer
+[2025-09-11 18:48:52.533] [cologne] [info] Renderer initialized
+[2025-09-11 18:48:52.533] [cologne] [info] 
+
+cologne::Renderer::Renderer() 1051.488025 ms
+[2025-09-11 18:48:52.533] [cologne] [info] Initializing Physics
+[2025-09-11 18:48:52.535] [cologne] [info] 
+
+Physics::init 2.824284 ms
+[2025-09-11 18:48:52.554] [cologne] [info] 
+
+load models 0.000200 ms
+[2025-09-11 18:48:52.780] [cologne] [info] 
+
+load models 226.523936 ms
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL glowCube
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL Lantern
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL sponza2
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL sofa
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_1
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL sofa2
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL Gas_Range
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL Kitchen_Dresser
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL Pot
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL alarm_clock
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL armchair_leather
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL bookshelf
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL cabinet
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL cabinet_a
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL candle_holder
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL ceiling1
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL ceiling2
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL ceiling3
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL ceiling4
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL ceiling5
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL chair_a
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL chair_dining
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL coffee_table
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL curtain
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL decal_1
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL door
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL drawer_a
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL drawer_b
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL drawer_c
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL fabric_lace1
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL fabric_lace2
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL fabric_lace3
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL fan_ceiling
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL fan_ceiling_emissive
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL floor1
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL floor2
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL floor3
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL floor4
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL floor5
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL floor6
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL fluorescent_light
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL fluorescent_light_emissive
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL foil
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL fork
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL knife
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL lamp_desk
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL lamp_desk_emissive
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL lamp_wall
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL lamp_wall_emissive
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL mirror_a
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL mirror_b
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL mirror_organizer
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL pan1
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL pan2
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL picture_frame_a
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL picture_frame_b
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL plane
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL plate
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL pot1
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL radiator
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL range_hood
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL refrigerator
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL rod_curtain
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL shelf_storage
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL sink_kitchen
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL sofa_chesterfield
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL table_dining
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL table_shelf
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL table_shelf_w_cloth
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL table_tv_stand
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL tv
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_modular_01
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_modular_02
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_modular_03
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_modular_04
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_modular_05
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_modular_06
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_modular_07
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_modular_08
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_modular_09
+[2025-09-11 18:48:52.780] [cologne] [info] SKINNED MODEL vsk
+[2025-09-11 18:48:52.780] [cologne] [info] SKINNED MODEL deagle
+[2025-09-11 18:48:52.780] [cologne] [info] SKINNED MODEL man
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION vsk_Fire
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION vsk_Idle
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION vsk_Reload_Full
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION vsk_Reload_Not_Full
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION vsk_Run
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION vsk_Sprint
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION deagle_Rig|Rig|DefaultPose
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_Idle
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_ReloadFast
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_ReloadFull
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_Shot
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION man_Idle
+[2025-09-11 18:48:52.780] [cologne] [info] 
+
+void cologne::AssetManager::init() 244.936903 ms
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL glowCube
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL Lantern
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL sponza2
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL sofa
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_1
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL sofa2
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL Gas_Range
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL Kitchen_Dresser
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL Pot
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL alarm_clock
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL armchair_leather
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL bookshelf
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL cabinet
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL cabinet_a
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL candle_holder
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL ceiling1
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL ceiling2
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL ceiling3
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL ceiling4
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL ceiling5
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL chair_a
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL chair_dining
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL coffee_table
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL curtain
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL decal_1
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL door
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL drawer_a
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL drawer_b
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL drawer_c
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL fabric_lace1
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL fabric_lace2
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL fabric_lace3
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL fan_ceiling
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL fan_ceiling_emissive
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL floor1
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL floor2
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL floor3
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL floor4
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL floor5
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL floor6
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL fluorescent_light
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL fluorescent_light_emissive
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL foil
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL fork
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL knife
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL lamp_desk
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL lamp_desk_emissive
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL lamp_wall
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL lamp_wall_emissive
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL mirror_a
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL mirror_b
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL mirror_organizer
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL pan1
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL pan2
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL picture_frame_a
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL picture_frame_b
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL plane
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL plate
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL pot1
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL radiator
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL range_hood
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL refrigerator
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL rod_curtain
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL shelf_storage
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL sink_kitchen
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL sofa_chesterfield
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL table_dining
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL table_shelf
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL table_shelf_w_cloth
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL table_tv_stand
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL tv
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_modular_01
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_modular_02
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_modular_03
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_modular_04
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_modular_05
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_modular_06
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_modular_07
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_modular_08
+[2025-09-11 18:48:52.780] [cologne] [info] MODEL wall_modular_09
+[2025-09-11 18:48:52.780] [cologne] [info] SKINNED MODEL vsk
+[2025-09-11 18:48:52.780] [cologne] [info] SKINNED MODEL deagle
+[2025-09-11 18:48:52.780] [cologne] [info] SKINNED MODEL man
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION vsk_Fire
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION vsk_Idle
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION vsk_Reload_Full
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION vsk_Reload_Not_Full
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION vsk_Run
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION vsk_Sprint
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION deagle_Rig|Rig|DefaultPose
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_Idle
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_ReloadFast
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_ReloadFull
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_Shot
+[2025-09-11 18:48:52.780] [cologne] [info] ANIMATION man_Idle
+[2025-09-11 18:48:52.781] [cologne] [info] LOADED PREVIOUSLY USED SCENE untitled_scene.cscn
+[2025-09-11 18:48:52.794] [cologne] [info] Added light handle to 13 entity
+[2025-09-11 18:48:52.795] [cologne] [info] Added light handle to 25 entity
+[2025-09-11 18:48:52.795] [cologne] [info] Added light handle to 27 entity
+[2025-09-11 18:48:52.800] [cologne] [info] Added light handle to 103 entity
+[2025-09-11 18:48:52.800] [cologne] [info] Added light handle to 117 entity
+[2025-09-11 18:48:52.804] [cologne] [info] Scene bounds are min (-11.558832, -1.662668, -2.358888), max (6.290165, 3.856379, 6.290165)
+[2025-09-11 18:48:52.804] [cologne] [info] Scene size is (20.488037, 5.519047, 8.649053)
+[2025-09-11 18:48:52.804] [cologne] [info] CLEANING UP PARTICLES!
+[2025-09-11 18:48:52.804] [cologne] [info] Light count 5
+[2025-09-11 18:48:52.804] [cologne] [info] Light count 5
+[2025-09-11 18:48:52.804] [cologne] [info] Event manager initialized
+[2025-09-11 18:48:52.804] [cologne] [info] Engine initialized successfully!
+[2025-09-11 18:48:52.804] [cologne] [info] Engine initialized in 1.537526 time
+[2025-09-11 18:48:52.810] [cologne] [info] GENERATING MIPS 5
+[2025-09-11 18:48:52.811] [cologne] [info] GENERATING MIPS 5
+[2025-09-11 18:48:53.502] [cologne] [info] file changed /home/alecpizz/Repos/goonengine/resources/logs/cologne.log MODIFIED
+[2025-09-11 18:49:01.468] [cologne] [info] Remove component of type AnimComponent
+[2025-09-11 18:49:02.401] [cologne] [info] Cleaning Up Scene
+[2025-09-11 18:49:02.401] [cologne] [info] CLEANING UP PARTICLES!
+[2025-09-11 18:49:02.541] [cologne] [info] File Watcher Stopped
+[2025-09-11 18:50:51.665] [cologne] [info] Starting up engine. the world is a shit place, and this is a shit engine. good luck!
+[2025-09-11 18:50:51.665] [cologne] [info] C++ VERSION 202002
+[2025-09-11 18:50:51.665] [cologne] [info] AUDIO INTI
+[2025-09-11 18:50:51.686] [cologne] [info] Audio Mixer started succesfully
+[2025-09-11 18:50:51.686] [cologne] [info] 
+
+Audio::init 20.834583 ms
+[2025-09-11 18:50:51.687] [cologne] [info] 
+
+cologne::Editor::Editor() 0.730886 ms
+[2025-09-11 18:50:51.857] [cologne] [info] Created window for GPU: NVIDIA Corporation NVIDIA GeForce RTX 3070/PCIe/SSE2
+[2025-09-11 18:50:51.857] [cologne] [info] 
+
+cologne::Window::Window(uint32_t, uint32_t) 170.417909 ms
+[2025-09-11 18:50:51.863] [cologne] [info] File Watcher Started
+[2025-09-11 18:50:51.863] [cologne] [info] Starting DebugRenderer
+[2025-09-11 18:50:51.869] [cologne] [info] Started Text Renderer
+[2025-09-11 18:50:52.912] [cologne] [info] Renderer initialized
+[2025-09-11 18:50:52.912] [cologne] [info] 
+
+cologne::Renderer::Renderer() 1048.620842 ms
+[2025-09-11 18:50:52.912] [cologne] [info] Initializing Physics
+[2025-09-11 18:50:52.914] [cologne] [info] 
+
+Physics::init 2.523835 ms
+[2025-09-11 18:50:52.932] [cologne] [info] 
+
+load models 0.000060 ms
+[2025-09-11 18:50:53.142] [cologne] [info] 
+
+load models 210.344326 ms
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL glowCube
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL Lantern
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL sponza2
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL sofa
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_1
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL sofa2
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL Gas_Range
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL Kitchen_Dresser
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL Pot
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL alarm_clock
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL armchair_leather
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL bookshelf
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL cabinet
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL cabinet_a
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL candle_holder
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL ceiling1
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL ceiling2
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL ceiling3
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL ceiling4
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL ceiling5
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL chair_a
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL chair_dining
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL coffee_table
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL curtain
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL decal_1
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL door
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL drawer_a
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL drawer_b
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL drawer_c
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL fabric_lace1
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL fabric_lace2
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL fabric_lace3
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL fan_ceiling
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL fan_ceiling_emissive
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL floor1
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL floor2
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL floor3
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL floor4
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL floor5
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL floor6
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL fluorescent_light
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL fluorescent_light_emissive
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL foil
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL fork
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL knife
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL lamp_desk
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL lamp_desk_emissive
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL lamp_wall
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL lamp_wall_emissive
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL mirror_a
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL mirror_b
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL mirror_organizer
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL pan1
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL pan2
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL picture_frame_a
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL picture_frame_b
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL plane
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL plate
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL pot1
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL radiator
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL range_hood
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL refrigerator
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL rod_curtain
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL shelf_storage
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL sink_kitchen
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL sofa_chesterfield
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL table_dining
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL table_shelf
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL table_shelf_w_cloth
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL table_tv_stand
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL tv
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_modular_01
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_modular_02
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_modular_03
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_modular_04
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_modular_05
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_modular_06
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_modular_07
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_modular_08
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_modular_09
+[2025-09-11 18:50:53.142] [cologne] [info] SKINNED MODEL vsk
+[2025-09-11 18:50:53.142] [cologne] [info] SKINNED MODEL deagle
+[2025-09-11 18:50:53.142] [cologne] [info] SKINNED MODEL man
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION vsk_Fire
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION vsk_Idle
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION vsk_Reload_Full
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION vsk_Reload_Not_Full
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION vsk_Run
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION vsk_Sprint
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION deagle_Rig|Rig|DefaultPose
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_Idle
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_ReloadFast
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_ReloadFull
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_Shot
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION man_Idle
+[2025-09-11 18:50:53.142] [cologne] [info] 
+
+void cologne::AssetManager::init() 228.331337 ms
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL glowCube
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL Lantern
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL sponza2
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL sofa
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_1
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL sofa2
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL Gas_Range
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL Kitchen_Dresser
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL Pot
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL alarm_clock
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL armchair_leather
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL bookshelf
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL cabinet
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL cabinet_a
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL candle_holder
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL ceiling1
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL ceiling2
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL ceiling3
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL ceiling4
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL ceiling5
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL chair_a
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL chair_dining
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL coffee_table
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL curtain
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL decal_1
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL door
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL drawer_a
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL drawer_b
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL drawer_c
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL fabric_lace1
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL fabric_lace2
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL fabric_lace3
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL fan_ceiling
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL fan_ceiling_emissive
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL floor1
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL floor2
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL floor3
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL floor4
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL floor5
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL floor6
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL fluorescent_light
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL fluorescent_light_emissive
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL foil
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL fork
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL knife
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL lamp_desk
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL lamp_desk_emissive
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL lamp_wall
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL lamp_wall_emissive
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL mirror_a
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL mirror_b
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL mirror_organizer
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL pan1
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL pan2
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL picture_frame_a
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL picture_frame_b
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL plane
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL plate
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL pot1
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL radiator
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL range_hood
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL refrigerator
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL rod_curtain
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL shelf_storage
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL sink_kitchen
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL sofa_chesterfield
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL table_dining
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL table_shelf
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL table_shelf_w_cloth
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL table_tv_stand
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL tv
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_modular_01
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_modular_02
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_modular_03
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_modular_04
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_modular_05
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_modular_06
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_modular_07
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_modular_08
+[2025-09-11 18:50:53.142] [cologne] [info] MODEL wall_modular_09
+[2025-09-11 18:50:53.142] [cologne] [info] SKINNED MODEL vsk
+[2025-09-11 18:50:53.142] [cologne] [info] SKINNED MODEL deagle
+[2025-09-11 18:50:53.142] [cologne] [info] SKINNED MODEL man
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION vsk_Fire
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION vsk_Idle
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION vsk_Reload_Full
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION vsk_Reload_Not_Full
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION vsk_Run
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION vsk_Sprint
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION deagle_Rig|Rig|DefaultPose
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_Idle
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_ReloadFast
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_ReloadFull
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_Shot
+[2025-09-11 18:50:53.142] [cologne] [info] ANIMATION man_Idle
+[2025-09-11 18:50:53.143] [cologne] [info] LOADED PREVIOUSLY USED SCENE untitled_scene.cscn
+[2025-09-11 18:50:53.157] [cologne] [info] Added light handle to 13 entity
+[2025-09-11 18:50:53.157] [cologne] [info] Added light handle to 25 entity
+[2025-09-11 18:50:53.157] [cologne] [info] Added light handle to 27 entity
+[2025-09-11 18:50:53.162] [cologne] [info] Added light handle to 103 entity
+[2025-09-11 18:50:53.163] [cologne] [info] Added light handle to 117 entity
+[2025-09-11 18:50:53.166] [cologne] [info] Scene bounds are min (-11.558832, -1.662668, -2.358888), max (6.290165, 3.856379, 6.290165)
+[2025-09-11 18:50:53.166] [cologne] [info] Scene size is (20.488037, 5.519047, 8.649053)
+[2025-09-11 18:50:53.166] [cologne] [info] CLEANING UP PARTICLES!
+[2025-09-11 18:50:53.166] [cologne] [info] Light count 5
+[2025-09-11 18:50:53.166] [cologne] [info] Light count 5
+[2025-09-11 18:50:53.166] [cologne] [info] Event manager initialized
+[2025-09-11 18:50:53.166] [cologne] [info] Engine initialized successfully!
+[2025-09-11 18:50:53.166] [cologne] [info] Engine initialized in 1.500949 time
+[2025-09-11 18:50:53.173] [cologne] [info] GENERATING MIPS 5
+[2025-09-11 18:50:53.173] [cologne] [info] GENERATING MIPS 5
+[2025-09-11 18:50:53.880] [cologne] [info] file changed /home/alecpizz/Repos/goonengine/resources/logs/cologne.log MODIFIED
+[2025-09-11 18:51:06.694] [cologne] [info] Light count 5
+[2025-09-11 18:51:06.694] [cologne] [info] 
+
+cologne::Scene::Scene() 0.010810 ms
+[2025-09-11 18:51:06.694] [cologne] [info] Copied ActiveComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied IDComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied MeshComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied StaticColliderComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied TagComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied TransformComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied WorldTransformComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied ChildComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied ParentComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Added light handle to 117 entity
+[2025-09-11 18:51:06.694] [cologne] [info] Added light handle to 103 entity
+[2025-09-11 18:51:06.694] [cologne] [info] Added light handle to 27 entity
+[2025-09-11 18:51:06.694] [cologne] [info] Added light handle to 25 entity
+[2025-09-11 18:51:06.694] [cologne] [info] Added light handle to 13 entity
+[2025-09-11 18:51:06.694] [cologne] [info] Copied LightComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied ConvexMeshColliderComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied RigidbodyComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied CameraComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied InteractorComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied AnimatorComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied SkinnedModelComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied ViewmodelComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied PlayerComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied EditorCameraComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied HideInEditorComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied ModelComponent
+[2025-09-11 18:51:06.694] [cologne] [info] Copied AnimComponent
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 16777216
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388609
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388610
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388611
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388612
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388613
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388614
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388615
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388616
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388617
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388618
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388619
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388620
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388621
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388622
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388623
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388624
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388625
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388626
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388627
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388628
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388629
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388630
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388631
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388632
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388633
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388634
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388635
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388636
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388637
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388638
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388639
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388640
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388641
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388642
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388643
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388644
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388645
+[2025-09-11 18:51:06.695] [cologne] [info] Created collider with id 8388646
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388647
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388648
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388649
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388650
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388651
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388652
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388653
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388654
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388655
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388656
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388657
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388658
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388659
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388660
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388661
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388662
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388663
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388664
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388665
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388666
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388667
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388668
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388669
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388670
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388671
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388672
+[2025-09-11 18:51:06.696] [cologne] [info] Created collider with id 8388673
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388674
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388675
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388676
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388677
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388678
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388679
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388680
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388681
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388682
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388683
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388684
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388685
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388686
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388687
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388688
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388689
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388690
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388691
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388692
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388693
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388694
+[2025-09-11 18:51:06.697] [cologne] [info] Created collider with id 8388695
+[2025-09-11 18:51:06.698] [cologne] [info] Created collider with id 8388696
+[2025-09-11 18:51:06.698] [cologne] [info] Created collider with id 8388697
+[2025-09-11 18:51:06.698] [cologne] [info] Created collider with id 8388698
+[2025-09-11 18:51:06.698] [cologne] [info] Created collider with id 8388699
+[2025-09-11 18:51:06.698] [cologne] [info] Created collider with id 8388700
+[2025-09-11 18:51:06.698] [cologne] [info] Created collider with id 8388701
+[2025-09-11 18:51:06.698] [cologne] [info] Created collider with id 8388702
+[2025-09-11 18:51:06.698] [cologne] [info] Created collider with id 8388703
+[2025-09-11 18:51:06.698] [cologne] [info] Created collider with id 8388704
+[2025-09-11 18:51:06.953] [cologne] [info] file changed /home/alecpizz/Repos/goonengine/resources/logs/cologne.log MODIFIED
+[2025-09-11 18:51:08.125] [cologne] [info] Bang
+[2025-09-11 18:51:08.447] [cologne] [info] Bang
+[2025-09-11 18:51:08.633] [cologne] [info] Bang
+[2025-09-11 18:51:08.833] [cologne] [info] Bang
+[2025-09-11 18:51:09.468] [cologne] [info] Light count 10
+[2025-09-11 18:51:09.468] [cologne] [info] Cleaning Up Scene
+[2025-09-11 18:51:09.468] [cologne] [info] Light count 5
+[2025-09-11 18:51:31.643] [cologne] [info] Cleaning Up Scene
+[2025-09-11 18:51:31.643] [cologne] [info] CLEANING UP PARTICLES!
+[2025-09-11 18:51:32.079] [cologne] [info] File Watcher Stopped
+[2025-09-11 18:57:46.886] [cologne] [info] Starting up engine. the world is a shit place, and this is a shit engine. good luck!
+[2025-09-11 18:57:46.886] [cologne] [info] C++ VERSION 202002
+[2025-09-11 18:57:46.886] [cologne] [info] AUDIO INTI
+[2025-09-11 18:57:46.908] [cologne] [info] Audio Mixer started succesfully
+[2025-09-11 18:57:46.908] [cologne] [info] 
+
+Audio::init 21.526583 ms
+[2025-09-11 18:57:46.908] [cologne] [info] 
+
+cologne::Editor::Editor() 0.682957 ms
+[2025-09-11 18:57:47.073] [cologne] [info] Created window for GPU: NVIDIA Corporation NVIDIA GeForce RTX 3070/PCIe/SSE2
+[2025-09-11 18:57:47.073] [cologne] [info] 
+
+cologne::Window::Window(uint32_t, uint32_t) 164.763033 ms
+[2025-09-11 18:57:47.079] [cologne] [info] File Watcher Started
+[2025-09-11 18:57:47.079] [cologne] [info] Starting DebugRenderer
+[2025-09-11 18:57:47.085] [cologne] [info] Started Text Renderer
+[2025-09-11 18:57:48.096] [cologne] [info] Renderer initialized
+[2025-09-11 18:57:48.096] [cologne] [info] 
+
+cologne::Renderer::Renderer() 1017.523795 ms
+[2025-09-11 18:57:48.096] [cologne] [info] Initializing Physics
+[2025-09-11 18:57:48.099] [cologne] [info] 
+
+Physics::init 2.605747 ms
+[2025-09-11 18:57:48.117] [cologne] [info] 
+
+load models 0.000090 ms
+[2025-09-11 18:57:48.329] [cologne] [info] 
+
+load models 211.547431 ms
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL glowCube
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL Lantern
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL sponza2
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL sofa
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_1
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL sofa2
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL Gas_Range
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL Kitchen_Dresser
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL Pot
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL alarm_clock
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL armchair_leather
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL bookshelf
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL cabinet
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL cabinet_a
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL candle_holder
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL ceiling1
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL ceiling2
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL ceiling3
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL ceiling4
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL ceiling5
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL chair_a
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL chair_dining
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL coffee_table
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL curtain
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL decal_1
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL door
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL drawer_a
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL drawer_b
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL drawer_c
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL fabric_lace1
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL fabric_lace2
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL fabric_lace3
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL fan_ceiling
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL fan_ceiling_emissive
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL floor1
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL floor2
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL floor3
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL floor4
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL floor5
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL floor6
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL fluorescent_light
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL fluorescent_light_emissive
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL foil
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL fork
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL knife
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL lamp_desk
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL lamp_desk_emissive
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL lamp_wall
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL lamp_wall_emissive
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL mirror_a
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL mirror_b
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL mirror_organizer
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL pan1
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL pan2
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL picture_frame_a
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL picture_frame_b
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL plane
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL plate
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL pot1
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL radiator
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL range_hood
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL refrigerator
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL rod_curtain
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL shelf_storage
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL sink_kitchen
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL sofa_chesterfield
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL table_dining
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL table_shelf
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL table_shelf_w_cloth
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL table_tv_stand
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL tv
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_modular_01
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_modular_02
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_modular_03
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_modular_04
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_modular_05
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_modular_06
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_modular_07
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_modular_08
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_modular_09
+[2025-09-11 18:57:48.329] [cologne] [info] SKINNED MODEL vsk
+[2025-09-11 18:57:48.329] [cologne] [info] SKINNED MODEL deagle
+[2025-09-11 18:57:48.329] [cologne] [info] SKINNED MODEL man
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION vsk_Fire
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION vsk_Idle
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION vsk_Reload_Full
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION vsk_Reload_Not_Full
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION vsk_Run
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION vsk_Sprint
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION deagle_Rig|Rig|DefaultPose
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_Idle
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_ReloadFast
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_ReloadFull
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_Shot
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION man_Idle
+[2025-09-11 18:57:48.329] [cologne] [info] 
+
+void cologne::AssetManager::init() 229.782691 ms
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL glowCube
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL Lantern
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL sponza2
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL sofa
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_1
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL sofa2
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL Gas_Range
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL Kitchen_Dresser
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL Pot
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL alarm_clock
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL armchair_leather
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL bookshelf
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL cabinet
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL cabinet_a
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL candle_holder
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL ceiling1
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL ceiling2
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL ceiling3
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL ceiling4
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL ceiling5
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL chair_a
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL chair_dining
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL coffee_table
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL curtain
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL decal_1
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL door
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL drawer_a
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL drawer_b
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL drawer_c
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL fabric_lace1
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL fabric_lace2
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL fabric_lace3
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL fan_ceiling
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL fan_ceiling_emissive
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL floor1
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL floor2
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL floor3
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL floor4
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL floor5
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL floor6
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL fluorescent_light
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL fluorescent_light_emissive
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL foil
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL fork
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL knife
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL lamp_desk
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL lamp_desk_emissive
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL lamp_wall
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL lamp_wall_emissive
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL mirror_a
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL mirror_b
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL mirror_organizer
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL pan1
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL pan2
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL picture_frame_a
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL picture_frame_b
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL plane
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL plate
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL pot1
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL radiator
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL range_hood
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL refrigerator
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL rod_curtain
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL shelf_storage
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL sink_kitchen
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL sofa_chesterfield
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL table_dining
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL table_shelf
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL table_shelf_w_cloth
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL table_tv_stand
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL tv
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_modular_01
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_modular_02
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_modular_03
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_modular_04
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_modular_05
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_modular_06
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_modular_07
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_modular_08
+[2025-09-11 18:57:48.329] [cologne] [info] MODEL wall_modular_09
+[2025-09-11 18:57:48.329] [cologne] [info] SKINNED MODEL vsk
+[2025-09-11 18:57:48.329] [cologne] [info] SKINNED MODEL deagle
+[2025-09-11 18:57:48.329] [cologne] [info] SKINNED MODEL man
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION vsk_Fire
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION vsk_Idle
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION vsk_Reload_Full
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION vsk_Reload_Not_Full
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION vsk_Run
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION vsk_Sprint
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION deagle_Rig|Rig|DefaultPose
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_Idle
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_ReloadFast
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_ReloadFull
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION deagle_Rig|Rig|MK_Shot
+[2025-09-11 18:57:48.329] [cologne] [info] ANIMATION man_Idle
+[2025-09-11 18:57:48.329] [cologne] [info] LOADED PREVIOUSLY USED SCENE untitled_scene.cscn
+[2025-09-11 18:57:48.342] [cologne] [info] Added light handle to 13 entity
+[2025-09-11 18:57:48.343] [cologne] [info] Added light handle to 25 entity
+[2025-09-11 18:57:48.343] [cologne] [info] Added light handle to 27 entity
+[2025-09-11 18:57:48.347] [cologne] [info] Added light handle to 103 entity
+[2025-09-11 18:57:48.348] [cologne] [info] Added light handle to 117 entity
+[2025-09-11 18:57:48.351] [cologne] [info] Scene bounds are min (-11.558832, -1.662668, -2.358888), max (6.290165, 3.856379, 6.290165)
+[2025-09-11 18:57:48.351] [cologne] [info] Scene size is (20.488037, 5.519047, 8.649053)
+[2025-09-11 18:57:48.351] [cologne] [info] CLEANING UP PARTICLES!
+[2025-09-11 18:57:48.351] [cologne] [info] Light count 5
+[2025-09-11 18:57:48.351] [cologne] [info] Light count 5
+[2025-09-11 18:57:48.351] [cologne] [info] Event manager initialized
+[2025-09-11 18:57:48.351] [cologne] [info] Engine initialized successfully!
+[2025-09-11 18:57:48.351] [cologne] [info] Engine initialized in 1.465478 time
+[2025-09-11 18:57:48.358] [cologne] [info] GENERATING MIPS 5
+[2025-09-11 18:57:48.358] [cologne] [info] GENERATING MIPS 5
+[2025-09-11 18:57:49.100] [cologne] [info] file changed /home/alecpizz/Repos/goonengine/resources/logs/cologne.log MODIFIED
+[2025-09-11 18:57:59.992] [cologne] [info] Light count 5
+[2025-09-11 18:57:59.992] [cologne] [info] 
+
+cologne::Scene::Scene() 0.012300 ms
+[2025-09-11 18:57:59.992] [cologne] [info] Copied ActiveComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied IDComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied MeshComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied StaticColliderComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied TagComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied TransformComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied WorldTransformComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied ChildComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied ParentComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Added light handle to 117 entity
+[2025-09-11 18:57:59.993] [cologne] [info] Added light handle to 103 entity
+[2025-09-11 18:57:59.993] [cologne] [info] Added light handle to 27 entity
+[2025-09-11 18:57:59.993] [cologne] [info] Added light handle to 25 entity
+[2025-09-11 18:57:59.993] [cologne] [info] Added light handle to 13 entity
+[2025-09-11 18:57:59.993] [cologne] [info] Copied LightComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied ConvexMeshColliderComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied RigidbodyComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied CameraComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied InteractorComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied AnimatorComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied SkinnedModelComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied ViewmodelComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied PlayerComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied EditorCameraComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied HideInEditorComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied ModelComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Copied AnimComponent
+[2025-09-11 18:57:59.993] [cologne] [info] Created collider with id 16777216
+[2025-09-11 18:57:59.993] [cologne] [info] Created collider with id 8388609
+[2025-09-11 18:57:59.993] [cologne] [info] Created collider with id 8388610
+[2025-09-11 18:57:59.993] [cologne] [info] Created collider with id 8388611
+[2025-09-11 18:57:59.993] [cologne] [info] Created collider with id 8388612
+[2025-09-11 18:57:59.993] [cologne] [info] Created collider with id 8388613
+[2025-09-11 18:57:59.993] [cologne] [info] Created collider with id 8388614
+[2025-09-11 18:57:59.993] [cologne] [info] Created collider with id 8388615
+[2025-09-11 18:57:59.993] [cologne] [info] Created collider with id 8388616
+[2025-09-11 18:57:59.993] [cologne] [info] Created collider with id 8388617
+[2025-09-11 18:57:59.993] [cologne] [info] Created collider with id 8388618
+[2025-09-11 18:57:59.993] [cologne] [info] Created collider with id 8388619
+[2025-09-11 18:57:59.993] [cologne] [info] Created collider with id 8388620
+[2025-09-11 18:57:59.993] [cologne] [info] Created collider with id 8388621
+[2025-09-11 18:57:59.993] [cologne] [info] Created collider with id 8388622
+[2025-09-11 18:57:59.993] [cologne] [info] Created collider with id 8388623
+[2025-09-11 18:57:59.993] [cologne] [info] Created collider with id 8388624
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388625
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388626
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388627
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388628
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388629
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388630
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388631
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388632
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388633
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388634
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388635
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388636
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388637
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388638
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388639
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388640
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388641
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388642
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388643
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388644
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388645
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388646
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388647
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388648
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388649
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388650
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388651
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388652
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388653
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388654
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388655
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388656
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388657
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388658
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388659
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388660
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388661
+[2025-09-11 18:57:59.994] [cologne] [info] Created collider with id 8388662
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388663
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388664
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388665
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388666
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388667
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388668
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388669
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388670
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388671
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388672
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388673
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388674
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388675
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388676
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388677
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388678
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388679
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388680
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388681
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388682
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388683
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388684
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388685
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388686
+[2025-09-11 18:57:59.995] [cologne] [info] Created collider with id 8388687
+[2025-09-11 18:57:59.996] [cologne] [info] Created collider with id 8388688
+[2025-09-11 18:57:59.996] [cologne] [info] Created collider with id 8388689
+[2025-09-11 18:57:59.996] [cologne] [info] Created collider with id 8388690
+[2025-09-11 18:57:59.996] [cologne] [info] Created collider with id 8388691
+[2025-09-11 18:57:59.996] [cologne] [info] Created collider with id 8388692
+[2025-09-11 18:57:59.996] [cologne] [info] Created collider with id 8388693
+[2025-09-11 18:57:59.996] [cologne] [info] Created collider with id 8388694
+[2025-09-11 18:57:59.996] [cologne] [info] Created collider with id 8388695
+[2025-09-11 18:57:59.996] [cologne] [info] Created collider with id 8388696
+[2025-09-11 18:57:59.996] [cologne] [info] Created collider with id 8388697
+[2025-09-11 18:57:59.996] [cologne] [info] Created collider with id 8388698
+[2025-09-11 18:57:59.996] [cologne] [info] Created collider with id 8388699
+[2025-09-11 18:57:59.996] [cologne] [info] Created collider with id 8388700
+[2025-09-11 18:57:59.996] [cologne] [info] Created collider with id 8388701
+[2025-09-11 18:57:59.996] [cologne] [info] Created collider with id 8388702
+[2025-09-11 18:57:59.996] [cologne] [info] Created collider with id 8388703
+[2025-09-11 18:57:59.997] [cologne] [info] Created collider with id 8388704
+[2025-09-11 18:58:00.156] [cologne] [info] file changed /home/alecpizz/Repos/goonengine/resources/logs/cologne.log MODIFIED
+[2025-09-11 18:58:04.174] [cologne] [info] Light count 10
+[2025-09-11 18:58:04.174] [cologne] [info] Cleaning Up Scene
+[2025-09-11 18:58:04.175] [cologne] [info] Light count 5
+[2025-09-11 18:58:05.168] [cologne] [info] Cleaning Up Scene
+[2025-09-11 18:58:05.168] [cologne] [info] CLEANING UP PARTICLES!
+[2025-09-11 18:58:06.181] [cologne] [info] File Watcher Stopped

@@ -302,10 +302,10 @@ namespace cologne
         ImGui::Text("%s: %f %f %f %f", name, mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
     }
 
-    static bool write_model(ModelComponent& model, const PropertiesMap& properties)
+    static bool write_model(ModelComponent &model, const PropertiesMap &properties)
     {
-        std::vector<const char*> model_names;
-        for (auto& model : AssetManager::get_models())
+        std::vector<const char *> model_names;
+        for (auto &model: AssetManager::get_models())
         {
             model_names.emplace_back(model.get_name());
         }
@@ -319,12 +319,12 @@ namespace cologne
         return false;
     }
 
-    static bool write_mesh(MeshComponent& mesh, const PropertiesMap& properties)
+    static bool write_mesh(MeshComponent &mesh, const PropertiesMap &properties)
     {
-        std::vector<const char*> mesh_names;
-        for (auto& mesh : AssetManager::get_meshes())
+        std::vector<const char *> mesh_names;
+        for (auto &mesh: AssetManager::get_meshes())
         {
-            const std::string& mesh_name = mesh.get_name();
+            const std::string &mesh_name = mesh.get_name();
             mesh_names.emplace_back(mesh_name.c_str());
         }
         int idx = AssetManager::get_mesh_index_by_name(mesh.mesh_name);
@@ -337,12 +337,12 @@ namespace cologne
         return false;
     }
 
-    static bool write_convex_mesh(ConvexMeshColliderComponent& mesh, const PropertiesMap& properties)
+    static bool write_convex_mesh(ConvexMeshColliderComponent &mesh, const PropertiesMap &properties)
     {
-        std::vector<const char*> mesh_names;
-        for (auto& mesh : AssetManager::get_meshes())
+        std::vector<const char *> mesh_names;
+        for (auto &mesh: AssetManager::get_meshes())
         {
-            const std::string& mesh_name = mesh.get_name();
+            const std::string &mesh_name = mesh.get_name();
             mesh_names.emplace_back(mesh_name.c_str());
         }
         int idx = AssetManager::get_mesh_index_by_name(mesh.mesh_name);
@@ -355,7 +355,8 @@ namespace cologne
         return false;
     }
 
-    static bool write_skinned_model_component(SkinnedModelComponent& skinned_model_component, const PropertiesMap& properties)
+    static bool write_skinned_model_component(SkinnedModelComponent &skinned_model_component,
+                                              const PropertiesMap &properties)
     {
         bool changed = false;
         if (ImGui::BeginCombo("Skinned Model", skinned_model_component.model_name.c_str()))
@@ -366,6 +367,26 @@ namespace cologne
                 if (ImGui::Selectable(name.c_str()))
                 {
                     skinned_model_component.model_name = name;
+                    changed = true;
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        return changed;
+    }
+
+    static bool write_anim_component(AnimComponent &anim_component, const PropertiesMap &properties)
+    {
+        bool changed = false;
+        if (ImGui::BeginCombo("Base Animation Clip", anim_component.base_clip_name.c_str()))
+        {
+            for (const auto &anim: AssetManager::get_animations())
+            {
+                auto name = anim.get_name();
+                if (ImGui::Selectable(name.c_str()))
+                {
+                    anim_component.base_clip_name = name;
                     changed = true;
                 }
             }
@@ -424,7 +445,6 @@ namespace cologne
                 .func<&write_mat4>("editor_write"_hs)
                 .func<&read_mat4>("editor_read"_hs);
 
-
         entt::meta_factory<TagComponent>()
                 .func<&editor_read_dummy>("editor_read"_hs)
                 .func<&editor_write_dummy>("editor_write"_hs);
@@ -432,15 +452,15 @@ namespace cologne
                 .func<&write_light>("editor_write"_hs)
                 .func<&read_light>("editor_read"_hs);
         entt::meta_factory<ModelComponent>()
-            .func<&write_model>("editor_write"_hs);
+                .func<&write_model>("editor_write"_hs);
         entt::meta_factory<MeshComponent>()
-           .func<&write_mesh>("editor_write"_hs);
+                .func<&write_mesh>("editor_write"_hs);
         entt::meta_factory<ConvexMeshColliderComponent>()
-           .func<&write_convex_mesh>("editor_write"_hs);
+                .func<&write_convex_mesh>("editor_write"_hs);
 
         entt::meta_factory<SkinnedModelComponent>()
-            .func<&write_skinned_model_component>("editor_write"_hs);
-
-
+                .func<&write_skinned_model_component>("editor_write"_hs);
+        entt::meta_factory<AnimComponent>()
+                .func<&write_anim_component>("editor_write"_hs);
     }
 }

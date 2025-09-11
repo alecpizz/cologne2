@@ -77,6 +77,10 @@ namespace cologne
                 auto &animator = registry.get<AnimatorComponent>(entity);
                 bones = animator.get_skinning_matrices();
             }
+            else if (registry.any_of<AnimComponent>(entity))
+            {
+                bones = m.skeleton_pose.get_skinning_matrices();
+            }
             else
             {
                 bones = std::vector<glm::mat4>(skinned_model->get_skeleton().get_bone_count(), glm::mat4(1.0f));

@@ -209,6 +209,9 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 REGISTER_PROPERTY(BulletComponent, direction)
                 REGISTER_PROPERTY(BulletComponent, damage);
 
+        REGISTER_COMPONENT(AnimComponent, "AnimComponent", EDITOR_READ_WRITE)
+                REGISTER_PROPERTY(AnimComponent, base_clip_name);
+
         REGISTER_COMPONENT(HideInEditorComponent, "HideInEditorComponent", NO_EDITOR);
         REGISTER_COMPONENT(EditorCameraComponent, "EditorCameraComponent", NO_EDITOR);
         REGISTER_COMPONENT(LightComponent, "LightComponent", EDITOR_READ_WRITE)

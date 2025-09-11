@@ -115,7 +115,7 @@ namespace cologne
         SkeletonPose pose(_skeleton);
         for (size_t i = 0; i < _skeleton.get_bone_count(); i++)
         {
-            pose._local_transforms[i] = _skeleton.get_bones()[i].local_bind_transform;
+            pose.local_transforms[i] = _skeleton.get_bones()[i].local_bind_transform;
         }
         pose.update_skinning_matrices(_skeleton);
         _ragdoll_id = Physics::create_ragdoll(entity_id, _bone_to_ragdoll_map, _skeleton, pose._global_transforms);
@@ -162,11 +162,11 @@ namespace cologne
             if (BoneAnimationData *channel = _current_clip->find_bone_channel(bone.name))
             {
                 channel->update(_current_time);
-                _pose._local_transforms[i] = channel->get_transform();
+                _pose.local_transforms[i] = channel->get_transform();
             }
             else
             {
-                _pose._local_transforms[i] = bone.local_bind_transform;
+                _pose.local_transforms[i] = bone.local_bind_transform;
             }
         }
         _pose.update_skinning_matrices(_skeleton);

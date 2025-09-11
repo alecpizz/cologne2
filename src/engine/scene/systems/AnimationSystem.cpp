@@ -5,6 +5,7 @@
 #include "AnimationSystem.h"
 
 #include <engine/animation/AnimatorComponent.h>
+#include <engine/asset_manager/AssetManager.h>
 #include <engine/scene/Components.h>
 #include <engine/scene/Scene.h>
 
@@ -22,6 +23,40 @@ namespace cologne
             }
             auto &animator = registry.get<AnimatorComponent>(entity);
             animator.update(dt, registry.get<WorldTransformComponent>(entity));
+        }
+
+        auto animators2 = registry.view<AnimComponent, ActiveComponent, SkinnedModelComponent>();
+        for (auto entity : animators2)
+        {
+            if (!registry.get<ActiveComponent>(entity).active)
+            {
+                continue;
+            }
+
+            auto& animator = registry.get<AnimComponent>(entity);
+            auto& skinned_model = registry.get<SkinnedModelComponent>(entity);
+            auto current_clip = AssetManager::get_animation_by_name(animator.base_clip_name);
+            if (!current_clip)
+            {
+                continue;
+            }
+            animator.current_time += current_clip->get_ticks_per_second() * dt;
+            animator.current_time = std::fmod(animator.current_time, current_clip->get_duration());
+            const auto &bones = skinned_model.skeleton.get_bones();
+            for (size_t i = 0; i < bones.size(); i++)
+            {
+                const auto& bone = bones[i];
+                if (BoneAnimationData *channel = current_clip->find_bone_channel(bone.name))
+                {
+                    channel->update(animator.current_time);
+                    skinned_model.skeleton_pose.local_transforms[i] = channel->get_transform();
+                }
+                else
+                {
+                    skinned_model.skeleton_pose.local_transforms[i] = bone.local_bind_transform;
+                }
+            }
+            skinned_model.skeleton_pose.update_skinning_matrices(skinned_model.skeleton);
         }
     }
 }

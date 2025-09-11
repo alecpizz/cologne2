@@ -11,7 +11,7 @@ namespace cologne
     SkeletonPose::SkeletonPose(const Skeleton &skeleton)
     {
         const auto bone_count = skeleton.get_bone_count();
-        _local_transforms.assign(bone_count, glm::mat4(1.0f));
+        local_transforms.assign(bone_count, glm::mat4(1.0f));
         _global_transforms.assign(bone_count, glm::mat4(1.0f));
         _skinning_matrices.assign(bone_count, glm::mat4(1.0f));
     }
@@ -24,11 +24,11 @@ namespace cologne
             const auto& bone = bones[i];
             if (bone.parent_idx == -1)
             {
-                _global_transforms[i] = _local_transforms[i];
+                _global_transforms[i] = local_transforms[i];
             }
             else
             {
-                _global_transforms[i] = _global_transforms[bone.parent_idx] * _local_transforms[i];
+                _global_transforms[i] = _global_transforms[bone.parent_idx] * local_transforms[i];
             }
         }
 

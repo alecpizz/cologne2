@@ -31,7 +31,7 @@
 namespace cologne
 {
     static std::vector<std::unique_ptr<System>> systems;
-    void Scene::initialize_physics_world()
+    void Scene::initialize_components()
     {
         auto view = _registry.view<TransformComponent, StaticColliderComponent>();
         for (auto entity: view)
@@ -76,6 +76,18 @@ namespace cologne
             PlayerCreateInfo info;
             info.position = _registry.get<TransformComponent>(entity).position;
             pc.id = Physics::create_player(info);
+        }
+
+        for (const auto entity : _registry.view<SkinnedModelComponent>())
+        {
+            auto& sk = _registry.get<SkinnedModelComponent>(entity);
+            auto model = AssetManager::get_skinned_model_by_name(sk.model_name);
+            if (!model)
+            {
+                continue;
+            }
+            sk.skeleton = model->get_skeleton();
+            sk.skeleton_pose = SkeletonPose(sk.skeleton);
         }
 
         for (const auto entity: _registry.view<AnimatorComponent>())
@@ -194,7 +206,7 @@ namespace cologne
     void Scene::on_enter_play_mode()
     {
         setup_entity_map();
-        initialize_physics_world();
+        initialize_components();
         re_calculate_bounds();
         for (const auto &system: systems)
         {

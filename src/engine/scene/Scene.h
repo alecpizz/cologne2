@@ -81,7 +81,7 @@ namespace cologne
     private:
         static void add_system(std::unique_ptr<System> system);
         void duplicate_recursive(Entity source, std::unordered_map<UUID, UUID>& old_to_new_map);
-        void initialize_physics_world();
+        void initialize_components();
         Entity create_player_entity(glm::vec3 pos);
         Entity create_scene_camera_entity();
         void setup_entity_map();

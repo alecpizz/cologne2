@@ -1,4 +1,5 @@
 #pragma once
+#include <engine/animation/SkeletonPose.h>
 #include <engine/core/UUID.h>
 #include <engine/physics/Physics.h>
 #include <engine/util/Util.h>
@@ -124,6 +125,19 @@ namespace cologne
     struct SkinnedModelComponent
     {
         std::string model_name;
+
+        SkinnedModelComponent(const char* name)
+        {
+            model_name = name;
+        }
+        SkinnedModelComponent() = default;
+        SkinnedModelComponent(const SkinnedModelComponent& other)
+        {
+            model_name = other.model_name;
+        }
+        //runtime
+        Skeleton skeleton;
+        SkeletonPose skeleton_pose;
     };
 
     struct TagComponent
@@ -290,5 +304,11 @@ namespace cologne
     struct EditorCameraControllerComponent
     {
         glm::vec2 rotation = glm::vec2(0.0f);
+    };
+
+    struct AnimComponent
+    {
+        std::string base_clip_name;
+        float current_time = 0.0f;
     };
 }
