@@ -34,25 +34,6 @@ namespace cologne
         mesh_name = mesh_by_index->get_name();
     }
 
-    void SkinnedModelComponent::on_construct(entt::registry &registry, const entt::entity entt)
-    {
-        auto skinned = registry.get<SkinnedModelComponent>(entt);
-        if (!registry.any_of<SkeletonComponent>(entt))
-        {
-            if (auto model = AssetManager::get_skinned_model_by_name(skinned.model_name))
-            {
-                registry.emplace_or_replace<SkeletonComponent>(entt, skinned.model_name, model->get_skeleton() );
-            }
-        }
-    }
-
-    void SkinnedModelComponent::on_destroy(entt::registry &registry, const entt::entity entt)
-    {
-        if (registry.any_of<SkeletonComponent>(entt))
-        {
-            registry.remove<SkeletonComponent>(entt);
-        }
-    }
 
     void StaticColliderComponent::on_destroy(entt::registry &registry, const entt::entity entt)
     {
@@ -123,22 +104,6 @@ namespace cologne
         if (registry.any_of<EditorCameraControllerComponent>(entt))
         {
             registry.remove<EditorCameraControllerComponent>(entt);
-        }
-    }
-
-    void SkeletonComponent::on_construct(entt::registry &registry, const entt::entity entt)
-    {
-        if (!registry.any_of<SkeletonPoseComponent>(entt))
-        {
-            registry.emplace_or_replace<SkeletonPoseComponent>(entt);
-        }
-    }
-
-    void SkeletonComponent::on_destroy(entt::registry &registry, const entt::entity entt)
-    {
-        if (registry.any_of<SkeletonPoseComponent>(entt))
-        {
-            registry.remove<SkeletonPoseComponent>(entt);
         }
     }
 }

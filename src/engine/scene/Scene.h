@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "../renderer/types/Model.h"
 #include "../renderer/types/Particles.h"
 #include <entt/entt.hpp>
 #include <engine/core/UUID.h>

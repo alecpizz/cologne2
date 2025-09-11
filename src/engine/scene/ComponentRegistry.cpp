@@ -209,16 +209,6 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 REGISTER_PROPERTY(BulletComponent, direction)
                 REGISTER_PROPERTY(BulletComponent, damage);
 
-        REGISTER_COMPONENT(AnimatorComponent2, "AnimatorComponent2", EDITOR_READ_WRITE)
-           REGISTER_PROPERTY(AnimatorComponent2, base_animation_clip)
-           REGISTER_PROPERTY(AnimatorComponent2, one_shot_animation_clip)
-           REGISTER_PROPERTY(AnimatorComponent2, speed);
-
-        REGISTER_COMPONENT(SkeletonComponent, "SkeletonComponent", EDITOR_READ_ONLY);
-
-        REGISTER_COMPONENT(RagdollComponent, "RagdollComponent", EDITOR_READ_ONLY);
-        REGISTER_COMPONENT(SkeletonPoseComponent, "SkeletonPoseComponent", EDITOR_READ_ONLY);
-
         REGISTER_COMPONENT(HideInEditorComponent, "HideInEditorComponent", NO_EDITOR);
         REGISTER_COMPONENT(EditorCameraComponent, "EditorCameraComponent", NO_EDITOR);
         REGISTER_COMPONENT(LightComponent, "LightComponent", EDITOR_READ_WRITE)

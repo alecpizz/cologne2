@@ -72,10 +72,14 @@ namespace cologne
             }
             SkinnedModel *skinned_model = AssetManager::get_skinned_model_by_name(m.model_name);
             std::vector<glm::mat4> bones;
-            if (registry.all_of<AnimatorComponent>(entity))
+            if (registry.any_of<AnimatorComponent>(entity))
             {
                 auto &animator = registry.get<AnimatorComponent>(entity);
                 bones = animator.get_skinning_matrices();
+            }
+            else
+            {
+                bones = std::vector<glm::mat4>(skinned_model->get_skeleton().get_bone_count(), glm::mat4(1.0f));
             }
             for (int32_t mesh_index: skinned_model->get_mesh_indices())
             {
