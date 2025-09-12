@@ -376,7 +376,7 @@ namespace cologne
         return changed;
     }
 
-    static bool write_anim_component(AnimComponent &anim_component, const PropertiesMap &properties)
+    static bool write_anim_component(AnimatorComponent &anim_component, const PropertiesMap &properties)
     {
         bool changed = false;
         if (ImGui::BeginCombo("Base Animation Clip", anim_component.base_clip_name.c_str()))
@@ -460,7 +460,7 @@ namespace cologne
 
         entt::meta_factory<SkinnedModelComponent>()
                 .func<&write_skinned_model_component>("editor_write"_hs);
-        entt::meta_factory<AnimComponent>()
+        entt::meta_factory<AnimatorComponent>()
                 .func<&write_anim_component>("editor_write"_hs);
     }
 }

@@ -306,7 +306,7 @@ namespace cologne
         glm::vec2 rotation = glm::vec2(0.0f);
     };
 
-    struct AnimComponent
+    struct AnimatorComponent
     {
         std::string current_clip_name;
         std::string base_clip_name;
@@ -332,55 +332,10 @@ namespace cologne
         uint32_t id = UINT32_MAX;
         std::unordered_map<std::string, uint32_t> bone_to_ragdoll_map = std::unordered_map<std::string, uint32_t>();
 
-        void to_ragdoll()
-        {
-            if (id == UINT32_MAX)
-            {
-                return;
-            }
-            if (current_state != State::ACTIVE)
-            {
-                Physics::make_ragdoll_active(id);
-                current_state = State::ACTIVE;
-            }
-        }
-        void to_kinematic()
-        {
-            if (id == UINT32_MAX)
-            {
-                return;
-            }
-            if (current_state != State::KINEMATIC)
-            {
-                Physics::make_ragdoll_kinematic(id);
-                current_state = State::KINEMATIC;
-            }
-        }
+        void to_ragdoll();
 
-        void take_ragdoll_hit(glm::vec3 point, glm::vec3 normal)
-        {
-            if (id == UINT32_MAX)
-            {
-                return;
-            }
-            if (current_state != State::ACTIVE)
-            {
-                return;
-            }
+        void to_kinematic();
 
-            uint32_t closest_body = 0;
-            float dist = std::numeric_limits<float>::max();
-            for (auto pair: bone_to_ragdoll_map)
-            {
-                auto transform = Physics::get_rigidbody_transform(pair.second);
-                float distance = glm::distance(glm::vec3(transform[3]), point);
-                if (distance < dist)
-                {
-                    closest_body = pair.second;
-                    dist = distance;
-                }
-            }
-            Physics::add_impulse_force_at_position(closest_body, point, -normal * 200.0f);
-        }
+        void take_ragdoll_hit(glm::vec3 point, glm::vec3 normal) const;
     };
 }

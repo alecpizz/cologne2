@@ -90,9 +90,9 @@ namespace cologne
             sk.skeleton_pose = SkeletonPose(sk.skeleton);
         }
 
-        for (const auto entity : _registry.view<AnimComponent>())
+        for (const auto entity : _registry.view<AnimatorComponent>())
         {
-            auto& anim = _registry.get<AnimComponent>(entity);
+            auto& anim = _registry.get<AnimatorComponent>(entity);
             anim.current_clip_name = anim.base_clip_name;
         }
 
@@ -424,7 +424,7 @@ namespace cologne
 
         Entity viewModel = create_entity("viewmodel");
         viewModel.add_component<SkinnedModelComponent>("deagle");
-        auto &anim4 = viewModel.add_component<AnimComponent>();
+        auto &anim4 = viewModel.add_component<AnimatorComponent>();
         anim4.base_clip_name = "deagle_Rig|Rig|MK_Idle";
         viewModel.add_component<ViewmodelComponent>();
 

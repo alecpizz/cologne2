@@ -13,7 +13,7 @@ namespace cologne
     void AnimationSystem::on_update(Scene* scene, float dt)
     {
         auto& registry = scene->get_raw_registry();
-        auto animators = registry.view<AnimComponent, ActiveComponent, SkinnedModelComponent>();
+        auto animators = registry.view<AnimatorComponent, ActiveComponent, SkinnedModelComponent>();
         for (auto entity : animators)
         {
             if (!registry.get<ActiveComponent>(entity).active)
@@ -21,7 +21,7 @@ namespace cologne
                 continue;
             }
 
-            auto& animator = registry.get<AnimComponent>(entity);
+            auto& animator = registry.get<AnimatorComponent>(entity);
             auto& skinned_model = registry.get<SkinnedModelComponent>(entity);
             auto current_clip = AssetManager::get_animation_by_name(animator.current_clip_name);
             if (!current_clip)

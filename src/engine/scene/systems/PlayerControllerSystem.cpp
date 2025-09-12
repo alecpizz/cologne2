@@ -473,7 +473,7 @@ namespace cologne
             {
                 LOG_INFO("Bang");
                 Entity vm = scene->get_entity_by_uuid(player.viewmodel);
-                auto &anim = vm.get_component<AnimComponent>();
+                auto &anim = vm.get_component<AnimatorComponent>();
                 anim.play_one_shot("deagle_Rig|Rig|MK_Shot");
                 Audio::play_sound(controller.shoot_sound, 30);
                 auto cam = scene->get_entity_by_uuid(player.camera);
@@ -491,7 +491,7 @@ namespace cologne
                 controller.shot_timer = 0.0f;
                 controller.gun_time = controller.reload_time;
                 Entity vm = scene->get_entity_by_uuid(player.viewmodel);
-                auto &anim = vm.get_component<AnimComponent>();
+                auto &anim = vm.get_component<AnimatorComponent>();
                 anim.play_one_shot("deagle_Rig|Rig|MK_ReloadFull");
                 Audio::play_sound(controller.reload_sound, 20);
                 controller.is_reloading = true;
