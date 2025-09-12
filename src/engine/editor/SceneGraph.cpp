@@ -6,6 +6,7 @@
 #include <engine/core/Engine.h>
 #include <engine/scene/Entity.h>
 #include <engine/scene/Prefab.h>
+#include <engine/util/FileUtil.h>
 #include <misc/cpp/imgui_stdlib.h>
 #include "Editor.h"
 
@@ -87,13 +88,14 @@ namespace cologne
             }
             if (ImGui::BeginMenu("Instantiate Prefab"))
             {
-                if (ImGui::MenuItem("create man"))
+                for (auto& info : FileUtil::iterate_directory(ASSETS_PATH "prefabs", {"prefab"}))
                 {
-                    _selected_entity = Prefab::instantiate(Engine::get_scene().get(), ASSETS_PATH "prefabs/the man.prefab");
-                }
-                if (ImGui::MenuItem("create lamp"))
-                {
-                    _selected_entity = Prefab::instantiate(Engine::get_scene().get(), ASSETS_PATH "prefabs/lamp_desk.prefab");
+                    if (ImGui::MenuItem(info.name.c_str()))
+                    {
+                        _selected_entity = Prefab::instantiate(Engine::get_scene().get(), info.path);
+                        _selected_entity.get_transform().position = glm::vec3(0.0f);
+                        _selected_entity.get_transform().rotation = glm::identity<glm::quat>();
+                    }
                 }
                 ImGui::EndMenu();
             }
