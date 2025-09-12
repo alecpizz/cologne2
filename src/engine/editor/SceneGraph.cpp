@@ -5,6 +5,7 @@
 #include <engine/audio/Audio.h>
 #include <engine/core/Engine.h>
 #include <engine/scene/Entity.h>
+#include <engine/scene/Prefab.h>
 #include <misc/cpp/imgui_stdlib.h>
 #include "Editor.h"
 
@@ -84,10 +85,26 @@ namespace cologne
                 }
                 ImGui::EndMenu();
             }
+            if (ImGui::BeginMenu("Instantiate Prefab"))
+            {
+                if (ImGui::MenuItem("create man"))
+                {
+                    _selected_entity = Prefab::instantiate(Engine::get_scene().get(), ASSETS_PATH "prefabs/the man.prefab");
+                }
+                if (ImGui::MenuItem("create lamp"))
+                {
+                    _selected_entity = Prefab::instantiate(Engine::get_scene().get(), ASSETS_PATH "prefabs/lamp_desk.prefab");
+                }
+                ImGui::EndMenu();
+            }
             if (_selected_entity && ImGui::MenuItem("Delete Entity"))
             {
                 Engine::get_scene()->destroy_entity(_selected_entity);
                 _selected_entity = {};
+            }
+            if (_selected_entity && ImGui::MenuItem("Create Prefab"))
+            {
+                Prefab::create(_selected_entity, ASSETS_PATH "prefabs/" + _selected_entity.get_name() + ".prefab");
             }
             ImGui::EndPopup();
         }

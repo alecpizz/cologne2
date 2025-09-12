@@ -77,6 +77,7 @@ namespace cologne
         bool operator==(const Entity & other) const {return _entity_handle == other._entity_handle;}
 
     private:
+        friend class Prefab;
         entt::entity _entity_handle = entt::null;
         Scene *_scene;
     };

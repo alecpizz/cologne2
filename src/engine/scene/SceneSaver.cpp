@@ -468,4 +468,5 @@ namespace cologne
     void SceneSaver::deserialize_runtime(const std::string &path)
     {
     }
+
 }
