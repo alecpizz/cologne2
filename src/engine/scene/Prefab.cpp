@@ -104,13 +104,11 @@ namespace cologne
                 if (type_name == "IDComponent")
                 {
                     old_id = instance.cast<IDComponent>().id;
-                    // instance.cast<IDComponent>().id = new_entity.get_uuid();
                     continue;
                 }
                 emplace_component(_scene->get_raw_registry(), new_entity, instance);
             }
         }
-
 
         old_to_new_uuid_map[old_id] = new_entity.get_uuid();
 
