@@ -18,7 +18,7 @@ namespace cologne
         const std::vector<glm::mat4> get_skinning_matrices() const;
     public:
         std::vector<glm::mat4> local_transforms;
-        std::vector<glm::mat4> _global_transforms;
+        std::vector<glm::mat4> global_transforms;
     private:
         std::vector<glm::mat4> _skinning_matrices;
     };

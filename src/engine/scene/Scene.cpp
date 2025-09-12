@@ -24,6 +24,7 @@
 #include "systems/InteractionSystem.h"
 #include "systems/PhysicsSystem.h"
 #include "systems/PlayerControllerSystem.h"
+#include "systems/RagdollSystem.h"
 #include "systems/RendererSystem.h"
 #include "systems/System.h"
 #include "systems/TransformSystem.h"
@@ -33,6 +34,7 @@ namespace cologne
     static std::vector<std::unique_ptr<System>> systems;
     void Scene::initialize_components()
     {
+        //todo: move me to on scene start!
         auto view = _registry.view<TransformComponent, StaticColliderComponent>();
         for (auto entity: view)
         {
@@ -90,12 +92,46 @@ namespace cologne
             sk.skeleton_pose = SkeletonPose(sk.skeleton);
         }
 
+        for (const auto entity : _registry.view<AnimComponent>())
+        {
+            auto& anim = _registry.get<AnimComponent>(entity);
+            anim.current_clip_name = anim.base_clip_name;
+        }
+
         for (const auto entity: _registry.view<AnimatorComponent>())
         {
             auto &ac = _registry.get<AnimatorComponent>(entity);
             if (ac.has_ragdoll())
             {
                 ac.create_ragdoll({entity, this});
+            }
+        }
+
+        for (const auto entity : _registry.view<RagdollComponent, SkinnedModelComponent>())
+        {
+            auto& rd = _registry.get<RagdollComponent>(entity);
+            auto& sm = _registry.get<SkinnedModelComponent>(entity);
+            auto model = AssetManager::get_skinned_model_by_name(sm.model_name);
+            if (!model)
+            {
+                continue;
+            }
+            if (rd.id != UINT32_MAX)
+            {
+                continue;
+            }
+            //make it make it don't fake it
+            SkeletonPose pose(sm.skeleton);
+            for (size_t i = 0; i < sm.skeleton.get_bone_count(); i++)
+            {
+                pose.local_transforms[i] = sm.skeleton.get_bones()[i].local_bind_transform;
+            }
+            pose.update_skinning_matrices(sm.skeleton);
+            rd.id = Physics::create_ragdoll({entity, this},
+                rd.bone_to_ragdoll_map, sm.skeleton, pose.global_transforms);
+            if (rd.current_state == RagdollComponent::State::KINEMATIC)
+            {
+                Physics::make_ragdoll_kinematic(rd.id);
             }
         }
     }
@@ -570,6 +606,7 @@ namespace cologne
     {
         add_system(std::make_unique<TransformSystem>());
         add_system(std::make_unique<AnimationSystem>());
+        add_system(std::make_unique<RagdollSystem>());
         add_system(std::make_unique<BulletSystem>());
         add_system(std::make_unique<PhysicsSystem>());
         add_system(std::make_unique<RendererSystem>());

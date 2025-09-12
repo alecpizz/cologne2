@@ -308,7 +308,21 @@ namespace cologne
 
     struct AnimComponent
     {
+        std::string current_clip_name;
         std::string base_clip_name;
+        std::string one_shot_name;
         float current_time = 0.0f;
+    };
+
+    struct RagdollComponent
+    {
+        enum class State
+        {
+            ACTIVE,
+            KINEMATIC
+        };
+        State current_state = State::KINEMATIC;
+        uint32_t id = UINT32_MAX;
+        std::unordered_map<std::string, uint32_t> bone_to_ragdoll_map = std::unordered_map<std::string, uint32_t>();
     };
 }

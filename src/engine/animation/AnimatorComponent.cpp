@@ -118,7 +118,7 @@ namespace cologne
             pose.local_transforms[i] = _skeleton.get_bones()[i].local_bind_transform;
         }
         pose.update_skinning_matrices(_skeleton);
-        _ragdoll_id = Physics::create_ragdoll(entity_id, _bone_to_ragdoll_map, _skeleton, pose._global_transforms);
+        _ragdoll_id = Physics::create_ragdoll(entity_id, _bone_to_ragdoll_map, _skeleton, pose.global_transforms);
         Physics::make_ragdoll_kinematic(_ragdoll_id);
         _has_ragdoll = true;
     }
@@ -186,7 +186,7 @@ namespace cologne
             std::string node_name = bone.name;
             glm::mat4 node_transform = bone.local_bind_transform;
             unsigned int parent_idx = bone.parent_idx;
-            glm::mat4 parent_transform = (parent_idx == -1) ? glm::mat4(1.0f) : _pose._global_transforms[parent_idx];
+            glm::mat4 parent_transform = (parent_idx == -1) ? glm::mat4(1.0f) : _pose.global_transforms[parent_idx];
             glm::mat4 global_transform = parent_transform * node_transform;
 
             if (_bone_to_ragdoll_map.contains(node_name))
@@ -195,7 +195,7 @@ namespace cologne
                                        _bone_to_ragdoll_map[node_name]);
             }
 
-            _pose._global_transforms[i] = global_transform;
+            _pose.global_transforms[i] = global_transform;
         }
         _pose.update_skinning_matrices_no_rebuild(_skeleton);
     }
@@ -210,7 +210,7 @@ namespace cologne
         for (auto &pair: _bone_to_ragdoll_map)
         {
             int bone_idx = _skeleton.find_bone_index(pair.first);
-            ragdoll_transforms[pair.first] = transform * _pose._global_transforms[bone_idx];
+            ragdoll_transforms[pair.first] = transform * _pose.global_transforms[bone_idx];
         }
         Physics::sync_ragdoll(_ragdoll_id, ragdoll_transforms);
     }

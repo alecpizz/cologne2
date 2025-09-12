@@ -41,6 +41,15 @@ namespace cologne
                 continue;
             }
             animator.current_time += current_clip->get_ticks_per_second() * dt;
+            if (!animator.one_shot_name.empty())
+            {
+                if (animator.current_time >= current_clip->get_duration())
+                {
+                    animator.current_clip_name = animator.base_clip_name;
+                    animator.current_time = 0.0f;
+                    animator.one_shot_name = "";
+                }
+            }
             animator.current_time = std::fmod(animator.current_time, current_clip->get_duration());
             const auto &bones = skinned_model.skeleton.get_bones();
             for (size_t i = 0; i < bones.size(); i++)
