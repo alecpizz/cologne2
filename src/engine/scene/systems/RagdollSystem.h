@@ -10,6 +10,7 @@ namespace cologne
     {
     public:
         void on_update(Scene *scene, float dt) override;
+        void on_scene_start(Scene *scene) override;
         UpdateFlags get_update_flags() override
         {
             return RUNTIME;

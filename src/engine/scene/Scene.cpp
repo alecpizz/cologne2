@@ -30,101 +30,6 @@
 namespace cologne
 {
     static std::vector<std::unique_ptr<System>> systems;
-    void Scene::initialize_components()
-    {
-        //todo: move me to on scene start!
-        auto view = _registry.view<TransformComponent, StaticColliderComponent>();
-        for (auto entity: view)
-        {
-            Entity e = {entity, this};
-            auto &transform = _registry.get<TransformComponent>(entity);
-            auto &collider = _registry.get<StaticColliderComponent>(entity);
-            // if (collider.body_id > 0)
-            // {
-            //     continue;
-            // }
-            auto mesh = AssetManager::get_mesh_by_name(collider.mesh_name);
-            if (!mesh)
-            {
-                continue;
-            }
-            uint32_t body_id = Physics::create_static_mesh_collider(
-                e, transform, *mesh);
-            collider.body_id = body_id;
-        }
-
-        for (auto entity: _registry.view<RigidbodyComponent, ConvexMeshColliderComponent>())
-        {
-            Entity e = {entity, this};
-            auto &rb = _registry.get<RigidbodyComponent>(entity);
-            //
-            // if (rb.body_id != 0)
-            // {
-            //     continue;
-            // }
-
-            rb.body_id = Physics::create_rigidbody(e);
-        }
-
-        for (const auto entity: _registry.view<PlayerComponent>())
-        {
-            auto &pc = _registry.get<PlayerComponent>(entity);
-            // if (pc.id > 0)
-            // {
-            //     continue;
-            // }
-            PlayerCreateInfo info;
-            info.position = _registry.get<TransformComponent>(entity).position;
-            pc.id = Physics::create_player(info);
-        }
-
-        for (const auto entity : _registry.view<SkinnedModelComponent>())
-        {
-            auto& sk = _registry.get<SkinnedModelComponent>(entity);
-            auto model = AssetManager::get_skinned_model_by_name(sk.model_name);
-            if (!model)
-            {
-                continue;
-            }
-            sk.skeleton = model->get_skeleton();
-            sk.skeleton_pose = SkeletonPose(sk.skeleton);
-        }
-
-        for (const auto entity : _registry.view<AnimatorComponent>())
-        {
-            auto& anim = _registry.get<AnimatorComponent>(entity);
-            anim.current_clip_name = anim.base_clip_name;
-        }
-
-        for (const auto entity : _registry.view<RagdollComponent, SkinnedModelComponent, WorldTransformComponent>())
-        {
-            auto& rd = _registry.get<RagdollComponent>(entity);
-            auto& sm = _registry.get<SkinnedModelComponent>(entity);
-            auto& transform = _registry.get<WorldTransformComponent>(entity).transform;
-            auto model = AssetManager::get_skinned_model_by_name(sm.model_name);
-            if (!model)
-            {
-                continue;
-            }
-            if (rd.id != UINT32_MAX)
-            {
-                continue;
-            }
-            //make it make it don't fake it
-            SkeletonPose pose(sm.skeleton);
-            for (size_t i = 0; i < sm.skeleton.get_bone_count(); i++)
-            {
-                pose.local_transforms[i] = sm.skeleton.get_bones()[i].local_bind_transform;
-            }
-            pose.update_skinning_matrices(sm.skeleton);
-            rd.id = Physics::create_ragdoll({entity, this},
-                rd.bone_to_ragdoll_map, sm.skeleton, pose.global_transforms);
-            if (rd.current_state == RagdollComponent::State::KINEMATIC)
-            {
-                Physics::make_ragdoll_kinematic(rd.id);
-            }
-        }
-    }
 
     void Scene::setup_blank_scene()
     {
@@ -232,7 +137,6 @@ namespace cologne
     void Scene::on_enter_play_mode()
     {
         setup_entity_map();
-        initialize_components();
         re_calculate_bounds();
         for (const auto &system: systems)
         {

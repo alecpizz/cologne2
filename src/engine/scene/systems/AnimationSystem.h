@@ -9,6 +9,7 @@ namespace cologne
     class AnimationSystem : public System
     {
     public:
+        void on_scene_start(Scene *scene) override;
         void on_update(Scene* scene, float dt) override;
         UpdateFlags get_update_flags() override
         {

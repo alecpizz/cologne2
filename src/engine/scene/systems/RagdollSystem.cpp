@@ -3,12 +3,45 @@
 //
 
 #include "RagdollSystem.h"
-
+#include <engine/asset_manager/AssetManager.h>
 #include <engine/scene/Components.h>
+#include <engine/scene/Entity.h>
 #include <engine/scene/Scene.h>
 
 namespace cologne
 {
+    void RagdollSystem::on_scene_start(Scene *scene)
+    {
+        auto& registry = scene->get_raw_registry();
+        for (const auto entity : registry.view<RagdollComponent, SkinnedModelComponent>())
+        {
+            auto& rd = registry.get<RagdollComponent>(entity);
+            auto& sm = registry.get<SkinnedModelComponent>(entity);
+            auto model = AssetManager::get_skinned_model_by_name(sm.model_name);
+            if (!model)
+            {
+                continue;
+            }
+            if (rd.id != UINT32_MAX)
+            {
+                continue;
+            }
+            //make it make it don't fake it
+            SkeletonPose pose(sm.skeleton);
+            for (size_t i = 0; i < sm.skeleton.get_bone_count(); i++)
+            {
+                pose.local_transforms[i] = sm.skeleton.get_bones()[i].local_bind_transform;
+            }
+            pose.update_skinning_matrices(sm.skeleton);
+            rd.id = Physics::create_ragdoll({entity, scene},
+                rd.bone_to_ragdoll_map, sm.skeleton, pose.global_transforms);
+            if (rd.current_state == RagdollComponent::State::KINEMATIC)
+            {
+                Physics::make_ragdoll_kinematic(rd.id);
+            }
+        }
+    }
+
     void RagdollSystem::on_update(Scene *scene, float dt)
     {
         auto& registry = scene->get_raw_registry();
@@ -62,4 +95,6 @@ namespace cologne
             }
         }
     }
+
+
 }

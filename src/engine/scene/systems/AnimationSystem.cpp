@@ -10,6 +10,29 @@
 
 namespace cologne
 {
+    void AnimationSystem::on_scene_start(Scene *scene)
+    {
+        auto& registry = scene->get_raw_registry();
+        for (const auto entity : registry.view<SkinnedModelComponent>())
+        {
+            auto& sk = registry.get<SkinnedModelComponent>(entity);
+            auto model = AssetManager::get_skinned_model_by_name(sk.model_name);
+            if (!model)
+            {
+                continue;
+            }
+            sk.skeleton = model->get_skeleton();
+            sk.skeleton_pose = SkeletonPose(sk.skeleton);
+        }
+
+        for (const auto entity : registry.view<AnimatorComponent>())
+        {
+            auto& anim = registry.get<AnimatorComponent>(entity);
+            anim.current_clip_name = anim.base_clip_name;
+        }
+
+    }
+
     void AnimationSystem::on_update(Scene* scene, float dt)
     {
         auto& registry = scene->get_raw_registry();

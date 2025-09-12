@@ -15,16 +15,18 @@
 
 namespace cologne
 {
-    void PlayerControllerSystem::on_create()
-    {
-        System::on_create();
-        
-    }
-
     void PlayerControllerSystem::on_scene_start(Scene *scene)
     {
         auto &registry = scene->get_raw_registry();
         auto view = registry.view<PlayerComponent, PlayerControllerComponent>();
+        for (const auto entity: registry.view<PlayerComponent>())
+        {
+            auto &pc = registry.get<PlayerComponent>(entity);
+            PlayerCreateInfo info;
+            info.position = registry.get<TransformComponent>(entity).position;
+            pc.id = Physics::create_player(info);
+        }
+
         for (auto entity: view)
         {
             auto &controller = registry.get<PlayerControllerComponent>(entity);

@@ -3,12 +3,41 @@
 //
 
 #include "PhysicsSystem.h"
+
+#include <engine/asset_manager/AssetManager.h>
 #include <engine/scene/Components.h>
 #include <engine/scene/Entity.h>
 #include <engine/scene/Scene.h>
 
 namespace cologne
 {
+    void PhysicsSystem::on_scene_start(Scene *scene)
+    {
+        auto &registry = scene->get_raw_registry();
+        auto view = registry.view<TransformComponent, StaticColliderComponent>();
+        for (auto entity: view)
+        {
+            Entity e = {entity, scene};
+            auto &transform = registry.get<TransformComponent>(entity);
+            auto &collider = registry.get<StaticColliderComponent>(entity);
+            auto mesh = AssetManager::get_mesh_by_name(collider.mesh_name);
+            if (!mesh)
+            {
+                continue;
+            }
+            uint32_t body_id = Physics::create_static_mesh_collider(
+                e, transform, *mesh);
+            collider.body_id = body_id;
+        }
+
+        for (auto entity: registry.view<RigidbodyComponent, ConvexMeshColliderComponent>())
+        {
+            Entity e = {entity, scene};
+            auto &rb = registry.get<RigidbodyComponent>(entity);
+            rb.body_id = Physics::create_rigidbody(e);
+        }
+    }
+
     void PhysicsSystem::on_update(Scene* scene, float dt)
     {
         auto &registry = scene->get_raw_registry();
