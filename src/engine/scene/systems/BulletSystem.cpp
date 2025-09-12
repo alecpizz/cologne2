@@ -40,6 +40,10 @@ namespace cologne
                                 info.hit_entity.get_component<AnimatorComponent>().take_ragdoll_hit(
                                     info.hit_point, info.hit_normal);
                             }
+                            if (info.hit_entity.has_component<RagdollComponent>())
+                            {
+                                info.hit_entity.get_component<RagdollComponent>().to_ragdoll();
+                            }
                         }
                     }
                     if (info.hit_entity.has_component<RigidbodyComponent>())

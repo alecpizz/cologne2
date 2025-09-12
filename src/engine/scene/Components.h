@@ -324,5 +324,30 @@ namespace cologne
         State current_state = State::KINEMATIC;
         uint32_t id = UINT32_MAX;
         std::unordered_map<std::string, uint32_t> bone_to_ragdoll_map = std::unordered_map<std::string, uint32_t>();
+
+        void to_ragdoll()
+        {
+            if (id == UINT32_MAX)
+            {
+                return;
+            }
+            if (current_state != State::ACTIVE)
+            {
+                Physics::make_ragdoll_active(id);
+                current_state = State::ACTIVE;
+            }
+        }
+        void to_kinematic()
+        {
+            if (id == UINT32_MAX)
+            {
+                return;
+            }
+            if (current_state != State::KINEMATIC)
+            {
+                Physics::make_ragdoll_kinematic(id);
+                current_state = State::KINEMATIC;
+            }
+        }
     };
 }

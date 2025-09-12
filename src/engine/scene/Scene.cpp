@@ -107,10 +107,11 @@ namespace cologne
             }
         }
 
-        for (const auto entity : _registry.view<RagdollComponent, SkinnedModelComponent>())
+        for (const auto entity : _registry.view<RagdollComponent, SkinnedModelComponent, WorldTransformComponent>())
         {
             auto& rd = _registry.get<RagdollComponent>(entity);
             auto& sm = _registry.get<SkinnedModelComponent>(entity);
+            auto& transform = _registry.get<WorldTransformComponent>(entity).transform;
             auto model = AssetManager::get_skinned_model_by_name(sm.model_name);
             if (!model)
             {

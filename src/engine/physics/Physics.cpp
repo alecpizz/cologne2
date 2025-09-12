@@ -1030,8 +1030,10 @@ namespace cologne::Physics
     {
         physics_system.GetBodyInterface().RemoveBodies(colliders_static.data(), colliders_static.size());
         physics_system.GetBodyInterface().DestroyBodies(colliders_static.data(), colliders_static.size());
+        entity_to_collider_map.clear();
         physics_players.clear();
         colliders_static.clear();
+        ragdolls.clear();
     }
 
 
