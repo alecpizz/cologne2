@@ -6,11 +6,6 @@
 
 namespace cologne
 {
-    class AnimatorComponent;
-}
-
-namespace cologne
-{
     class Scene;
 }
 

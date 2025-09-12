@@ -4,7 +4,6 @@
 
 #include "AnimationSystem.h"
 
-#include <engine/animation/AnimatorComponent.h>
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/scene/Components.h>
 #include <engine/scene/Scene.h>
@@ -14,19 +13,8 @@ namespace cologne
     void AnimationSystem::on_update(Scene* scene, float dt)
     {
         auto& registry = scene->get_raw_registry();
-        auto animators = registry.view<AnimatorComponent, ActiveComponent>();
-        for (auto entity: animators)
-        {
-            if (!registry.get<ActiveComponent>(entity).active)
-            {
-                continue;
-            }
-            auto &animator = registry.get<AnimatorComponent>(entity);
-            animator.update(dt, registry.get<WorldTransformComponent>(entity));
-        }
-
-        auto animators2 = registry.view<AnimComponent, ActiveComponent, SkinnedModelComponent>();
-        for (auto entity : animators2)
+        auto animators = registry.view<AnimComponent, ActiveComponent, SkinnedModelComponent>();
+        for (auto entity : animators)
         {
             if (!registry.get<ActiveComponent>(entity).active)
             {
@@ -35,7 +23,7 @@ namespace cologne
 
             auto& animator = registry.get<AnimComponent>(entity);
             auto& skinned_model = registry.get<SkinnedModelComponent>(entity);
-            auto current_clip = AssetManager::get_animation_by_name(animator.base_clip_name);
+            auto current_clip = AssetManager::get_animation_by_name(animator.current_clip_name);
             if (!current_clip)
             {
                 continue;

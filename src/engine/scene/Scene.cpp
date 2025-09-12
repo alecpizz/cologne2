@@ -4,14 +4,12 @@
 
 #include "Scene.h"
 
-#include <engine/animation/AnimatorComponent.h>
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/core/Engine.h>
 #include <engine/core/UUID.h>
 #include <engine/physics/Physics.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Light.h>
-#include <engine/util/FileUtil.h>
 #include <engine/util/DebugScope.h>
 
 #include "ComponentRegistry.h"
@@ -96,15 +94,6 @@ namespace cologne
         {
             auto& anim = _registry.get<AnimComponent>(entity);
             anim.current_clip_name = anim.base_clip_name;
-        }
-
-        for (const auto entity: _registry.view<AnimatorComponent>())
-        {
-            auto &ac = _registry.get<AnimatorComponent>(entity);
-            if (ac.has_ragdoll())
-            {
-                ac.create_ragdoll({entity, this});
-            }
         }
 
         for (const auto entity : _registry.view<RagdollComponent, SkinnedModelComponent, WorldTransformComponent>())
@@ -435,8 +424,8 @@ namespace cologne
 
         Entity viewModel = create_entity("viewmodel");
         viewModel.add_component<SkinnedModelComponent>("deagle");
-        auto &anim4 = viewModel.add_component<AnimatorComponent>("deagle");
-        anim4.play_base_animation(AssetManager::get_animation_by_name("deagle_Rig|Rig|MK_Idle"));
+        auto &anim4 = viewModel.add_component<AnimComponent>();
+        anim4.base_clip_name = "deagle_Rig|Rig|MK_Idle";
         viewModel.add_component<ViewmodelComponent>();
 
         Entity player = create_entity("player");

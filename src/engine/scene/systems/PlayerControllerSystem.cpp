@@ -4,7 +4,6 @@
 
 #include "PlayerControllerSystem.h"
 
-#include <engine/animation/AnimatorComponent.h>
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/audio/Audio.h>
 #include <engine/core/Engine.h>
@@ -474,8 +473,8 @@ namespace cologne
             {
                 LOG_INFO("Bang");
                 Entity vm = scene->get_entity_by_uuid(player.viewmodel);
-                auto &anim = vm.get_component<AnimatorComponent>();
-                anim.play_one_shot_animation(AssetManager::get_animation_by_name("deagle_Rig|Rig|MK_Shot"));
+                auto &anim = vm.get_component<AnimComponent>();
+                anim.play_one_shot("deagle_Rig|Rig|MK_Shot");
                 Audio::play_sound(controller.shoot_sound, 30);
                 auto cam = scene->get_entity_by_uuid(player.camera);
                 auto tr = cam.get_transform();
@@ -492,8 +491,8 @@ namespace cologne
                 controller.shot_timer = 0.0f;
                 controller.gun_time = controller.reload_time;
                 Entity vm = scene->get_entity_by_uuid(player.viewmodel);
-                auto &anim = vm.get_component<AnimatorComponent>();
-                anim.play_one_shot_animation(AssetManager::get_animation_by_name("deagle_Rig|Rig|MK_ReloadFull"));
+                auto &anim = vm.get_component<AnimComponent>();
+                anim.play_one_shot("deagle_Rig|Rig|MK_ReloadFull");
                 Audio::play_sound(controller.reload_sound, 20);
                 controller.is_reloading = true;
                 controller.current_ammo = controller.max_ammo;

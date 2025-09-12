@@ -312,6 +312,13 @@ namespace cologne
         std::string base_clip_name;
         std::string one_shot_name;
         float current_time = 0.0f;
+
+        void play_one_shot(const std::string& name)
+        {
+            one_shot_name = name;
+            current_clip_name = one_shot_name;
+            current_time = 0.0f;
+        }
     };
 
     struct RagdollComponent
@@ -348,6 +355,32 @@ namespace cologne
                 Physics::make_ragdoll_kinematic(id);
                 current_state = State::KINEMATIC;
             }
+        }
+
+        void take_ragdoll_hit(glm::vec3 point, glm::vec3 normal)
+        {
+            if (id == UINT32_MAX)
+            {
+                return;
+            }
+            if (current_state != State::ACTIVE)
+            {
+                return;
+            }
+
+            uint32_t closest_body = 0;
+            float dist = std::numeric_limits<float>::max();
+            for (auto pair: bone_to_ragdoll_map)
+            {
+                auto transform = Physics::get_rigidbody_transform(pair.second);
+                float distance = glm::distance(glm::vec3(transform[3]), point);
+                if (distance < dist)
+                {
+                    closest_body = pair.second;
+                    dist = distance;
+                }
+            }
+            Physics::add_impulse_force_at_position(closest_body, point, -normal * 200.0f);
         }
     };
 }
