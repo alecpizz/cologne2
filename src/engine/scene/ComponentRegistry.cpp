@@ -3,7 +3,7 @@
 //
 #include "ComponentRegistry.h"
 
-#include <engine/animation/AnimatorComponent.h>
+
 #include <engine/asset_manager/AssetManager.h>
 #include <nlohmann/json.hpp>
 #include "Components.h"
@@ -43,52 +43,7 @@ registry->remove<T>(entity); }>("remove"_hs) \
 
     static std::map<entt::id_type, std::string> component_type_map;
 
-    void serialize_animator(const AnimatorComponent &comp, nlohmann::json &j)
-    {
-        j["model_name"] = comp.get_model_base_name();
-        j["has_ragdoll"] = comp.get_ragdoll_id() != -1;
-        if (comp.get_current_clip())
-        {
-            j["current_clip"] = comp.get_current_clip()->get_name();
-        }
-        if (comp.get_base_clip())
-        {
-            j["base_clip"] = comp.get_base_clip()->get_name();
-        }
-        j["current_state"] = comp.get_current_state();
-        j["current_time"] = comp.get_current_progress();
-    }
 
-    void deserialize_animator(AnimatorComponent &animator_component, const nlohmann::json &j)
-    {
-        AnimatorComponent temp(j["model_name"]);
-        if (j["has_ragdoll"].get<bool>())
-        {
-            temp.set_has_ragdoll(true);
-        }
-        if (j.contains("current_clip"))
-        {
-            auto clip = AssetManager::get_animation_by_name(j["current_clip"]);
-            if (clip)
-            {
-                temp.play_one_shot_animation(clip);
-            }
-        }
-        if (j.contains("base_clip"))
-        {
-            auto clip = AssetManager::get_animation_by_name(j["base_clip"]);
-            if (clip)
-            {
-                temp.play_base_animation(clip);
-            }
-        }
-        if (j["current_state"] == AnimatorComponent::State::RAGDOLLING)
-        {
-            temp.to_ragdoll();
-        }
-        temp.set_current_progress(j["current_time"].get<float>());
-        animator_component = temp;
-    }
 
     const std::map<entt::id_type, std::string> &get_component_map()
     {
@@ -143,7 +98,7 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 REGISTER_PROPERTY(ModelComponent, model_name)
                 REGISTER_PROPERTY(ModelComponent, gi_only);
         //
-         REGISTER_COMPONENT(MeshComponent, "MeshComponent", EDITOR_READ_WRITE)
+        REGISTER_COMPONENT(MeshComponent, "MeshComponent", EDITOR_READ_WRITE)
         //     .traits(Traits::TRANSIENT)
         //     .type("MeshComponent"_hs)
                 REGISTER_PROPERTY(MeshComponent, mesh_name);
@@ -208,6 +163,11 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 REGISTER_PROPERTY(BulletComponent, direction)
                 REGISTER_PROPERTY(BulletComponent, damage);
 
+        REGISTER_COMPONENT(AnimatorComponent, "AnimComponent", EDITOR_READ_WRITE)
+                REGISTER_PROPERTY(AnimatorComponent, base_clip_name)
+                REGISTER_PROPERTY(AnimatorComponent, one_shot_name);
+            REGISTER_COMPONENT(RagdollComponent, "RagdollComponent", EDITOR_READ_ONLY);
+
         REGISTER_COMPONENT(HideInEditorComponent, "HideInEditorComponent", NO_EDITOR);
         REGISTER_COMPONENT(EditorCameraComponent, "EditorCameraComponent", NO_EDITOR);
         REGISTER_COMPONENT(LightComponent, "LightComponent", EDITOR_READ_WRITE)
@@ -228,15 +188,6 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 ENUMERATOR(LightComponent::LightType, Point)
                 ENUMERATOR(LightComponent::LightType, Spot);
 
-        REGISTER_COMPONENT(AnimatorComponent, "AnimatorComponent", EDITOR_READ_WRITE)
-                .func<[](AnimatorComponent &comp, nlohmann::json &j)
-                {
-                    serialize_animator(comp, j);
-                }>("serialize"_hs)
-                .func<[](AnimatorComponent &comp, const nlohmann::json &j)
-                {
-                    deserialize_animator(comp, j);
-                }>("deserialize"_hs);
         REGISTER_COMPONENT(ParentComponent, "ParentComponent", NO_EDITOR)
                 REGISTER_PROPERTY(ParentComponent, children);
     }

@@ -11,3 +11,4 @@ Makefile
 /cmake-build-debug/
 /cmake-build-release/
 /cmake-build-relwithdebinfo/
+resources/logs/cologne.log

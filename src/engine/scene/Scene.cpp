@@ -4,27 +4,25 @@
 
 #include "Scene.h"
 
-#include <engine/animation/AnimatorComponent.h>
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/core/Engine.h>
 #include <engine/core/UUID.h>
 #include <engine/physics/Physics.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Light.h>
-#include <engine/util/FileUtil.h>
 #include <engine/util/DebugScope.h>
 
 #include "ComponentRegistry.h"
 #include "Components.h"
 #include "Entity.h"
 #include "SceneSaver.h"
-#include "engine/physics/RaycastHitInfo.h"
 #include "systems/AnimationSystem.h"
 #include "systems/BulletSystem.h"
 #include "systems/EditorCameraControllerSystem.h"
 #include "systems/InteractionSystem.h"
 #include "systems/PhysicsSystem.h"
 #include "systems/PlayerControllerSystem.h"
+#include "systems/RagdollSystem.h"
 #include "systems/RendererSystem.h"
 #include "systems/System.h"
 #include "systems/TransformSystem.h"
@@ -32,8 +30,9 @@
 namespace cologne
 {
     static std::vector<std::unique_ptr<System>> systems;
-    void Scene::initialize_physics_world()
+    void Scene::initialize_components()
     {
+        //todo: move me to on scene start!
         auto view = _registry.view<TransformComponent, StaticColliderComponent>();
         for (auto entity: view)
         {
@@ -79,12 +78,50 @@ namespace cologne
             pc.id = Physics::create_player(info);
         }
 
-        for (const auto entity: _registry.view<AnimatorComponent>())
+        for (const auto entity : _registry.view<SkinnedModelComponent>())
         {
-            auto &ac = _registry.get<AnimatorComponent>(entity);
-            if (ac.has_ragdoll())
+            auto& sk = _registry.get<SkinnedModelComponent>(entity);
+            auto model = AssetManager::get_skinned_model_by_name(sk.model_name);
+            if (!model)
             {
-                ac.create_ragdoll({entity, this});
+                continue;
+            }
+            sk.skeleton = model->get_skeleton();
+            sk.skeleton_pose = SkeletonPose(sk.skeleton);
+        }
+
+        for (const auto entity : _registry.view<AnimatorComponent>())
+        {
+            auto& anim = _registry.get<AnimatorComponent>(entity);
+            anim.current_clip_name = anim.base_clip_name;
+        }
+
+        for (const auto entity : _registry.view<RagdollComponent, SkinnedModelComponent, WorldTransformComponent>())
+        {
+            auto& rd = _registry.get<RagdollComponent>(entity);
+            auto& sm = _registry.get<SkinnedModelComponent>(entity);
+            auto& transform = _registry.get<WorldTransformComponent>(entity).transform;
+            auto model = AssetManager::get_skinned_model_by_name(sm.model_name);
+            if (!model)
+            {
+                continue;
+            }
+            if (rd.id != UINT32_MAX)
+            {
+                continue;
+            }
+            //make it make it don't fake it
+            SkeletonPose pose(sm.skeleton);
+            for (size_t i = 0; i < sm.skeleton.get_bone_count(); i++)
+            {
+                pose.local_transforms[i] = sm.skeleton.get_bones()[i].local_bind_transform;
+            }
+            pose.update_skinning_matrices(sm.skeleton);
+            rd.id = Physics::create_ragdoll({entity, this},
+                rd.bone_to_ragdoll_map, sm.skeleton, pose.global_transforms);
+            if (rd.current_state == RagdollComponent::State::KINEMATIC)
+            {
+                Physics::make_ragdoll_kinematic(rd.id);
             }
         }
     }
@@ -195,7 +232,7 @@ namespace cologne
     void Scene::on_enter_play_mode()
     {
         setup_entity_map();
-        initialize_physics_world();
+        initialize_components();
         re_calculate_bounds();
         for (const auto &system: systems)
         {
@@ -387,8 +424,8 @@ namespace cologne
 
         Entity viewModel = create_entity("viewmodel");
         viewModel.add_component<SkinnedModelComponent>("deagle");
-        auto &anim4 = viewModel.add_component<AnimatorComponent>("deagle");
-        anim4.play_base_animation(AssetManager::get_animation_by_name("deagle_Rig|Rig|MK_Idle"));
+        auto &anim4 = viewModel.add_component<AnimatorComponent>();
+        anim4.base_clip_name = "deagle_Rig|Rig|MK_Idle";
         viewModel.add_component<ViewmodelComponent>();
 
         Entity player = create_entity("player");
@@ -559,6 +596,7 @@ namespace cologne
     {
         add_system(std::make_unique<TransformSystem>());
         add_system(std::make_unique<AnimationSystem>());
+        add_system(std::make_unique<RagdollSystem>());
         add_system(std::make_unique<BulletSystem>());
         add_system(std::make_unique<PhysicsSystem>());
         add_system(std::make_unique<RendererSystem>());

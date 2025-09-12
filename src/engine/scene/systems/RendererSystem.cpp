@@ -4,7 +4,6 @@
 
 #include "RendererSystem.h"
 
-#include <engine/animation/AnimatorComponent.h>
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/core/Engine.h>
 #include <engine/renderer/Renderer.h>
@@ -71,11 +70,14 @@ namespace cologne
                 continue;
             }
             SkinnedModel *skinned_model = AssetManager::get_skinned_model_by_name(m.model_name);
-            std::vector<glm::mat4> bones;
-            if (registry.all_of<AnimatorComponent>(entity))
+            std::vector<glm::mat4> bones = m.skeleton_pose.get_skinning_matrices();
+            if (!m.skeleton_pose.get_skinning_matrices().empty())
             {
-                auto &animator = registry.get<AnimatorComponent>(entity);
-                bones = animator.get_skinning_matrices();
+                bones = m.skeleton_pose.get_skinning_matrices();
+            }
+            else
+            {
+                bones = std::vector<glm::mat4>(skinned_model->get_skeleton().get_bone_count(), glm::mat4(1.0f));
             }
             for (int32_t mesh_index: skinned_model->get_mesh_indices())
             {

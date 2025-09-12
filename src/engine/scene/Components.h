@@ -1,4 +1,5 @@
 #pragma once
+#include <engine/animation/SkeletonPose.h>
 #include <engine/core/UUID.h>
 #include <engine/physics/Physics.h>
 #include <engine/util/Util.h>
@@ -124,6 +125,19 @@ namespace cologne
     struct SkinnedModelComponent
     {
         std::string model_name;
+
+        SkinnedModelComponent(const char* name)
+        {
+            model_name = name;
+        }
+        SkinnedModelComponent() = default;
+        SkinnedModelComponent(const SkinnedModelComponent& other)
+        {
+            model_name = other.model_name;
+        }
+        //runtime
+        Skeleton skeleton;
+        SkeletonPose skeleton_pose;
     };
 
     struct TagComponent
@@ -290,5 +304,38 @@ namespace cologne
     struct EditorCameraControllerComponent
     {
         glm::vec2 rotation = glm::vec2(0.0f);
+    };
+
+    struct AnimatorComponent
+    {
+        std::string current_clip_name;
+        std::string base_clip_name;
+        std::string one_shot_name;
+        float current_time = 0.0f;
+
+        void play_one_shot(const std::string& name)
+        {
+            one_shot_name = name;
+            current_clip_name = one_shot_name;
+            current_time = 0.0f;
+        }
+    };
+
+    struct RagdollComponent
+    {
+        enum class State
+        {
+            ACTIVE,
+            KINEMATIC
+        };
+        State current_state = State::KINEMATIC;
+        uint32_t id = UINT32_MAX;
+        std::unordered_map<std::string, uint32_t> bone_to_ragdoll_map = std::unordered_map<std::string, uint32_t>();
+
+        void to_ragdoll();
+
+        void to_kinematic();
+
+        void take_ragdoll_hit(glm::vec3 point, glm::vec3 normal) const;
     };
 }

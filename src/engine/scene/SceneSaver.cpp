@@ -6,10 +6,8 @@
 #include <engine/util/FileUtil.h>
 #include <nlohmann/json.hpp>
 #include "Components.h"
-#include "Entity.h"
 #include "Scene.h"
 #include <fstream>
-#include <engine/animation/AnimatorComponent.h>
 #include <engine/asset_manager/AssetManager.h>
 #include "ComponentRegistry.h"
 

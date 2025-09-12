@@ -17,8 +17,8 @@ namespace cologne
         void update_skinning_matrices_no_rebuild(const Skeleton& skeleton);
         const std::vector<glm::mat4> get_skinning_matrices() const;
     public:
-        std::vector<glm::mat4> _local_transforms;
-        std::vector<glm::mat4> _global_transforms;
+        std::vector<glm::mat4> local_transforms;
+        std::vector<glm::mat4> global_transforms;
     private:
         std::vector<glm::mat4> _skinning_matrices;
     };

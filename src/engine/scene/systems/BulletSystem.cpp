@@ -4,7 +4,6 @@
 
 #include "BulletSystem.h"
 
-#include <engine/animation/AnimatorComponent.h>
 #include <engine/audio/Audio.h>
 #include <engine/core/Engine.h>
 #include <engine/scene/Components.h>
@@ -34,10 +33,10 @@ namespace cologne
                         if (enemy.health <= 0)
                         {
                             enemy.dead = true;
-                            if (info.hit_entity.has_component<AnimatorComponent>())
+                            if (info.hit_entity.has_component<RagdollComponent>())
                             {
-                                info.hit_entity.get_component<AnimatorComponent>().to_ragdoll();
-                                info.hit_entity.get_component<AnimatorComponent>().take_ragdoll_hit(
+                                info.hit_entity.get_component<RagdollComponent>().to_ragdoll();
+                                info.hit_entity.get_component<RagdollComponent>().take_ragdoll_hit(
                                     info.hit_point, info.hit_normal);
                             }
                         }
