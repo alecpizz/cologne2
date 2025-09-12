@@ -32,10 +32,10 @@ namespace cologne
             auto &controller = registry.get<PlayerControllerComponent>(entity);
             if (controller.footstep_sounds.empty())
             {
-                controller.footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_1.wav");
-                controller.footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_2.wav");
-                controller.footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_3.wav");
-                controller.footstep_sounds.emplace_back(RESOURCES_PATH "sounds/player_step_4.wav");
+                controller.footstep_sounds.emplace_back(ASSETS_PATH "sounds/player_step_1.wav");
+                controller.footstep_sounds.emplace_back(ASSETS_PATH "sounds/player_step_2.wav");
+                controller.footstep_sounds.emplace_back(ASSETS_PATH "sounds/player_step_3.wav");
+                controller.footstep_sounds.emplace_back(ASSETS_PATH "sounds/player_step_4.wav");
             }
             for (const auto &footstep_sound: controller.footstep_sounds)
             {

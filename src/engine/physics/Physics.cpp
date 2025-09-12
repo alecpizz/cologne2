@@ -856,7 +856,7 @@ namespace cologne::Physics
                                          const Mesh &mesh)
     {
         JPH::Ref<Shape> mesh_shape;
-        const std::string path = RESOURCES_PATH "cache/colliders/" + mesh.get_name() + ".ccol";
+        const std::string path = ASSETS_PATH "cache/colliders/" + mesh.get_name() + ".ccol";
         if (!FileUtil::file_exists(path))
         {
             FileUtil::create_directory_recursive(path);

@@ -130,7 +130,7 @@ namespace cologne
         editor = create_ref<Editor>();
         window = create_ref<Window>(width, height);
         file_watcher = create_ref<FileWatcher>(
-            RESOURCES_PATH, [this](const std::filesystem::path &path, FileStatus status)
+            ASSETS_PATH, [this](const std::filesystem::path &path, FileStatus status)
             {
                 file_status_queue.emplace(path, status);
             });
@@ -153,7 +153,7 @@ namespace cologne
                 nlohmann::json j = nlohmann::json::parse(file);
                 std::string last_save_path = j["scene_name"];
                 LOG_INFO("LOADED PREVIOUSLY USED SCENE %s", last_save_path.c_str());
-                scene_manager->set_editor_scene(RESOURCES_PATH + std::string("scenes/") + last_save_path);
+                scene_manager->set_editor_scene(ASSETS_PATH + std::string("scenes/") + last_save_path);
             }
             file.close();
         }

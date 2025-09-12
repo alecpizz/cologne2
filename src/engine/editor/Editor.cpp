@@ -129,7 +129,7 @@ namespace cologne
         if (ImGui::IsKeyChordPressed(chord))
         {
             SceneSaver saver(Engine::get_scene().get());
-            saver.serialize(RESOURCES_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name());
+            saver.serialize(ASSETS_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name());
         }
 
         chord = ImGuiKey_Delete;

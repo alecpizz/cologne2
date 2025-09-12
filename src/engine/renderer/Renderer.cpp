@@ -706,7 +706,7 @@ namespace cologne
         init_gbuffer();
         init_outline();
         glDisable(GL_CULL_FACE);
-        init_skybox(RESOURCES_PATH "TreasureIslandWhiteBalanced.hdr");
+        init_skybox(ASSETS_PATH "TreasureIslandWhiteBalanced.hdr");
         init_radiance();
         init_prefilter();
         init_brdf();

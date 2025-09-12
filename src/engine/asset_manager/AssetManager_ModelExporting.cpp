@@ -79,22 +79,22 @@ namespace cologne::AssetManager
             if (material.albedo.contains_data())
             {
                 std::string albedo_path = path + "/albedo.ctext";
-                material.albedo.export_to_compressed((RESOURCES_PATH + albedo_path).c_str());
+                material.albedo.export_to_compressed((ASSETS_PATH + albedo_path).c_str());
             }
             if (material.orm.contains_data())
             {
                 std::string orm_path = path + "/orm.ctext";
-                material.orm.export_to_compressed((RESOURCES_PATH + orm_path).c_str());
+                material.orm.export_to_compressed((ASSETS_PATH + orm_path).c_str());
             }
             if (material.emission.contains_data())
             {
                 std::string emission_path = path + "/emission.ctext";
-                material.emission.export_to_compressed((RESOURCES_PATH + emission_path).c_str());
+                material.emission.export_to_compressed((ASSETS_PATH + emission_path).c_str());
             }
             if (material.normal.contains_data())
             {
                 std::string normal_path = path + "/normal.ctext";
-                material.normal.export_to_compressed((RESOURCES_PATH + normal_path).c_str());
+                material.normal.export_to_compressed((ASSETS_PATH + normal_path).c_str());
             }
             i++;
         }
@@ -103,7 +103,7 @@ namespace cologne::AssetManager
 
     void export_model(const ModelData &model_data, uint64_t export_time)
     {
-        const std::string output_path = RESOURCES_PATH "cache/models/" + model_data.name + ".cmdl";
+        const std::string output_path = ASSETS_PATH "cache/models/" + model_data.name + ".cmdl";
         FileUtil::create_directory_recursive(output_path);
         std::ofstream file(output_path, std::ios::binary);
         if (!file.is_open())
@@ -150,7 +150,7 @@ namespace cologne::AssetManager
 
     void export_skinned_model(const SkinnedModelData &skinned_model_data, uint64_t export_time)
     {
-        const std::string output_path = RESOURCES_PATH "cache/skinned_models/" + skinned_model_data.name + ".cskmdl";
+        const std::string output_path = ASSETS_PATH "cache/skinned_models/" + skinned_model_data.name + ".cskmdl";
         FileUtil::create_directory_recursive(output_path);
         std::ofstream file(output_path, std::ios::binary);
         if (!file.is_open())
@@ -289,10 +289,10 @@ namespace cologne::AssetManager
             MaterialCacheHeader material_header;
             file.read(reinterpret_cast<char *>(&material_header), sizeof(MaterialCacheHeader));
 
-            material.albedo.set_path(std::string(RESOURCES_PATH) + material_header.albedo_path);
-            material.orm.set_path(std::string(RESOURCES_PATH) + material_header.orm_path);
-            material.emission.set_path(std::string(RESOURCES_PATH) + material_header.emission_path);
-            material.normal.set_path(std::string(RESOURCES_PATH)  + material_header.normal_path);
+            material.albedo.set_path(std::string(ASSETS_PATH) + material_header.albedo_path);
+            material.orm.set_path(std::string(ASSETS_PATH) + material_header.orm_path);
+            material.emission.set_path(std::string(ASSETS_PATH) + material_header.emission_path);
+            material.normal.set_path(std::string(ASSETS_PATH)  + material_header.normal_path);
             material.roughness_override = material_header.roughness_override;
             material.metallic_override = material_header.metallic_override;
         }
@@ -351,10 +351,10 @@ namespace cologne::AssetManager
             MaterialCacheHeader material_header;
             file.read(reinterpret_cast<char *>(&material_header), sizeof(MaterialCacheHeader));
 
-            material.albedo.set_path(std::string(RESOURCES_PATH) + material_header.albedo_path);
-            material.orm.set_path(std::string(RESOURCES_PATH) + material_header.orm_path);
-            material.emission.set_path(std::string(RESOURCES_PATH) + material_header.emission_path);
-            material.normal.set_path(std::string(RESOURCES_PATH)  + material_header.normal_path);
+            material.albedo.set_path(std::string(ASSETS_PATH) + material_header.albedo_path);
+            material.orm.set_path(std::string(ASSETS_PATH) + material_header.orm_path);
+            material.emission.set_path(std::string(ASSETS_PATH) + material_header.emission_path);
+            material.normal.set_path(std::string(ASSETS_PATH)  + material_header.normal_path);
             material.roughness_override = material_header.roughness_override;
             material.metallic_override = material_header.metallic_override;
         }

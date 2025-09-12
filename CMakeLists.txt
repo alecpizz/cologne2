@@ -113,11 +113,13 @@ target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC ENTT_NO_ETO)
 if (PRODUCTION_BUILD)
     # setup the ASSETS_PATH macro to be in the root folder of your exe
     target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RESOURCES_PATH="./resources/")
+    target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC ASSETS_PATH="./assets/")
     target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC PRODUCTION_BUILD=1)
 
 else ()
     # This is useful to get an ASSETS_PATH in your IDE during development
     target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/resources/")
+    target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
     target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC PRODUCTION_BUILD=0)
 
 endif ()

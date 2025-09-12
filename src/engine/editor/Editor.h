@@ -69,9 +69,9 @@ namespace cologne
 
         void draw_entity_node(Entity entity);
 
-        const char *_move_sound = RESOURCES_PATH "sounds/menus/move.wav";
-        const char *_accept_sound = RESOURCES_PATH "sounds/menus/accept.wav";
-        const char *_cancel_sound = RESOURCES_PATH "sounds/menus/cancel.wav";
+        const char *_move_sound = ASSETS_PATH "sounds/menus/move.wav";
+        const char *_accept_sound = ASSETS_PATH "sounds/menus/accept.wav";
+        const char *_cancel_sound = ASSETS_PATH "sounds/menus/cancel.wav";
         uint32_t _global_window_flags = 0;
         bool _mouse_captured = false;
         bool _image_window_active = false;

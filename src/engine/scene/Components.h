@@ -215,8 +215,8 @@ namespace cologne
         float gun_time = 0.0f;
         bool is_firing = false;
         bool is_reloading = false;
-        const char *shoot_sound = RESOURCES_PATH "sounds/vsk_fire.ogg";
-        const char *reload_sound = RESOURCES_PATH "sounds/vsk_reload_empty.ogg";
+        const char *shoot_sound = ASSETS_PATH "sounds/vsk_fire.ogg";
+        const char *reload_sound = ASSETS_PATH "sounds/vsk_reload_empty.ogg";
         //view model stuff
         float time = 0.0f;
         TransformComponent prev_transform;
@@ -238,7 +238,7 @@ namespace cologne
     {
         float health = 100.0f;
         bool dead = false;
-        std::string hurt_sound = RESOURCES_PATH "sounds/enemy_hurt.mp3";
+        std::string hurt_sound = ASSETS_PATH "sounds/enemy_hurt.mp3";
     };
 
     struct BulletComponent

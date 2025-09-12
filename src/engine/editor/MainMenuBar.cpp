@@ -106,19 +106,19 @@ namespace cologne
                 if (ImGui::MenuItem("Load Scene"))
                 {
                     Engine::get_window()->show_file_dialogue_window({{"Scene Files", "cscn"}, {"All Files", "*"}},
-                                                                    RESOURCES_PATH "scenes",
+                                                                    ASSETS_PATH "scenes",
                                                                     reinterpret_cast<void *>(open_scene_callback));
                     _selected_entity = {};
                 }
                 if (ImGui::MenuItem("Save Scene"))
                 {
                     SceneSaver saver(Engine::get_scene().get());
-                    saver.serialize(RESOURCES_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name());
+                    saver.serialize(ASSETS_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name());
                 }
                 if (ImGui::MenuItem("Reload Scene"))
                 {
                     Engine::load_scene(
-                        (RESOURCES_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name()).c_str());
+                        (ASSETS_PATH + std::string("scenes/") + Engine::get_scene()->get_scene_name()).c_str());
                     _selected_entity = {};
                 }
                 if (ImGui::MenuItem("Save Scene As"))

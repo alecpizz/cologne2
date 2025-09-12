@@ -74,11 +74,11 @@ namespace cologne::AssetManager
     {
         DebugScope scope(__PRETTY_FUNCTION__);
 
-        std::vector<FileUtil::FileInfo> model_paths = FileUtil::iterate_directory(RESOURCES_PATH "models");
+        std::vector<FileUtil::FileInfo> model_paths = FileUtil::iterate_directory(ASSETS_PATH "models");
         std::vector<ModelData> model_datas;
         for (auto& model_path : model_paths)
         {
-            if (!std::filesystem::exists(RESOURCES_PATH "cache/models/" + model_path.name + ".cmdl"))
+            if (!std::filesystem::exists(ASSETS_PATH "cache/models/" + model_path.name + ".cmdl"))
             {
                 LOG_INFO("No cache for file %s found!", model_path.name.c_str());
                 const ModelData data = FileUtil::import_model(model_path.path);
@@ -88,7 +88,7 @@ namespace cologne::AssetManager
             }
         }
 
-        std::vector<FileUtil::FileInfo> cache_model_paths = FileUtil::iterate_directory(RESOURCES_PATH "cache/models");
+        std::vector<FileUtil::FileInfo> cache_model_paths = FileUtil::iterate_directory(ASSETS_PATH "cache/models");
         model_datas.resize(cache_model_paths.size());
         std::transform(std::execution::par_unseq, std::begin(cache_model_paths),
                        std::end(cache_model_paths), std::begin(model_datas),
@@ -99,11 +99,11 @@ namespace cologne::AssetManager
                        });
 
         //skinned models --> assuming animations are in models for now
-        std::vector<FileUtil::FileInfo> skinned_paths = FileUtil::iterate_directory(RESOURCES_PATH "skinned_models");
+        std::vector<FileUtil::FileInfo> skinned_paths = FileUtil::iterate_directory(ASSETS_PATH "skinned_models");
         std::vector<SkinnedModelData> skinned_model_datas;
         for (auto& model_path : skinned_paths)
         {
-            if (!std::filesystem::exists(RESOURCES_PATH "cache/skinned_models/" + model_path.name + ".cskmdl"))
+            if (!std::filesystem::exists(ASSETS_PATH "cache/skinned_models/" + model_path.name + ".cskmdl"))
             {
                 LOG_INFO("No cache for file %s found!", model_path.name.c_str());
                 const SkinnedModelData data = FileUtil::import_skinned_model(model_path.path);
@@ -114,7 +114,7 @@ namespace cologne::AssetManager
             }
         }
 
-        std::vector<FileUtil::FileInfo> cache_skinned_paths = FileUtil::iterate_directory(RESOURCES_PATH "cache/skinned_models");
+        std::vector<FileUtil::FileInfo> cache_skinned_paths = FileUtil::iterate_directory(ASSETS_PATH "cache/skinned_models");
         skinned_model_datas.resize(cache_skinned_paths.size());
         std::transform(std::execution::par_unseq, std::begin(cache_skinned_paths), std::end(cache_skinned_paths),
                        std::begin(skinned_model_datas), [](const FileUtil::FileInfo &file)

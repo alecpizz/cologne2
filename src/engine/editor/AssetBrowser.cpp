@@ -7,7 +7,7 @@
 
 namespace cologne
 {
-    static const std::filesystem::path assets_directory = RESOURCES_PATH;
+    static const std::filesystem::path assets_directory = ASSETS_PATH;
     static std::filesystem::path current_directory = assets_directory;
     static Texture folder_texture;
     static Texture icon_texture;
