@@ -27,6 +27,7 @@
 #include "systems/RendererSystem.h"
 #include "systems/System.h"
 #include "systems/TransformSystem.h"
+#include "systems/NavigationSystem.h"
 
 namespace cologne
 {
@@ -511,5 +512,6 @@ namespace cologne
         add_system(std::make_unique<EditorCameraControllerSystem>());
         add_system(std::make_unique<PlayerControllerSystem>());
         add_system(std::make_unique<InteractionSystem>());
+        add_system(std::make_unique<NavigationSystem>());
     }
 }

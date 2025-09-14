@@ -62,8 +62,7 @@ namespace cologne
         auto view = registry.view<StaticColliderComponent, WorldTransformComponent>();
 
         std::vector<glm::vec3> all_vertices;
-        std::vector<int> all_indices;
-        int vertex_offset = 0;
+        std::vector<int> all_triangles;
         for (auto entity: view)
         {
             auto &sc = registry.get<StaticColliderComponent>(entity);
@@ -76,40 +75,37 @@ namespace cologne
             }
 
             const auto verts = mesh->get_vertices();
-            const auto indices = mesh->get_indices();
-
+            const int vert_offset = static_cast<int>(all_vertices.size());
             for (const auto &vertex: verts)
             {
                 glm::vec4 world_pos = transform * glm::vec4(vertex.position, 1.0f);
                 all_vertices.emplace_back(world_pos);
             }
 
-            for (const auto &index: indices)
+            for (int i = 0; i < mesh->get_indices_count(); i += 3)
             {
-                all_indices.push_back(static_cast<int>(index));
+                all_triangles.push_back(mesh->get_indices()[i + 0] + vert_offset);
+                all_triangles.push_back(mesh->get_indices()[i + 1] + vert_offset);
+                all_triangles.push_back(mesh->get_indices()[i + 2] + vert_offset);
             }
-            vertex_offset += verts.size();
         }
 
-        glm::vec3 min = scene->get_bounds().min;
-        glm::vec3 max = scene->get_bounds().max;
-        const float *b_min = min.data.data;
-        const float *b_max = max.data.data;
+
         const float *verts = reinterpret_cast<const float *>(all_vertices.data());
         const int nverts = all_vertices.size();
-        const int *tris = all_indices.data();
-        const int ntris = all_indices.size() / 3;
+        const int *tris = all_triangles.data();
+        const int ntris = all_triangles.size() / 3;
 
 
         BuildContext context;
 
         rcConfig cfg = {};
         memset(&cfg, 0, sizeof(cfg));
-        float cellSize = 0.3f;
-        float cellHeight = 0.2f;
-        float agentHeight = 2.0f;
-        float agentRadius = 0.6f;
-        float agentMaxClimb = 0.9f;
+        float cellSize = 0.1f;
+        float cellHeight = 0.1f;
+        float agentHeight = 1.8f;
+        float agentRadius = 0.2f;
+        float agentMaxClimb = 0.2f;
         float agentMaxSlope = 45.0f;
         float regionMinSize = 8;
         float regionMergeSize = 20;
@@ -125,16 +121,15 @@ namespace cologne
         cfg.walkableHeight = (int) ceilf(agentHeight / cfg.ch);
         cfg.walkableClimb = (int) floorf(agentMaxClimb / cfg.ch);
         cfg.walkableRadius = (int) ceilf(agentRadius / cfg.cs);
-        cfg.maxEdgeLen = (int) (edgeMaxLen / cellSize);
+        cfg.maxEdgeLen = 20;
         cfg.maxSimplificationError = edgeMaxError;
         cfg.minRegionArea = (int) rcSqr(regionMinSize); // Note: area = size*size
         cfg.mergeRegionArea = (int) rcSqr(regionMergeSize); // Note: area = size*size
         cfg.maxVertsPerPoly = (int) vertsPerPoly;
-        cfg.detailSampleDist = detailSampleDist < 0.9f ? 0 : cellSize * detailSampleDist;
-        cfg.detailSampleMaxError = cellHeight * detailSampleMaxError;
+        cfg.detailSampleDist = 1.0f;
+        cfg.detailSampleMaxError = 0.2f;
 
-        rcVcopy(cfg.bmin, b_min);
-        rcVcopy(cfg.bmax, b_max);
+        rcCalcBounds(verts, nverts, cfg.bmin, cfg.bmax);
         rcCalcGridSize(cfg.bmin, cfg.bmax, cfg.cs, &cfg.width, &cfg.height);
 
 
@@ -247,6 +242,11 @@ namespace cologne
             return;
         }
 
+        for (int i = 0; i < poly_mesh->npolys; i++)
+        {
+            poly_mesh->flags[i] = 1;
+        }
+
         rcFreeCompactHeightfield(compact_height_field);
         rcFreeContourSet(contour_set);
 
@@ -271,9 +271,16 @@ namespace cologne
             params.detailVertsCount = detail_mesh->nverts;
             params.detailTris = detail_mesh->tris;
             params.detailTriCount = detail_mesh->ntris;
-            params.walkableHeight = agentHeight;
-            params.walkableRadius = agentRadius;
-            params.walkableClimb = agentMaxClimb;
+            params.walkableHeight = agentHeight * cfg.ch;
+            params.walkableRadius = agentRadius * cfg.cs;
+            params.walkableClimb = agentMaxClimb * cfg.ch;
+            params.offMeshConVerts = nullptr; // m_geom->getOffMeshConnectionVerts();
+            params.offMeshConRad = nullptr; //m_geom->getOffMeshConnectionRads();
+            params.offMeshConDir = nullptr; // m_geom->getOffMeshConnectionDirs();
+            params.offMeshConAreas = nullptr; // m_geom->getOffMeshConnectionAreas();
+            params.offMeshConFlags = nullptr; // m_geom->getOffMeshConnectionFlags();
+            params.offMeshConUserID = nullptr; // m_geom->getOffMeshConnectionId();
+            params.offMeshConCount = 0; // m_geom->getOffMeshConnectionCount();
             rcVcopy(params.bmin, poly_mesh->bmin);
             rcVcopy(params.bmax, poly_mesh->bmax);
             params.cs = cfg.cs;
@@ -300,14 +307,6 @@ namespace cologne
             {
                 dtFree(nav_data);
                 LOG_ERROR("Couldn't init detour navmesh!");
-                return;
-            }
-
-            dtNavMeshQuery nav_query;
-            status = nav_query.init(navmesh, 2048);
-            if (dtStatusFailed(status))
-            {
-                LOG_ERROR("Couldn't init detour navmesh query");
                 return;
             }
 
