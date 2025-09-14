@@ -44,7 +44,6 @@ registry->remove<T>(entity); }>("remove"_hs) \
     static std::map<entt::id_type, std::string> component_type_map;
 
 
-
     const std::map<entt::id_type, std::string> &get_component_map()
     {
         return component_type_map;
@@ -80,7 +79,7 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 REGISTER_PROPERTY(TransformComponent, scale);
 
         entt::meta_factory<UUID>().conv<uint64_t>()
-            .data<&UUID::_uuid>("_uuid"_hs);
+                .data<&UUID::_uuid>("_uuid"_hs);
 
         REGISTER_COMPONENT(IDComponent, "IDComponent", NO_EDITOR)
                 REGISTER_PROPERTY(IDComponent, id);
@@ -166,7 +165,7 @@ registry->remove<T>(entity); }>("remove"_hs) \
         REGISTER_COMPONENT(AnimatorComponent, "AnimComponent", EDITOR_READ_WRITE)
                 REGISTER_PROPERTY(AnimatorComponent, base_clip_name)
                 REGISTER_PROPERTY(AnimatorComponent, one_shot_name);
-            REGISTER_COMPONENT(RagdollComponent, "RagdollComponent", EDITOR_READ_ONLY);
+        REGISTER_COMPONENT(RagdollComponent, "RagdollComponent", EDITOR_READ_ONLY);
 
         REGISTER_COMPONENT(HideInEditorComponent, "HideInEditorComponent", NO_EDITOR);
         REGISTER_COMPONENT(EditorCameraComponent, "EditorCameraComponent", NO_EDITOR);
@@ -188,6 +187,7 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 ENUMERATOR(LightComponent::LightType, Point)
                 ENUMERATOR(LightComponent::LightType, Spot);
 
+        REGISTER_COMPONENT(NPCMemberComponent, "NPCMemberComponent", EDITOR_READ_ONLY);
         REGISTER_COMPONENT(ParentComponent, "ParentComponent", NO_EDITOR)
                 REGISTER_PROPERTY(ParentComponent, children);
     }

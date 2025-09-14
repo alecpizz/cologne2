@@ -8,11 +8,12 @@ namespace cologne
     class NavigationSystem : public System
     {
     public:
+        void on_scene_start(Scene *scene) override;
         void on_update(Scene *scene, float dt) override;
 
         UpdateFlags get_update_flags() override
         {
-            return static_cast<UpdateFlags>(EDITOR | RUNTIME);
+            return static_cast<UpdateFlags>( RUNTIME);
         }
     };
 }

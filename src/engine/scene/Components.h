@@ -338,4 +338,9 @@ namespace cologne
 
         void take_ragdoll_hit(glm::vec3 point, glm::vec3 normal) const;
     };
+
+    struct NPCMemberComponent
+    {
+        int agent_id = -1;
+    };
 }
