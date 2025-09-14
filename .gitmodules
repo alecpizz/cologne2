@@ -32,3 +32,6 @@
 [submodule "assets"]
 	path = assets
 	url = git@github.com:alecpizz/cologne-resources.git
+[submodule "vendor/recast"]
+	path = vendor/recast
+	url = https://github.com/recastnavigation/recastnavigation.git

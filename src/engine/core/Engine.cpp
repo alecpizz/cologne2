@@ -18,6 +18,7 @@
 #include <engine/scene/ComponentRegistry.h>
 #include <nlohmann/json.hpp>
 #include <fstream>
+#include <engine/navigation/Navigation.h>
 
 #include "EventManager.h"
 #include "SceneManager.h"
@@ -223,6 +224,7 @@ namespace cologne
                 Physics::update(et.elapsed);
             }
             Physics::draw();
+            Navigation::draw();
             // player->update(et.elapsed);
             window->clear();
             renderer->render_frame();

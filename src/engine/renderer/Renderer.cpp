@@ -474,6 +474,11 @@ namespace cologne
         debug_renderer->draw_triangle(p1, p2, p3, color);
     }
 
+    void Renderer::draw_point(glm::vec3 p1, glm::vec3 color)
+    {
+        debug_renderer->draw_point(p1, color);
+    }
+
     void Renderer::draw_aabb(glm::mat4 transform, glm::vec3 min, glm::vec3 max, glm::vec3 color)
     {
         debug_renderer->draw_aabb(transform, min, max, color);

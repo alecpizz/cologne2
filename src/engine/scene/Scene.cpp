@@ -7,6 +7,7 @@
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/core/Engine.h>
 #include <engine/core/UUID.h>
+#include <engine/navigation/Navigation.h>
 #include <engine/physics/Physics.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Light.h>
@@ -168,6 +169,9 @@ namespace cologne
         Engine::get_renderer()->clear_lights();
         setup_entity_map();
         re_calculate_bounds();
+        //TEMP, bad org
+        Navigation::cleanup();
+        Navigation::init_for_scene(this);
     }
 
     void Scene::on_exit_edit_mode()

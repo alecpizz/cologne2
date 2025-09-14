@@ -8,11 +8,6 @@
 
 namespace cologne
 {
-    struct DebugVertex
-    {
-        glm::vec3 point;
-        glm::vec3 color;
-    };
 
     struct DebugCmd
     {

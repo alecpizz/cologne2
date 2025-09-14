@@ -8,8 +8,10 @@
 #include <engine/audio/Audio.h>
 #include <engine/core/EventManager.h>
 #include <engine/core/Window.h>
+#include <engine/navigation/Navigation.h>
 #include <engine/scene/SceneSaver.h>
 #include <misc/cpp/imgui_stdlib.h>
+#include <engine/navigation/NavmeshBuilder.h>
 #include "Editor.h"
 
 namespace cologne
@@ -137,9 +139,9 @@ namespace cologne
                 {
                     Engine::get_scene()->re_calculate_bounds();
                 }
-                if (ImGui::MenuItem("Test Copy Scene"))
+                if (ImGui::MenuItem("Build Navmesh"))
                 {
-                    Scene::copy(Engine::get_scene());
+                    NavMeshBuilder::build_navmesh(Engine::get_scene().get());
                 }
                 ImGui::EndMenu();
             }
@@ -148,6 +150,11 @@ namespace cologne
                 if (ImGui::MenuItem("Save Layout"))
                 {
                     ImGui::SaveIniSettingsToDisk(RESOURCES_PATH "editor/imgui_config.ini");
+                }
+
+                if (ImGui::Checkbox("Draw Navmesh Visuals", &_draw_navmesh))
+                {
+                    Navigation::set_drawing_visibility(_draw_navmesh);
                 }
 
                 if (ImGui::MenuItem("Hot reload shaders"))
