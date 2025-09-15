@@ -81,7 +81,7 @@ namespace cologne::Physics
                 case Layers::NON_MOVING:
                     return inLayer2 == Layers::MOVING || inLayer2 == Layers::PLAYER;
                 case Layers::MOVING:
-                    return true;
+                    return inLayer2 != Layers::PLAYER;
                 case Layers::PLAYER:
                     return inLayer2 == Layers::NON_MOVING;
                 default:
@@ -95,7 +95,8 @@ namespace cologne::Physics
     {
         static constexpr BroadPhaseLayer NON_MOVING(0);
         static constexpr BroadPhaseLayer MOVING(1);
-        static constexpr uint32_t NUM_LAYERS(2);
+        static constexpr BroadPhaseLayer PLAYER(2);
+        static constexpr uint32_t NUM_LAYERS(3);
     }
 
     class BroadPhaseLayerImpl final : public BroadPhaseLayerInterface
@@ -105,6 +106,7 @@ namespace cologne::Physics
         {
             _object_to_broad_phase[Layers::NON_MOVING] = BroadPhaseLayers::NON_MOVING;
             _object_to_broad_phase[Layers::MOVING] = BroadPhaseLayers::MOVING;
+            _object_to_broad_phase[Layers::PLAYER] = BroadPhaseLayers::PLAYER;
         }
 
         JPH::uint GetNumBroadPhaseLayers() const override
@@ -125,6 +127,7 @@ namespace cologne::Physics
             {
                 case (BroadPhaseLayer::Type) BroadPhaseLayers::NON_MOVING: return "NON_MOVING";
                 case (BroadPhaseLayer::Type) BroadPhaseLayers::MOVING: return "MOVING";
+                case (BroadPhaseLayer::Type) BroadPhaseLayers::PLAYER: return "PLAYER";
                 default: assert(false);
                     return "INVALID";
             }
@@ -145,9 +148,9 @@ namespace cologne::Physics
                 case Layers::NON_MOVING:
                     return inLayer2 == BroadPhaseLayers::MOVING;
                 case Layers::MOVING:
-                    return true;
+                    return inLayer2 != BroadPhaseLayers::PLAYER;
                 case Layers::PLAYER:
-                    return true;
+                    return inLayer2 == BroadPhaseLayers::NON_MOVING;
                 default:
                     assert(false);
                     return false;
@@ -664,8 +667,8 @@ namespace cologne::Physics
             update_settings.mWalkStairsStepUp = character->GetUp() * update_settings.mWalkStairsStepUp.Length();
             character->ExtendedUpdate(
                 dt, character->GetUp() * physics_system.GetGravity().Length(), update_settings,
-                physics_system.GetDefaultBroadPhaseLayerFilter(1),
-                physics_system.GetDefaultLayerFilter(1),
+                physics_system.GetDefaultBroadPhaseLayerFilter(Layers::PLAYER),
+                physics_system.GetDefaultLayerFilter(Layers::PLAYER),
                 {},
                 {},
                 *temp_allocator);
@@ -1126,7 +1129,12 @@ namespace cologne::Physics
             {
                 continue;
             }
-            physics_system.GetBodyInterface().SetMotionType(bodyId, EMotionType::Kinematic, EActivation::DontActivate);
+            BodyLockWrite lock(physics_system.GetBodyLockInterface(), bodyId);
+            if (lock.Succeeded())
+            {
+                lock.GetBody().SetIsSensor(true);
+                physics_system.GetBodyInterfaceNoLock().SetMotionType(bodyId, EMotionType::Static, EActivation::DontActivate);
+            }
         }
     }
 
@@ -1145,7 +1153,12 @@ namespace cologne::Physics
             {
                 continue;
             }
-            physics_system.GetBodyInterface().SetMotionType(bodyId, EMotionType::Dynamic, EActivation::Activate);
+            BodyLockWrite lock(physics_system.GetBodyLockInterface(), bodyId);
+            if (lock.Succeeded())
+            {
+                lock.GetBody().SetIsSensor(false);
+                physics_system.GetBodyInterfaceNoLock().SetMotionType(bodyId, EMotionType::Dynamic, EActivation::Activate);
+            }
         }
     }
 
