@@ -142,6 +142,8 @@ namespace cologne
                 if (ImGui::MenuItem("Build Navmesh"))
                 {
                     NavMeshBuilder::build_navmesh(Engine::get_scene().get());
+                    Navigation::cleanup();
+                    Navigation::init_navmesh(Engine::get_scene().get());
                 }
                 ImGui::EndMenu();
             }

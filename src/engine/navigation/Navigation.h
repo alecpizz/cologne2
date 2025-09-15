@@ -14,7 +14,7 @@ namespace cologne
     class Navigation
     {
     public:
-        static void init_for_scene(Scene * scene);
+        static void init_navmesh(Scene * scene);
         static void cleanup();
         static void draw();
         static void set_drawing_visibility(bool visible);

@@ -172,7 +172,7 @@ namespace cologne
         re_calculate_bounds();
         //TEMP, bad org
         Navigation::cleanup();
-        Navigation::init_for_scene(this);
+        Navigation::init_navmesh(this);
     }
 
     void Scene::on_exit_edit_mode()

@@ -20,13 +20,11 @@ namespace cologne
     dtCrowd *Navigation::_nav_crowd = nullptr;
     NavmeshDebugDrawer Navigation::_debug_drawer = {};
     dtNavMeshQuery *Navigation::_nav_query = nullptr;
-    static const int MAX_POLYS = 256;
-    constexpr float POLY_PICK_EXTENTS[3] = {2.0f, 50.0f, 2.0f};
 
-    void Navigation::init_for_scene(Scene *scene)
+    void Navigation::init_navmesh(Scene *scene)
     {
         auto path = ASSETS_PATH "navmesh/" + scene->get_scene_name() + ".navmesh";
-        if (true)
+        if (!FileUtil::file_exists(path))
         {
             LOG_WARN("NO NAVMESH EXISTS AT PATH! CREATING ONE");
             NavMeshBuilder::build_navmesh(scene);
