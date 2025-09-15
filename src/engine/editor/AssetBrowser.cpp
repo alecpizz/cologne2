@@ -4,6 +4,7 @@
 #include "Editor.h"
 #include <filesystem>
 #include <engine/audio/Audio.h>
+#include <engine/renderer/types/Texture.h>
 
 namespace cologne
 {

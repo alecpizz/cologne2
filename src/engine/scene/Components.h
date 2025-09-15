@@ -1,4 +1,5 @@
 #pragma once
+#include <engine/animation/Skeleton.h>
 #include <engine/animation/SkeletonPose.h>
 #include <engine/core/UUID.h>
 #include <engine/physics/Physics.h>
@@ -339,8 +340,9 @@ namespace cologne
         void take_ragdoll_hit(glm::vec3 point, glm::vec3 normal) const;
     };
 
-    struct NPCMemberComponent
+    struct NPCCrowdMember
     {
         int agent_id = -1;
+        glm::vec3 offset = glm::vec3(0.0f, -0.15f, 0.0f);
     };
 }

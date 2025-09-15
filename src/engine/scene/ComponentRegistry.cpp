@@ -187,7 +187,8 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 ENUMERATOR(LightComponent::LightType, Point)
                 ENUMERATOR(LightComponent::LightType, Spot);
 
-        REGISTER_COMPONENT(NPCMemberComponent, "NPCMemberComponent", EDITOR_READ_ONLY);
+        REGISTER_COMPONENT(NPCCrowdMember, "NPCCrowdMember", EDITOR_READ_WRITE)
+            REGISTER_PROPERTY(NPCCrowdMember, offset);
         REGISTER_COMPONENT(ParentComponent, "ParentComponent", NO_EDITOR)
                 REGISTER_PROPERTY(ParentComponent, children);
     }
