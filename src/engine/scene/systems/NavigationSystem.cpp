@@ -14,13 +14,13 @@ namespace cologne
     void NavigationSystem::on_scene_start(Scene *scene)
     {
         auto& registry = scene->get_raw_registry();
-        auto view = registry.view<TransformComponent, NPCCrowdMember>();
+        auto view = registry.view<TransformComponent, NPCCrowdMemberComponent>();
         for (auto entity : view)
         {
             auto& transform = view.get<TransformComponent>(entity);
-            auto& npc_controller = view.get<NPCCrowdMember>(entity);
+            auto& npc_controller = view.get<NPCCrowdMemberComponent>(entity);
 
-            int agent_id = Navigation::add_agent(transform.position);
+            int agent_id = Navigation::add_agent(transform.position, npc_controller);
             npc_controller.agent_id = agent_id;
         }
     }
@@ -58,11 +58,11 @@ namespace cologne
 
         glm::vec3 target_pos = player_pos;
 
-        auto npc_view = registry.view<TransformComponent, NPCCrowdMember>();
+        auto npc_view = registry.view<TransformComponent, NPCCrowdMemberComponent>();
         for (auto entity : npc_view)
         {
             auto& transform = npc_view.get<TransformComponent>(entity);
-            auto& npc_controller = npc_view.get<NPCCrowdMember>(entity);
+            auto& npc_controller = npc_view.get<NPCCrowdMemberComponent>(entity);
 
             if (npc_controller.agent_id != -1)
             {

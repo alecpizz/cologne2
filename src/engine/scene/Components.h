@@ -340,9 +340,11 @@ namespace cologne
         void take_ragdoll_hit(glm::vec3 point, glm::vec3 normal) const;
     };
 
-    struct NPCCrowdMember
+    struct NPCCrowdMemberComponent
     {
         int agent_id = -1;
         glm::vec3 offset = glm::vec3(0.0f, -0.15f, 0.0f);
+        float max_acceleration = 3.5f;
+        float max_speed = 1.0f;
     };
 }

@@ -7,6 +7,7 @@
 #include <DetourCrowd.h>
 #include <DetourDebugDraw.h>
 #include <DetourNavMesh.h>
+#include <engine/scene/Components.h>
 #include <engine/scene/Scene.h>
 #include <engine/util/FileUtil.h>
 
@@ -201,6 +202,7 @@ namespace cologne
         }
     }
 
+
     glm::vec3 Navigation::get_agent_position(int agent_id)
     {
        if (!_nav_crowd)
@@ -215,7 +217,7 @@ namespace cologne
         return glm::vec3(0.0f);
     }
 
-    int Navigation::add_agent(glm::vec3 vec)
+    int Navigation::add_agent(glm::vec3 vec, const NPCCrowdMemberComponent& crowd_member)
     {
         if (!_nav_crowd)
         {
@@ -225,8 +227,8 @@ namespace cologne
         dtCrowdAgentParams agent_params = {};
         agent_params.radius = 0.2f;
         agent_params.height = 1.8f;
-        agent_params.maxAcceleration = 3.5f;
-        agent_params.maxSpeed = 1.0f;
+        agent_params.maxAcceleration = crowd_member.max_acceleration;
+        agent_params.maxSpeed = crowd_member.max_speed;
         agent_params.updateFlags = DT_CROWD_ANTICIPATE_TURNS | DT_CROWD_OPTIMIZE_VIS | DT_CROWD_OPTIMIZE_TOPO
         | DT_CROWD_OBSTACLE_AVOIDANCE | DT_CROWD_SEPARATION;
         agent_params.obstacleAvoidanceType = 0;

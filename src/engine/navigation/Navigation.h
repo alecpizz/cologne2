@@ -9,6 +9,7 @@ class dtNavMesh;
 
 namespace cologne
 {
+    struct NPCCrowdMemberComponent;
     class Scene;
     class NavmeshDebugDrawer;
     class Navigation
@@ -22,7 +23,7 @@ namespace cologne
         static void update_crowd(float dt);
         static void set_agent_target(int agent_id, const glm::vec3& target_pos);
         static glm::vec3 get_agent_position(int agent_id);
-        static int add_agent(glm::vec3 vec);
+        static int add_agent(glm::vec3 vec, const NPCCrowdMemberComponent& crowd_member);
 
     private:
         static bool _is_drawing;
