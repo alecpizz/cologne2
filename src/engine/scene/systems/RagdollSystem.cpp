@@ -78,18 +78,28 @@ namespace cologne
                 {
                     const auto &bone = sm.skeleton.get_bones()[i];
                     std::string node_name = bone.name;
-                    glm::mat4 node_transform = bone.local_bind_transform;
+                    glm::mat4 node_transform = sm.skeleton_pose.local_transforms[i];
                     unsigned int parent_idx = bone.parent_idx;
                     glm::mat4 parent_transform = (parent_idx == -1) ? glm::mat4(1.0f) : sm.skeleton_pose.global_transforms[parent_idx];
-                    glm::mat4 global_transform = parent_transform * node_transform;
+                    glm::mat4 animated_global_transform = parent_transform * node_transform;
+                    glm::mat4 final_transform;
 
                     if (rd.bone_to_ragdoll_map.contains(node_name))
                     {
-                        global_transform = inverse_entity_transform * Physics::get_rigidbody_transform(
-                                               rd.bone_to_ragdoll_map[node_name]);
+                        glm::vec3 animated_scale;
+                        glm::vec3 dummy_pos;
+                        glm::quat dummy_rot;
+                        Util::decompose_mat4(animated_global_transform, dummy_pos, dummy_rot, animated_scale);
+                        glm::mat4 rigidbody_world_transform = Physics::get_rigidbody_transform(rd.bone_to_ragdoll_map[node_name]);
+                        glm::mat4 scaled_rigidbody_world_transform = rigidbody_world_transform * glm::scale(glm::mat4(1.0f), animated_scale);
+                        final_transform = inverse_entity_transform * scaled_rigidbody_world_transform;
+                    }
+                    else
+                    {
+                        final_transform = animated_global_transform;
                     }
 
-                    sm.skeleton_pose.global_transforms[i] = global_transform;
+                    sm.skeleton_pose.global_transforms[i] = final_transform;
                 }
                 sm.skeleton_pose.update_skinning_matrices_no_rebuild(sm.skeleton);
             }
