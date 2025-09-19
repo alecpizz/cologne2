@@ -97,10 +97,16 @@ namespace cologne
 
         void draw()
         {
+
             if (!is_drawing)
             {
                 lines.clear();
                 tris.clear();
+                return;
+            }
+
+            if (lines.empty() && tris.empty())
+            {
                 return;
             }
             OpenGLDebugScope scope("DebugRenderer::draw");
@@ -127,6 +133,7 @@ namespace cologne
             glDepthMask(GL_TRUE);
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_CULL_FACE);
+            glBlendFunc(GL_ONE, GL_ZERO);
           //  glEnable(GL_BLEND);
         }
     };
