@@ -118,6 +118,22 @@ namespace cologne
         _scene = scene;
     }
 
+    using SaveFunction = std::function<void(nlohmann::json&, const std::string&, entt::meta_any&)>;
+
+    // Create a static map of type hashes to their save functions
+    static const std::unordered_map<entt::id_type, SaveFunction> property_savers = {
+        { entt::type_hash<glm::vec3>::value(),     [](auto& j, auto& name, auto& any){ save_property<glm::vec3>(j, name, any); } },
+        { entt::type_hash<glm::vec4>::value(),     [](auto& j, auto& name, auto& any){ save_property<glm::vec4>(j, name, any); } },
+        { entt::type_hash<glm::quat>::value(),     [](auto& j, auto& name, auto& any){ save_property<glm::quat>(j, name, any); } },
+        { entt::type_hash<cologne::UUID>::value(),    [](auto& j, auto& name, auto& any){ save_property<cologne::UUID>(j, name, any); } },
+        { entt::type_hash<glm::mat4>::value(),     [](auto& j, auto& name, auto& any){ save_property<glm::mat4>(j, name, any); } },
+        { entt::type_hash<float>::value(),         [](auto& j, auto& name, auto& any){ save_property<float>(j, name, any); } },
+        { entt::type_hash<bool>::value(),          [](auto& j, auto& name, auto& any){ save_property<bool>(j, name, any); } },
+        { entt::type_hash<std::string>::value(),   [](auto& j, auto& name, auto& any){ save_property<std::string>(j, name, any); } },
+        { entt::type_hash<int>::value(),           [](auto& j, auto& name, auto& any){ save_property<int>(j, name, any); } },
+        { entt::type_hash<uint64_t>::value(),      [](auto& j, auto& name, auto& any){ save_property<uint64_t>(j, name, any); } },
+        { entt::type_hash<uint32_t>::value(),      [](auto& j, auto& name, auto& any){ save_property<uint32_t>(j, name, any); } }
+    };
 
     template<typename T>
     void save_property(nlohmann::json &j, const std::string &member_name, entt::meta_any &any)
@@ -468,5 +484,4 @@ namespace cologne
     void SceneSaver::deserialize_runtime(const std::string &path)
     {
     }
-
 }

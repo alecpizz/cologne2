@@ -5,7 +5,7 @@
 #include <engine/scene/systems/System.h>
 namespace cologne
 {
-    class NavigationSystem : public System
+    class NPCSystem : public System
     {
     public:
         void on_scene_start(Scene *scene) override;

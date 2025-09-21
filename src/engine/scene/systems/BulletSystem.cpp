@@ -30,15 +30,19 @@ namespace cologne
                         auto &enemy = info.hit_entity.get_component<EnemyComponent>();
                         enemy.health -= bullet.damage;
                         Audio::play_sound(enemy.hurt_sound.c_str(), 40);
+                        // if (info.hit_entity.has_component<AnimatorComponent>() && info.hit_entity.has_component<NPCCrowdMemberComponent>())
+                        // {
+                        //     info.hit_entity.get_component<AnimatorComponent>().play_one_shot(info.hit_entity.get_component<NPCCrowdMemberComponent>().hit_clip_name);
+                        // }
                         if (enemy.health <= 0)
                         {
                             enemy.dead = true;
-                            if (info.hit_entity.has_component<RagdollComponent>())
-                            {
-                                info.hit_entity.get_component<RagdollComponent>().to_ragdoll();
-                                info.hit_entity.get_component<RagdollComponent>().take_ragdoll_hit(
-                                    info.hit_point, info.hit_normal);
-                            }
+                            // if (info.hit_entity.has_component<RagdollComponent>())
+                            // {
+                            //     info.hit_entity.get_component<RagdollComponent>().to_ragdoll();
+                            //     info.hit_entity.get_component<RagdollComponent>().take_ragdoll_hit(
+                            //         info.hit_point, info.hit_normal);
+                            // }
                         }
                     }
                     if (info.hit_entity.has_component<RigidbodyComponent>())

@@ -238,4 +238,13 @@ namespace cologne
         
         return _nav_crowd->addAgent(glm::value_ptr(vec), &agent_params);
     }
+
+    void Navigation::remove_agent(int agent_id)
+    {
+        if (!_nav_crowd)
+        {
+            return;
+        }
+        _nav_crowd->removeAgent(agent_id);
+    }
 }

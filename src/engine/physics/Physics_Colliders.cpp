@@ -106,7 +106,6 @@ namespace cologne
         auto &body_interface = _physics_system.GetBodyInterface();
         auto id = body_interface.CreateAndAddBody(
             settings, JPH::EActivation::DontActivate);
-        LOG_INFO("Created collider with id %d", id);
         _colliders_static.push_back(id);
         _physics_system.OptimizeBroadPhase();
         _entity_to_collider_map[id] = entity;

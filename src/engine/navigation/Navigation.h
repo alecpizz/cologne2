@@ -24,6 +24,7 @@ namespace cologne
         static void set_agent_target(int agent_id, const glm::vec3& target_pos);
         static glm::vec3 get_agent_position(int agent_id);
         static int add_agent(glm::vec3 vec, const NPCCrowdMemberComponent& crowd_member);
+        static void remove_agent(int agent_id);
 
     private:
         static bool _is_drawing;

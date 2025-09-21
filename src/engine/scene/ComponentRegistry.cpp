@@ -36,7 +36,8 @@ registry->remove<T>(entity); }>("remove"_hs) \
 
 
 #define REFLECT_ENUM(T) \
-        entt::meta_factory<T>()
+        entt::meta_factory<T>() \
+        .func<[](T value) {return static_cast<std::underlying_type_t<T>>(value);}>("to_underlying"_hs)
 #define ENUMERATOR(E, Member, ...) \
         .data<E::Member>(#Member##_hs) \
         .custom<PropertiesMap>(PropertiesMap{{"name"_hs, #Member} __VA_OPT__(, __VA_ARGS__)})
@@ -190,7 +191,21 @@ registry->remove<T>(entity); }>("remove"_hs) \
         REGISTER_COMPONENT(NPCCrowdMemberComponent, "NPCCrowdMemberComponent", EDITOR_READ_WRITE)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, offset)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, max_acceleration)
-            REGISTER_PROPERTY(NPCCrowdMemberComponent, max_speed);
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, max_speed)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, detection_radius)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, attack_range)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, attack_cooldown)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, current_state)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, idle_clip_name)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, run_clip_name)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, attack_clip_name)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, hit_clip_name);
+
+        REFLECT_ENUM(NPCCrowdMemberComponent::State)
+                ENUMERATOR(NPCCrowdMemberComponent::State, IDLE)
+                ENUMERATOR(NPCCrowdMemberComponent::State, CHASING)
+                ENUMERATOR(NPCCrowdMemberComponent::State, ATTACKING)
+                ENUMERATOR(NPCCrowdMemberComponent::State, DYING);
         REGISTER_COMPONENT(ParentComponent, "ParentComponent", NO_EDITOR)
                 REGISTER_PROPERTY(ParentComponent, children);
     }
