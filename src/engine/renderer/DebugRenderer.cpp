@@ -8,11 +8,6 @@
 
 namespace cologne
 {
-    struct DebugVertex
-    {
-        glm::vec3 point;
-        glm::vec3 color;
-    };
 
     struct DebugCmd
     {
@@ -23,10 +18,14 @@ namespace cologne
 
     struct DebugRenderer::Impl
     {
-        std::vector<DebugVertex> cmds;
-        uint32_t VAO, VBO;
-        uint32_t allocated_buffer_size;
-        uint32_t vertex_count;
+        std::vector<DebugVertex> lines;
+        std::vector<DebugVertex> tris;
+        uint32_t line_VAO, line_VBO;
+        uint32_t tri_VAO, tri_VBO;
+        uint32_t line_allocated_buffer_size;
+        uint32_t tri_allocated_buffer_size;
+        uint32_t line_vertex_count;
+        uint32_t tri_vertex_count;
         Ref<Shader> shader = nullptr;
         bool is_drawing = true;
 
@@ -36,21 +35,21 @@ namespace cologne
             shader = create_ref<Shader>(RESOURCES_PATH "shaders/debug.vert", RESOURCES_PATH "shaders/debug.frag");
         }
 
-        void update_vertex_data(std::vector<DebugVertex> &vertices)
+        void update_line_vertex_data(std::vector<DebugVertex>& vertices)
         {
-            if (VAO == 0)
+            if (line_VAO == 0)
             {
-                glGenVertexArrays(1, &VAO);
-                glGenBuffers(1, &VBO);
+                glGenVertexArrays(1, &line_VAO);
+                glGenBuffers(1, &line_VBO);
             }
-            glBindVertexArray(VAO);
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBindVertexArray(line_VAO);
+            glBindBuffer(GL_ARRAY_BUFFER, line_VBO);
 
             size_t bufferSize = vertices.size() * sizeof(DebugVertex);
-            if (bufferSize > allocated_buffer_size)
+            if (bufferSize > line_allocated_buffer_size)
             {
                 glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_DYNAMIC_DRAW);
-                allocated_buffer_size = static_cast<uint32_t>(bufferSize);
+                line_allocated_buffer_size = static_cast<uint32_t>(bufferSize);
             }
 
             glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSize, vertices.data());
@@ -62,42 +61,88 @@ namespace cologne
             glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void *) offsetof(DebugVertex, color));
             glBindVertexArray(0);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
-            vertex_count = static_cast<uint32_t>(vertices.size());
+            line_vertex_count = static_cast<uint32_t>(vertices.size());
+        }
+
+
+
+        void update_tri_vertex_data(std::vector<DebugVertex> &vertices)
+        {
+            if (tri_VAO == 0)
+            {
+                glGenVertexArrays(1, &tri_VAO);
+                glGenBuffers(1, &tri_VBO);
+            }
+            glBindVertexArray(tri_VAO);
+            glBindBuffer(GL_ARRAY_BUFFER, tri_VBO);
+
+            size_t bufferSize = vertices.size() * sizeof(DebugVertex);
+            if (bufferSize > tri_allocated_buffer_size)
+            {
+                glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_DYNAMIC_DRAW);
+                tri_allocated_buffer_size = static_cast<uint32_t>(bufferSize);
+            }
+
+            glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSize, vertices.data());
+
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void *) offsetof(DebugVertex, point));
+
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void *) offsetof(DebugVertex, color));
+            glBindVertexArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            tri_vertex_count = static_cast<uint32_t>(vertices.size());
         }
 
         void draw()
         {
+
             if (!is_drawing)
             {
-                cmds.clear();
+                lines.clear();
+                tris.clear();
+                return;
+            }
+
+            if (lines.empty() && tris.empty())
+            {
                 return;
             }
             OpenGLDebugScope scope("DebugRenderer::draw");
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);
-            glDisable(GL_BLEND);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glDepthMask(GL_FALSE);
             glPointSize(8.0f);
 
             shader->bind();
 
-            update_vertex_data(cmds);
+            update_line_vertex_data(lines);
+            update_tri_vertex_data(tris);
 
-            cmds.clear();
+            lines.clear();
+            tris.clear();
 
-            glBindVertexArray(VAO);
-            glDrawArrays(GL_LINES, 0, vertex_count);
+            glBindVertexArray(line_VAO);
+            glDrawArrays(GL_LINES, 0, line_vertex_count);
+            glBindVertexArray(tri_VAO);
+            glDrawArrays(GL_TRIANGLES, 0, tri_vertex_count);
 
+            glDepthMask(GL_TRUE);
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_CULL_FACE);
-            glEnable(GL_BLEND);
+            glBlendFunc(GL_ONE, GL_ZERO);
+          //  glEnable(GL_BLEND);
         }
     };
 
 
     void DebugRenderer::draw_line(glm::vec3 p1, glm::vec3 p2, glm::vec3 color)
     {
-        _impl->cmds.emplace_back(DebugVertex(p1, color));
-        _impl->cmds.emplace_back(DebugVertex(p2, color));
+        _impl->lines.emplace_back(DebugVertex(p1, color));
+        _impl->lines.emplace_back(DebugVertex(p2, color));
     }
 
     void DebugRenderer::draw_box(glm::vec3 center, glm::vec3 size, glm::vec3 color)
@@ -147,15 +192,17 @@ namespace cologne
 
     void DebugRenderer::draw_point(glm::vec3 p, glm::vec3 color)
     {
-        _impl->cmds.emplace_back(DebugVertex(p, color));
-        _impl->cmds.emplace_back(DebugVertex(p + glm::vec3(0.0f, 0.02f, 0.0f), color));
+        float size = 0.02f;
+        draw_line(p - glm::vec3(size, 0, 0), p + glm::vec3(size, 0, 0), color);
+        draw_line(p - glm::vec3(0, size, 0), p + glm::vec3(0, size, 0), color);
+        draw_line(p - glm::vec3(0, 0, size), p + glm::vec3(0, 0, size), color);
     }
 
     void DebugRenderer::draw_triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 color)
     {
-        draw_line(p1, p2, color);
-        draw_line(p2, p3, color);
-        draw_line(p3, p1, color);
+        _impl->tris.emplace_back(DebugVertex(p1, color));
+        _impl->tris.emplace_back(DebugVertex(p2, color));
+        _impl->tris.emplace_back(DebugVertex(p3, color));
     }
 
     void DebugRenderer::draw_aabb(glm::mat4 transform, glm::vec3 aabb_min, glm::vec3 aabb_max, glm::vec3 color)

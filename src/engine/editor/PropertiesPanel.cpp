@@ -48,7 +48,59 @@ namespace cologne
         }
         else if (meta.is_enum())
         {
-            ImGui::Text("TODO: enum");
+            bool is_open = false;
+            //get name of the enum itself
+            if (auto it = properties.find("name"_hs); it != properties.end())
+            {
+                //get preview name of each enum value
+                const char *preview = "";
+                for (auto [id, data]: meta.data())
+                {
+                    //this is the right enum value
+                    if (instance == data.get({}))
+                    {
+                        //get preview name of enum value
+                        ComponentRegistry::PropertiesMap data_props = {};
+                        if (auto *mp = static_cast<const ComponentRegistry::PropertiesMap *>(data.custom()))
+                        {
+                            data_props = *mp;
+                        }
+                        if (auto it = data_props.find("name"_hs); it != data_props.end())
+                        {
+                            auto name = it->second.cast<const char *>();
+                            preview = name;
+                        }
+                        break;
+                    }
+                }
+                is_open = ImGui::BeginCombo(it->second.cast<const char *>(), preview);
+            }
+
+            if (is_open)
+            {
+                //draw all enum values
+                for (auto [id, data]: meta.data())
+                {
+                    ComponentRegistry::PropertiesMap data_props = {};
+                    if (auto *mp = static_cast<const ComponentRegistry::PropertiesMap *>(data.custom()))
+                    {
+                        data_props = *mp;
+                    }
+
+                    if (auto it = data_props.find("name"_hs); it != data_props.end())
+                    {
+                        ImGui::PushID(guiID++);
+                        auto name = it->second.cast<const char *>();
+                        if (ImGui::Selectable(name, instance == data.get({}), 0))
+                        {
+                            instance.assign(data.get({}));
+                            changed = true;
+                        }
+                        ImGui::PopID();
+                    }
+                }
+                ImGui::EndCombo();
+            }
         }
         else
         {
@@ -132,7 +184,8 @@ namespace cologne
                     item.mesh_idx = mesh_index;
                     item.transform = entity.get_component<
                         WorldTransformComponent>();
-                    item.bones = std::vector<glm::mat4>(skinned_model->get_skeleton().get_bone_count(), glm::mat4(1.0f));
+                    item.bones = std::vector<
+                        glm::mat4>(skinned_model->get_skeleton().get_bone_count(), glm::mat4(1.0f));
                     Engine::get_renderer()->
                             submit_skinned_outline_render_item(item);
                 }

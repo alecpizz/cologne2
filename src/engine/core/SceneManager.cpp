@@ -4,6 +4,7 @@
 
 #include "SceneManager.h"
 
+#include <engine/navigation/Navigation.h>
 #include <engine/physics/Physics.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/scene/Scene.h>
@@ -67,6 +68,8 @@ namespace cologne
         {
             _active_scene->on_exit_edit_mode();
         }
+        Navigation::cleanup();
+        Navigation::init_navmesh(_editor_scene.get());
         _runtime_scene = Scene::copy(_editor_scene);
         _active_scene = _runtime_scene;
         _active_scene->on_enter_play_mode();

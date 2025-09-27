@@ -74,6 +74,7 @@ namespace cologne
         const char *_cancel_sound = ASSETS_PATH "sounds/menus/cancel.wav";
         uint32_t _global_window_flags = 0;
         bool _mouse_captured = false;
+        bool _draw_navmesh = false;
         bool _image_window_active = false;
         inline static bool _was_game_mode;
 #define DEFAULT_WIDTH 1600

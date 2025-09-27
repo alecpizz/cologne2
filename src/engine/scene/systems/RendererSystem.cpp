@@ -89,5 +89,16 @@ namespace cologne
                 Engine::get_renderer()->submit_skinned_render_item(item);
             }
         }
+
+        auto view4 = registry.view<BloodSplatterComponent, WorldTransformComponent>();
+        for (auto entity : view4)
+        {
+            auto [b, tr] = view4.get<BloodSplatterComponent, WorldTransformComponent>(entity);
+            BloodRenderItem item;
+            item.blood_component = b;
+            item.transform = tr;
+            item.entity_id = static_cast<uint32_t>(entity);
+            Engine::get_renderer()->submit_blood_render_item(item);
+        }
     }
 }

@@ -43,12 +43,6 @@ namespace cologne
         const auto& bones = skeleton.get_bones();
         for (size_t i = 0; i < bones.size(); i++)
         {
-            glm::vec3 scale = glm::vec3(global_transforms[i][0][0], global_transforms[i][1][1], global_transforms[i][2][2]);
-            glm::vec3 scale2 = glm::vec3(bones[i].inverse_bind_pose[0][0], bones[i].inverse_bind_pose[1][1], bones[i].inverse_bind_pose[2][2]);
-            if (scale.x > 1.1f)
-            {
-                LOG_INFO("Big bone %s", bones[i].name.c_str());
-            }
             _skinning_matrices[i] = global_transforms[i] * bones[i].inverse_bind_pose;
         }
     }

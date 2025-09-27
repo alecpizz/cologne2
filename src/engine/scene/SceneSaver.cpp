@@ -11,106 +11,6 @@
 #include <engine/asset_manager/AssetManager.h>
 #include "ComponentRegistry.h"
 
-namespace nlohmann
-{
-    template<>
-    struct adl_serializer<glm::vec2>
-    {
-        static void to_json(json &j, const glm::vec2 &vec)
-        {
-            j = {vec.x, vec.y};
-        }
-
-        static void from_json(const json &j, glm::vec2 &vec)
-        {
-            j.at(0).get_to(vec.x);
-            j.at(1).get_to(vec.y);
-        }
-    };
-
-    template<>
-    struct adl_serializer<glm::vec3>
-    {
-        static void to_json(json &j, const glm::vec3 &vec)
-        {
-            j = {vec.x, vec.y, vec.z};
-        }
-
-        static void from_json(const json &j, glm::vec3 &vec)
-        {
-            j.at(0).get_to(vec.x);
-            j.at(1).get_to(vec.y);
-            j.at(2).get_to(vec.z);
-        }
-    };
-
-    template<>
-    struct adl_serializer<glm::vec4>
-    {
-        static void to_json(json &j, const glm::vec4 &vec)
-        {
-            j = {vec.x, vec.y, vec.z, vec.w};
-        }
-
-        static void from_json(const json &j, glm::vec4 &vec)
-        {
-            j.at(0).get_to(vec.x);
-            j.at(1).get_to(vec.y);
-            j.at(2).get_to(vec.z);
-            j.at(3).get_to(vec.w);
-        }
-    };
-
-    template<>
-    struct adl_serializer<glm::quat>
-    {
-        static void to_json(json &j, const glm::quat &quat)
-        {
-            j = {quat.w, quat.x, quat.y, quat.z};
-        }
-
-        static void from_json(const json &j, glm::quat &quat)
-        {
-            j.at(0).get_to(quat.w);
-            j.at(1).get_to(quat.x);
-            j.at(2).get_to(quat.y);
-            j.at(3).get_to(quat.z);
-        }
-    };
-
-
-    template<>
-    struct adl_serializer<glm::mat4>
-    {
-        static void to_json(json &j, const glm::mat4 &mat)
-        {
-            j = {mat[0], mat[1], mat[2], mat[3]};
-        }
-
-        static void from_json(const json &j, glm::mat4 &mat)
-        {
-            j.at(0).get_to(mat[0]);
-            j.at(1).get_to(mat[1]);
-            j.at(2).get_to(mat[2]);
-            j.at(3).get_to(mat[3]);
-        }
-    };
-
-    template<>
-    struct adl_serializer<cologne::UUID>
-    {
-        static void to_json(json &j, const cologne::UUID &id)
-        {
-            j = id._uuid;
-        }
-
-        static void from_json(const json &j, cologne::UUID &id)
-        {
-            id = cologne::UUID(j.get<uint64_t>());
-        }
-    };
-}
-
 namespace cologne
 {
     SceneSaver::SceneSaver(Scene *scene)
@@ -119,33 +19,11 @@ namespace cologne
     }
 
 
-    template<typename T>
-    void save_property(nlohmann::json &j, const std::string &member_name, entt::meta_any &any)
-    {
-        T value = any.cast<T>();
-        if (member_name.empty())
-        {
-            j.emplace_back(value);
-        }
-        else
-        {
-            if (j.is_array())
-            {
-                j.emplace_back(value);
-            }
-            else
-            {
-                j[member_name] = value;
-            }
-        }
-    }
-
     void save_component(entt::meta_any instance, nlohmann::json &j)
     {
         using namespace entt::literals;
         for (auto [id, data]: instance.type().data())
         {
-            auto hash = data.type().info().hash();
             auto property_any = data.get(instance);
             std::string member_name;
             if (auto *mp = static_cast<const ComponentRegistry::PropertiesMap *>(data.custom()))
@@ -155,49 +33,9 @@ namespace cologne
                     member_name = *it->second.try_cast<const char *>();
                 }
             }
-            if (hash == entt::type_hash<glm::vec3>::value())
+            if (auto serialize_func = data.type().func("serialize"_hs))
             {
-                save_property<glm::vec3>(j, member_name, property_any);
-            }
-            else if (hash == entt::type_hash<glm::vec4>::value())
-            {
-                save_property<glm::vec4>(j, member_name, property_any);
-            }
-            else if (hash == entt::type_hash<glm::quat>::value())
-            {
-                save_property<glm::quat>(j, member_name, property_any);
-            }
-            else if (hash == entt::type_hash<cologne::UUID>::value())
-            {
-                save_property<UUID>(j, member_name, property_any);
-            }
-            else if (hash == entt::type_hash<glm::mat4>::value())
-            {
-                save_property<glm::mat4>(j, member_name, property_any);
-            }
-            else if (hash == entt::type_hash<float>::value())
-            {
-                save_property<float>(j, member_name, property_any);
-            }
-            else if (hash == entt::type_hash<bool>::value())
-            {
-                save_property<bool>(j, member_name, property_any);
-            }
-            else if (hash == entt::type_hash<std::string>::value())
-            {
-                save_property<std::string>(j, member_name, property_any);
-            }
-            else if (hash == entt::type_hash<int>::value())
-            {
-                save_property<int>(j, member_name, property_any);
-            }
-            else if (hash == entt::type_hash<uint64_t>::value())
-            {
-                save_property<uint64_t>(j, member_name, property_any);
-            }
-            else if (hash == entt::type_hash<uint32_t>::value())
-            {
-                save_property<uint32_t>(j, member_name, property_any);
+                serialize_func.invoke(instance, property_any.as_ref(),  entt::forward_as_meta(j).as_ref(), entt::forward_as_meta(member_name).as_ref());
             }
             else if (data.type().is_sequence_container())
             {
@@ -219,6 +57,20 @@ namespace cologne
                     j[member_name] = std::move(array_node);
                 }
             }
+            else if (data.type().is_enum())
+            {
+                if (auto func = data.type().func("to_underlying"_hs); func)
+                {
+                    if (auto underlying = func.invoke({}, property_any))
+                    {
+                        if (auto serialize_func = underlying.type().func("serialize"_hs); serialize_func)
+                        {
+                            serialize_func.invoke(instance, underlying.as_ref(),
+                                entt::forward_as_meta(j).as_ref(), entt::forward_as_meta(member_name).as_ref());
+                        }
+                    }
+                }
+            }
             else
             {
                 nlohmann::json object_node;
@@ -230,49 +82,10 @@ namespace cologne
 
     void load_property(const nlohmann::json &j, entt::meta_data &meta_data, entt::meta_any instance)
     {
-        auto hash = meta_data.type().info().hash();
-        if (hash == entt::type_hash<glm::vec3>::value())
+        using namespace entt::literals;
+        if (auto func = meta_data.type().func("deserialize"_hs); func)
         {
-            if (!meta_data.set(instance, j.get<glm::vec3>()))
-            {
-                LOG_ERROR("couldn't set meta data");
-            }
-        }
-        else if (hash == entt::type_hash<glm::vec4>::value())
-        {
-            meta_data.set(instance, j.get<glm::vec4>());
-        }
-        else if (hash == entt::type_hash<glm::quat>::value())
-        {
-            meta_data.set(instance, j.get<glm::quat>());
-        }
-        else if (hash == entt::type_hash<UUID>::value())
-        {
-            meta_data.set(instance, j.get<UUID>());
-        }
-        else if (hash == entt::type_hash<glm::mat4>::value())
-        {
-            meta_data.set(instance, j.get<glm::mat4>());
-        }
-        else if (hash == entt::type_hash<float>::value())
-        {
-            meta_data.set(instance, j.get<float>());
-        }
-        else if (hash == entt::type_hash<bool>::value())
-        {
-            meta_data.set(instance, j.get<bool>());
-        }
-        else if (hash == entt::type_hash<std::string>::value())
-        {
-            meta_data.set(instance, j.get<std::string>());
-        }
-        else if (hash == entt::type_hash<int>::value())
-        {
-            meta_data.set(instance, j.get<int>());
-        }
-        else if (hash == entt::type_hash<uint64_t>::value())
-        {
-            meta_data.set(instance, j.get<uint64_t>());
+            func.invoke(instance, entt::forward_as_meta(j).as_ref(), entt::forward_as_meta(meta_data).as_ref(), entt::forward_as_meta(instance).as_ref());
         }
         else if (meta_data.type().is_sequence_container())
         {
@@ -291,6 +104,17 @@ namespace cologne
         }
         else if (meta_data.type().is_enum())
         {
+            if (auto underlying_func = meta_data.type().func("to_underlying"_hs); underlying_func)
+            {
+                auto prop = meta_data.get(instance);
+                if (auto underlying = underlying_func.invoke({}, prop))
+                {
+                    if (auto deserialize_func = underlying.type().func("deserialize"_hs); deserialize_func)
+                    {
+                        deserialize_func.invoke(instance, entt::forward_as_meta(j).as_ref(), entt::forward_as_meta(meta_data).as_ref(), entt::forward_as_meta(instance).as_ref());
+                    }
+                }
+            }
         }
         else
         {
@@ -372,7 +196,7 @@ namespace cologne
                     }
                     else
                     {
-                        save_component(instance, j_component_data);
+                        save_component(instance.as_ref(), j_component_data);
                     }
                     j_components[name] = j_component_data;
                 }
@@ -468,5 +292,4 @@ namespace cologne
     void SceneSaver::deserialize_runtime(const std::string &path)
     {
     }
-
 }

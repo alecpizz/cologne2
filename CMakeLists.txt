@@ -55,6 +55,7 @@ add_subdirectory(vendor/freetype)
 add_subdirectory(vendor/imguizmo)
 add_subdirectory(vendor/libsquish)
 add_subdirectory(vendor/json)
+add_subdirectory(vendor/recast)
 
 
 FetchContent_Declare(
@@ -143,6 +144,7 @@ target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURC
 target_precompile_headers("${CMAKE_PROJECT_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/gpch.h")
 target_include_directories(${CMAKE_PROJECT_NAME}  PUBLIC ${JoltPhysics_SOURCE_DIR})
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm_static spdlog::spdlog_header_only
-        stb_image stb_image_resize stb_truetype nlohmann_json libsquish::Squish imgui ImGuizmo SDL3-static assimp Jolt freetype SDL3_mixer-static)
+        stb_image stb_image_resize stb_truetype nlohmann_json libsquish::Squish imgui ImGuizmo SDL3-static assimp Jolt freetype SDL3_mixer-static
+        RecastNavigation::Recast RecastNavigation::Detour RecastNavigation::DetourCrowd RecastNavigation::DebugUtils)
 
 

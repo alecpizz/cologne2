@@ -7,6 +7,7 @@
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/core/Engine.h>
 #include <engine/core/UUID.h>
+#include <engine/navigation/Navigation.h>
 #include <engine/physics/Physics.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Light.h>
@@ -26,6 +27,7 @@
 #include "systems/RendererSystem.h"
 #include "systems/System.h"
 #include "systems/TransformSystem.h"
+#include "systems/NPCSystem.h"
 
 namespace cologne
 {
@@ -168,6 +170,9 @@ namespace cologne
         Engine::get_renderer()->clear_lights();
         setup_entity_map();
         re_calculate_bounds();
+        //TEMP, bad org
+        Navigation::cleanup();
+        Navigation::init_navmesh(this);
     }
 
     void Scene::on_exit_edit_mode()
@@ -503,9 +508,10 @@ namespace cologne
         add_system(std::make_unique<RagdollSystem>());
         add_system(std::make_unique<BulletSystem>());
         add_system(std::make_unique<PhysicsSystem>());
-        add_system(std::make_unique<RendererSystem>());
+        add_system(std::make_unique<NPCSystem>());
         add_system(std::make_unique<EditorCameraControllerSystem>());
         add_system(std::make_unique<PlayerControllerSystem>());
         add_system(std::make_unique<InteractionSystem>());
+        add_system(std::make_unique<RendererSystem>());
     }
 }

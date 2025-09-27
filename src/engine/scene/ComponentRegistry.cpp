@@ -36,14 +36,13 @@ registry->remove<T>(entity); }>("remove"_hs) \
 
 
 #define REFLECT_ENUM(T) \
-        entt::meta_factory<T>()
+        entt::meta_factory<T>() \
+        .func<[](T value) {return static_cast<std::underlying_type_t<T>>(value);}>("to_underlying"_hs)
 #define ENUMERATOR(E, Member, ...) \
         .data<E::Member>(#Member##_hs) \
         .custom<PropertiesMap>(PropertiesMap{{"name"_hs, #Member} __VA_OPT__(, __VA_ARGS__)})
 
     static std::map<entt::id_type, std::string> component_type_map;
-
-
 
     const std::map<entt::id_type, std::string> &get_component_map()
     {
@@ -80,7 +79,7 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 REGISTER_PROPERTY(TransformComponent, scale);
 
         entt::meta_factory<UUID>().conv<uint64_t>()
-            .data<&UUID::_uuid>("_uuid"_hs);
+                .data<&UUID::_uuid>("_uuid"_hs);
 
         REGISTER_COMPONENT(IDComponent, "IDComponent", NO_EDITOR)
                 REGISTER_PROPERTY(IDComponent, id);
@@ -166,7 +165,7 @@ registry->remove<T>(entity); }>("remove"_hs) \
         REGISTER_COMPONENT(AnimatorComponent, "AnimComponent", EDITOR_READ_WRITE)
                 REGISTER_PROPERTY(AnimatorComponent, base_clip_name)
                 REGISTER_PROPERTY(AnimatorComponent, one_shot_name);
-            REGISTER_COMPONENT(RagdollComponent, "RagdollComponent", EDITOR_READ_ONLY);
+        REGISTER_COMPONENT(RagdollComponent, "RagdollComponent", EDITOR_READ_ONLY);
 
         REGISTER_COMPONENT(HideInEditorComponent, "HideInEditorComponent", NO_EDITOR);
         REGISTER_COMPONENT(EditorCameraComponent, "EditorCameraComponent", NO_EDITOR);
@@ -188,7 +187,30 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 ENUMERATOR(LightComponent::LightType, Point)
                 ENUMERATOR(LightComponent::LightType, Spot);
 
+        REGISTER_COMPONENT(NPCCrowdMemberComponent, "NPCCrowdMemberComponent", EDITOR_READ_WRITE)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, offset)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, max_acceleration)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, max_speed)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, detection_radius)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, attack_range)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, attack_cooldown)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, current_state)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, idle_clip_name)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, run_clip_name)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, attack_clip_name)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, hit_clip_name);
+
+        REFLECT_ENUM(NPCCrowdMemberComponent::State)
+                ENUMERATOR(NPCCrowdMemberComponent::State, IDLE)
+                ENUMERATOR(NPCCrowdMemberComponent::State, CHASING)
+                ENUMERATOR(NPCCrowdMemberComponent::State, ATTACKING)
+                ENUMERATOR(NPCCrowdMemberComponent::State, DYING);
         REGISTER_COMPONENT(ParentComponent, "ParentComponent", NO_EDITOR)
                 REGISTER_PROPERTY(ParentComponent, children);
+
+        REGISTER_COMPONENT(BloodSplatterComponent, "BloodSplatterComponent", EDITOR_READ_WRITE)
+                REGISTER_PROPERTY(BloodSplatterComponent, mesh_name)
+                REGISTER_PROPERTY(BloodSplatterComponent, position_texture_name)
+                REGISTER_PROPERTY(BloodSplatterComponent, normal_texture_name);
     }
 }

@@ -28,13 +28,14 @@ namespace cologne
 
         Renderer &operator=(const Renderer &) = delete;
 
-        void draw_line(glm::vec3 p1, glm::vec3 p2, glm::vec3 color);
+        static void draw_line(glm::vec3 p1, glm::vec3 p2, glm::vec3 color);
 
         void draw_box(glm::vec3 center, glm::vec3 size, glm::vec3 color);
 
         void draw_sphere(glm::vec3 center, float radius, glm::vec3 color);
 
-        void draw_triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 color);
+        static void draw_triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 color);
+        static void draw_point(glm::vec3 p1, glm::vec3 color);
 
         void draw_aabb(glm::mat4 transform, glm::vec3 min, glm::vec3 max, glm::vec3 color);
 
@@ -57,6 +58,8 @@ namespace cologne
         void submit_render_item(RenderItem item);
 
         void submit_skinned_render_item(SkinnedRenderItem item);
+
+        void submit_blood_render_item(BloodRenderItem item);
 
         void submit_outline_render_item(RenderItem item);
 
@@ -133,6 +136,8 @@ namespace cologne
 
         void init_shadow();
 
+        void blood_pass();
+
         void dir_shadow_pass();
 
         void shadow_pass();
@@ -192,6 +197,7 @@ namespace cologne
         std::vector<RenderItem> _render_items;
         std::vector<SkinnedRenderItem> _skinned_render_items;
         std::vector<RenderItem> _outline_render_items;
+        std::vector<BloodRenderItem> _blood_render_items;
         std::vector<SkinnedRenderItem> _outline_skinned_render_items;
         std::vector<MultiDrawElementsCommand> _render_cmds;
         std::vector<MultiDrawElementsCommand> _skinned_render_cmds;

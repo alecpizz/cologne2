@@ -1,76 +1,126 @@
 #pragma once
-#include <engine/Types.h>
-#include "RagdollCreateInfo.h"
+
+namespace JPH
+{
+    class CharacterVirtual;
+    class Shape;
+    class Ragdoll;
+    class BodyID;
+    class PhysicsSystem;
+    class JobSystemThreadPool;
+    class TempAllocatorImpl;
+}
+
 
 namespace cologne
 {
+    class Skeleton;
+    struct PlayerMovementCommand;
+    struct PlayerCreateInfo;
+    struct PhysicsPlayer;
     class Mesh;
     struct RaycastHitInfo;
     struct TransformComponent;
     class Entity;
 }
 
-namespace cologne::Physics
+namespace Layers
 {
-    void init();
+    static constexpr uint32_t NON_MOVING = 0;
+    static constexpr uint32_t MOVING = 1;
+    static constexpr uint32_t PLAYER = 2;
+    static constexpr uint32_t NUM_LAYERS = 3;
+}
 
-    void update(float dt);
+namespace cologne
+{
+    class Physics
+    {
+    public:
+        static void init();
 
-    void draw();
+        static void update(float dt);
 
-    static constexpr uint8_t NON_MOVING(0);
-    static constexpr uint8_t MOVING(1);
-    static constexpr uint8_t PLAYER(2);
+        static void draw();
 
-    uint32_t create_player(PlayerCreateInfo &info);
+        static constexpr uint8_t NON_MOVING = 0;
 
-    void move_player(uint32_t id, PlayerMovementCommand cmd);
+        static constexpr uint8_t MOVING = 1;
 
-    void teleport_player(uint32_t id, glm::vec3 position);
+        static constexpr uint8_t PLAYER = 2;
 
-    bool player_is_grounded(uint32_t id);
+        static uint32_t create_player(PlayerCreateInfo &info);
 
-    bool player_is_supported(uint32_t id);
+        static void move_player(uint32_t id, PlayerMovementCommand cmd);
 
-    bool slope_to_steep_for_player(uint32_t id);
+        static void teleport_player(uint32_t id, glm::vec3 position);
 
-    glm::vec3 get_player_position(uint32_t id);
+        static bool player_is_grounded(uint32_t id);
 
-    glm::vec3 get_player_velocity(uint32_t id);
+        static bool player_is_supported(uint32_t id);
 
-    glm::vec3 get_gravity();
+        static bool slope_to_steep_for_player(uint32_t id);
 
-    glm::vec3 get_player_ground_velocity(uint32_t id);
+        static glm::vec3 get_player_position(uint32_t id);
 
-    uint32_t create_static_mesh_collider(Entity entity, TransformComponent transform,
-                                         const Mesh& mesh);
+        static glm::vec3 get_player_velocity(uint32_t id);
 
-    uint32_t create_infinite_ground_plane(glm::vec3 plane_normal, float constant);
+        static glm::vec3 get_gravity();
 
-    void sync_transform(Entity entity);
+        static glm::vec3 get_player_ground_velocity(uint32_t id);
 
-    bool raycast(glm::vec3 origin, glm::vec3 direction, float max_distance, uint32_t layers, RaycastHitInfo &info);
+        static uint32_t create_static_mesh_collider(Entity entity, TransformComponent transform,
+                                                    const Mesh &mesh);
 
-    // void create_static_mesh_collider(Model& model);
-    void delete_all_bodies();
+        static uint32_t create_infinite_ground_plane(glm::vec3 plane_normal, float constant);
 
-    void cleanup();
+        static void sync_transform(Entity entity);
 
-    void destroy_body(uint32_t body_id);
+        static bool raycast(glm::vec3 origin, glm::vec3 direction, float max_distance, uint32_t layers,
+                            RaycastHitInfo &info);
 
-    void add_impulse_force_at_position(uint32_t body_id, glm::vec3 position, glm::vec3 force, bool ignore_mass = false);
+        // void create_static_mesh_collider(Model& model);
+        static void delete_all_bodies();
 
-    void disable_body(uint32_t body_id);
+        static void cleanup();
 
-    void enable_body(uint32_t body_id);
+        static void destroy_body(uint32_t body_id);
 
-    uint32_t create_ragdoll(Entity entity, std::unordered_map<std::string, uint32_t> &out_map, const Skeleton& skeleton, const std::vector<glm::mat4>& global_bind_transforms);
-    void make_ragdoll_kinematic(uint32_t ragdoll_id);
-    void make_ragdoll_active(uint32_t ragdoll_id);
-    void sync_ragdoll(uint32_t ragdoll_id, const std::unordered_map<std::string, glm::mat4>& ragdoll_transforms);
-    glm::mat4 get_rigidbody_transform(uint32_t body_id);
+        static void add_impulse_force_at_position(uint32_t body_id, glm::vec3 position, glm::vec3 force,
+                                                  bool ignore_mass = false);
 
-    uint32_t create_rigidbody(Entity entity);
+        static void disable_body(uint32_t body_id);
 
-    void destroy_entity(Entity entity);
+        static void enable_body(uint32_t body_id);
+
+        static uint32_t create_ragdoll(Entity entity, std::unordered_map<std::string, uint32_t> &out_map,
+                                       const Skeleton &skeleton, const std::vector<glm::mat4> &global_bind_transforms);
+
+        static void make_ragdoll_kinematic(uint32_t ragdoll_id);
+
+        static void make_ragdoll_active(uint32_t ragdoll_id);
+
+        static void sync_ragdoll(uint32_t ragdoll_id,
+                                 const std::unordered_map<std::string, glm::mat4> &ragdoll_transforms);
+
+        static glm::mat4 get_rigidbody_transform(uint32_t body_id);
+
+        static uint32_t create_rigidbody(Entity entity);
+
+        static void destroy_entity(Entity entity);
+
+    private:
+        static void update_players(float dt);
+        static void cleanup_players();
+
+        static JPH::TempAllocatorImpl *_temp_allocator;
+        static JPH::JobSystemThreadPool *_job_system;
+        static JPH::PhysicsSystem _physics_system;
+        static std::vector<JPH::BodyID> _colliders_static;
+        static std::unordered_map<JPH::BodyID, Entity> _entity_to_collider_map;
+        static std::unordered_map<uint32_t, PhysicsPlayer> _physics_players;
+        static std::vector<JPH::Ragdoll *> _ragdolls;
+
+        static bool _drawing;
+    };
 }

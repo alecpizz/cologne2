@@ -1,4 +1,5 @@
 #pragma once
+#include <engine/animation/Skeleton.h>
 #include <engine/animation/SkeletonPose.h>
 #include <engine/core/UUID.h>
 #include <engine/physics/Physics.h>
@@ -9,6 +10,7 @@
 
 namespace cologne
 {
+    //todo: split into multple files
     struct IDComponent
     {
         UUID id;
@@ -315,6 +317,10 @@ namespace cologne
 
         void play_one_shot(const std::string& name)
         {
+            if (current_clip_name == name)
+            {
+                return;
+            }
             one_shot_name = name;
             current_clip_name = one_shot_name;
             current_time = 0.0f;
@@ -337,5 +343,38 @@ namespace cologne
         void to_kinematic();
 
         void take_ragdoll_hit(glm::vec3 point, glm::vec3 normal) const;
+    };
+
+    struct NPCCrowdMemberComponent
+    {
+        enum State : int //todo: enum serialization rather than just ints everywhere
+        {
+            IDLE,
+            CHASING,
+            ATTACKING,
+            DYING
+        };
+        int agent_id = -1;
+        glm::vec3 offset = glm::vec3(0.0f, -0.15f, 0.0f);
+        float max_acceleration = 3.5f;
+        float max_speed = 1.0f;
+        float detection_radius = 20.0f;
+        float attack_range = 1.5f;
+        float attack_cooldown = 1.2f;
+        State current_state = CHASING;
+        float state_timer = 0.0f;
+
+        //todo: handles PLEASE
+        std::string idle_clip_name;
+        std::string run_clip_name;
+        std::string attack_clip_name;
+        std::string hit_clip_name;
+    };
+
+    struct BloodSplatterComponent
+    {
+        std::string mesh_name;
+        std::string position_texture_name;
+        std::string normal_texture_name;
     };
 }

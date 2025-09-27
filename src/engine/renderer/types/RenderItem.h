@@ -29,4 +29,11 @@ namespace cologne
         std::vector<glm::mat4> bones;
         uint32_t entity_id = entt::null;
     };
+
+    struct BloodRenderItem
+    {
+        BloodSplatterComponent blood_component = {};
+        WorldTransformComponent transform = {};
+        uint32_t entity_id = entt::null;
+    };
 }
