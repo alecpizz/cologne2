@@ -19,6 +19,7 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <engine/navigation/Navigation.h>
+#include <engine/scene/Serialization.h>
 
 #include "EventManager.h"
 #include "SceneManager.h"
@@ -145,6 +146,7 @@ namespace cologne
         // Audio::play_music(RESOURCES_PATH "sounds/music2.mp3");
         // Audio::set_music_volume(12);
         ComponentRegistry::register_components();
+        Serialization::init();
         //TODO: move this to scene manager?
         if (FileUtil::file_exists(RESOURCES_PATH "last_saved_scene.json"))
         {

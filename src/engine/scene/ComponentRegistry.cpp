@@ -44,7 +44,6 @@ registry->remove<T>(entity); }>("remove"_hs) \
 
     static std::map<entt::id_type, std::string> component_type_map;
 
-
     const std::map<entt::id_type, std::string> &get_component_map()
     {
         return component_type_map;
