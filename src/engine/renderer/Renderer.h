@@ -59,6 +59,8 @@ namespace cologne
 
         void submit_skinned_render_item(SkinnedRenderItem item);
 
+        void submit_blood_render_item(BloodRenderItem item);
+
         void submit_outline_render_item(RenderItem item);
 
         void submit_skinned_outline_render_item(SkinnedRenderItem item);
@@ -134,6 +136,8 @@ namespace cologne
 
         void init_shadow();
 
+        void blood_pass();
+
         void dir_shadow_pass();
 
         void shadow_pass();
@@ -193,6 +197,7 @@ namespace cologne
         std::vector<RenderItem> _render_items;
         std::vector<SkinnedRenderItem> _skinned_render_items;
         std::vector<RenderItem> _outline_render_items;
+        std::vector<BloodRenderItem> _blood_render_items;
         std::vector<SkinnedRenderItem> _outline_skinned_render_items;
         std::vector<MultiDrawElementsCommand> _render_cmds;
         std::vector<MultiDrawElementsCommand> _skinned_render_cmds;

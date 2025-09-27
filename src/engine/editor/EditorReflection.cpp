@@ -329,6 +329,7 @@ namespace cologne
 
     static bool write_mesh(MeshComponent &mesh, const PropertiesMap &properties)
     {
+        bool changed = false;
         std::vector<const char *> mesh_names;
         for (auto &mesh: AssetManager::get_meshes())
         {
@@ -340,9 +341,12 @@ namespace cologne
         if (ImGui::Combo("Mesh", &idx, mesh_names.data(), mesh_names.size()))
         {
             mesh.mesh_name = mesh_names[idx];
-            return true;
+            changed = true;
         }
-        return false;
+        ImGui::TextUnformatted("Stats");
+        ImGui::Text("Verts: %d", AssetManager::get_mesh_by_name(mesh.mesh_name)->get_vertices().size());
+        ImGui::Text("Indices: %d", AssetManager::get_mesh_by_name(mesh.mesh_name)->get_indices_count());
+        return changed;
     }
 
     static bool write_convex_mesh(ConvexMeshColliderComponent &mesh, const PropertiesMap &properties)

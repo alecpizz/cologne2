@@ -370,4 +370,11 @@ namespace cologne
         std::string attack_clip_name;
         std::string hit_clip_name;
     };
+
+    struct BloodSplatterComponent
+    {
+        std::string mesh_name;
+        std::string position_texture_name;
+        std::string normal_texture_name;
+    };
 }

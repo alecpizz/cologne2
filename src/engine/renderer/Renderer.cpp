@@ -197,6 +197,11 @@ namespace cologne
         }
     }
 
+    void Renderer::submit_blood_render_item(BloodRenderItem item)
+    {
+        _blood_render_items.emplace_back(item);
+    }
+
     void Renderer::submit_outline_render_item(RenderItem item)
     {
         _outline_render_items.emplace_back(item);
@@ -521,6 +526,7 @@ namespace cologne
         shadow_pass();
         voxelize_scene();
         geometry_pass();
+
         skybox_pass();
         indirect_pass();
         bloom_pass();
@@ -550,6 +556,7 @@ namespace cologne
         _outline_skinned_render_items.clear();
         _model_AABBs.clear();
         _skinned_AABBs.clear();
+        _blood_render_items.clear();
     }
 
     void Renderer::window_resized(uint32_t width, uint32_t height)
