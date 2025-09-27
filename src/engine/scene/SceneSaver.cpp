@@ -11,106 +11,6 @@
 #include <engine/asset_manager/AssetManager.h>
 #include "ComponentRegistry.h"
 
-namespace nlohmann
-{
-    template<>
-    struct adl_serializer<glm::vec2>
-    {
-        static void to_json(json &j, const glm::vec2 &vec)
-        {
-            j = {vec.x, vec.y};
-        }
-
-        static void from_json(const json &j, glm::vec2 &vec)
-        {
-            j.at(0).get_to(vec.x);
-            j.at(1).get_to(vec.y);
-        }
-    };
-
-    template<>
-    struct adl_serializer<glm::vec3>
-    {
-        static void to_json(json &j, const glm::vec3 &vec)
-        {
-            j = {vec.x, vec.y, vec.z};
-        }
-
-        static void from_json(const json &j, glm::vec3 &vec)
-        {
-            j.at(0).get_to(vec.x);
-            j.at(1).get_to(vec.y);
-            j.at(2).get_to(vec.z);
-        }
-    };
-
-    template<>
-    struct adl_serializer<glm::vec4>
-    {
-        static void to_json(json &j, const glm::vec4 &vec)
-        {
-            j = {vec.x, vec.y, vec.z, vec.w};
-        }
-
-        static void from_json(const json &j, glm::vec4 &vec)
-        {
-            j.at(0).get_to(vec.x);
-            j.at(1).get_to(vec.y);
-            j.at(2).get_to(vec.z);
-            j.at(3).get_to(vec.w);
-        }
-    };
-
-    template<>
-    struct adl_serializer<glm::quat>
-    {
-        static void to_json(json &j, const glm::quat &quat)
-        {
-            j = {quat.w, quat.x, quat.y, quat.z};
-        }
-
-        static void from_json(const json &j, glm::quat &quat)
-        {
-            j.at(0).get_to(quat.w);
-            j.at(1).get_to(quat.x);
-            j.at(2).get_to(quat.y);
-            j.at(3).get_to(quat.z);
-        }
-    };
-
-
-    template<>
-    struct adl_serializer<glm::mat4>
-    {
-        static void to_json(json &j, const glm::mat4 &mat)
-        {
-            j = {mat[0], mat[1], mat[2], mat[3]};
-        }
-
-        static void from_json(const json &j, glm::mat4 &mat)
-        {
-            j.at(0).get_to(mat[0]);
-            j.at(1).get_to(mat[1]);
-            j.at(2).get_to(mat[2]);
-            j.at(3).get_to(mat[3]);
-        }
-    };
-
-    template<>
-    struct adl_serializer<cologne::UUID>
-    {
-        static void to_json(json &j, const cologne::UUID &id)
-        {
-            j = id._uuid;
-        }
-
-        static void from_json(const json &j, cologne::UUID &id)
-        {
-            id = cologne::UUID(j.get<uint64_t>());
-        }
-    };
-}
-
 namespace cologne
 {
     SceneSaver::SceneSaver(Scene *scene)
@@ -118,33 +18,12 @@ namespace cologne
         _scene = scene;
     }
 
-    template<typename T>
-    void save_property(nlohmann::json &j, const std::string &member_name, entt::meta_any &any)
-    {
-        T value = any.cast<T>();
-        if (member_name.empty())
-        {
-            j.emplace_back(value);
-        }
-        else
-        {
-            if (j.is_array())
-            {
-                j.emplace_back(value);
-            }
-            else
-            {
-                j[member_name] = value;
-            }
-        }
-    }
 
     void save_component(entt::meta_any instance, nlohmann::json &j)
     {
         using namespace entt::literals;
         for (auto [id, data]: instance.type().data())
         {
-            auto hash = data.type().info().hash();
             auto property_any = data.get(instance);
             std::string member_name;
             if (auto *mp = static_cast<const ComponentRegistry::PropertiesMap *>(data.custom()))
@@ -180,7 +59,17 @@ namespace cologne
             }
             else if (data.type().is_enum())
             {
-                LOG_INFO("ENUM IMPLEMET ME");
+                if (auto func = data.type().func("to_underlying"_hs); func)
+                {
+                    if (auto underlying = func.invoke({}, property_any))
+                    {
+                        if (auto serialize_func = underlying.type().func("serialize"_hs); serialize_func)
+                        {
+                            serialize_func.invoke(instance, underlying.as_ref(),
+                                entt::forward_as_meta(j).as_ref(), entt::forward_as_meta(member_name).as_ref());
+                        }
+                    }
+                }
             }
             else
             {
