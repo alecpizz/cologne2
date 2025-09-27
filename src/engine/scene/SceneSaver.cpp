@@ -193,49 +193,10 @@ namespace cologne
 
     void load_property(const nlohmann::json &j, entt::meta_data &meta_data, entt::meta_any instance)
     {
-        auto hash = meta_data.type().info().hash();
-        if (hash == entt::type_hash<glm::vec3>::value())
+        using namespace entt::literals;
+        if (auto func = meta_data.type().func("deserialize"_hs); func)
         {
-            if (!meta_data.set(instance, j.get<glm::vec3>()))
-            {
-                LOG_ERROR("couldn't set meta data");
-            }
-        }
-        else if (hash == entt::type_hash<glm::vec4>::value())
-        {
-            meta_data.set(instance, j.get<glm::vec4>());
-        }
-        else if (hash == entt::type_hash<glm::quat>::value())
-        {
-            meta_data.set(instance, j.get<glm::quat>());
-        }
-        else if (hash == entt::type_hash<UUID>::value())
-        {
-            meta_data.set(instance, j.get<UUID>());
-        }
-        else if (hash == entt::type_hash<glm::mat4>::value())
-        {
-            meta_data.set(instance, j.get<glm::mat4>());
-        }
-        else if (hash == entt::type_hash<float>::value())
-        {
-            meta_data.set(instance, j.get<float>());
-        }
-        else if (hash == entt::type_hash<bool>::value())
-        {
-            meta_data.set(instance, j.get<bool>());
-        }
-        else if (hash == entt::type_hash<std::string>::value())
-        {
-            meta_data.set(instance, j.get<std::string>());
-        }
-        else if (hash == entt::type_hash<int>::value())
-        {
-            meta_data.set(instance, j.get<int>());
-        }
-        else if (hash == entt::type_hash<uint64_t>::value())
-        {
-            meta_data.set(instance, j.get<uint64_t>());
+            func.invoke(instance, entt::forward_as_meta(j).as_ref(), entt::forward_as_meta(meta_data).as_ref(), entt::forward_as_meta(instance).as_ref());
         }
         else if (meta_data.type().is_sequence_container())
         {
@@ -254,6 +215,7 @@ namespace cologne
         }
         else if (meta_data.type().is_enum())
         {
+            LOG_INFO("ENUM IMPLEMTN ME");
         }
         else
         {

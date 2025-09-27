@@ -111,7 +111,7 @@ namespace nlohmann
 namespace cologne::Serialization
 {
     template<typename T>
-    void serialize(entt::meta_any any, nlohmann::json &j, const std::string& member_name)
+    void serialize(entt::meta_any any, nlohmann::json &j, const std::string &member_name)
     {
         T value = any.cast<T>();
         if (member_name.empty())
@@ -132,7 +132,7 @@ namespace cologne::Serialization
     }
 
     template<typename T>
-    void deserialize(const nlohmann::json &j, entt::meta_data &meta_data, entt::meta_any instance)
+    void deserialize(const nlohmann::json &j, entt::meta_data &meta_data, entt::meta_any &instance)
     {
         meta_data.set(instance, j.get<T>());
     }
@@ -149,14 +149,6 @@ namespace cologne::Serialization
           serialize<T>(val, j, member_name); \
       }>("serialize"_hs) \
       .func<deserialize<T>>("deserialize"_hs)
-
-        // entt::meta_factory<glm::vec3>()
-        //         .func<[](glm::vec3 &val, nlohmann::json &j)
-        //         {
-        //             serialize<glm::vec3>(val, j);
-        //         }>("serialize"_hs)
-        //         .func<deserialize<glm::vec3> >("deserialize"_hs);
-
         MAKE_SERIALIZERS(glm::vec3);
         MAKE_SERIALIZERS(glm::vec2);
         MAKE_SERIALIZERS(glm::quat);
