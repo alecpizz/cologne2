@@ -104,7 +104,17 @@ namespace cologne
         }
         else if (meta_data.type().is_enum())
         {
-            LOG_INFO("ENUM IMPLEMTN ME");
+            if (auto underlying_func = meta_data.type().func("to_underlying"_hs); underlying_func)
+            {
+                auto prop = meta_data.get(instance);
+                if (auto underlying = underlying_func.invoke({}, prop))
+                {
+                    if (auto deserialize_func = underlying.type().func("deserialize"_hs); deserialize_func)
+                    {
+                        deserialize_func.invoke(instance, entt::forward_as_meta(j).as_ref(), entt::forward_as_meta(meta_data).as_ref(), entt::forward_as_meta(instance).as_ref());
+                    }
+                }
+            }
         }
         else
         {
