@@ -209,6 +209,12 @@ namespace cologne
                     break;
             }
         }
+
+        if (entity.has_component<DecalComponent>())
+        {
+            auto transform = entity.get_component<WorldTransformComponent>();
+            Engine::get_renderer()->draw_box(transform, glm::vec3(-0.5f), glm::vec3(0.5f), glm::vec3(1.0f));
+        }
     }
 
     void Editor::build_properties_panel()

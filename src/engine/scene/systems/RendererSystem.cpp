@@ -102,5 +102,16 @@ namespace cologne
             item.entity_id = static_cast<uint32_t>(entity);
             Engine::get_renderer()->submit_blood_render_item(item);
         }
+
+        auto view5 = registry.view<DecalComponent, WorldTransformComponent>();
+        for (auto entity : view5)
+        {
+            auto [d, tr] = view5.get<DecalComponent, WorldTransformComponent>(entity);
+            DecalRenderItem item;
+            item.decal_component = d;
+            item.transform = tr;
+            item.entity_id = static_cast<uint32_t>(entity);
+            Engine::get_renderer()->submit_decal_render_item(item);
+        }
     }
 }

@@ -139,6 +139,10 @@ namespace cologne::AssetManager
                 auto& texture = special_textures.emplace_back(FileUtil::import_exr(texture_path.path));
                 texture.set_name(texture_path.name);
             }
+            if (texture_path.ext == "png")
+            {
+
+            }
         }
 
         scope = DebugScope("load models");

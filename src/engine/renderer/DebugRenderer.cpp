@@ -8,7 +8,6 @@
 
 namespace cologne
 {
-
     struct DebugCmd
     {
         glm::vec3 p1, p2;
@@ -35,7 +34,7 @@ namespace cologne
             shader = create_ref<Shader>(RESOURCES_PATH "shaders/debug.vert", RESOURCES_PATH "shaders/debug.frag");
         }
 
-        void update_line_vertex_data(std::vector<DebugVertex>& vertices)
+        void update_line_vertex_data(std::vector<DebugVertex> &vertices)
         {
             if (line_VAO == 0)
             {
@@ -63,7 +62,6 @@ namespace cologne
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             line_vertex_count = static_cast<uint32_t>(vertices.size());
         }
-
 
 
         void update_tri_vertex_data(std::vector<DebugVertex> &vertices)
@@ -97,7 +95,6 @@ namespace cologne
 
         void draw()
         {
-
             if (!is_drawing)
             {
                 lines.clear();
@@ -134,7 +131,7 @@ namespace cologne
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_CULL_FACE);
             glBlendFunc(GL_ONE, GL_ZERO);
-          //  glEnable(GL_BLEND);
+            //  glEnable(GL_BLEND);
         }
     };
 
@@ -145,8 +142,39 @@ namespace cologne
         _impl->lines.emplace_back(DebugVertex(p2, color));
     }
 
-    void DebugRenderer::draw_box(glm::vec3 center, glm::vec3 size, glm::vec3 color)
+    void DebugRenderer::draw_box(glm::mat4 transform, glm::vec3 min, glm::vec3 max, glm::vec3 color)
     {
+        glm::vec3 corners[8] =
+        {
+            glm::vec3(min.x, min.y, min.z),
+            glm::vec3(max.x, min.y, min.z),
+            glm::vec3(max.x, max.y, min.z),
+            glm::vec3(min.x, max.y, min.z),
+            glm::vec3(min.x, min.y, max.z),
+            glm::vec3(max.x, min.y, max.z),
+            glm::vec3(max.x, max.y, max.z),
+            glm::vec3(min.x, max.y, max.z)
+        };
+
+        for (int i = 0; i < 8; ++i)
+        {
+            corners[i] = transform * glm::vec4(corners[i], 1.0f);
+        }
+
+        draw_line(corners[0], corners[1], color);
+        draw_line(corners[1], corners[5], color);
+        draw_line(corners[5], corners[4], color);
+        draw_line(corners[4], corners[0], color);
+
+        draw_line(corners[3], corners[2], color);
+        draw_line(corners[2], corners[6], color);
+        draw_line(corners[6], corners[7], color);
+        draw_line(corners[7], corners[3], color);
+
+        draw_line(corners[0], corners[3], color);
+        draw_line(corners[1], corners[2], color);
+        draw_line(corners[4], corners[7], color);
+        draw_line(corners[5], corners[6], color);
     }
 
     void DebugRenderer::draw_sphere(glm::vec3 center, float radius, glm::vec3 color)
@@ -212,8 +240,8 @@ namespace cologne
 
         glm::vec3 world_center = glm::vec3(transform * glm::vec4(center, 1.0));
         glm::vec3 world_extents = glm::abs(extents.x * transform[0]) +
-                             glm::abs(extents.y * transform[1]) +
-                             glm::abs(extents.z * transform[2]);
+                                  glm::abs(extents.y * transform[1]) +
+                                  glm::abs(extents.z * transform[2]);
 
         glm::vec3 min = world_center - world_extents;
         glm::vec3 max = world_center + world_extents;
@@ -224,8 +252,8 @@ namespace cologne
         glm::vec3 FrontBottomLeft = glm::vec4(min.x, min.y, max.z, 1.0f);
         glm::vec3 FrontBottomRight = glm::vec4(max.x, min.y, max.z, 1.0f);
         glm::vec3 BackTopLeft = glm::vec4(min.x, max.y, min.z, 1.0f);
-        glm::vec3 BackTopRight =  glm::vec4(max.x, max.y, min.z, 1.0f);
-        glm::vec3 BackBottomLeft =  glm::vec4(min.x, min.y, min.z, 1.0f);
+        glm::vec3 BackTopRight = glm::vec4(max.x, max.y, min.z, 1.0f);
+        glm::vec3 BackBottomLeft = glm::vec4(min.x, min.y, min.z, 1.0f);
         glm::vec3 BackBottomRight = glm::vec4(max.x, min.y, min.z, 1.0f);
         draw_line(FrontTopLeft, FrontTopRight, color);
         draw_line(FrontBottomLeft, FrontBottomRight, color);

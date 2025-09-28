@@ -379,4 +379,12 @@ namespace cologne
         glm::vec3 offset = glm::vec3(0.0f);
         float time = 0.0f;
     };
+
+    struct DecalComponent
+    {
+        std::string albedo_name;
+        std::string normal_name;
+        std::string orm_name;
+        std::string emission_name;
+    };
 }

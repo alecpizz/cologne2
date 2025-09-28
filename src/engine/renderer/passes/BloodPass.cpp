@@ -9,6 +9,10 @@ namespace cologne
 {
     void Renderer::blood_pass()
     {
+        if (_blood_render_items.empty())
+        {
+            return;
+        }
         auto shader = get_shader_by_name("vat_blood");
         auto gbuffer = get_framebuffer_by_name("gbuffer");
         if (!shader || !gbuffer)

@@ -214,5 +214,11 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 REGISTER_PROPERTY(BloodSplatterComponent, position_texture_name)
                 REGISTER_PROPERTY(BloodSplatterComponent, normal_texture_name)
                 REGISTER_PROPERTY(BloodSplatterComponent, offset);
+
+            REGISTER_COMPONENT(DecalComponent, "DecalComponent", EDITOR_READ_WRITE)
+                REGISTER_PROPERTY(DecalComponent, albedo_name)
+                REGISTER_PROPERTY(DecalComponent, normal_name)
+                REGISTER_PROPERTY(DecalComponent, orm_name)
+                REGISTER_PROPERTY(DecalComponent, emission_name);
     }
 }

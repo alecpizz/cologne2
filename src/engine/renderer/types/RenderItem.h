@@ -36,4 +36,11 @@ namespace cologne
         WorldTransformComponent transform = {};
         uint32_t entity_id = entt::null;
     };
+
+    struct DecalRenderItem
+    {
+        DecalComponent decal_component = {};
+        WorldTransformComponent transform = {};
+        uint32_t entity_id = entt::null;
+    };
 }

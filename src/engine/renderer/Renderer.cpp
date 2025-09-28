@@ -75,7 +75,10 @@ namespace cologne
                                          RESOURCES_PATH "shaders/outline/outline_mask.frag");
         shaders["outline"] = Shader(RESOURCES_PATH "shaders/outline/outline.vert",
                                     RESOURCES_PATH "shaders/outline/outline.frag");
-        shaders["vat_blood"] = Shader(RESOURCES_PATH "shaders/blood_vat/blood_vat.vert", RESOURCES_PATH "shaders/blood_vat/blood_vat.frag");
+        shaders["vat_blood"] = Shader(RESOURCES_PATH "shaders/blood_vat/blood_vat.vert",
+            RESOURCES_PATH "shaders/blood_vat/blood_vat.frag");
+        shaders["screenspace_decal"] = Shader(RESOURCES_PATH "shaders/decals/screenspace_decal.vert",
+            RESOURCES_PATH "shaders/decals/screenspace_decal.frag");
         shaders["outline_composite"] = Shader(RESOURCES_PATH "shaders/outline/outline_composite.comp");
         shaders["indirect_upsample"] = Shader(RESOURCES_PATH "shaders/vxgi/indirect_upsample.comp");
         shaders["compute_skinning"] = Shader(RESOURCES_PATH "shaders/skinning.comp");
@@ -201,6 +204,11 @@ namespace cologne
     void Renderer::submit_blood_render_item(BloodRenderItem item)
     {
         _blood_render_items.emplace_back(item);
+    }
+
+    void Renderer::submit_decal_render_item(DecalRenderItem item)
+    {
+        _decal_render_items.emplace_back(item);
     }
 
     void Renderer::submit_outline_render_item(RenderItem item)
@@ -465,9 +473,9 @@ namespace cologne
         debug_renderer->draw_line(p1, p2, color);
     }
 
-    void Renderer::draw_box(glm::vec3 center, glm::vec3 size, glm::vec3 color)
+    void Renderer::draw_box(glm::mat4 transform, glm::vec3 min, glm::vec3 max, glm::vec3 color)
     {
-        debug_renderer->draw_box(center, size, color);
+        debug_renderer->draw_box(transform, min, max, color);
     }
 
     void Renderer::draw_sphere(glm::vec3 center, float radius, glm::vec3 color)
@@ -527,6 +535,7 @@ namespace cologne
         shadow_pass();
         voxelize_scene();
         geometry_pass();
+        decal_pass();
         blood_pass();
         skybox_pass();
         indirect_pass();
@@ -558,6 +567,7 @@ namespace cologne
         _model_AABBs.clear();
         _skinned_AABBs.clear();
         _blood_render_items.clear();
+        _decal_render_items.clear();
     }
 
     void Renderer::window_resized(uint32_t width, uint32_t height)
