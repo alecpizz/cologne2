@@ -54,22 +54,24 @@ void main()
     vec4 decal_color_x = texture(decal_albedo, uv_x);
     vec4 decal_color_y = texture(decal_albedo, uv_y);
     vec4 decal_color_z = texture(decal_albedo, uv_z);
-//    texture(decal_albedo, uv_y);
-    vec4 decal_color = decal_color_x * blend_weights.x + decal_color_y * blend_weights.y + decal_color_z * blend_weights.z;
+    vec4 decal_color = texture(decal_albedo, uv_y);
+   // vec4 decal_color = decal_color_x * blend_weights.x + decal_color_y * blend_weights.y + decal_color_z * blend_weights.z;
 
-    if(decal_color.a < 0.05f)
+    if(decal_color.a < 0.1f)
     {
         discard;
     }
 
+
     vec4 normal_x = texture(decal_normal, uv_x);
     vec4 normal_y = texture(decal_normal, uv_z);
     vec4 normal_z = texture(decal_normal, uv_z);
-    vec4 decal_norm = normal_x * blend_weights.x + normal_y * blend_weights.y + normal_z * blend_weights.z;
+    vec4 decal_norm = texture(decal_normal, uv_y);
 
     vec4 scene_color = texture(albedoTexture, tex_coord);
-    gORM = vec3(0.015, 0.54, 1.0);
-    gAlbedo = mix(scene_color, decal_color * tint_color, decal_color.a);
-    gNormal = mix(world_normal, decal_norm, decal_color.a);
-    gEmission = vec3(1.0, 0.0, 0.0);
+    gORM = vec3(1.0, 0.015, 0.54);
+    gAlbedo = decal_color * tint_color;
+    gNormal = decal_norm;
+    gPosition = vec4(world_pos, 1.0);
+    gEmission = vec3(0.0, 0.0, 0.0);
 }

@@ -14,7 +14,8 @@ void main()
 {
     gAlbedo = vec4(1.0, 0.0, 0.0, 1.0);
     gNormal = vec4(normalize(Normal), 1.0);
-    gORM = vec3(0.015, 0.54, 1.0);
+//    gORM = vec3(0.015, 0.54, 1.0);
+    gORM = vec3(1.0, 0.015, 0.54);
     gPosition = WorldPos;
   //gEmission = vec3(1.0, 0.0, 0.0);
     gEntityId = entity_id;
