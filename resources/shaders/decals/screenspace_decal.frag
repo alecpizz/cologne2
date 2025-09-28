@@ -15,8 +15,10 @@ layout (binding = 3) uniform sampler2D decal_emission;
 layout (binding = 5) uniform sampler2D depthTexture;
 layout (binding = 6) uniform sampler2D positionTexture;
 layout (binding = 7) uniform sampler2D albedoTexture;
+layout (binding = 8) uniform sampler2D normalTexture;
 
 uniform mat4 model_inverse;
+uniform vec4 tint_color;
 
 void main()
 {
@@ -38,13 +40,19 @@ void main()
     uv = clamp(uv, 0.0, 1.0);
 
     vec4 decal_color = texture(decal_albedo, uv); //make this a texture sample!
-    if(decal_color.a < 0.1f)
+    if(decal_color.a < 0.05f)
     {
         discard;
     }
 
     vec4 scene_color = texture(albedoTexture, uv);
-    gAlbedo = mix(scene_color, decal_color, decal_color.a);
+    vec4 scene_normal = texture(normalTexture, uv);
+    float floor_angle = abs(dot(scene_normal.rgb, vec3(0, 1, 0)));
+    float angle = dot(scene_normal.rgb, vec3(0, 0, 1));
 
-    gAlbedo = decal_color;
+    float reject = 1.0 - (step(abs(angle), 0.125) * step(floor_angle, 0.5));
+    gORM = vec3(0.015, 0.54, 1.0);
+//    gAlbedo = mix(scene_color, decal_color, decal_color.a);
+    gAlbedo = mix(scene_color, decal_color * tint_color, decal_color.a * reject);
+    gNormal = mix(scene_normal, texture(decal_normal, uv), decal_color.a * reject);
 }

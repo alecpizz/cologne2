@@ -219,6 +219,7 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 REGISTER_PROPERTY(DecalComponent, albedo_name)
                 REGISTER_PROPERTY(DecalComponent, normal_name)
                 REGISTER_PROPERTY(DecalComponent, orm_name)
-                REGISTER_PROPERTY(DecalComponent, emission_name);
+                REGISTER_PROPERTY(DecalComponent, emission_name)
+                REGISTER_PROPERTY(DecalComponent, color_tint);
     }
 }

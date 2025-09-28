@@ -141,7 +141,8 @@ namespace cologne::AssetManager
             }
             if (texture_path.ext == "png")
             {
-
+                auto& texture = special_textures.emplace_back(texture_path.path.c_str());
+                texture.set_name(texture_path.name);
             }
         }
 

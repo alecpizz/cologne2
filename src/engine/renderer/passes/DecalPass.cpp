@@ -26,30 +26,32 @@ namespace cologne
         glBindTextureUnit(5, gbuffer->get_depth_attachment_handle());
         glBindTextureUnit(6, gbuffer->get_color_attachment_handle_by_name("position"));
         glBindTextureUnit(7, gbuffer->get_color_attachment_handle_by_name("albedo"));
+        glBindTextureUnit(8, gbuffer->get_color_attachment_handle_by_name("normal"));
         for (const auto &decal_render_item: _decal_render_items)
         {
             //draw a cube
+            shader->set_vec4("tint_color", decal_render_item.decal_component.color_tint);
             shader->set_mat4("model", decal_render_item.transform);
             shader->set_mat4("model_inverse", glm::inverse(decal_render_item.transform.transform));
             if (const auto albedo = AssetManager::get_texture_by_name(decal_render_item.decal_component.albedo_name))
             {
-                glBindTextureUnit(albedo->get_handle(), 0);
+                glBindTextureUnit(0, albedo->get_handle());
             }
 
             if (const auto normal = AssetManager::get_texture_by_name(decal_render_item.decal_component.normal_name))
             {
-                glBindTextureUnit(normal->get_handle(), 1);
+                glBindTextureUnit(1, normal->get_handle());
             }
 
             if (const auto orm = AssetManager::get_texture_by_name(decal_render_item.decal_component.orm_name))
             {
-                glBindTextureUnit(orm->get_handle(), 2);
+                glBindTextureUnit(2, orm->get_handle());
             }
 
             if (const auto emission =
                     AssetManager::get_texture_by_name(decal_render_item.decal_component.emission_name))
             {
-                glBindTextureUnit(emission->get_handle(), 3);
+                glBindTextureUnit(3, emission->get_handle());
             }
             render_cube();
         }

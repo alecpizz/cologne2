@@ -386,5 +386,6 @@ namespace cologne
         std::string normal_name;
         std::string orm_name;
         std::string emission_name;
+        glm::vec4 color_tint = glm::vec4(1.0f); //TODO: Color type
     };
 }
