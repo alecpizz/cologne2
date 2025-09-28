@@ -35,27 +35,29 @@ void main()
     int u_NumOfFrames = 81;
     int u_Speed = 35;
 
-    float bounding_min = 144;
-    float bounding_max = 144;
+    float bounding_min = -116.0f;
+    float bounding_max = 144.0f;
     float currentSpeed = 1.0f / (u_NumOfFrames / u_Speed);
-    float timeInFrames = ((ceil(fract(-time * currentSpeed) * u_NumOfFrames)) / u_NumOfFrames) + (1.0 / u_NumOfFrames);
 
-    vec3 v = position;
 
-    timeInFrames = 0.0;
-    timeInFrames = time;
+    float timeInFrames = time;
 
     vec2 TexCoord = vec2(uv.x, (timeInFrames + uv.y));
     TexCoord = clamp(TexCoord, 0, 1);
 
     vec4 texturePos = textureLod(position_texture, TexCoord, 0);
-    texturePos.xyz += height_offset.xyz;
+    float expand = bounding_max - bounding_min;
+    texturePos.xyz *= expand;
+//    texturePos.xyz += bounding_min;
+//    texturePos.x *= -1;
+    vec3 v = texturePos.xzy;
+    v += height_offset;
     vec4 textureNorm = textureLod(normal_texture, TexCoord, 0);
 
     Normal = textureNorm.xzy * 2.0 - 1.0;
     Normal = normalize((normalMatrix * vec4(Normal, 0)).xyz);
 
-    WorldPos = modelMatrix * vec4(texturePos.xzy, 1.0);
+    WorldPos = modelMatrix * vec4(v, 1.0);
 
     gl_Position =  projectionView * WorldPos;
 }

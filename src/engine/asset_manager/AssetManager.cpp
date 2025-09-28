@@ -361,6 +361,10 @@ namespace cologne::AssetManager
 
     Texture * get_texture_by_name(const std::string &name)
     {
+        if (!texture_index_map.contains(name))
+        {
+            return nullptr;
+        }
         return &special_textures[texture_index_map[name]];
     }
 

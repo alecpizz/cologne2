@@ -160,8 +160,8 @@ vec3(0.0),   // Color temperature strength
 );
 
 ColorGradingPreset ColorGradingPreset2 = ColorGradingPreset(
-vec3(0.8),   // Gain
-vec3(0.4),   // Gamma
+vec3(0.9),   // Gain
+vec3(0.5),   // Gamma
 vec3(0.5),   // Lift
 vec3(1.0),   // Presaturation
 vec3(1.0),   // Color temperature strength
