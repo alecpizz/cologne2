@@ -150,6 +150,7 @@ namespace cologne::Serialization
       }>("serialize"_hs) \
       .func<deserialize<T>>("deserialize"_hs)
         MAKE_SERIALIZERS(glm::vec3);
+        MAKE_SERIALIZERS(glm::vec4);
         MAKE_SERIALIZERS(glm::vec2);
         MAKE_SERIALIZERS(glm::quat);
         MAKE_SERIALIZERS(UUID);

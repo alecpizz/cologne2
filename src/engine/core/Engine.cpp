@@ -132,7 +132,7 @@ namespace cologne
         editor = create_ref<Editor>();
         window = create_ref<Window>(width, height);
         file_watcher = create_ref<FileWatcher>(
-            ASSETS_PATH, [this](const std::filesystem::path &path, FileStatus status)
+            RESOURCES_PATH, [this](const std::filesystem::path &path, FileStatus status)
             {
                 file_status_queue.emplace(path, status);
             });

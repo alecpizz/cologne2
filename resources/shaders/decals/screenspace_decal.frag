@@ -18,13 +18,14 @@ layout (binding = 7) uniform sampler2D albedoTexture;
 layout (binding = 8) uniform sampler2D normalTexture;
 
 uniform mat4 model_inverse;
+uniform mat4 model_normal;
 uniform vec4 tint_color;
 
 void main()
 {
     vec2 tex_coord = gl_FragCoord.xy / textureSize(positionTexture, 0);
     vec3 world_pos = texture(positionTexture, tex_coord).xyz;
-
+    vec4 world_normal = texture(normalTexture, tex_coord);
     if(world_pos == vec3(0.0f))
     {
         discard;
@@ -36,23 +37,39 @@ void main()
         discard;
     }
 
-    vec2 uv = decal_local_pos.xz + 0.5;
-    uv = clamp(uv, 0.0, 1.0);
 
-    vec4 decal_color = texture(decal_albedo, uv); //make this a texture sample!
+    vec3 local_normal = normalize(model_normal * world_normal).xyz;
+
+    vec3 blend_weights = abs(local_normal.xyz);
+    blend_weights = normalize(max(blend_weights, 0.00001));
+    blend_weights /= vec3(blend_weights.x + blend_weights.y + blend_weights.z);
+
+    vec2 uv_x = decal_local_pos.yz + 0.5;
+    vec2 uv_y = decal_local_pos.xz + 0.5;
+    vec2 uv_z = decal_local_pos.xy + 0.5;
+    uv_x = clamp(uv_x, 0, 1);
+    uv_y = clamp(uv_y, 0, 1);
+    uv_z = clamp(uv_z, 0, 1);
+
+    vec4 decal_color_x = texture(decal_albedo, uv_x);
+    vec4 decal_color_y = texture(decal_albedo, uv_y);
+    vec4 decal_color_z = texture(decal_albedo, uv_z);
+//    texture(decal_albedo, uv_y);
+    vec4 decal_color = decal_color_x * blend_weights.x + decal_color_y * blend_weights.y + decal_color_z * blend_weights.z;
+
     if(decal_color.a < 0.05f)
     {
         discard;
     }
 
-    vec4 scene_color = texture(albedoTexture, uv);
-    vec4 scene_normal = texture(normalTexture, uv);
-    float floor_angle = abs(dot(scene_normal.rgb, vec3(0, 1, 0)));
-    float angle = dot(scene_normal.rgb, vec3(0, 0, 1));
+    vec4 normal_x = texture(decal_normal, uv_x);
+    vec4 normal_y = texture(decal_normal, uv_z);
+    vec4 normal_z = texture(decal_normal, uv_z);
+    vec4 decal_norm = normal_x * blend_weights.x + normal_y * blend_weights.y + normal_z * blend_weights.z;
 
-    float reject = 1.0 - (step(abs(angle), 0.125) * step(floor_angle, 0.5));
+    vec4 scene_color = texture(albedoTexture, tex_coord);
     gORM = vec3(0.015, 0.54, 1.0);
-//    gAlbedo = mix(scene_color, decal_color, decal_color.a);
-    gAlbedo = mix(scene_color, decal_color * tint_color, decal_color.a * reject);
-    gNormal = mix(scene_normal, texture(decal_normal, uv), decal_color.a * reject);
+    gAlbedo = mix(scene_color, decal_color * tint_color, decal_color.a);
+    gNormal = mix(world_normal, decal_norm, decal_color.a);
+    gEmission = vec3(1.0, 0.0, 0.0);
 }

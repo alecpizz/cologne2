@@ -33,6 +33,7 @@ namespace cologne
             shader->set_vec4("tint_color", decal_render_item.decal_component.color_tint);
             shader->set_mat4("model", decal_render_item.transform);
             shader->set_mat4("model_inverse", glm::inverse(decal_render_item.transform.transform));
+            shader->set_mat4("model_normal", glm::transpose(glm::inverse(decal_render_item.transform.transform)));
             if (const auto albedo = AssetManager::get_texture_by_name(decal_render_item.decal_component.albedo_name))
             {
                 glBindTextureUnit(0, albedo->get_handle());
