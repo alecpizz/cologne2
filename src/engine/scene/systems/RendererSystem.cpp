@@ -94,6 +94,8 @@ namespace cologne
         for (auto entity : view4)
         {
             auto [b, tr] = view4.get<BloodSplatterComponent, WorldTransformComponent>(entity);
+            b.time += 0.5f * dt;
+            b.time = std::fmod(b.time, 1.0f);
             BloodRenderItem item;
             item.blood_component = b;
             item.transform = tr;

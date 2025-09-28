@@ -168,7 +168,7 @@ namespace cologne
         }
         else
         {
-            return ImGui::DragScalar(name, scalar_to_imgui_data_type<Scalar>(), &f);
+            return ImGui::DragScalar(name, scalar_to_imgui_data_type<Scalar>(), &f, 0.01f);
         }
     }
 
@@ -186,7 +186,7 @@ namespace cologne
         const char *label = "vec3";
         const auto name_str = get_editor_name(label, properties);
         const auto name = name_str.c_str();
-        return ImGui::DragFloat3(name, glm::value_ptr(v));
+        return ImGui::DragFloat3(name, glm::value_ptr(v), 0.01f);
     }
 
     static void read_vec3(glm::vec3 v, const PropertiesMap &properties)

@@ -7,6 +7,7 @@ namespace cologne
     public:
         explicit Texture(const char *texture_path);
         Texture(unsigned char* data, uint32_t width, uint32_t height, uint32_t channels);
+        Texture(float* data, uint32_t width, uint32_t height, uint32_t channels);
         Texture(uint32_t handle, uint32_t width, uint32_t height, uint32_t channels);
         Texture();
 
@@ -28,6 +29,8 @@ namespace cologne
 
         bool contains_data() const;
 
+        bool load_normal();
+
         void load();
 
         void cleanup();
@@ -38,11 +41,16 @@ namespace cologne
         void make_non_resident();
         void export_to_compressed(const char* path) const;
         const std::vector<unsigned char>& get_raw_data() const;
+        void set_name(const std::string& name) {_name = name;}
+        const std::string& get_name() const {return _name; }
 
     private:
         bool _is_resident = false;
+        std::string _name;
         std::string _path;
+        //todo not this
         std::vector<unsigned char> _data;
+        std::vector<float> _float_data;
         uint64_t _bindless_handle = 0;
         uint32_t _handle = 0;
         uint32_t _width = 0;

@@ -14,6 +14,7 @@ namespace cologne::AssetManager
     void print_animations();
     void print_models();
     void print_skinned_models();
+    void print_textures();
     void print_all();
     void file_added(const std::filesystem::path& path);
 
@@ -29,6 +30,7 @@ namespace cologne::AssetManager
     std::vector<Mesh>& get_meshes();
     std::vector<SkinnedModel>& get_skinned_models();
     std::vector<Material>& get_materials();
+    std::vector<Texture>& get_special_textures();
 
     Material* get_material_by_index(int32_t idx);
 
@@ -40,7 +42,7 @@ namespace cologne::AssetManager
     SkinnedMesh* get_skinned_mesh_by_index(int32_t idx);
     int32_t get_skinned_mesh_index_by_name(const std::string& name);
 
-
+    Texture* get_texture_by_name(const std::string& name);
 
     Model* get_model_by_name(const std::string& name);
     Model* get_model_by_index(int32_t idx);

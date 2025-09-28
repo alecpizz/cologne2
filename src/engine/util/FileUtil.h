@@ -26,6 +26,8 @@ namespace cologne::FileUtil
 
     std::vector<FileInfo> iterate_directory(const std::string &directory,
                                             const std::vector<std::string> &extensions = {});
+    //TODO texture data, texture managemetn shit
+    Texture import_exr(const std::string& path);
     bool create_directory_recursive(const std::string& directory);
     bool file_exists(const std::string& path);
 }

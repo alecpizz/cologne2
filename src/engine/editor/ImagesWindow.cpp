@@ -59,7 +59,7 @@ namespace cologne
             if (selected_image_idx > 0 && selected_image_idx < image_cmds.size())
             {
                 ImGui::Text("Label: %s", image_cmds[selected_image_idx].name.c_str());
-                ImGui::Text("Dimensions: %d %d", image_cmds[selected_image_idx].image_size.x,
+                ImGui::Text("Dimensions: %f %f", image_cmds[selected_image_idx].image_size.x,
                             image_cmds[selected_image_idx].image_size.y);
                 static float image_scale = 1.0f;
                 ImGui::SliderFloat("Scale", &image_scale, 0.1f, 5.0f);

@@ -75,6 +75,7 @@ namespace cologne
                                          RESOURCES_PATH "shaders/outline/outline_mask.frag");
         shaders["outline"] = Shader(RESOURCES_PATH "shaders/outline/outline.vert",
                                     RESOURCES_PATH "shaders/outline/outline.frag");
+        shaders["vat_blood"] = Shader(RESOURCES_PATH "shaders/blood_vat/blood_vat.vert", RESOURCES_PATH "shaders/blood_vat/blood_vat.frag");
         shaders["outline_composite"] = Shader(RESOURCES_PATH "shaders/outline/outline_composite.comp");
         shaders["indirect_upsample"] = Shader(RESOURCES_PATH "shaders/vxgi/indirect_upsample.comp");
         shaders["compute_skinning"] = Shader(RESOURCES_PATH "shaders/skinning.comp");
@@ -526,7 +527,7 @@ namespace cologne
         shadow_pass();
         voxelize_scene();
         geometry_pass();
-
+        blood_pass();
         skybox_pass();
         indirect_pass();
         bloom_pass();

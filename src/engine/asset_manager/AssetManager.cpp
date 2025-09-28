@@ -12,6 +12,7 @@
 #include <engine/core/Engine.h>
 #include <engine/renderer/Renderer.h>
 #include <chrono>
+#include <engine/editor/Editor.h>
 
 namespace cologne::AssetManager
 {
@@ -20,12 +21,14 @@ namespace cologne::AssetManager
     std::vector<AnimationClip> animations;
     std::vector<Mesh> meshes;
     std::vector<SkinnedMesh> skinned_meshes;
+    std::vector<Texture> special_textures;
     std::vector<Material> materials;
     std::unordered_map<std::string, int32_t> model_index_map;
     std::unordered_map<std::string, int32_t> skinned_model_index_map;
     std::unordered_map<std::string, int32_t> animation_index_map;
     std::unordered_map<std::string, int32_t> mesh_index_map;
     std::unordered_map<std::string, int32_t> skinned_mesh_index_map;
+    std::unordered_map<std::string, int32_t> texture_index_map;
     bool is_loading = true;
     int32_t material_offset = 0;
     std::vector<Vertex> vertices;
@@ -66,6 +69,11 @@ namespace cologne::AssetManager
         for (int32_t i = 0; i < skinned_meshes.size(); i++)
         {
             skinned_mesh_index_map[skinned_meshes[i].get_name()] = i;
+        }
+
+        for (int32_t i = 0; i < special_textures.size(); i++)
+        {
+            texture_index_map[special_textures[i].get_name()] = i;
         }
         print_all();
     }
@@ -122,6 +130,17 @@ namespace cologne::AssetManager
                            const SkinnedModelData data = import_skinned_model(file.path.c_str());
                            return data;
                        });
+
+        std::vector<FileUtil::FileInfo> texture_paths = FileUtil::iterate_directory(ASSETS_PATH "textures");
+        for (const auto& texture_path : texture_paths)
+        {
+            if (texture_path.ext == "exr")
+            {
+                auto& texture = special_textures.emplace_back(FileUtil::import_exr(texture_path.path));
+                texture.set_name(texture_path.name);
+            }
+        }
+
         scope = DebugScope("load models");
         //DO MESHES BEFORE MODELS
 
@@ -201,6 +220,14 @@ namespace cologne::AssetManager
         {
             m.load_all();
         }
+
+        for (auto& special_texture : special_textures)
+        {
+            special_texture.load();
+            Engine::get_editor()->add_image_entry(special_texture.get_name().c_str(), special_texture.get_handle(),
+                glm::vec2(special_texture.get_height(), special_texture.get_width()));
+        }
+
     }
 
     void load_model(const std::string &path)
@@ -288,6 +315,11 @@ namespace cologne::AssetManager
         return materials;
     }
 
+    std::vector<Texture> & get_special_textures()
+    {
+        return special_textures;
+    }
+
     Material *get_material_by_index(int32_t idx)
     {
         return &materials[idx];
@@ -327,6 +359,11 @@ namespace cologne::AssetManager
         return skinned_mesh_index_map[name];
     }
 
+    Texture * get_texture_by_name(const std::string &name)
+    {
+        return &special_textures[texture_index_map[name]];
+    }
+
     void print_models()
     {
         for (const auto &model: models)
@@ -343,11 +380,20 @@ namespace cologne::AssetManager
         }
     }
 
+    void print_textures()
+    {
+        for (const auto & special_texture : special_textures)
+        {
+            LOG_INFO("TEXTURE %s", special_texture.get_name().c_str());
+        }
+    }
+
     void print_all()
     {
         print_models();
         print_skinned_models();
         print_animations();
+        print_textures();
     }
 
     void file_added(const std::filesystem::path &path)

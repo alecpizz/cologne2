@@ -104,6 +104,14 @@ namespace cologne
         _data = std::vector<unsigned char>(data, data + (width * height * channels));
     }
 
+    Texture::Texture(float *data, uint32_t width, uint32_t height, uint32_t channels)
+    {
+        _width = width;
+        _height = height;
+        _channels = channels;
+        _float_data = std::vector<float>(data, data + (width * height * channels ));
+    }
+
     Texture::Texture(uint32_t handle, uint32_t width, uint32_t height, uint32_t channels)
     {
         _handle = handle;
@@ -167,20 +175,12 @@ namespace cologne
         return !_data.empty();
     }
 
-    void Texture::load()
+    bool Texture::load_normal()
     {
         if (_data.empty())
         {
-            return;
+            return true;
         }
-       // stbi_set_flip_vertically_on_load (false);
-       //  int new_width = 0, new_height = 0, new_channels = 0;
-       //  stbi_uc *img_data =
-       //          stbi_load_from_memory(_data.data(), static_cast<int>(_data.size()),
-       //                                &new_width, &new_height, &new_channels, 0);
-       //  _width = new_width;
-       //  _height = new_height;
-       //  _channels = new_channels;
 
         glCreateTextures(GL_TEXTURE_2D, 1, &_handle);
         glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -212,6 +212,49 @@ namespace cologne
         glGenerateTextureMipmap(_handle);
         _data.clear();
         _data.shrink_to_fit();
+        return false;
+    }
+
+    void Texture::load()
+    {
+        if (!_data.empty())
+        {
+            load_normal();
+        }
+        if (!_float_data.empty())
+        {
+            glCreateTextures(GL_TEXTURE_2D, 1, &_handle);
+            glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTextureParameteri(_handle, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+            int32_t format = GL_RGB;
+            int32_t format_internal = GL_RGB32F;
+            if (_channels == 1)
+            {
+                format = GL_RED;
+                format_internal = GL_R32F;
+            }
+            else if (_channels == 3)
+            {
+                format = GL_RGB;
+                format_internal = GL_RGB32F;
+            }
+            else if (_channels == 4)
+            {
+                format = GL_RGBA;
+                format_internal = GL_RGBA32F;
+            }
+            glTextureStorage2D(_handle, 1, format_internal, _width, _height);
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            glTextureSubImage2D(_handle, 0, 0, 0, _width, _height, format, GL_FLOAT,
+                                _float_data.data());
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+            _float_data.clear();
+            _float_data.shrink_to_fit();
+            LOG_INFO("LOADED EXR");
+        }
     }
 
     void Texture::cleanup()

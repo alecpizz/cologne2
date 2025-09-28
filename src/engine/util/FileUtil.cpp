@@ -6,7 +6,9 @@
 
 #include "assimp/Importer.hpp"
 #include <filesystem>
-
+#include <stb_image_write/stb_image_write.h>
+#include <tinyexr/tinyexr.h>
+#include <stb_image_write/stb_image_write.h>
 
 namespace cologne::FileUtil
 {
@@ -56,6 +58,24 @@ namespace cologne::FileUtil
                 result.push_back(info);
             }
         }
+        return result;
+    }
+
+    Texture import_exr(const std::string &path)
+    {
+        stbi_flip_vertically_on_write(true);
+        const char* err = nullptr;
+        const char* layer_name = nullptr;
+        float* data = nullptr;
+        int width = 0;
+        int height = 0;
+        bool status = LoadEXRWithLayer(&data, &width, &height, path.c_str(), layer_name, &err);
+        if (status)
+        {
+            LOG_ERROR("EXR FAIL %s", err);
+        }
+        auto result = Texture(data, width, height, 4);
+        free(data);
         return result;
     }
 

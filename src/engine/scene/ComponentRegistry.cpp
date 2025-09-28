@@ -209,8 +209,10 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 REGISTER_PROPERTY(ParentComponent, children);
 
         REGISTER_COMPONENT(BloodSplatterComponent, "BloodSplatterComponent", EDITOR_READ_WRITE)
+                REGISTER_PROPERTY(BloodSplatterComponent, time)
                 REGISTER_PROPERTY(BloodSplatterComponent, mesh_name)
                 REGISTER_PROPERTY(BloodSplatterComponent, position_texture_name)
-                REGISTER_PROPERTY(BloodSplatterComponent, normal_texture_name);
+                REGISTER_PROPERTY(BloodSplatterComponent, normal_texture_name)
+                REGISTER_PROPERTY(BloodSplatterComponent, offset);
     }
 }

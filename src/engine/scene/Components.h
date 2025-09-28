@@ -376,5 +376,7 @@ namespace cologne
         std::string mesh_name;
         std::string position_texture_name;
         std::string normal_texture_name;
+        glm::vec3 offset = glm::vec3(0.0f);
+        float time = 0.0f;
     };
 }

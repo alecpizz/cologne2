@@ -46,6 +46,7 @@ add_subdirectory(vendor/SDL_mixer)
 add_subdirectory(vendor/glad)
 add_subdirectory(vendor/stb_image)
 add_subdirectory(vendor/stb_image_resize)
+add_subdirectory(vendor/stb_image_write)
 add_subdirectory(vendor/stb_truetype)
 add_subdirectory(vendor/glm/glm)
 add_subdirectory(vendor/imgui-docking)
@@ -56,6 +57,7 @@ add_subdirectory(vendor/imguizmo)
 add_subdirectory(vendor/libsquish)
 add_subdirectory(vendor/json)
 add_subdirectory(vendor/recast)
+add_subdirectory(vendor/tinyexr)
 
 
 FetchContent_Declare(
@@ -144,7 +146,7 @@ target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURC
 target_precompile_headers("${CMAKE_PROJECT_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/gpch.h")
 target_include_directories(${CMAKE_PROJECT_NAME}  PUBLIC ${JoltPhysics_SOURCE_DIR})
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm_static spdlog::spdlog_header_only
-        stb_image stb_image_resize stb_truetype nlohmann_json libsquish::Squish imgui ImGuizmo SDL3-static assimp Jolt freetype SDL3_mixer-static
-        RecastNavigation::Recast RecastNavigation::Detour RecastNavigation::DetourCrowd RecastNavigation::DebugUtils)
+        stb_image stb_image_resize stb_image_write stb_truetype nlohmann_json libsquish::Squish imgui ImGuizmo SDL3-static assimp Jolt freetype SDL3_mixer-static
+        RecastNavigation::Recast RecastNavigation::Detour RecastNavigation::DetourCrowd RecastNavigation::DebugUtils tinyexr)
 
 
