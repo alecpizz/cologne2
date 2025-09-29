@@ -12,7 +12,7 @@ uniform uint entity_id;
 
 void main()
 {
-    gAlbedo = vec4(1.0, 0.0, 0.0, 1.0);
+    gAlbedo = vec4(0.42, 0.0, 0.0, 1.0);
     gNormal = vec4(normalize(Normal), 1.0);
 //    gORM = vec3(0.015, 0.54, 1.0);
     gORM = vec3(1.0, 0.015, 0.54);

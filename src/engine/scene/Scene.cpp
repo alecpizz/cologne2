@@ -503,15 +503,15 @@ namespace cologne
 
     void Scene::initialize_systems()
     {
+        add_system(std::make_unique<PhysicsSystem>());
+        add_system(std::make_unique<PlayerControllerSystem>());
+        add_system(std::make_unique<BulletSystem>());
+        add_system(std::make_unique<NPCSystem>());
+        add_system(std::make_unique<InteractionSystem>());
+        add_system(std::make_unique<EditorCameraControllerSystem>());
         add_system(std::make_unique<TransformSystem>());
         add_system(std::make_unique<AnimationSystem>());
         add_system(std::make_unique<RagdollSystem>());
-        add_system(std::make_unique<BulletSystem>());
-        add_system(std::make_unique<PhysicsSystem>());
-        add_system(std::make_unique<NPCSystem>());
-        add_system(std::make_unique<EditorCameraControllerSystem>());
-        add_system(std::make_unique<PlayerControllerSystem>());
-        add_system(std::make_unique<InteractionSystem>());
         add_system(std::make_unique<RendererSystem>());
     }
 }

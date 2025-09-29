@@ -27,6 +27,7 @@ namespace cologne
         glBindTextureUnit(6, gbuffer->get_color_attachment_handle_by_name("position"));
         glBindTextureUnit(7, gbuffer->get_color_attachment_handle_by_name("albedo"));
         glBindTextureUnit(8, gbuffer->get_color_attachment_handle_by_name("normal"));
+        glBindTextureUnit(4, gbuffer->get_color_attachment_handle_by_name("orm"));
         for (const auto &decal_render_item: _decal_render_items)
         {
             //draw a cube
