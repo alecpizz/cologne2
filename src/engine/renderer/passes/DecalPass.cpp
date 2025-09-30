@@ -20,9 +20,18 @@ namespace cologne
         }
 
         glDisable(GL_DEPTH_TEST);
+        glDepthMask(GL_FALSE);
         glCullFace(GL_FRONT);
         gbuffer->bind();
         shader->bind();
+        glEnable(GL_BLEND);
+        glBlendFunci(2, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendEquationi(2, GL_FUNC_ADD);
+        glBlendFunci(1, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendEquationi(1, GL_FUNC_ADD);
+        glBlendFunci(3, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendEquationi(3, GL_FUNC_ADD);
+
         glBindTextureUnit(5, gbuffer->get_depth_attachment_handle());
         glBindTextureUnit(6, gbuffer->get_color_attachment_handle_by_name("position"));
         glBindTextureUnit(7, gbuffer->get_color_attachment_handle_by_name("albedo"));
@@ -57,6 +66,13 @@ namespace cologne
             }
             render_cube();
         }
+        glBlendFunci(2, GL_ONE, GL_ZERO);
+        glBlendEquationi(2, GL_FUNC_ADD);
+        glBlendFunci(1, GL_ONE, GL_ZERO);
+        glBlendEquationi(1, GL_FUNC_ADD);
+        glBlendFunci(3, GL_ONE, GL_ZERO);
+        glBlendEquationi(3, GL_FUNC_ADD);
+        glDepthMask(GL_TRUE);
         glCullFace(GL_BACK);
         glEnable(GL_DEPTH_TEST);
     }

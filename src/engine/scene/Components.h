@@ -6,6 +6,7 @@
 #include <engine/util/Util.h>
 #include <entt/entt.hpp>
 #include <nlohmann/adl_serializer.hpp>
+#include <engine/core/Color.h>
 #include <engine/renderer/types/LightHandle.h>
 
 namespace cologne
@@ -209,7 +210,7 @@ namespace cologne
         bool jump_queued = false;
         float step_timer = 0.0f;
         float step_time = .01f;
-        float rpm = 60.0f / 350.0f;
+        float rpm = 60.0f / 600.0f;
         float reload_time = 0.25f;
         float shot_timer = 0.0f;
         int max_ammo = 10;
@@ -386,6 +387,6 @@ namespace cologne
         std::string normal_name;
         std::string orm_name;
         std::string emission_name;
-        glm::vec4 color_tint = glm::vec4(1.0f); //TODO: Color type
+        Color color_tint = Color(1.0f, 1.0f, 1.0f, 1.0f);
     };
 }

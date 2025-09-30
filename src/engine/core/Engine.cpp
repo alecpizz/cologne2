@@ -234,6 +234,10 @@ namespace cologne
             {
                 editor->present(et.elapsed);
             }
+            else
+            {
+                editor->update_input(et.elapsed);
+            }
             window->present();
             et.update();
             Time::DeltaTime = et.elapsed;

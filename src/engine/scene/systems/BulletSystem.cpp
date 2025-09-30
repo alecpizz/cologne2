@@ -27,6 +27,7 @@ namespace cologne
                 {
                     if (info.hit_entity.has_component<EnemyComponent>())
                     {
+                        Engine::get_scene()->spawn_blood(info.hit_point, bullet.direction);
                         auto &enemy = info.hit_entity.get_component<EnemyComponent>();
                         enemy.health -= bullet.damage;
                         Audio::play_sound(enemy.hurt_sound.c_str(), 40);

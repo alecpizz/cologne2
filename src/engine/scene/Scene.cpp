@@ -9,6 +9,7 @@
 #include <engine/core/UUID.h>
 #include <engine/navigation/Navigation.h>
 #include <engine/physics/Physics.h>
+#include <engine/physics/RaycastHitInfo.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Light.h>
 #include <engine/util/DebugScope.h>
@@ -18,6 +19,7 @@
 #include "Entity.h"
 #include "SceneSaver.h"
 #include "systems/AnimationSystem.h"
+#include "systems/BloodSystem.h"
 #include "systems/BulletSystem.h"
 #include "systems/EditorCameraControllerSystem.h"
 #include "systems/InteractionSystem.h"
@@ -184,12 +186,21 @@ namespace cologne
     Ref<Scene> Scene::copy(Ref<Scene> scene)
     {
         Ref<Scene> result = create_ref<Scene>();
-
+        result->_scene_name = "RUNTIME_SCENE";
         auto &src_registry = scene->get_raw_registry();
         auto &dest_registry = result->get_raw_registry();
 
-        src_registry.view<entt::entity>().each([&](auto entity)
+        src_registry.view<entt::entity>().each([&](entt::entity entity)
         {
+            if (!src_registry.valid(entity))
+            {
+                LOG_WARN("bad entity");
+            }
+            if (entity == entt::null)
+            {
+                LOG_WARN("NULL ENTITY");
+                return;
+            }
             auto dest_entity = dest_registry.create();
             assert(dest_entity != entt::null);
         });
@@ -205,7 +216,7 @@ namespace cologne
                                                  entt::forward_as_meta(dest_registry));
             LOG_INFO("Copied %s", ComponentRegistry::get_component_map().at(storage.type().hash()).c_str());
         }
-        result->_scene_name = "RUNTIME_SCENE";
+
         return result;
     }
 
@@ -369,6 +380,11 @@ namespace cologne
         _registry.destroy(entity);
     }
 
+    void Scene::destroy_entity(uint32_t id)
+    {
+        destroy_entity(Entity(static_cast<entt::entity>(id), this));
+    }
+
     Entity Scene::get_primary_camera()
     {
         for (auto entity: _registry.view<CameraComponent>())
@@ -494,6 +510,57 @@ namespace cologne
         e.add_component<BulletComponent>(pos, dir, damage);
     }
 
+    void Scene::spawn_blood(glm::vec3 pos, glm::vec3 dir)
+    {
+        static int blood_count = 0;
+        Entity vat_blood = create_entity("vat blood" + blood_count++);
+        glm::vec3 world_up = glm::abs(glm::dot(dir, glm::vec3(0, 1, 0))) > 0.99f ? glm::vec3(1, 0, 0) : glm::vec3(0, 1, 0);
+        glm::vec3 right = glm::normalize(glm::cross(world_up, dir));
+        glm::vec3 up = glm::cross(dir, right);
+
+        glm::mat4 rotation = glm::mat4(glm::mat3(right, up, dir));
+        glm::mat4 rotation_90 = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(0, 1, 0));
+        glm::vec3 scale = glm::vec3(6.0f);
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, pos);
+        model *= rotation;
+        model *= rotation_90;
+        model = glm::scale(model, scale);
+        model *= glm::translate(glm::mat4(1.0f), glm::vec3(-0.08f, -0.23f, -0.155f));
+        vat_blood.get_transform() = model;
+
+        auto& blood = vat_blood.add_component<BloodSplatterComponent>();
+        blood.mesh_name = "blood_mesh_TRIANGLE_CLOUD";
+        blood.position_texture_name = "blood_pos";
+        blood.normal_texture_name = "blood_norm";
+        blood.time = 0.0f;
+
+        RaycastHitInfo hit_info;
+        if (Physics::raycast(pos, glm::vec3(0.0f, -1.0f, 0.0f), 100.0f, Physics::NON_MOVING, hit_info))
+        {
+            Entity decal_blood = create_entity("decal blood" + blood_count);
+            decal_blood.get_transform().position = hit_info.hit_point;
+            glm::vec3 rot = glm::vec3(0.0f);
+            rot.y = glm::linearRand(0.0f, glm::pi<float>() * 2.0f);
+            decal_blood.get_transform().rotation = glm::quat(rot);
+            decal_blood.get_transform().scale = glm::vec3(2.0f);
+
+            auto& decal = decal_blood.add_component<DecalComponent>();
+            decal.albedo_name = "decal_white";
+            decal.normal_name = "decal_normal";
+            decal.color_tint = Color(0.42f, 0.0f, 0.0f, 1.0f);
+        }
+        //do some randomness shit here
+        //blood splatter component
+        //blood_mesh_TRIANGLE_CLOUD
+        //blood_pos
+        //blood_norm
+        //-26.510, -54.750, -38.470 offset -> ditch?
+        //.03 scale
+
+        //raycast down from hit, spawn a decal
+    }
 
     void Scene::add_system(std::unique_ptr<System> system)
     {
@@ -512,6 +579,7 @@ namespace cologne
         add_system(std::make_unique<TransformSystem>());
         add_system(std::make_unique<AnimationSystem>());
         add_system(std::make_unique<RagdollSystem>());
+        add_system(std::make_unique<BloodSystem>());
         add_system(std::make_unique<RendererSystem>());
     }
 }

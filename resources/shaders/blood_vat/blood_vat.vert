@@ -46,12 +46,12 @@ void main()
     TexCoord = clamp(TexCoord, 0, 1);
 
     vec4 texturePos = textureLod(position_texture, TexCoord, 0);
-    float expand = bounding_max - bounding_min;
-    texturePos.xyz *= expand;
+//    float expand = bounding_max - bounding_min;
+//    texturePos.xyz *= expand;
 //    texturePos.xyz += bounding_min;
 //    texturePos.x *= -1;
     vec3 v = texturePos.xzy;
-    v += height_offset;
+//    v += height_offset;
     vec4 textureNorm = textureLod(normal_texture, TexCoord, 0);
 
     Normal = textureNorm.xzy * 2.0 - 1.0;

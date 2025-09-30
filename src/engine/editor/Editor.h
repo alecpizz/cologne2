@@ -31,6 +31,8 @@ namespace cologne
 
         void add_button(const char *name, std::function<void()> action);
 
+        void update_input(float dt);
+
         Editor(Editor &&) = delete;
 
         Editor(const Editor &) = delete;

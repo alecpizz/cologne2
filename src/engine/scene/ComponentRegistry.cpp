@@ -73,6 +73,9 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 .data<[](glm::mat4 &m) { return m[2]; }>("c2"_hs)
                 .data<[](glm::mat4 &m) { return m[3]; }>("c3"_hs);
 
+        entt::meta_factory<Color>()
+            .data<&Color::color>("color"_hs);
+
         REGISTER_COMPONENT(TransformComponent, "TransformComponent", NO_EDITOR)
                 REGISTER_PROPERTY(TransformComponent, position)
                 REGISTER_PROPERTY(TransformComponent, rotation)

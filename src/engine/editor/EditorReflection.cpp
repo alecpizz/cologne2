@@ -213,6 +213,22 @@ namespace cologne
         ImGui::Text("%s: %f %f %f %f", name, v.x, v.y, v.z, v.w);
     }
 
+    static bool write_color(Color &color, const PropertiesMap &properties)
+    {
+        const char *label = "color";
+        const auto name_str = get_editor_name(label, properties);
+        const auto name = name_str.c_str();
+        return ImGui::ColorEdit4(name, glm::value_ptr(color.color));
+    }
+
+    static void read_color(Color c, const PropertiesMap& properties)
+    {
+        const char *label = "color";
+        const auto name_str = get_editor_name(label, properties);
+        const auto name = name_str.c_str();
+        ImGui::ColorEdit4(name, glm::value_ptr(c.color));
+    }
+
     static bool write_quat(glm::quat &q, const PropertiesMap &properties)
     {
         const char *label = "quat";
@@ -409,6 +425,7 @@ namespace cologne
     }
 
 
+
     static bool editor_write_dummy()
     {
         return true;
@@ -460,6 +477,9 @@ namespace cologne
         entt::meta_factory<UUID>()
             .func<&write_uuid>("editor_read"_hs);
 
+        entt::meta_factory<Color>()
+            .func<&write_color>("editor_write"_hs)
+            .func<&read_color>("editor_read"_hs);
 
         entt::meta_factory<TagComponent>()
                 .func<&editor_read_dummy>("editor_read"_hs)

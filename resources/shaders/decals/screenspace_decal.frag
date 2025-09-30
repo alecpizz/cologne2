@@ -64,9 +64,9 @@ void main()
     vec4 scene_orm = texture(ormTexture, tex_coord);
     vec3 decal_orm = vec3(1.0, 0.015, 0.54);
     vec4 final_decal_color = decal_color * tint_color;
-    gORM = mix(scene_orm.rgb, decal_orm, decal_color.a);
-    gAlbedo = mix(scene_color, final_decal_color, decal_color.a);//decal_color * tint_color;
-    gNormal = vec4(normalize(mix(world_normal.xyz, decal_norm.xyz, decal_color.a)), 1.0);
+    gORM = decal_orm;
+    gAlbedo = final_decal_color;
+    gNormal = decal_norm;
     gPosition = vec4(world_pos, 1.0);
     gEmission = vec3(0.0, 0.0, 0.0);
 }

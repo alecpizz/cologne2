@@ -96,6 +96,12 @@ namespace cologne
         button_cmds.emplace_back(ButtonCmd{action, name});
     }
 
+    void Editor::update_input(float dt)
+    {
+        ImGui::SetNextFrameWantCaptureKeyboard(false);
+        ImGui::SetNextFrameWantCaptureMouse(false);
+    }
+
     void Editor::build_main_menu_bar()
     {
         if (ImGui::BeginMainMenuBar())

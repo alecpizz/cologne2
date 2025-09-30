@@ -1,6 +1,7 @@
 //
 // Created by alecpizz on 9/20/25.
 //
+#include <engine/core/Color.h>
 #include <engine/core/UUID.h>
 #include <engine/scene/Serialization.h>
 #include <entt/entt.hpp>
@@ -94,6 +95,23 @@ namespace nlohmann
     };
 
     template<>
+    struct adl_serializer<cologne::Color>
+    {
+        static void to_json(json &j, const cologne::Color &color)
+        {
+            j = {color.color.r, color.color.g, color.color.b, color.color.a};
+        }
+
+        static void from_json(const json &j, cologne::Color &color)
+        {
+            j.at(0).get_to(color.color.r);
+            j.at(1).get_to(color.color.g);
+            j.at(2).get_to(color.color.b);
+            j.at(3).get_to(color.color.a);
+        }
+    };
+
+    template<>
     struct adl_serializer<cologne::UUID>
     {
         static void to_json(json &j, const cologne::UUID &id)
@@ -140,8 +158,6 @@ namespace cologne::Serialization
     void init()
     {
         using namespace entt::literals;
-
-
 #define MAKE_SERIALIZERS(T) \
         entt::meta_factory<T>() \
       .func<[](T & val, nlohmann::json & j, const std::string& member_name) \
@@ -149,8 +165,10 @@ namespace cologne::Serialization
           serialize<T>(val, j, member_name); \
       }>("serialize"_hs) \
       .func<deserialize<T>>("deserialize"_hs)
+
         MAKE_SERIALIZERS(glm::vec3);
         MAKE_SERIALIZERS(glm::vec4);
+        MAKE_SERIALIZERS(Color);
         MAKE_SERIALIZERS(glm::vec2);
         MAKE_SERIALIZERS(glm::quat);
         MAKE_SERIALIZERS(UUID);
