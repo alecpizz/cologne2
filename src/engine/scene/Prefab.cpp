@@ -7,9 +7,8 @@
 #include <fstream>
 #include <engine/util/FileUtil.h>
 #include <nlohmann/json.hpp>
-
-#include "ComponentRegistry.h"
-#include "Components.h"
+#include <engine/scene/Components/Components.h>
+#include <engine/scene/Components/ComponentRegistry.h>
 #include "Entity.h"
 #include "SceneSaver.h"
 

@@ -5,11 +5,10 @@
 #include "SceneSaver.h"
 #include <engine/util/FileUtil.h>
 #include <nlohmann/json.hpp>
-#include "Components.h"
+#include "Components/ComponentRegistry.h"
 #include "Scene.h"
 #include <fstream>
 #include <engine/asset_manager/AssetManager.h>
-#include "ComponentRegistry.h"
 
 namespace cologne
 {

@@ -5,7 +5,6 @@
 #include <engine/physics/Physics.h>
 #include <engine/util/Util.h>
 #include <entt/entt.hpp>
-#include <nlohmann/adl_serializer.hpp>
 #include <engine/core/Color.h>
 #include <engine/renderer/types/LightHandle.h>
 
@@ -73,7 +72,7 @@ namespace cologne
             return rotation * glm::vec3(1.0f, 0.0f, 0.0f);
         }
 
-        bool operator==(const TransformComponent & transform) const = default;
+        bool operator==(const TransformComponent &transform) const = default;
     };
 
     struct ParentComponent
@@ -94,7 +93,9 @@ namespace cologne
         {
             return Physics::get_rigidbody_transform(body_id);
         }
+
         static void on_construct(entt::registry &registry, const entt::entity entt);
+
         static void on_destroy(entt::registry &registry, const entt::entity entt);
     };
 
@@ -119,7 +120,9 @@ namespace cologne
     struct MeshComponent
     {
         MeshComponent() = default;
-        MeshComponent(const std::string& name);
+
+        MeshComponent(const std::string &name);
+
         MeshComponent(int idx);
 
         std::string mesh_name;
@@ -129,15 +132,18 @@ namespace cologne
     {
         std::string model_name;
 
-        SkinnedModelComponent(const char* name)
+        SkinnedModelComponent(const char *name)
         {
             model_name = name;
         }
+
         SkinnedModelComponent() = default;
-        SkinnedModelComponent(const SkinnedModelComponent& other)
+
+        SkinnedModelComponent(const SkinnedModelComponent &other)
         {
             model_name = other.model_name;
         }
+
         //runtime
         Skeleton skeleton;
         SkeletonPose skeleton_pose;
@@ -153,6 +159,7 @@ namespace cologne
         uint32_t body_id = 0;
         std::string mesh_name;
         bool body_enabled = true;
+
         static void on_destroy(entt::registry &registry, const entt::entity entt);
     };
 
@@ -189,7 +196,9 @@ namespace cologne
         {
             cologne::Physics::teleport_player(id, pos);
         }
+
         static void on_construct(entt::registry &registry, const entt::entity entt);
+
         static void on_destroy(entt::registry &registry, const entt::entity entt);
     };
 
@@ -268,7 +277,9 @@ namespace cologne
         float inner_cutoff = 12.5f;
         bool cast_shadows = false;
         bool always_update_shadows = true;
+
         static void on_construct(entt::registry &registry, const entt::entity entt);
+
         static void on_destroy(entt::registry &registry, const entt::entity entt);
     };
 
@@ -276,18 +287,20 @@ namespace cologne
     struct LightHandleComponent
     {
         LightHandle light_handle;
+
         static void on_destroy(entt::registry &registry, const entt::entity entt);
     };
 
     struct HideInEditorComponent
     {
-        
     };
 
     struct InteractorComponent
     {
         bool update_every_frame = true;
+
         static void on_construct(entt::registry &registry, const entt::entity entt);
+
         static void on_destroy(entt::registry &registry, const entt::entity entt);
     };
 
@@ -295,12 +308,13 @@ namespace cologne
     {
         //dunno what can live in here yet :3
         uint32_t last_entity = 0;
-        uint32_t current_entity =0;
+        uint32_t current_entity = 0;
     };
 
     struct EditorCameraComponent
     {
         static void on_construct(entt::registry &registry, const entt::entity entt);
+
         static void on_destroy(entt::registry &registry, const entt::entity entt);
     };
 
@@ -316,7 +330,7 @@ namespace cologne
         std::string one_shot_name;
         float current_time = 0.0f;
 
-        void play_one_shot(const std::string& name)
+        void play_one_shot(const std::string &name)
         {
             if (current_clip_name == name)
             {
@@ -335,6 +349,7 @@ namespace cologne
             ACTIVE,
             KINEMATIC
         };
+
         State current_state = State::KINEMATIC;
         uint32_t id = UINT32_MAX;
         std::unordered_map<std::string, uint32_t> bone_to_ragdoll_map = std::unordered_map<std::string, uint32_t>();
@@ -355,6 +370,7 @@ namespace cologne
             ATTACKING,
             DYING
         };
+
         int agent_id = -1;
         glm::vec3 offset = glm::vec3(0.0f, -0.15f, 0.0f);
         float max_acceleration = 3.5f;
@@ -371,6 +387,8 @@ namespace cologne
         std::string attack_clip_name;
         std::string hit_clip_name;
     };
+
+
 
     struct BloodSplatterComponent
     {

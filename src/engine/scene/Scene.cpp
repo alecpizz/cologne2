@@ -14,8 +14,8 @@
 #include <engine/renderer/types/Light.h>
 #include <engine/util/DebugScope.h>
 
-#include "ComponentRegistry.h"
-#include "Components.h"
+#include "Components/Components.h"
+#include "Components/ComponentRegistry.h"
 #include "Entity.h"
 #include "SceneSaver.h"
 #include "systems/AnimationSystem.h"

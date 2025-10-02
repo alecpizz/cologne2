@@ -7,7 +7,7 @@
 #include <engine/util/DebugScope.h>
 #include "RaycastHitInfo.h"
 #include <engine/renderer/Renderer.h>
-#include <engine/scene/Components.h>
+#include <engine/scene/Components/Components.h>
 #include <Jolt/Jolt.h>
 #include <Jolt/Core/Factory.h>
 #include <Jolt/Core/TempAllocator.h>

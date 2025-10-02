@@ -12,7 +12,7 @@
 #include <misc/cpp/imgui_stdlib.h>
 
 #include "Editor.h"
-#include "engine/scene/ComponentRegistry.h"
+#include "engine/scene/Components/ComponentRegistry.h"
 
 namespace cologne
 {

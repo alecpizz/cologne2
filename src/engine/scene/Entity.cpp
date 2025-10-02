@@ -3,7 +3,7 @@
 //
 
 #include "Entity.h"
-#include "Components.h"
+#include <engine/scene/Components/Components.h>
 
 namespace cologne
 {

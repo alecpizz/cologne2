@@ -3,7 +3,7 @@
 #include "RaycastHitInfo.h"
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Mesh.h>
-#include <engine/scene/Components.h>
+#include <engine/scene/Components/Components.h>
 #include <engine/util/FileUtil.h>
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/PhysicsSystem.h>

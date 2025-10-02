@@ -6,7 +6,7 @@
 
 #include <engine/core/Engine.h>
 #include <engine/core/Input.h>
-#include <engine/scene/Components.h>
+#include <engine/scene/Components/Components.h>
 #include <engine/scene/Scene.h>
 
 namespace cologne

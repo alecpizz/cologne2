@@ -2,12 +2,10 @@
 // Created by alecpizz on 7/21/25.
 //
 #include "ComponentRegistry.h"
-
-
-#include <engine/asset_manager/AssetManager.h>
+#include <engine/core/Color.h>
+#include <engine/core/UUID.h>
 #include <nlohmann/json.hpp>
 #include "Components.h"
-
 
 namespace cologne::ComponentRegistry
 {
@@ -48,7 +46,7 @@ registry->remove<T>(entity); }>("remove"_hs) \
     {
         return component_type_map;
     }
-
+        
     void register_components()
     {
         using namespace entt::literals;

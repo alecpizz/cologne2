@@ -15,7 +15,7 @@
 #include "Time.h"
 #include <queue>
 #include <engine/util/FileUtil.h>
-#include <engine/scene/ComponentRegistry.h>
+#include <engine/scene/Components/ComponentRegistry.h>
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <engine/navigation/Navigation.h>

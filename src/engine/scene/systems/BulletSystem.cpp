@@ -6,7 +6,7 @@
 
 #include <engine/audio/Audio.h>
 #include <engine/core/Engine.h>
-#include <engine/scene/Components.h>
+#include <engine/scene/Components/Components.h>
 #include <engine/scene/Scene.h>
 #include <engine/physics/RaycastHitInfo.h>
 

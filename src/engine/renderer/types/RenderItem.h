@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include <engine/scene/Components.h>
+#include <engine/scene/Components/Components.h>
 #include <engine/renderer/types/Model.h>
 #include <engine/renderer/types/SkinnedModel.h>
 

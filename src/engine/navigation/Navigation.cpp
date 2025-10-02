@@ -7,7 +7,7 @@
 #include <DetourCrowd.h>
 #include <DetourDebugDraw.h>
 #include <DetourNavMesh.h>
-#include <engine/scene/Components.h>
+#include <engine/scene/Components/Components.h>
 #include <engine/scene/Scene.h>
 #include <engine/util/FileUtil.h>
 

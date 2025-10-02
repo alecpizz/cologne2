@@ -5,7 +5,7 @@
 #include "PhysicsSystem.h"
 
 #include <engine/asset_manager/AssetManager.h>
-#include <engine/scene/Components.h>
+#include <engine/scene/Components/Components.h>
 #include <engine/scene/Entity.h>
 #include <engine/scene/Scene.h>
 
