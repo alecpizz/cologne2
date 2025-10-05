@@ -181,8 +181,7 @@ namespace cologne
         if (entity.has_component<SkinnedModelComponent>())
         {
             auto model_comp = entity.get_component<SkinnedModelComponent>();
-            if (auto skinned_model = AssetManager::get_skinned_model_by_name(
-                model_comp.model_name))
+            if (auto skinned_model = model_comp.model.get())
             {
                 for (int32_t mesh_index: skinned_model->get_mesh_indices())
                 {

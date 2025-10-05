@@ -19,7 +19,7 @@ namespace cologne
         for (const auto entity: registry.view<SkinnedModelComponent>())
         {
             auto &sk = registry.get<SkinnedModelComponent>(entity);
-            auto model = AssetManager::get_skinned_model_by_name(sk.model_name);
+            auto model = sk.model.get();
             if (!model)
             {
                 continue;

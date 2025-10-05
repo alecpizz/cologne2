@@ -4,23 +4,20 @@
 #pragma once
 #include <engine/animation/Skeleton.h>
 #include <engine/animation/SkeletonPose.h>
+#include <engine/asset_manager/AssetHandle.h>
+
 namespace cologne
 {
 
     struct SkinnedModelComponent
     {
-        std::string model_name;
-
-        SkinnedModelComponent(const char *name)
-        {
-            model_name = name;
-        }
+        AssetHandle<SkinnedModel> model;
 
         SkinnedModelComponent() = default;
 
         SkinnedModelComponent(const SkinnedModelComponent &other)
         {
-            model_name = other.model_name;
+            model = other.model;
         }
 
         //runtime

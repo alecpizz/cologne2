@@ -356,7 +356,8 @@ namespace cologne
         c.primary = true;
 
         Entity viewModel = create_entity("viewmodel");
-        viewModel.add_component<SkinnedModelComponent>("deagle");
+        auto& sm = viewModel.add_component<SkinnedModelComponent>();
+        sm.model = AssetHandle<SkinnedModel>("deagle");
         viewModel.add_component<AnimatorComponent>();
         viewModel.add_component<ViewmodelComponent>();
 

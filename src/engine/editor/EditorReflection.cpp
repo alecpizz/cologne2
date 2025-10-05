@@ -490,26 +490,7 @@ namespace cologne
         return false;
     }
 
-    static bool write_skinned_model_component(SkinnedModelComponent &skinned_model_component,
-                                              const PropertiesMap &properties)
-    {
-        bool changed = false;
-        if (ImGui::BeginCombo("Skinned Model", skinned_model_component.model_name.c_str()))
-        {
-            for (const auto &model: AssetManager::get_skinned_models())
-            {
-                auto name = model.get_name();
-                if (ImGui::Selectable(name.c_str()))
-                {
-                    skinned_model_component.model_name = name;
-                    changed = true;
-                }
-            }
-            ImGui::EndCombo();
-        }
 
-        return changed;
-    }
 
     // static bool write_anim_component(AnimatorComponent &anim_component, const PropertiesMap &properties)
     // {
@@ -616,9 +597,6 @@ namespace cologne
                 .func<&write_mesh>("editor_write"_hs);
         entt::meta_factory<ConvexMeshColliderComponent>()
                 .func<&write_convex_mesh>("editor_write"_hs);
-
-        entt::meta_factory<SkinnedModelComponent>()
-                .func<&write_skinned_model_component>("editor_write"_hs);
         // entt::meta_factory<AnimatorComponent>()
         //         .func<&write_anim_component>("editor_write"_hs);
     }

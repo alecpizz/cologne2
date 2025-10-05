@@ -22,7 +22,7 @@ namespace cologne
         {
             auto &rd = registry.get<RagdollComponent>(entity);
             auto &sm = registry.get<SkinnedModelComponent>(entity);
-            auto model = AssetManager::get_skinned_model_by_name(sm.model_name);
+            auto model = sm.model.get();
             if (!model)
             {
                 continue;

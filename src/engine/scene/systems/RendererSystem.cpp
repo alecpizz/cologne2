@@ -73,7 +73,7 @@ namespace cologne
             {
                 continue;
             }
-            SkinnedModel *skinned_model = AssetManager::get_skinned_model_by_name(m.model_name);
+            SkinnedModel *skinned_model = m.model.get();
             std::vector<glm::mat4> bones = m.skeleton_pose.get_skinning_matrices();
             if (!m.skeleton_pose.get_skinning_matrices().empty())
             {

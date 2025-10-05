@@ -104,7 +104,7 @@ registry->remove<T>(entity); }>("remove"_hs) \
 
 
         REGISTER_COMPONENT(SkinnedModelComponent, "SkinnedModelComponent", EDITOR_READ_WRITE)
-                REGISTER_PROPERTY(SkinnedModelComponent, model_name);
+                REGISTER_PROPERTY(SkinnedModelComponent, model);
 
         REGISTER_COMPONENT(CameraComponent, "CameraComponent", EDITOR_READ_WRITE)
                 REGISTER_PROPERTY(CameraComponent, fov_radians)
