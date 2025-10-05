@@ -31,6 +31,8 @@ namespace cologne::AssetManager
     std::vector<SkinnedModel>& get_skinned_models();
     std::vector<Material>& get_materials();
     std::vector<Texture>& get_special_textures();
+    std::vector<SkinnedMesh>& get_skinned_meshes();
+
 
     Material* get_material_by_index(int32_t idx);
 
@@ -56,4 +58,5 @@ namespace cologne::AssetManager
     AnimationClip* get_animation_by_index(int32_t idx);
     int32_t get_animation_index_by_name(const std::string& name);
     int32_t get_first_animation_index_with_name(const std::string& name);
+
 }

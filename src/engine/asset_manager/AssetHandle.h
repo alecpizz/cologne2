@@ -4,49 +4,79 @@
 #pragma once
 #include "AssetManager.h"
 
-namespace cologne
-{
-    class AnimationClip;
-}
 
 namespace cologne
 {
     template<typename T>
     struct AssetHandle
     {
-        //move me into the source file please
-        explicit AssetHandle(const std::string& name)
+        explicit AssetHandle(const std::string &name)
         {
             handle = name;
-            if constexpr(std::is_same_v<T, AnimationClip>)
+            if constexpr (std::is_same_v<T, AnimationClip>)
             {
                 _asset = AssetManager::get_animation_by_name(name);
             }
+            else if constexpr (std::is_same_v<T, Mesh>)
+            {
+                _asset = AssetManager::get_mesh_by_name(name);
+            }
+            else if constexpr (std::is_same_v<T, Texture>)
+            {
+                _asset = AssetManager::get_texture_by_name(name);
+            }
+            else if constexpr (std::is_same_v<T, Model>)
+            {
+                _asset = AssetManager::get_model_by_name(name);
+            }
+            else if constexpr (std::is_same_v<T, SkinnedModel>)
+            {
+                _asset = AssetManager::get_skinned_model_by_name(name);
+            }
+            else if constexpr (std::is_same_v<T, SkinnedMesh>)
+            {
+                _asset = AssetManager::get_skinned_mesh_by_name(name);
+            }
+            else
+            {
+                LOG_ERROR("UKNOWN TYPE!");
+            }
         }
-        T* get() const
+
+        AssetHandle() = default;
+
+        T *get() const
         {
             if (!is_valid())
             {
                 return nullptr;
             }
-            return _asset.get();
+            return _asset;
         }
+
         std::string handle;
-        T* operator->() const
+
+        T *operator->() const
         {
             return get();
         }
-        T& operator*() const
+
+        T &operator*() const
         {
             return *get();
         }
 
-        bool is_valid() const
+        [[nodiscard]] bool is_valid() const
         {
             return !handle.empty();
         }
 
+        explicit operator bool() const
+        {
+            return is_valid();
+        }
+
     private:
-        Ref<T> _asset;
+        T* _asset;
     };
 }

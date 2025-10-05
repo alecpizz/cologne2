@@ -1,6 +1,7 @@
 //
 // Created by alecpizz on 7/30/25.
 //
+#include <engine/asset_manager/AssetHandle.h>
 #include <engine/asset_manager/AssetManager.h>
 #include <engine/scene/components/ConvexMeshColliderComponent.h>
 #include <engine/scene/components/LightComponent.h>
@@ -228,7 +229,7 @@ namespace cologne
         return ImGui::ColorEdit4(name, glm::value_ptr(color.color));
     }
 
-    static void read_color(Color c, const PropertiesMap& properties)
+    static void read_color(Color c, const PropertiesMap &properties)
     {
         const char *label = "color";
         const auto name_str = get_editor_name(label, properties);
@@ -286,12 +287,111 @@ namespace cologne
         return c0 || c1 || c2 || c3;
     }
 
-    static bool write_uuid(UUID &uuid, const PropertiesMap& properties)
+    static bool write_uuid(UUID &uuid, const PropertiesMap &properties)
     {
         const char *label = "uuid";
         const auto name_str = get_editor_name(label, properties);
         const auto name = name_str.c_str();
         return ImGui::DragScalar(name, ImGuiDataType_U64, &uuid._uuid);
+    }
+
+    template<typename T>
+    static bool write_asset_handle(AssetHandle<T> &handle, const PropertiesMap &properties)
+    {
+        const char *label = "uuid";
+        const auto name_str = get_editor_name(label, properties);
+        const auto name = name_str.c_str();
+        bool changed = false;
+        if (ImGui::BeginCombo(name, handle.handle.c_str()))
+        {
+            if constexpr (std::is_same_v<T, AnimationClip>)
+            {
+                for (const auto& animation: AssetManager::get_animations())
+                {
+                    auto name = animation.get_name();
+                    if (ImGui::Selectable(name.c_str()))
+                    {
+                        handle = AssetHandle<T>(name);
+                        changed = true;
+                    }
+                }
+            }
+            else if constexpr (std::is_same_v<T, Mesh>)
+            {
+                for (const auto& animation: AssetManager::get_animations())
+                {
+                    auto name = animation.get_name();
+                    if (ImGui::Selectable(name.c_str()))
+                    {
+                        handle = AssetHandle<T>(name);
+                        changed = true;
+                    }
+                }
+            }
+            else if constexpr (std::is_same_v<T, Texture>)
+            {
+                for (const auto& texture: AssetManager::get_special_textures())
+                {
+                    auto name = texture.get_name();
+                    if (ImGui::Selectable(name.c_str()))
+                    {
+                        handle = AssetHandle<T>(name);
+                        changed = true;
+                    }
+                }
+            }
+            else if constexpr (std::is_same_v<T, Model>)
+            {
+                for (const auto& model: AssetManager::get_models())
+                {
+                    auto name = model.get_name();
+                    if (ImGui::Selectable(name))
+                    {
+                        handle = AssetHandle<T>(name);
+                        changed = true;
+                    }
+                }
+            }
+            else if constexpr (std::is_same_v<T, SkinnedModel>)
+            {
+                for (const auto& skinned_model: AssetManager::get_skinned_models())
+                {
+                    auto name = skinned_model.get_name();
+                    if (ImGui::Selectable(name.c_str()))
+                    {
+                        handle = AssetHandle<T>(name);
+                        changed = true;
+                    }
+                }
+            }
+            else if constexpr (std::is_same_v<T, SkinnedMesh>)
+            {
+                for (const auto& skinned_mesh: AssetManager::get_skinned_meshes())
+                {
+                    auto name = skinned_mesh.get_name();
+                    if (ImGui::Selectable(name.c_str()))
+                    {
+                        handle = AssetHandle<T>(name);
+                        changed = true;
+                    }
+                }
+            }
+            else
+            {
+                LOG_ERROR("UKNOWN TYPE!");
+            }
+            ImGui::EndCombo();
+        }
+        return changed;
+    }
+
+    template<typename T>
+    static void read_asset_handle(const AssetHandle<T> &handle, const PropertiesMap &properties)
+    {
+        const char *label = "uuid";
+        const auto name_str = get_editor_name(label, properties);
+        const auto name = name_str.c_str();
+        ImGui::Text("%s %s", name, handle.handle.c_str());
     }
 
     static bool write_light(LightComponent &light, const PropertiesMap &properties)
@@ -433,7 +533,6 @@ namespace cologne
     // }
 
 
-
     static bool editor_write_dummy()
     {
         return true;
@@ -483,11 +582,27 @@ namespace cologne
                 .func<&read_mat4>("editor_read"_hs);
 
         entt::meta_factory<UUID>()
-            .func<&write_uuid>("editor_read"_hs);
+                .func<&write_uuid>("editor_read"_hs);
+
+        entt::meta_factory<AssetHandle<AnimationClip>>()
+            .func<&write_asset_handle<AnimationClip>>("editor_write"_hs)
+            .func<&read_asset_handle<AnimationClip>>("editor_read"_hs);
+        entt::meta_factory<AssetHandle<Texture>>()
+           .func<&write_asset_handle<Texture>>("editor_write"_hs)
+           .func<&read_asset_handle<Texture>>("editor_read"_hs);
+        entt::meta_factory<AssetHandle<Model>>()
+           .func<&write_asset_handle<Model>>("editor_write"_hs)
+           .func<&read_asset_handle<Model>>("editor_read"_hs);
+        entt::meta_factory<AssetHandle<SkinnedModel>>()
+           .func<&write_asset_handle<SkinnedModel>>("editor_write"_hs)
+           .func<&read_asset_handle<SkinnedModel>>("editor_read"_hs);
+        entt::meta_factory<AssetHandle<Mesh>>()
+           .func<&write_asset_handle<Mesh>>("editor_write"_hs)
+           .func<&read_asset_handle<Mesh>>("editor_read"_hs);
 
         entt::meta_factory<Color>()
-            .func<&write_color>("editor_write"_hs)
-            .func<&read_color>("editor_read"_hs);
+                .func<&write_color>("editor_write"_hs)
+                .func<&read_color>("editor_read"_hs);
 
         entt::meta_factory<TagComponent>()
                 .func<&editor_read_dummy>("editor_read"_hs)

@@ -70,7 +70,6 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 .data<[](glm::mat4 &m) { return m[1]; }>("c1"_hs)
                 .data<[](glm::mat4 &m) { return m[2]; }>("c2"_hs)
                 .data<[](glm::mat4 &m) { return m[3]; }>("c3"_hs);
-
         entt::meta_factory<Color>()
                 .data<&Color::color>("color"_hs);
 
@@ -197,7 +196,11 @@ registry->remove<T>(entity); }>("remove"_hs) \
             REGISTER_PROPERTY(NPCCrowdMemberComponent, idle_clip_name)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, run_clip_name)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, attack_clip_name)
-            REGISTER_PROPERTY(NPCCrowdMemberComponent, hit_clip_name);
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, hit_clip_name)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, idle_clip)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, run_clip)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, attack_clip)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, hit_clip);
 
         REFLECT_ENUM(NPCCrowdMemberComponent::State)
                 ENUMERATOR(NPCCrowdMemberComponent::State, IDLE)

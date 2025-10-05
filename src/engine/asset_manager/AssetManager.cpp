@@ -325,6 +325,11 @@ namespace cologne::AssetManager
         return special_textures;
     }
 
+    std::vector<SkinnedMesh> & get_skinned_meshes()
+    {
+        return skinned_meshes;
+    }
+
     Material *get_material_by_index(int32_t idx)
     {
         return &materials[idx];

@@ -3,6 +3,7 @@
 //
 #pragma once
 #include <engine/asset_manager/AssetHandle.h>
+#include <engine/animation/AnimationClip.h>
 
 namespace cologne
 {
@@ -27,10 +28,15 @@ namespace cologne
         State current_state = SPAWNING;
         float state_timer = 0.0f;
 
-        //todo: handles PLEASE
+        //bad, dumb, stupid
         std::string idle_clip_name;
         std::string run_clip_name;
         std::string attack_clip_name;
         std::string hit_clip_name;
+        //cool, awesome, sexy
+        AssetHandle<AnimationClip> idle_clip;
+        AssetHandle<AnimationClip> run_clip;
+        AssetHandle<AnimationClip> attack_clip;
+        AssetHandle<AnimationClip> hit_clip;
     };
 }
