@@ -404,26 +404,26 @@ namespace cologne
         return changed;
     }
 
-    static bool write_anim_component(AnimatorComponent &anim_component, const PropertiesMap &properties)
-    {
-        bool changed = false;
-        if (ImGui::BeginCombo("Source Clip Name", anim_component.source_clip_name.c_str()))
-        {
-            for (const auto &anim: AssetManager::get_animations())
-            {
-                auto name = anim.get_name();
-                if (ImGui::Selectable(name.c_str()))
-                {
-                    anim_component.source_clip_name = name;
-                    changed = true;
-                }
-            }
-            ImGui::EndCombo();
-        }
-        ImGui::DragFloat("Blend Duration", &anim_component.blend_duration, 0.01f);
-
-        return changed;
-    }
+    // static bool write_anim_component(AnimatorComponent &anim_component, const PropertiesMap &properties)
+    // {
+    //     bool changed = false;
+    //     if (ImGui::BeginCombo("Source Clip Name", anim_component.source_clip_name.c_str()))
+    //     {
+    //         for (const auto &anim: AssetManager::get_animations())
+    //         {
+    //             auto name = anim.get_name();
+    //             if (ImGui::Selectable(name.c_str()))
+    //             {
+    //                 anim_component.source_clip_name = name;
+    //                 changed = true;
+    //             }
+    //         }
+    //         ImGui::EndCombo();
+    //     }
+    //     ImGui::DragFloat("Blend Duration", &anim_component.blend_duration, 0.01f);
+    //
+    //     return changed;
+    // }
 
 
 
@@ -497,7 +497,7 @@ namespace cologne
 
         entt::meta_factory<SkinnedModelComponent>()
                 .func<&write_skinned_model_component>("editor_write"_hs);
-        entt::meta_factory<AnimatorComponent>()
-                .func<&write_anim_component>("editor_write"_hs);
+        // entt::meta_factory<AnimatorComponent>()
+        //         .func<&write_anim_component>("editor_write"_hs);
     }
 }

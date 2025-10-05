@@ -325,47 +325,57 @@ namespace cologne
 
     struct AnimatorComponent
     {
-        std::string source_clip_name;
-        float source_time = 0.0f;
-
-        std::string dest_clip_name;
-        float dest_time = 0.0f;
-
-        float blend_time = 0.0f;
-        float blend_duration = 0.2f;
-
-        std::string one_shot_name;
-        std::string one_shot_return_clip;
-
-        void crossfade_to(const std::string& name, float duration = 0.2f)
+        struct AnimationLayer
         {
-            if (dest_clip_name == name) return;
-            if (dest_clip_name.empty() && source_clip_name == name) return;
+            std::string clip_name;
+            float time = 0.0f;
+            float weight = 1.0f;
+            bool loop = true;
+            bool is_finished = false;
 
-            // Start a new blend
-            dest_clip_name = name;
-            dest_time = 0.0f;
-            blend_time = 0.0f;
-            blend_duration = duration;
+            std::string fade_to_clip_name;
+            float fade_time = 0.0f;
+            float fade_to_time = 0.0f;
+            float fade_duration = 0.0f;
+            bool next_loop = true;
+        };
 
-            one_shot_name = "";
+        std::vector<AnimationLayer> layers;
+
+        AnimatorComponent()
+        {
+            layers.emplace_back();
         }
 
-        void play_one_shot(const std::string &name, float duration = 0.1f)
+        void play(const std::string& clip_name, int layer_index = 0, bool loop = true)
         {
-            if (source_clip_name == name && dest_clip_name.empty())
+            if (layer_index >= layers.size())
             {
-                source_time = 0.0f;
-                return;
+                layers.resize(layer_index + 1);
             }
 
-            one_shot_return_clip = source_clip_name;
-            one_shot_name = name;
+            layers[layer_index].clip_name = clip_name;
+            layers[layer_index].time = 0.0f;
+            layers[layer_index].loop = loop;
+            layers[layer_index].fade_duration = 0.0f;
+            layers[layer_index].is_finished = false;
+        }
 
-            dest_clip_name = name;
-            dest_time = 0.0f;
-            blend_time = 0.0f;
-            blend_duration = duration;
+        void crossfade_to(const std::string& name, float duration, int layer_index = 0, bool loop = true)
+        {
+            if (layer_index >= layers.size())
+            {
+                layers.resize(layer_index + 1);
+            }
+
+            auto& layer = layers[layer_index];
+            if (layer.clip_name == name) return;
+
+            layer.fade_to_clip_name = name;
+            layer.fade_time = 0.0f;
+            layer.fade_to_time = 0.0f;
+            layer.fade_duration = duration;
+            layer.next_loop = loop;
         }
     };
 

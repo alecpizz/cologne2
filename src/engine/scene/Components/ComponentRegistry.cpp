@@ -163,10 +163,7 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 REGISTER_PROPERTY(BulletComponent, direction)
                 REGISTER_PROPERTY(BulletComponent, damage);
 
-        REGISTER_COMPONENT(AnimatorComponent, "AnimComponent", EDITOR_READ_WRITE)
-                REGISTER_PROPERTY(AnimatorComponent, source_clip_name)
-                REGISTER_PROPERTY(AnimatorComponent, blend_duration)
-                REGISTER_PROPERTY(AnimatorComponent, one_shot_name);
+        REGISTER_COMPONENT(AnimatorComponent, "AnimComponent", EDITOR_READ_WRITE);
         REGISTER_COMPONENT(RagdollComponent, "RagdollComponent", EDITOR_READ_ONLY);
 
         REGISTER_COMPONENT(HideInEditorComponent, "HideInEditorComponent", NO_EDITOR);

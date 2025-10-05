@@ -47,6 +47,13 @@ namespace cologne
             Audio::add_sound(controller.reload_sound);
             controller.current_ammo = controller.max_ammo;
         }
+
+        auto view2 = registry.view<ViewmodelComponent, AnimatorComponent>();
+        for (auto entity : view2)
+        {
+            auto& animator = registry.get<AnimatorComponent>(entity);
+            animator.play("deagle_Rig|Rig|MK_Idle");
+        }
     }
 
     void PlayerControllerSystem::on_update(Scene *scene, float dt)
@@ -477,7 +484,7 @@ namespace cologne
                 LOG_INFO("Bang");
                 Entity vm = scene->get_entity_by_uuid(player.viewmodel);
                 auto &anim = vm.get_component<AnimatorComponent>();
-                anim.play_one_shot("deagle_Rig|Rig|MK_Shot");
+                anim.play("deagle_Rig|Rig|MK_Shot", 1, false);
                 LOG_INFO("play one shot");
                 Audio::play_sound(controller.shoot_sound, 30);
                 auto cam = scene->get_entity_by_uuid(player.camera);
@@ -496,7 +503,7 @@ namespace cologne
                 controller.gun_time = controller.reload_time;
                 Entity vm = scene->get_entity_by_uuid(player.viewmodel);
                 auto &anim = vm.get_component<AnimatorComponent>();
-                anim.play_one_shot("deagle_Rig|Rig|MK_ReloadFull");
+                anim.play("deagle_Rig|Rig|MK_ReloadFull", 1, false);
                 LOG_INFO("play one reload shot");
                 Audio::play_sound(controller.reload_sound, 20);
                 controller.is_reloading = true;

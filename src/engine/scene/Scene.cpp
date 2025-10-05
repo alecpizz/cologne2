@@ -33,7 +33,7 @@
 
 namespace cologne
 {
-    static std::vector<std::unique_ptr<System>> systems;
+    static std::vector<std::unique_ptr<System> > systems;
 
     void Scene::setup_blank_scene()
     {
@@ -344,8 +344,7 @@ namespace cologne
 
         Entity viewModel = create_entity("viewmodel");
         viewModel.add_component<SkinnedModelComponent>("deagle");
-        auto &anim4 = viewModel.add_component<AnimatorComponent>();
-        anim4.source_clip_name = "deagle_Rig|Rig|MK_Idle";
+        viewModel.add_component<AnimatorComponent>();
         viewModel.add_component<ViewmodelComponent>();
 
         Entity player = create_entity("player");
@@ -514,7 +513,9 @@ namespace cologne
     {
         static int blood_count = 0;
         Entity vat_blood = create_entity("vat blood" + blood_count++);
-        glm::vec3 world_up = glm::abs(glm::dot(dir, glm::vec3(0, 1, 0))) > 0.99f ? glm::vec3(1, 0, 0) : glm::vec3(0, 1, 0);
+        glm::vec3 world_up = glm::abs(glm::dot(dir, glm::vec3(0, 1, 0))) > 0.99f
+                                 ? glm::vec3(1, 0, 0)
+                                 : glm::vec3(0, 1, 0);
         glm::vec3 right = glm::normalize(glm::cross(world_up, dir));
         glm::vec3 up = glm::cross(dir, right);
 
@@ -530,7 +531,7 @@ namespace cologne
         model *= glm::translate(glm::mat4(1.0f), glm::vec3(-0.08f, -0.23f, -0.155f));
         vat_blood.get_transform() = model;
 
-        auto& blood = vat_blood.add_component<BloodSplatterComponent>();
+        auto &blood = vat_blood.add_component<BloodSplatterComponent>();
         blood.mesh_name = "blood_mesh_TRIANGLE_CLOUD";
         blood.position_texture_name = "blood_pos";
         blood.normal_texture_name = "blood_norm";
@@ -546,7 +547,7 @@ namespace cologne
             decal_blood.get_transform().rotation = glm::quat(rot);
             decal_blood.get_transform().scale = glm::vec3(2.0f);
 
-            auto& decal = decal_blood.add_component<DecalComponent>();
+            auto &decal = decal_blood.add_component<DecalComponent>();
             decal.albedo_name = "decal_white";
             decal.normal_name = "decal_normal";
             decal.color_tint = Color(0.42f, 0.0f, 0.0f, 1.0f);
