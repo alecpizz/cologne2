@@ -4,8 +4,8 @@
 
 #include "BloodSystem.h"
 
-#include <engine/scene/Components/Components.h>
 #include <engine/scene/Scene.h>
+#include <engine/scene/components/BloodSplatterComponent.h>
 
 namespace cologne
 {

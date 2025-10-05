@@ -5,7 +5,7 @@
 #include <engine/core/Color.h>
 #include <engine/core/UUID.h>
 #include <nlohmann/json.hpp>
-#include "Components.h"
+#include "AllComponents.h"
 
 namespace cologne::ComponentRegistry
 {
@@ -72,7 +72,7 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 .data<[](glm::mat4 &m) { return m[3]; }>("c3"_hs);
 
         entt::meta_factory<Color>()
-            .data<&Color::color>("color"_hs);
+                .data<&Color::color>("color"_hs);
 
         REGISTER_COMPONENT(TransformComponent, "TransformComponent", NO_EDITOR)
                 REGISTER_PROPERTY(TransformComponent, position)
@@ -214,7 +214,7 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 REGISTER_PROPERTY(BloodSplatterComponent, normal_texture_name)
                 REGISTER_PROPERTY(BloodSplatterComponent, offset);
 
-            REGISTER_COMPONENT(DecalComponent, "DecalComponent", EDITOR_READ_WRITE)
+        REGISTER_COMPONENT(DecalComponent, "DecalComponent", EDITOR_READ_WRITE)
                 REGISTER_PROPERTY(DecalComponent, albedo_name)
                 REGISTER_PROPERTY(DecalComponent, normal_name)
                 REGISTER_PROPERTY(DecalComponent, orm_name)

@@ -1,5 +1,6 @@
 #pragma once
-#include <engine/scene/Components/Components.h>
+#include <engine/scene/components/LightComponent.h>
+#include <engine/scene/components/TransformComponent.h>
 
 namespace cologne
 {

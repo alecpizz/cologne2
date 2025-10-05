@@ -7,10 +7,12 @@
 #include <fstream>
 #include <engine/util/FileUtil.h>
 #include <nlohmann/json.hpp>
-#include <engine/scene/Components/Components.h>
-#include <engine/scene/Components/ComponentRegistry.h>
+#include <engine/scene/components/ComponentRegistry.h>
 #include "Entity.h"
 #include "SceneSaver.h"
+#include "components/ChildComponent.h"
+#include "components/IDComponent.h"
+#include "components/ParentComponent.h"
 
 namespace cologne
 {

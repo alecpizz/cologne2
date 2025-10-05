@@ -3,11 +3,20 @@
 #include "engine/renderer/types/RenderItem.h"
 #include <filesystem>
 #include <queue>
-
+#include "types/LightHandle.h"
 #include "types/Light.h"
+#include <engine/scene/components/LightComponent.h>
+#include <engine/scene/components/CameraComponent.h>
+#include <engine/scene/components/TransformComponent.h>
 
 namespace cologne
 {
+    struct GPUMaterial;
+    struct AABB;
+    struct MultiDrawElementsCommand;
+    class Texture;
+    struct WeightedVertex;
+    struct Vertex;
     class Shader;
     class SSBO;
     struct Light;

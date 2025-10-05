@@ -7,7 +7,6 @@
 #include <engine/util/DebugScope.h>
 #include "RaycastHitInfo.h"
 #include <engine/renderer/Renderer.h>
-#include <engine/scene/Components/Components.h>
 #include <Jolt/Jolt.h>
 #include <Jolt/Core/Factory.h>
 #include <Jolt/Core/TempAllocator.h>
@@ -21,6 +20,9 @@
 #include <Jolt/Core/StreamWrapper.h>
 #include <Jolt/Renderer/DebugRendererSimple.h>
 #include <fstream>
+#include <engine/scene/components/RigidbodyComponent.h>
+#include <engine/scene/components/StaticColliderComponent.h>
+
 #include "PhysicsUtil.h"
 #include "Jolt/Physics/Ragdoll/Ragdoll.h"
 

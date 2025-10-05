@@ -6,7 +6,10 @@
 
 #include <engine/audio/Audio.h>
 #include <engine/core/Engine.h>
-#include <engine/scene/Components/Components.h>
+#include <engine/physics/Physics.h>
+#include <engine/scene/components/BulletComponent.h>
+#include <engine/scene/components/EnemyComponent.h>
+#include <engine/scene/components/RigidbodyComponent.h>
 #include <engine/scene/Scene.h>
 #include <engine/physics/RaycastHitInfo.h>
 

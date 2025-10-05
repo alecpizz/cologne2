@@ -1,7 +1,9 @@
 #include "Physics.h"
 #include "PhysicsUtil.h"
 #include "RaycastHitInfo.h"
-#include <engine/scene/Components/Components.h>
+#include <engine/scene/components/StaticColliderComponent.h>
+#include <engine/scene/components/WorldTransformComponent.h>
+#include <engine/util/Util.h>
 
 #include <Jolt/Jolt.h>
 #include <Jolt/Math/Quat.h>

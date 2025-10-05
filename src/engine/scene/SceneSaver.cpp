@@ -5,7 +5,7 @@
 #include "SceneSaver.h"
 #include <engine/util/FileUtil.h>
 #include <nlohmann/json.hpp>
-#include "Components/ComponentRegistry.h"
+#include "components/ComponentRegistry.h"
 #include "Scene.h"
 #include <fstream>
 #include <engine/asset_manager/AssetManager.h>

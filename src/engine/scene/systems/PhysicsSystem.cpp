@@ -5,9 +5,14 @@
 #include "PhysicsSystem.h"
 
 #include <engine/asset_manager/AssetManager.h>
-#include <engine/scene/Components/Components.h>
 #include <engine/scene/Entity.h>
 #include <engine/scene/Scene.h>
+#include <engine/scene/components/ActiveComponent.h>
+#include <engine/scene/components/RigidbodyComponent.h>
+#include <engine/scene/components/ConvexMeshColliderComponent.h>
+#include <engine/scene/components/StaticColliderComponent.h>
+#include <engine/scene/components/TransformComponent.h>
+#include <engine/scene/components/WorldTransformComponent.h>
 
 namespace cologne
 {

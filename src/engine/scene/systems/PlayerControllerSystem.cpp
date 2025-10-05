@@ -9,9 +9,11 @@
 #include <engine/core/Engine.h>
 #include <engine/core/Input.h>
 #include <engine/renderer/Renderer.h>
-#include <engine/scene/Components/Components.h>
 #include <engine/scene/Entity.h>
 #include <engine/scene/Scene.h>
+#include <engine/scene/components/AnimatorComponent.h>
+#include <engine/scene/components/PlayerComponent.h>
+#include <engine/scene/components/ViewmodelComponent.h>
 
 namespace cologne
 {

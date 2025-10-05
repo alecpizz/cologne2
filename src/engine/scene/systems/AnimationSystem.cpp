@@ -4,9 +4,12 @@
 
 #include "AnimationSystem.h"
 
+#include <engine/animation/SkeletonPose.h>
 #include <engine/asset_manager/AssetManager.h>
-#include <engine/scene/Components/Components.h>
+#include <engine/scene/components/SkinnedModelComponent.h>
 #include <engine/scene/Scene.h>
+#include <engine/scene/components/ActiveComponent.h>
+#include <engine/util/Util.h>
 
 namespace cologne
 {

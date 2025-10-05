@@ -3,11 +3,15 @@
 //
 
 #include "RagdollSystem.h"
+#include <engine/physics/Physics.h>
 #include <engine/asset_manager/AssetManager.h>
-#include <engine/core/Input.h>
-#include <engine/scene/Components/Components.h>
 #include <engine/scene/Entity.h>
+#include <engine/util/Util.h>
 #include <engine/scene/Scene.h>
+#include <engine/scene/components/ActiveComponent.h>
+#include <engine/scene/components/SkinnedModelComponent.h>
+#include <engine/scene/components/RagdollComponent.h>
+#include <engine/scene/components/WorldTransformComponent.h>
 
 namespace cologne
 {

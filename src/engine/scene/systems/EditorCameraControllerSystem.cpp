@@ -6,8 +6,10 @@
 
 #include <engine/core/Engine.h>
 #include <engine/core/Input.h>
-#include <engine/scene/Components/Components.h>
+#include <engine/scene/components/EditorCameraComponent.h>
 #include <engine/scene/Scene.h>
+#include <engine/scene/components/ActiveComponent.h>
+#include <engine/scene/components/TransformComponent.h>
 
 namespace cologne
 {

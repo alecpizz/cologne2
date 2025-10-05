@@ -9,10 +9,16 @@
 #include <imgui.h>
 #include <engine/audio/Audio.h>
 #include <engine/renderer/types/Light.h>
+#include <engine/scene/components/ActiveComponent.h>
+#include <engine/scene/components/MeshComponent.h>
+#include <engine/scene/components/ModelComponent.h>
+#include <engine/scene/components/ParentComponent.h>
+#include <engine/scene/components/SkinnedModelComponent.h>
+#include <engine/scene/components/TagComponent.h>
 #include <misc/cpp/imgui_stdlib.h>
 
 #include "Editor.h"
-#include "engine/scene/Components/ComponentRegistry.h"
+#include "engine/scene/components/ComponentRegistry.h"
 
 namespace cologne
 {

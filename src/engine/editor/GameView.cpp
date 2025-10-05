@@ -5,9 +5,10 @@
 #include <engine/core/Engine.h>
 #include <engine/core/EventManager.h>
 #include <engine/core/Input.h>
-#include <engine/core/SceneManager.h>
 #include <engine/core/Window.h>
 #include <engine/renderer/Renderer.h>
+#include <engine/scene/components/ChildComponent.h>
+#include <engine/scene/components/ActiveComponent.h>
 
 #include "Editor.h"
 #include "ImGuizmo.h"

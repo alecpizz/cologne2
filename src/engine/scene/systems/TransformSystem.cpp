@@ -4,9 +4,11 @@
 
 #include "TransformSystem.h"
 
-#include <engine/scene/Components/Components.h>
 #include <engine/scene/Entity.h>
 #include <engine/scene/Scene.h>
+#include <engine/scene/components/ParentComponent.h>
+#include <engine/scene/components/TransformComponent.h>
+#include <engine/scene/components/WorldTransformComponent.h>
 
 namespace cologne
 {

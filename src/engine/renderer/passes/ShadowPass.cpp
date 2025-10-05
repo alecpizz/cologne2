@@ -5,6 +5,7 @@
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Light.h>
 #include <engine/renderer/types/SSBO.h>
+#include <engine/renderer/types/Texture.h>
 
 namespace cologne
 {

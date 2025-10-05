@@ -8,8 +8,9 @@
 #include <DetourNavMeshQuery.h>
 #include <fstream>
 #include <engine/asset_manager/AssetManager.h>
-#include <engine/scene/Components/Components.h>
 #include <engine/scene/Scene.h>
+#include <engine/scene/components/WorldTransformComponent.h>
+#include <engine/scene/components/StaticColliderComponent.h>
 #include <engine/util/FileUtil.h>
 
 namespace cologne

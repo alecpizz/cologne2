@@ -5,13 +5,18 @@
 #include "InteractionSystem.h"
 
 #include <engine/core/Engine.h>
+#include <engine/physics/Physics.h>
 #include <engine/physics/RaycastHitInfo.h>
 #include <engine/renderer/Renderer.h>
-#include <engine/scene/Components/Components.h>
+#include <engine/scene/components/InteractorComponent.h>
+#include <engine/scene/components/InteractionControllerComponent.h>
 #include <engine/scene/Scene.h>
+#include <engine/scene/components/TagComponent.h>
 
 namespace cologne
 {
+    struct TagComponent;
+
     void InteractionSystem::on_update(Scene* scene, float dt)
     {
         auto &registry = scene->get_raw_registry();

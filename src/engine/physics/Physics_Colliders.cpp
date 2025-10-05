@@ -3,7 +3,6 @@
 #include "RaycastHitInfo.h"
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/Mesh.h>
-#include <engine/scene/Components/Components.h>
 #include <engine/util/FileUtil.h>
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/PhysicsSystem.h>
@@ -19,6 +18,7 @@
 
 #include <fstream>
 #include <engine/asset_manager/AssetManager.h>
+#include <engine/scene/components/ConvexMeshColliderComponent.h>
 
 #include "Jolt/Physics/Ragdoll/Ragdoll.h"
 

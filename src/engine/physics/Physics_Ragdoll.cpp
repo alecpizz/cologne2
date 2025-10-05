@@ -2,7 +2,6 @@
 #include "PhysicsUtil.h"
 #include "RaycastHitInfo.h"
 #include <engine/renderer/Renderer.h>
-#include <engine/scene/Components/Components.h>
 
 #include <engine/util/FileUtil.h>
 #include <Jolt/Jolt.h>

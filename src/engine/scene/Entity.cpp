@@ -3,7 +3,11 @@
 //
 
 #include "Entity.h"
-#include <engine/scene/Components/Components.h>
+
+#include "components/ActiveComponent.h"
+#include "components/IDComponent.h"
+#include "components/TagComponent.h"
+#include "components/TransformComponent.h"
 
 namespace cologne
 {

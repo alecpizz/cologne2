@@ -8,9 +8,12 @@
 #include <engine/core/Engine.h>
 #include <engine/renderer/Renderer.h>
 #include <engine/renderer/types/RenderItem.h>
-#include <engine/scene/Components/Components.h>
-#include <engine/scene/Entity.h>
 #include <engine/scene/Scene.h>
+#include <engine/scene/components/ActiveComponent.h>
+#include <engine/scene/components/ModelComponent.h>
+#include <engine/scene/components/SkinnedModelComponent.h>
+#include <engine/scene/components/ViewmodelComponent.h>
+#include <engine/scene/components/MeshComponent.h>
 
 namespace cologne
 {

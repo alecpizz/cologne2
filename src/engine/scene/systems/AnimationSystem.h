@@ -2,11 +2,14 @@
 // Created by alecpizz on 8/13/25.
 //
 #pragma once
-#include <engine/scene/Components/Components.h>
 #include <engine/scene/systems/System.h>
+#include <engine/scene/components/AnimatorComponent.h>
 
 namespace cologne
 {
+    struct Bone;
+    class Skeleton;
+    class SkeletonPose;
     class AnimationClip;
 }
 

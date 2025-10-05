@@ -6,6 +6,12 @@
 #include <engine/core/Engine.h>
 #include <engine/scene/Entity.h>
 #include <engine/scene/Prefab.h>
+#include <engine/scene/components/HideInEditorComponent.h>
+#include <engine/scene/components/ChildComponent.h>
+#include <engine/scene/components/IDComponent.h>
+#include <engine/scene/components/ParentComponent.h>
+#include <engine/scene/components/TransformComponent.h>
+#include <engine/scene/components/TagComponent.h>
 #include <engine/util/FileUtil.h>
 #include <misc/cpp/imgui_stdlib.h>
 #include "Editor.h"

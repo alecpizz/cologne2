@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include <shared_mutex>
-#include <engine/scene/Components/Components.h>
 #include <engine/scene/Entity.h>
 
 namespace cologne

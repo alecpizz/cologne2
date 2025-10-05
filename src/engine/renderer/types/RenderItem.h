@@ -3,9 +3,10 @@
 //
 
 #pragma once
-#include <engine/scene/Components/Components.h>
-#include <engine/renderer/types/Model.h>
-#include <engine/renderer/types/SkinnedModel.h>
+#include <engine/scene/components/WorldTransformComponent.h>
+#include <engine/scene/components/BloodSplatterComponent.h>
+#include <engine/scene/components/DecalComponent.h>
+#include <entt/entt.hpp>
 
 namespace cologne
 {

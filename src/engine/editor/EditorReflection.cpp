@@ -2,6 +2,13 @@
 // Created by alecpizz on 7/30/25.
 //
 #include <engine/asset_manager/AssetManager.h>
+#include <engine/scene/components/ConvexMeshColliderComponent.h>
+#include <engine/scene/components/LightComponent.h>
+#include <engine/scene/components/MeshComponent.h>
+#include <engine/scene/components/ModelComponent.h>
+#include <engine/scene/components/SkinnedModelComponent.h>
+#include <engine/scene/components/TagComponent.h>
+#include <engine/core/Color.h>
 
 #include "Editor.h"
 #include "imgui.h"
