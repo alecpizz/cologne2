@@ -506,6 +506,14 @@ namespace cologne::AssetManager
 
     AnimationClip *get_animation_by_name(const std::string &name)
     {
+        if (name.empty())
+        {
+            return nullptr;
+        }
+        if (!animation_index_map.contains(name))
+        {
+            return nullptr;
+        }
         return &animations.at(animation_index_map[name]);
     }
 

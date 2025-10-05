@@ -345,7 +345,7 @@ namespace cologne
         Entity viewModel = create_entity("viewmodel");
         viewModel.add_component<SkinnedModelComponent>("deagle");
         auto &anim4 = viewModel.add_component<AnimatorComponent>();
-        anim4.base_clip_name = "deagle_Rig|Rig|MK_Idle";
+        anim4.source_clip_name = "deagle_Rig|Rig|MK_Idle";
         viewModel.add_component<ViewmodelComponent>();
 
         Entity player = create_entity("player");
@@ -520,7 +520,7 @@ namespace cologne
 
         glm::mat4 rotation = glm::mat4(glm::mat3(right, up, dir));
         glm::mat4 rotation_90 = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(0, 1, 0));
-        glm::vec3 scale = glm::vec3(6.0f);
+        glm::vec3 scale = glm::vec3(12.0f);
 
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, pos);

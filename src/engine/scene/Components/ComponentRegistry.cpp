@@ -46,7 +46,7 @@ registry->remove<T>(entity); }>("remove"_hs) \
     {
         return component_type_map;
     }
-        
+
     void register_components()
     {
         using namespace entt::literals;
@@ -164,7 +164,8 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 REGISTER_PROPERTY(BulletComponent, damage);
 
         REGISTER_COMPONENT(AnimatorComponent, "AnimComponent", EDITOR_READ_WRITE)
-                REGISTER_PROPERTY(AnimatorComponent, base_clip_name)
+                REGISTER_PROPERTY(AnimatorComponent, source_clip_name)
+                REGISTER_PROPERTY(AnimatorComponent, blend_duration)
                 REGISTER_PROPERTY(AnimatorComponent, one_shot_name);
         REGISTER_COMPONENT(RagdollComponent, "RagdollComponent", EDITOR_READ_ONLY);
 

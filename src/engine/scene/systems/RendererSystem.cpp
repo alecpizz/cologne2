@@ -80,6 +80,7 @@ namespace cologne
             {
                 bones = std::vector<glm::mat4>(skinned_model->get_skeleton().get_bone_count(), glm::mat4(1.0f));
             }
+            bool is_viewmodel = registry.any_of<ViewmodelComponent>(entity);
             for (int32_t mesh_index: skinned_model->get_mesh_indices())
             {
                 SkinnedRenderItem item;
@@ -87,6 +88,7 @@ namespace cologne
                 item.transform = tr;
                 item.entity_id = static_cast<uint32_t>(entity);
                 item.bones = bones;
+                item.clear_depth = is_viewmodel;
                 Engine::get_renderer()->submit_skinned_render_item(item);
             }
         }

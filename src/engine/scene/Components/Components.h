@@ -325,20 +325,47 @@ namespace cologne
 
     struct AnimatorComponent
     {
-        std::string current_clip_name;
-        std::string base_clip_name;
-        std::string one_shot_name;
-        float current_time = 0.0f;
+        std::string source_clip_name;
+        float source_time = 0.0f;
 
-        void play_one_shot(const std::string &name)
+        std::string dest_clip_name;
+        float dest_time = 0.0f;
+
+        float blend_time = 0.0f;
+        float blend_duration = 0.2f;
+
+        std::string one_shot_name;
+        std::string one_shot_return_clip;
+
+        void crossfade_to(const std::string& name, float duration = 0.2f)
         {
-            if (current_clip_name == name)
+            if (dest_clip_name == name) return;
+            if (dest_clip_name.empty() && source_clip_name == name) return;
+
+            // Start a new blend
+            dest_clip_name = name;
+            dest_time = 0.0f;
+            blend_time = 0.0f;
+            blend_duration = duration;
+
+            one_shot_name = "";
+        }
+
+        void play_one_shot(const std::string &name, float duration = 0.1f)
+        {
+            if (source_clip_name == name && dest_clip_name.empty())
             {
+                source_time = 0.0f;
                 return;
             }
+
+            one_shot_return_clip = source_clip_name;
             one_shot_name = name;
-            current_clip_name = one_shot_name;
-            current_time = 0.0f;
+
+            dest_clip_name = name;
+            dest_time = 0.0f;
+            blend_time = 0.0f;
+            blend_duration = duration;
         }
     };
 

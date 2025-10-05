@@ -86,14 +86,14 @@ namespace cologne
             switch (npc_controller.current_state)
             {
                 case NPCCrowdMemberComponent::State::IDLE:
-                    animator.base_clip_name = npc_controller.idle_clip_name;
+                    animator.crossfade_to(npc_controller.idle_clip_name);
                     if (distance_to_player < npc_controller.detection_radius)
                     {
                         npc_controller.current_state = NPCCrowdMemberComponent::State::CHASING;
                     }
                     break;
                 case NPCCrowdMemberComponent::State::CHASING:
-                    animator.base_clip_name = npc_controller.run_clip_name;
+                    animator.crossfade_to(npc_controller.run_clip_name);
                     Navigation::set_agent_target(npc_controller.agent_id, player_pos);
                     if (distance_to_player <= npc_controller.attack_range)
                     {
@@ -103,9 +103,9 @@ namespace cologne
                     break;
                 case NPCCrowdMemberComponent::State::ATTACKING:
                     Navigation::set_agent_target(npc_controller.agent_id, transform.position);
-                    animator.play_one_shot(npc_controller.attack_clip_name);
                     if (npc_controller.state_timer >= npc_controller.attack_cooldown)
                     {
+                        animator.crossfade_to(npc_controller.attack_clip_name);
                         if (distance_to_player > npc_controller.attack_range)
                         {
                             npc_controller.current_state = NPCCrowdMemberComponent::State::CHASING;

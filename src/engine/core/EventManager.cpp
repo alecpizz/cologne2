@@ -37,6 +37,7 @@ namespace cologne
                 if (event.key.scancode == SDL_SCANCODE_ESCAPE)
                 {
                     Engine::exit_play_mode();
+                    // Engine::enable_editor();
                     invoke_resize(Engine::get_render_target_width(), Engine::get_render_target_height());
                 }
             }

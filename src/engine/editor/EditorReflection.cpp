@@ -168,7 +168,7 @@ namespace cologne
         }
         else
         {
-            return ImGui::DragScalar(name, scalar_to_imgui_data_type<Scalar>(), &f, 0.01f);
+            return ImGui::DragScalar(name, scalar_to_imgui_data_type<Scalar>(), &f, 0.01, nullptr, nullptr, "%.6f");
         }
     }
 
@@ -186,7 +186,7 @@ namespace cologne
         const char *label = "vec3";
         const auto name_str = get_editor_name(label, properties);
         const auto name = name_str.c_str();
-        return ImGui::DragFloat3(name, glm::value_ptr(v), 0.01f);
+        return ImGui::DragFloat3(name, glm::value_ptr(v), 0.01f, 0, 0, "%.6f");
     }
 
     static void read_vec3(glm::vec3 v, const PropertiesMap &properties)
@@ -407,19 +407,20 @@ namespace cologne
     static bool write_anim_component(AnimatorComponent &anim_component, const PropertiesMap &properties)
     {
         bool changed = false;
-        if (ImGui::BeginCombo("Base Animation Clip", anim_component.base_clip_name.c_str()))
+        if (ImGui::BeginCombo("Source Clip Name", anim_component.source_clip_name.c_str()))
         {
             for (const auto &anim: AssetManager::get_animations())
             {
                 auto name = anim.get_name();
                 if (ImGui::Selectable(name.c_str()))
                 {
-                    anim_component.base_clip_name = name;
+                    anim_component.source_clip_name = name;
                     changed = true;
                 }
             }
             ImGui::EndCombo();
         }
+        ImGui::DragFloat("Blend Duration", &anim_component.blend_duration, 0.01f);
 
         return changed;
     }

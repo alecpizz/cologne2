@@ -32,6 +32,12 @@ void main()
         discard;
     }
 
+    float depth = texture(depthTexture, tex_coord).r;
+    if(depth < 0.0001)
+    {
+        discard;
+    }
+
     vec4 decal_local_pos = model_inverse * vec4(world_pos, 1.0);
     if(abs(decal_local_pos.x) > 0.5 || abs(decal_local_pos.y) > 0.5 || abs(decal_local_pos.z) > 0.5)
     {

@@ -271,12 +271,13 @@ namespace cologne
         }
 
         glm::vec3 bob = glm::vec3(0.0f);
-        bob.y += glm::sin(controller.time * viewmodel.frequency) * viewmodel.amplitude;
-        bob.x += glm::cos(controller.time * viewmodel.frequency / 2.0f) * viewmodel.amplitude * 2.0f;
-        bob.y += glm::clamp(-y_vel * viewmodel.vertical_velocity_multiplier,
+        float vm_scale = viewmodel_entity.get_transform().scale.x;
+        bob.y += glm::sin(controller.time * viewmodel.frequency) * viewmodel.amplitude * vm_scale;
+        bob.x += glm::cos(controller.time * viewmodel.frequency / 2.0f) * viewmodel.amplitude * vm_scale * 2.0f;
+        bob.y += glm::clamp(-y_vel * viewmodel.vertical_velocity_multiplier * vm_scale,
                             -viewmodel.max_vertical_offset, viewmodel.max_vertical_offset);
         glm::vec3 new_position = glm::lerp(controller.prev_transform.position,
-                                           bob + viewmodel.position_offset, dt * viewmodel.smoothing);
+                                           bob + viewmodel.position_offset * vm_scale, dt * viewmodel.smoothing);
         controller.prev_transform.position = new_position;
         controller.prev_transform.rotation = new_rotation;
 
@@ -477,6 +478,7 @@ namespace cologne
                 Entity vm = scene->get_entity_by_uuid(player.viewmodel);
                 auto &anim = vm.get_component<AnimatorComponent>();
                 anim.play_one_shot("deagle_Rig|Rig|MK_Shot");
+                LOG_INFO("play one shot");
                 Audio::play_sound(controller.shoot_sound, 30);
                 auto cam = scene->get_entity_by_uuid(player.camera);
                 auto tr = cam.get_transform();
@@ -495,6 +497,7 @@ namespace cologne
                 Entity vm = scene->get_entity_by_uuid(player.viewmodel);
                 auto &anim = vm.get_component<AnimatorComponent>();
                 anim.play_one_shot("deagle_Rig|Rig|MK_ReloadFull");
+                LOG_INFO("play one reload shot");
                 Audio::play_sound(controller.reload_sound, 20);
                 controller.is_reloading = true;
                 controller.current_ammo = controller.max_ammo;

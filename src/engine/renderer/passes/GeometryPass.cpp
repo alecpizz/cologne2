@@ -102,6 +102,7 @@ namespace cologne
         auto shader = get_shader_by_name("gbuffer");
         shader->bind();
         render_geometry();
+
         render_skinned_geometry();
 
         shader = get_shader_by_name("particle_render");

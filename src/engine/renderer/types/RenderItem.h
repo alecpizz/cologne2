@@ -28,6 +28,7 @@ namespace cologne
         WorldTransformComponent transform = {};
         std::vector<glm::mat4> bones;
         uint32_t entity_id = entt::null;
+        bool clear_depth = true;
     };
 
     struct BloodRenderItem
