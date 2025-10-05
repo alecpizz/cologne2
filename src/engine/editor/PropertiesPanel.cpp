@@ -157,7 +157,7 @@ namespace cologne
         {
             auto mesh_comp = entity.get_component<MeshComponent>();
             Engine::get_renderer()->submit_outline_render_item(RenderItem(
-                AssetManager::get_mesh_index_by_name(mesh_comp.mesh_name),
+                AssetManager::get_mesh_index_by_name(mesh_comp.mesh.handle),
                 entity.get_component<
                     WorldTransformComponent>(),
                 false,
@@ -167,7 +167,7 @@ namespace cologne
         if (entity.has_component<ModelComponent>())
         {
             auto model_comp = entity.get_component<ModelComponent>();
-            auto m = AssetManager::get_model_by_name(model_comp.model_name);
+            auto m = model_comp.model.get();
             for (auto idx: m->get_mesh_indices())
             {
                 Engine::get_renderer()->submit_outline_render_item(RenderItem(

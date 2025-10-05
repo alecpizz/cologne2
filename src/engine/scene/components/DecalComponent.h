@@ -3,14 +3,15 @@
 //
 #pragma once
 #include <engine/core/Color.h>
+
 namespace cologne
-    {
+{
     struct DecalComponent
     {
-        std::string albedo_name;
-        std::string normal_name;
-        std::string orm_name;
-        std::string emission_name;
+        AssetHandle<Texture> albedo;
+        AssetHandle<Texture> normal;
+        AssetHandle<Texture> orm;
+        AssetHandle<Texture> emission;
         Color color_tint = Color(1.0f, 1.0f, 1.0f, 1.0f);
     };
 }

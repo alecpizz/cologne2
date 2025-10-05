@@ -63,7 +63,7 @@ namespace cologne
     void AnimationSystem::apply_animation(AnimatorComponent::AnimationLayer &layer, const Skeleton &skeleton,
                                           SkeletonPose &skeleton_pose, float dt, float blend_weight)
     {
-        auto current_clip = AssetManager::get_animation_by_name(layer.clip_name);
+        auto current_clip = layer.clip.get();
         if (!current_clip)
         {
             return;
@@ -87,7 +87,7 @@ namespace cologne
 
         if (layer.fade_duration > 0.0f)
         {
-            auto fade_to_clip = AssetManager::get_animation_by_name(layer.fade_to_clip_name);
+            auto fade_to_clip = layer.fade_to_clip.get();
             if (fade_to_clip)
             {
                 layer.fade_time += dt;
@@ -115,7 +115,7 @@ namespace cologne
 
                 if (layer.fade_time >= layer.fade_duration)
                 {
-                    layer.clip_name = layer.fade_to_clip_name;
+                    layer.clip = layer.fade_to_clip;
                     layer.time = layer.fade_to_time;
                     layer.loop = layer.next_loop;
                     layer.fade_duration = 0.0f;

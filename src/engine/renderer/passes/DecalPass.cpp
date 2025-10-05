@@ -44,23 +44,22 @@ namespace cologne
             shader->set_mat4("model", decal_render_item.transform);
             shader->set_mat4("model_inverse", glm::inverse(decal_render_item.transform.transform));
             shader->set_mat4("model_normal", glm::transpose(glm::inverse(decal_render_item.transform.transform)));
-            if (const auto albedo = AssetManager::get_texture_by_name(decal_render_item.decal_component.albedo_name))
+            if (const auto albedo = decal_render_item.decal_component.albedo.get())
             {
                 glBindTextureUnit(0, albedo->get_handle());
             }
 
-            if (const auto normal = AssetManager::get_texture_by_name(decal_render_item.decal_component.normal_name))
+            if (const auto normal = decal_render_item.decal_component.normal.get())
             {
                 glBindTextureUnit(1, normal->get_handle());
             }
 
-            if (const auto orm = AssetManager::get_texture_by_name(decal_render_item.decal_component.orm_name))
+            if (const auto orm = decal_render_item.decal_component.orm.get())
             {
                 glBindTextureUnit(2, orm->get_handle());
             }
 
-            if (const auto emission =
-                    AssetManager::get_texture_by_name(decal_render_item.decal_component.emission_name))
+            if (const auto emission = decal_render_item.decal_component.emission.get())
             {
                 glBindTextureUnit(3, emission->get_handle());
             }

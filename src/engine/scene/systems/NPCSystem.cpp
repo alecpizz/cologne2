@@ -32,7 +32,7 @@ namespace cologne
         for (auto entity: view2)
         {
            auto [npc, anim] = registry.get<NPCCrowdMemberComponent, AnimatorComponent>(entity);
-            anim.play(npc.idle_clip_name, 0, true);
+            anim.play(npc.idle_clip, 0, true);
         }
     }
 
@@ -97,14 +97,14 @@ namespace cologne
             switch (npc_controller.current_state)
             {
                 case NPCCrowdMemberComponent::State::IDLE:
-                    animator.crossfade_to(npc_controller.idle_clip_name, 0.2f, 1);
+                    animator.crossfade_to(npc_controller.idle_clip, 0.2f, 1);
                     if (distance_to_player < npc_controller.detection_radius)
                     {
                         npc_controller.current_state = NPCCrowdMemberComponent::State::CHASING;
                     }
                     break;
                 case NPCCrowdMemberComponent::State::CHASING:
-                    animator.crossfade_to(npc_controller.run_clip_name, 0.2f, 1);
+                    animator.crossfade_to(npc_controller.run_clip, 0.2f, 1);
                     Navigation::set_agent_target(npc_controller.agent_id, player_pos);
                     if (distance_to_player <= npc_controller.attack_range)
                     {
@@ -116,7 +116,7 @@ namespace cologne
                     Navigation::set_agent_target(npc_controller.agent_id, transform.position);
                     if (npc_controller.state_timer >= npc_controller.attack_cooldown)
                     {
-                        animator.play(npc_controller.attack_clip_name, 1, false);
+                        animator.play(npc_controller.attack_clip, 1, false);
                         if (distance_to_player > npc_controller.attack_range)
                         {
                             npc_controller.current_state = NPCCrowdMemberComponent::State::CHASING;

@@ -128,11 +128,11 @@ namespace cologne
          JPH::Ref<Shape> result_shape;
          if (entity.has_component<ConvexMeshColliderComponent>())
          {
-             auto mesh = AssetManager::get_mesh_by_name(entity.get_component<ConvexMeshColliderComponent>().mesh_name);
+             auto mesh = entity.get_component<ConvexMeshColliderComponent>().mesh.get();
              if (!mesh)
              {
                  LOG_ERROR("No mesh found with name %s",
-                           entity.get_component<ConvexMeshColliderComponent>().mesh_name.c_str());
+                           entity.get_component<ConvexMeshColliderComponent>().mesh.handle.c_str());
                  return 0;
              }
              //TODO: BAKE ME BAKE ME BAKE ME

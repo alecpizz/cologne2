@@ -94,13 +94,13 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 REGISTER_PROPERTY(ActiveComponent, active);
 
         REGISTER_COMPONENT(ModelComponent, "ModelComponent", EDITOR_READ_WRITE)
-                REGISTER_PROPERTY(ModelComponent, model_name)
+                REGISTER_PROPERTY(ModelComponent, model)
                 REGISTER_PROPERTY(ModelComponent, gi_only);
         //
         REGISTER_COMPONENT(MeshComponent, "MeshComponent", EDITOR_READ_WRITE)
         //     .traits(Traits::TRANSIENT)
         //     .type("MeshComponent"_hs)
-                REGISTER_PROPERTY(MeshComponent, mesh_name);
+                REGISTER_PROPERTY(MeshComponent, mesh);
 
 
         REGISTER_COMPONENT(SkinnedModelComponent, "SkinnedModelComponent", EDITOR_READ_WRITE)
@@ -116,12 +116,12 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 REGISTER_PROPERTY(TagComponent, tag);
 
         REGISTER_COMPONENT(StaticColliderComponent, "StaticColliderComponent", EDITOR_READ_ONLY)
-                REGISTER_PROPERTY(StaticColliderComponent, mesh_name);
+                REGISTER_PROPERTY(StaticColliderComponent, mesh);
 
         REGISTER_COMPONENT(RigidbodyComponent, "RigidbodyComponent", EDITOR_READ_ONLY);
 
         REGISTER_COMPONENT(ConvexMeshColliderComponent, "ConvexMeshColliderComponent", EDITOR_READ_WRITE)
-                REGISTER_PROPERTY(ConvexMeshColliderComponent, mesh_name);
+                REGISTER_PROPERTY(ConvexMeshColliderComponent, mesh);
 
         REGISTER_COMPONENT(PlayerComponent, "PlayerComponent", EDITOR_READ_WRITE)
                 REGISTER_PROPERTY(PlayerComponent, camera)
@@ -193,10 +193,6 @@ registry->remove<T>(entity); }>("remove"_hs) \
             REGISTER_PROPERTY(NPCCrowdMemberComponent, attack_range)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, attack_cooldown)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, current_state)
-            REGISTER_PROPERTY(NPCCrowdMemberComponent, idle_clip_name)
-            REGISTER_PROPERTY(NPCCrowdMemberComponent, run_clip_name)
-            REGISTER_PROPERTY(NPCCrowdMemberComponent, attack_clip_name)
-            REGISTER_PROPERTY(NPCCrowdMemberComponent, hit_clip_name)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, idle_clip)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, run_clip)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, attack_clip)
@@ -212,16 +208,16 @@ registry->remove<T>(entity); }>("remove"_hs) \
 
         REGISTER_COMPONENT(BloodSplatterComponent, "BloodSplatterComponent", EDITOR_READ_WRITE)
                 REGISTER_PROPERTY(BloodSplatterComponent, time)
-                REGISTER_PROPERTY(BloodSplatterComponent, mesh_name)
-                REGISTER_PROPERTY(BloodSplatterComponent, position_texture_name)
-                REGISTER_PROPERTY(BloodSplatterComponent, normal_texture_name)
+                REGISTER_PROPERTY(BloodSplatterComponent, mesh)
+                REGISTER_PROPERTY(BloodSplatterComponent, position_texture)
+                REGISTER_PROPERTY(BloodSplatterComponent, normal_texture)
                 REGISTER_PROPERTY(BloodSplatterComponent, offset);
 
         REGISTER_COMPONENT(DecalComponent, "DecalComponent", EDITOR_READ_WRITE)
-                REGISTER_PROPERTY(DecalComponent, albedo_name)
-                REGISTER_PROPERTY(DecalComponent, normal_name)
-                REGISTER_PROPERTY(DecalComponent, orm_name)
-                REGISTER_PROPERTY(DecalComponent, emission_name)
+                REGISTER_PROPERTY(DecalComponent, albedo)
+                REGISTER_PROPERTY(DecalComponent, normal)
+                REGISTER_PROPERTY(DecalComponent, orm)
+                REGISTER_PROPERTY(DecalComponent, emission)
                 REGISTER_PROPERTY(DecalComponent, color_tint);
     }
 }

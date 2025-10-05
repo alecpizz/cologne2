@@ -68,8 +68,7 @@ namespace cologne
         {
             auto &sc = registry.get<StaticColliderComponent>(entity);
             const auto transform = registry.get<WorldTransformComponent>(entity).transform;
-            const auto &mesh_name = sc.mesh_name;
-            const auto mesh = AssetManager::get_mesh_by_name(mesh_name);
+            const auto mesh = sc.mesh.get();
             if (!mesh)
             {
                 continue;

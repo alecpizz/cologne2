@@ -27,14 +27,14 @@ namespace cologne
 
         for (auto& render_item : _blood_render_items)
         {
-            auto mesh = AssetManager::get_mesh_by_name(render_item.blood_component.mesh_name);
+            auto mesh = render_item.blood_component.mesh.get();
             if (!mesh)
             {
                 continue;
             }
 
-            auto pos = AssetManager::get_texture_by_name(render_item.blood_component.position_texture_name);
-            auto norm = AssetManager::get_texture_by_name(render_item.blood_component.normal_texture_name);
+            auto pos = render_item.blood_component.position_texture.get();
+            auto norm = render_item.blood_component.normal_texture.get();
             if (!pos || !norm)
             {
                 continue;

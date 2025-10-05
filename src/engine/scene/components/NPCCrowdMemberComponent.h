@@ -29,10 +29,7 @@ namespace cologne
         float state_timer = 0.0f;
 
         //bad, dumb, stupid
-        std::string idle_clip_name;
-        std::string run_clip_name;
-        std::string attack_clip_name;
-        std::string hit_clip_name;
+
         //cool, awesome, sexy
         AssetHandle<AnimationClip> idle_clip;
         AssetHandle<AnimationClip> run_clip;

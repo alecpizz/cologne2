@@ -10,13 +10,13 @@ namespace cologne
     {
         struct AnimationLayer
         {
-            std::string clip_name;
+            AssetHandle<AnimationClip> clip;
             float time = 0.0f;
             float weight = 1.0f;
             bool loop = true;
             bool is_finished = false;
 
-            std::string fade_to_clip_name;
+            AssetHandle<AnimationClip> fade_to_clip;
             float fade_time = 0.0f;
             float fade_to_time = 0.0f;
             float fade_duration = 0.0f;
@@ -27,8 +27,8 @@ namespace cologne
 
         AnimatorComponent();
 
-        void play(const std::string &clip_name, int layer_index = 0, bool loop = true);
+        void play(const AssetHandle<AnimationClip> &clip, int layer_index = 0, bool loop = true);
 
-        void crossfade_to(const std::string &name, float duration, int layer_index = 0, bool loop = true);
+        void crossfade_to(AssetHandle<AnimationClip> name, float duration, int layer_index = 0, bool loop = true);
     };
 }

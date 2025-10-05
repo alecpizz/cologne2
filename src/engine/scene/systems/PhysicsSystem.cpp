@@ -25,7 +25,7 @@ namespace cologne
             Entity e = {entity, scene};
             auto &transform = registry.get<TransformComponent>(entity);
             auto &collider = registry.get<StaticColliderComponent>(entity);
-            auto mesh = AssetManager::get_mesh_by_name(collider.mesh_name);
+            auto mesh = collider.mesh.get();
             if (!mesh)
             {
                 continue;

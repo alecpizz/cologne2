@@ -54,7 +54,7 @@ namespace cologne
         for (auto entity : view2)
         {
             auto& animator = registry.get<AnimatorComponent>(entity);
-            animator.play("deagle_Rig|Rig|MK_Idle");
+            animator.play(AssetHandle<AnimationClip>("deagle_Rig|Rig|MK_Idle"));
         }
     }
 
@@ -486,7 +486,7 @@ namespace cologne
                 LOG_INFO("Bang");
                 Entity vm = scene->get_entity_by_uuid(player.viewmodel);
                 auto &anim = vm.get_component<AnimatorComponent>();
-                anim.play("deagle_Rig|Rig|MK_Shot", 1, false);
+                anim.play(AssetHandle<AnimationClip>("deagle_Rig|Rig|MK_Shot"), 1, false);
                 LOG_INFO("play one shot");
                 Audio::play_sound(controller.shoot_sound, 30);
                 auto cam = scene->get_entity_by_uuid(player.camera);
@@ -505,7 +505,7 @@ namespace cologne
                 controller.gun_time = controller.reload_time;
                 Entity vm = scene->get_entity_by_uuid(player.viewmodel);
                 auto &anim = vm.get_component<AnimatorComponent>();
-                anim.play("deagle_Rig|Rig|MK_ReloadFull", 1, false);
+                anim.play(AssetHandle<AnimationClip>("deagle_Rig|Rig|MK_ReloadFull"), 1, false);
                 LOG_INFO("play one reload shot");
                 Audio::play_sound(controller.reload_sound, 20);
                 controller.is_reloading = true;

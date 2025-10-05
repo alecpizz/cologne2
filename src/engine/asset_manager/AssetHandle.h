@@ -51,6 +51,11 @@ namespace cologne
             {
                 return nullptr;
             }
+            if (!_asset)
+            {
+                //todo: assetmanager get asset by T
+                LOG_ERROR("MISSING ASSET PTR");
+            }
             return _asset;
         }
 
@@ -74,6 +79,11 @@ namespace cologne
         explicit operator bool() const
         {
             return is_valid();
+        }
+
+        bool operator==(const AssetHandle & other) const
+        {
+            return handle == other.handle;
         }
 
     private:

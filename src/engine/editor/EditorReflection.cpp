@@ -433,62 +433,6 @@ namespace cologne
         ImGui::Text("%s: %f %f %f %f", name, mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
     }
 
-    static bool write_model(ModelComponent &model, const PropertiesMap &properties)
-    {
-        std::vector<const char *> model_names;
-        for (auto &model: AssetManager::get_models())
-        {
-            model_names.emplace_back(model.get_name());
-        }
-        int idx = AssetManager::get_model_index_by_name(model.model_name);
-
-        if (ImGui::Combo("Model", &idx, model_names.data(), model_names.size()))
-        {
-            model.model_name = model_names[idx];
-            return true;
-        }
-        return false;
-    }
-
-    static bool write_mesh(MeshComponent &mesh, const PropertiesMap &properties)
-    {
-        bool changed = false;
-        std::vector<const char *> mesh_names;
-        for (auto &mesh: AssetManager::get_meshes())
-        {
-            const std::string &mesh_name = mesh.get_name();
-            mesh_names.emplace_back(mesh_name.c_str());
-        }
-        int idx = AssetManager::get_mesh_index_by_name(mesh.mesh_name);
-
-        if (ImGui::Combo("Mesh", &idx, mesh_names.data(), mesh_names.size()))
-        {
-            mesh.mesh_name = mesh_names[idx];
-            changed = true;
-        }
-        ImGui::TextUnformatted("Stats");
-        ImGui::Text("Verts: %d", AssetManager::get_mesh_by_name(mesh.mesh_name)->get_vertices().size());
-        ImGui::Text("Indices: %d", AssetManager::get_mesh_by_name(mesh.mesh_name)->get_indices_count());
-        return changed;
-    }
-
-    static bool write_convex_mesh(ConvexMeshColliderComponent &mesh, const PropertiesMap &properties)
-    {
-        std::vector<const char *> mesh_names;
-        for (auto &mesh: AssetManager::get_meshes())
-        {
-            const std::string &mesh_name = mesh.get_name();
-            mesh_names.emplace_back(mesh_name.c_str());
-        }
-        int idx = AssetManager::get_mesh_index_by_name(mesh.mesh_name);
-
-        if (ImGui::Combo("Mesh", &idx, mesh_names.data(), mesh_names.size()))
-        {
-            mesh.mesh_name = mesh_names[idx];
-            return true;
-        }
-        return false;
-    }
 
 
 
@@ -591,13 +535,5 @@ namespace cologne
         entt::meta_factory<LightComponent>()
                 .func<&write_light>("editor_write"_hs)
                 .func<&read_light>("editor_read"_hs);
-        entt::meta_factory<ModelComponent>()
-                .func<&write_model>("editor_write"_hs);
-        entt::meta_factory<MeshComponent>()
-                .func<&write_mesh>("editor_write"_hs);
-        entt::meta_factory<ConvexMeshColliderComponent>()
-                .func<&write_convex_mesh>("editor_write"_hs);
-        // entt::meta_factory<AnimatorComponent>()
-        //         .func<&write_anim_component>("editor_write"_hs);
     }
 }

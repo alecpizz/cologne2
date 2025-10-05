@@ -240,7 +240,7 @@ namespace cologne
         for (const auto entity: view)
         {
             auto [tr, m] = view.get<TransformComponent, ModelComponent>(entity);
-            const auto model = AssetManager::get_model_by_name(m.model_name);
+            const auto model = m.model.get();
             AABB aabb = model->get_aabb();
             aabb = aabb.transform_by_mat4(tr.get_mat4());
             _scene_bounds.expand(aabb.min);
@@ -250,7 +250,7 @@ namespace cologne
         for (const auto entity: view2)
         {
             auto [tr, m] = view2.get<TransformComponent, MeshComponent>(entity);
-            const auto mesh = AssetManager::get_mesh_by_name(m.mesh_name);
+            const auto mesh = m.mesh.get();
             AABB aabb = mesh->get_aabb();
             aabb = aabb.transform_by_mat4(tr.get_mat4());
             _scene_bounds.expand(aabb.min);
@@ -309,10 +309,11 @@ namespace cologne
         parent.get_component<WorldTransformComponent>().transform = parent_transform.get_mat4();
         if (model->get_mesh_indices().size() == 1)
         {
-            parent.add_component<MeshComponent>(model->get_mesh_indices()[0]);
-            auto &col = parent.add_component<StaticColliderComponent>();
             auto mesh_by_index = AssetManager::get_mesh_by_index(model->get_mesh_indices()[0]);
-            col.mesh_name = mesh_by_index->get_name();
+            auto& comp = parent.add_component<MeshComponent>();
+            comp.mesh = AssetHandle<Mesh>(mesh_by_index->get_name());
+            auto &col = parent.add_component<StaticColliderComponent>();
+            col.mesh = AssetHandle<Mesh>(mesh_by_index->get_name());
             if (create_colliders)
             {
                 auto mesh = AssetManager::get_mesh_by_index(model->get_mesh_indices()[0]);
@@ -330,12 +331,13 @@ namespace cologne
             Entity sub_mesh = create_entity(mesh->get_name());
             sub_mesh.add_component<ChildComponent>(parent.get_uuid());
             parent_comp.children.emplace_back(sub_mesh.get_uuid());
-            sub_mesh.add_component<MeshComponent>(idx);
+            auto& mesh_comp = sub_mesh.add_component<MeshComponent>();
+            mesh_comp.mesh = AssetHandle<Mesh>(mesh->get_name());
             sub_mesh.get_transform() = TransformComponent(mesh->get_inverse_bind_pose());
             sub_mesh.get_component<WorldTransformComponent>().transform =
                     parent_transform.get_mat4() * mesh->get_inverse_bind_pose();
             auto &col = sub_mesh.add_component<StaticColliderComponent>();
-            col.mesh_name = mesh->get_name();
+            col.mesh = AssetHandle<Mesh>(mesh->get_name());
             if (create_colliders)
             {
                 TransformComponent temp = TransformComponent(
@@ -447,7 +449,7 @@ namespace cologne
         if (new_entity.has_component<StaticColliderComponent>())
         {
             auto &collider = new_entity.get_component<StaticColliderComponent>();
-            auto mesh = AssetManager::get_mesh_by_name(collider.mesh_name);
+            auto mesh = collider.mesh.get();
             if (mesh)
             {
                 uint32_t body_id = Physics::create_static_mesh_collider(
@@ -546,9 +548,9 @@ namespace cologne
         vat_blood.get_transform() = model;
 
         auto &blood = vat_blood.add_component<BloodSplatterComponent>();
-        blood.mesh_name = "blood_mesh_TRIANGLE_CLOUD";
-        blood.position_texture_name = "blood_pos";
-        blood.normal_texture_name = "blood_norm";
+        blood.mesh = AssetHandle<Mesh>("blood_mesh_TRIANGLE_CLOUD");
+        blood.position_texture = AssetHandle<Texture>("blood_pos");
+        blood.normal_texture = AssetHandle<Texture>("blood_norm");
         blood.time = 0.0f;
 
         RaycastHitInfo hit_info;
@@ -562,8 +564,8 @@ namespace cologne
             decal_blood.get_transform().scale = glm::vec3(2.0f);
 
             auto &decal = decal_blood.add_component<DecalComponent>();
-            decal.albedo_name = "decal_white";
-            decal.normal_name = "decal_normal";
+            decal.albedo = AssetHandle<Texture>("decal_white");
+            decal.normal = AssetHandle<Texture>("decal_normal");
             decal.color_tint = Color(0.42f, 0.0f, 0.0f, 1.0f);
         }
         //do some randomness shit here

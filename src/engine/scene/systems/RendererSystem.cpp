@@ -30,7 +30,7 @@ namespace cologne
             {
                 continue;
             }
-            Model *model = AssetManager::get_model_by_name(m.model_name);
+            Model *model = m.model.get();
             for (int32_t idx: model->get_mesh_indices())
             {
                 Engine::get_renderer()->submit_render_item(
@@ -59,7 +59,7 @@ namespace cologne
                 continue;
             }
             Engine::get_renderer()->
-                    submit_render_item(RenderItem(AssetManager::get_mesh_index_by_name(m.mesh_name), tr, false,
+                    submit_render_item(RenderItem(AssetManager::get_mesh_index_by_name(m.mesh.handle), tr, false,
                                                   static_cast<uint32_t>(entity)));
         }
 

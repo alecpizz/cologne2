@@ -9,21 +9,21 @@ namespace cologne
         layers.emplace_back();
     }
 
-    void AnimatorComponent::play(const std::string &clip_name, int layer_index, bool loop)
+    void AnimatorComponent::play(const AssetHandle<AnimationClip> &clip, int layer_index, bool loop)
     {
         if (layer_index >= layers.size())
         {
             layers.resize(layer_index + 1);
         }
 
-        layers[layer_index].clip_name = clip_name;
+        layers[layer_index].clip = clip;
         layers[layer_index].time = 0.0f;
         layers[layer_index].loop = loop;
         layers[layer_index].fade_duration = 0.0f;
         layers[layer_index].is_finished = false;
     }
 
-    void AnimatorComponent::crossfade_to(const std::string &name, float duration, int layer_index, bool loop)
+    void AnimatorComponent::crossfade_to(AssetHandle<AnimationClip> clip, float duration, int layer_index, bool loop)
     {
         if (layer_index >= layers.size())
         {
@@ -31,9 +31,9 @@ namespace cologne
         }
 
         auto& layer = layers[layer_index];
-        if (layer.clip_name == name) return;
+        if (layer.clip == clip) return;
 
-        layer.fade_to_clip_name = name;
+        layer.fade_to_clip = clip;
         layer.fade_time = 0.0f;
         layer.fade_to_time = 0.0f;
         layer.fade_duration = duration;

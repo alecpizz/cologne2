@@ -2,12 +2,13 @@
 // Created by alecpizz on 10/5/25.
 //
 #pragma once
-namespace cologne
-    {
+#include <engine/asset_manager/AssetHandle.h>
 
+namespace cologne
+{
     struct ModelComponent
     {
-        std::string model_name;
+        AssetHandle<Model> model;
         bool gi_only = false;
     };
 }

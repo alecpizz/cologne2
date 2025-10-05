@@ -2,16 +2,14 @@
 // Created by alecpizz on 10/5/25.
 //
 #pragma once
+#include <engine/asset_manager/AssetHandle.h>
+
 namespace cologne
     {
     struct MeshComponent
     {
         MeshComponent() = default;
 
-        MeshComponent(const std::string &name);
-
-        MeshComponent(int idx);
-
-        std::string mesh_name;
+        AssetHandle<Mesh> mesh;
     };
 }

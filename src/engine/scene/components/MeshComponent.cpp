@@ -6,18 +6,4 @@
 namespace cologne
 {
 
-    MeshComponent::MeshComponent(const std::string &name)
-    {
-        mesh_name = name;
-    }
-
-    MeshComponent::MeshComponent(int idx)
-    {
-        auto mesh_by_index = AssetManager::get_mesh_by_index(idx);
-        if (!mesh_by_index)
-        {
-            return;
-        }
-        mesh_name = mesh_by_index->get_name();
-    }
 }
