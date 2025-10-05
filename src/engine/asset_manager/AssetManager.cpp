@@ -84,7 +84,7 @@ namespace cologne::AssetManager
 
         std::vector<FileUtil::FileInfo> model_paths = FileUtil::iterate_directory(ASSETS_PATH "models");
         std::vector<ModelData> model_datas;
-        for (auto& model_path : model_paths)
+        for (auto &model_path: model_paths)
         {
             if (!std::filesystem::exists(ASSETS_PATH "cache/models/" + model_path.name + ".cmdl"))
             {
@@ -92,7 +92,8 @@ namespace cologne::AssetManager
                 const ModelData data = FileUtil::import_model(model_path.path);
                 auto time = std::filesystem::last_write_time(model_path.path);
                 auto sys_time = std::chrono::clock_cast<std::chrono::system_clock>(time);
-                export_model(data, std::chrono::duration_cast<std::chrono::seconds>(sys_time.time_since_epoch()).count());
+                export_model(
+                    data, std::chrono::duration_cast<std::chrono::seconds>(sys_time.time_since_epoch()).count());
             }
         }
 
@@ -109,7 +110,7 @@ namespace cologne::AssetManager
         //skinned models --> assuming animations are in models for now
         std::vector<FileUtil::FileInfo> skinned_paths = FileUtil::iterate_directory(ASSETS_PATH "skinned_models");
         std::vector<SkinnedModelData> skinned_model_datas;
-        for (auto& model_path : skinned_paths)
+        for (auto &model_path: skinned_paths)
         {
             if (!std::filesystem::exists(ASSETS_PATH "cache/skinned_models/" + model_path.name + ".cskmdl"))
             {
@@ -117,12 +118,14 @@ namespace cologne::AssetManager
                 const SkinnedModelData data = FileUtil::import_skinned_model(model_path.path);
                 auto time = std::filesystem::last_write_time(model_path.path);
                 auto sys_time = std::chrono::clock_cast<std::chrono::system_clock>(time);
-                export_skinned_model(data, std::chrono::duration_cast<std::chrono::seconds>(sys_time.time_since_epoch()).count());
+                export_skinned_model(
+                    data, std::chrono::duration_cast<std::chrono::seconds>(sys_time.time_since_epoch()).count());
                 LOG_INFO("Exported skinned model %s", model_path.name.c_str());
             }
         }
 
-        std::vector<FileUtil::FileInfo> cache_skinned_paths = FileUtil::iterate_directory(ASSETS_PATH "cache/skinned_models");
+        std::vector<FileUtil::FileInfo> cache_skinned_paths = FileUtil::iterate_directory(
+            ASSETS_PATH "cache/skinned_models");
         skinned_model_datas.resize(cache_skinned_paths.size());
         std::transform(std::execution::par_unseq, std::begin(cache_skinned_paths), std::end(cache_skinned_paths),
                        std::begin(skinned_model_datas), [](const FileUtil::FileInfo &file)
@@ -132,16 +135,16 @@ namespace cologne::AssetManager
                        });
 
         std::vector<FileUtil::FileInfo> texture_paths = FileUtil::iterate_directory(ASSETS_PATH "textures");
-        for (const auto& texture_path : texture_paths)
+        for (const auto &texture_path: texture_paths)
         {
             if (texture_path.ext == "exr")
             {
-                auto& texture = special_textures.emplace_back(FileUtil::import_exr(texture_path.path));
+                auto &texture = special_textures.emplace_back(FileUtil::import_exr(texture_path.path));
                 texture.set_name(texture_path.name);
             }
             if (texture_path.ext == "png")
             {
-                auto& texture = special_textures.emplace_back(texture_path.path.c_str());
+                auto &texture = special_textures.emplace_back(texture_path.path.c_str());
                 texture.set_name(texture_path.name);
             }
         }
@@ -226,13 +229,12 @@ namespace cologne::AssetManager
             m.load_all();
         }
 
-        for (auto& special_texture : special_textures)
+        for (auto &special_texture: special_textures)
         {
             special_texture.load();
             Engine::get_editor()->add_image_entry(special_texture.get_name().c_str(), special_texture.get_handle(),
-                glm::vec2(special_texture.get_height(), special_texture.get_width()));
+                                                  glm::vec2(special_texture.get_height(), special_texture.get_width()));
         }
-
     }
 
     void load_model(const std::string &path)
@@ -320,12 +322,12 @@ namespace cologne::AssetManager
         return materials;
     }
 
-    std::vector<Texture> & get_special_textures()
+    std::vector<Texture> &get_special_textures()
     {
         return special_textures;
     }
 
-    std::vector<SkinnedMesh> & get_skinned_meshes()
+    std::vector<SkinnedMesh> &get_skinned_meshes()
     {
         return skinned_meshes;
     }
@@ -369,7 +371,7 @@ namespace cologne::AssetManager
         return skinned_mesh_index_map[name];
     }
 
-    Texture * get_texture_by_name(const std::string &name)
+    Texture *get_texture_by_name(const std::string &name)
     {
         if (!texture_index_map.contains(name))
         {
@@ -377,6 +379,8 @@ namespace cologne::AssetManager
         }
         return &special_textures[texture_index_map[name]];
     }
+
+
 
     void print_models()
     {
@@ -396,7 +400,7 @@ namespace cologne::AssetManager
 
     void print_textures()
     {
-        for (const auto & special_texture : special_textures)
+        for (const auto &special_texture: special_textures)
         {
             LOG_INFO("TEXTURE %s", special_texture.get_name().c_str());
         }
@@ -432,7 +436,7 @@ namespace cologne::AssetManager
         skinned_models.clear();
         meshes.clear();
         skinned_meshes.clear();
-        for (auto& material : materials)
+        for (auto &material: materials)
         {
             material.cleanup_all();
         }
