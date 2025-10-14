@@ -187,8 +187,6 @@ registry->remove<T>(entity); }>("remove"_hs) \
 
         REGISTER_COMPONENT(NPCCrowdMemberComponent, "NPCCrowdMemberComponent", EDITOR_READ_WRITE)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, offset)
-            REGISTER_PROPERTY(NPCCrowdMemberComponent, max_acceleration)
-            REGISTER_PROPERTY(NPCCrowdMemberComponent, max_speed)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, detection_radius)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, attack_range)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, attack_cooldown)
@@ -196,9 +194,15 @@ registry->remove<T>(entity); }>("remove"_hs) \
             REGISTER_PROPERTY(NPCCrowdMemberComponent, idle_clip)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, run_clip)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, attack_clip)
-            REGISTER_PROPERTY(NPCCrowdMemberComponent, hit_clip);
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, spawn_clip)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, sprint_clip)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, walk_speed)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, run_speed)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, sprint_speed)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, current_speed);
 
         REFLECT_ENUM(NPCCrowdMemberComponent::State)
+                ENUMERATOR(NPCCrowdMemberComponent::State, SPAWNING)
                 ENUMERATOR(NPCCrowdMemberComponent::State, IDLE)
                 ENUMERATOR(NPCCrowdMemberComponent::State, CHASING)
                 ENUMERATOR(NPCCrowdMemberComponent::State, ATTACKING)

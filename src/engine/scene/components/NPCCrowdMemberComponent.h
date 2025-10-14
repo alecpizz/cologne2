@@ -17,23 +17,26 @@ namespace cologne
             ATTACKING,
             DYING
         };
-
-        int agent_id = -1;
-        glm::vec3 offset = glm::vec3(0.0f, -0.15f, 0.0f);
-        float max_acceleration = 3.5f;
-        float max_speed = 1.0f;
-        float detection_radius = 20.0f;
-        float attack_range = 1.5f;
-        float attack_cooldown = 1.2f;
         State current_state = SPAWNING;
         float state_timer = 0.0f;
 
-        //bad, dumb, stupid
+        int agent_id = -1;
+        glm::vec3 offset = glm::vec3(0.0f, -0.15f, 0.0f);
 
-        //cool, awesome, sexy
+        float detection_radius = 20.0f;
+        float attack_range = 1.5f;
+        float attack_cooldown = 1.2f;
+        float time_since_last_attack = 0.0f;
+        float walk_speed = 1.0f;
+        float run_speed = 2.5f;
+        float sprint_speed = 4.0f;
+        float current_speed = 2.5f;
+
+        AssetHandle<AnimationClip> spawn_clip;
         AssetHandle<AnimationClip> idle_clip;
+        AssetHandle<AnimationClip> walk_clip;
         AssetHandle<AnimationClip> run_clip;
+        AssetHandle<AnimationClip> sprint_clip;
         AssetHandle<AnimationClip> attack_clip;
-        AssetHandle<AnimationClip> hit_clip;
     };
 }

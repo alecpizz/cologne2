@@ -227,8 +227,8 @@ namespace cologne
         dtCrowdAgentParams agent_params = {};
         agent_params.radius = 0.2f;
         agent_params.height = 1.8f;
-        agent_params.maxAcceleration = crowd_member.max_acceleration;
-        agent_params.maxSpeed = crowd_member.max_speed;
+        agent_params.maxAcceleration = 10.0f;
+        agent_params.maxSpeed = crowd_member.current_speed;
         agent_params.updateFlags = DT_CROWD_ANTICIPATE_TURNS | DT_CROWD_OPTIMIZE_VIS | DT_CROWD_OPTIMIZE_TOPO
         | DT_CROWD_OBSTACLE_AVOIDANCE | DT_CROWD_SEPARATION;
         agent_params.obstacleAvoidanceType = 0;

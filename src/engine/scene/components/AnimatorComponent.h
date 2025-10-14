@@ -29,6 +29,6 @@ namespace cologne
 
         void play(const AssetHandle<AnimationClip> &clip, int layer_index = 0, bool loop = true);
 
-        void crossfade_to(AssetHandle<AnimationClip> name, float duration, int layer_index = 0, bool loop = true);
+        void crossfade_to(const AssetHandle<AnimationClip> &name, float duration, int layer_index = 0, bool loop = true);
     };
 }

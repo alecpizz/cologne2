@@ -48,7 +48,7 @@ namespace cologne
 
         void draw_aabb(glm::mat4 transform, glm::vec3 min, glm::vec3 max, glm::vec3 color);
 
-        void draw_text(const char *text, glm::vec3 position, glm::vec4 color, float size);
+        static void draw_text(const char *text, glm::vec3 position, glm::vec4 color, float size);
 
         void render_frame();
 
