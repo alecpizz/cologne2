@@ -10,7 +10,6 @@
 #include "ConvexMeshColliderComponent.h"
 #include "DecalComponent.h"
 #include "EditorCameraComponent.h"
-#include "EnemyComponent.h"
 #include "HideInEditorComponent.h"
 #include "ActiveComponent.h"
 #include "ModelComponent.h"

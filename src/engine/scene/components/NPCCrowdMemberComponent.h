@@ -4,6 +4,7 @@
 #pragma once
 #include <engine/asset_manager/AssetHandle.h>
 #include <engine/animation/AnimationClip.h>
+#include <entt/entt.hpp>
 
 namespace cologne
 {
@@ -15,6 +16,7 @@ namespace cologne
             IDLE,
             CHASING,
             ATTACKING,
+            STAGGERING,
             DYING
         };
         State current_state = SPAWNING;
@@ -31,12 +33,16 @@ namespace cologne
         float run_speed = 2.5f;
         float sprint_speed = 4.0f;
         float current_speed = 2.5f;
-
+        float max_health = 100.0f;
+        float health = max_health;
+        bool was_hit = false;
         AssetHandle<AnimationClip> spawn_clip;
         AssetHandle<AnimationClip> idle_clip;
         AssetHandle<AnimationClip> walk_clip;
         AssetHandle<AnimationClip> run_clip;
         AssetHandle<AnimationClip> sprint_clip;
         AssetHandle<AnimationClip> attack_clip;
+        AssetHandle<AnimationClip> stagger_clip;
+
     };
 }

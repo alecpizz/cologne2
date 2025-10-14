@@ -152,11 +152,6 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 REGISTER_PROPERTY(ViewmodelComponent, vertical_velocity_multiplier)
                 REGISTER_PROPERTY(ViewmodelComponent, max_vertical_offset);
 
-        REGISTER_COMPONENT(EnemyComponent, "EnemyComponent", EDITOR_READ_WRITE)
-                REGISTER_PROPERTY(EnemyComponent, health)
-                REGISTER_PROPERTY(EnemyComponent, dead)
-                REGISTER_PROPERTY(EnemyComponent, hurt_sound);
-
         REGISTER_COMPONENT(BulletComponent, "BulletComponent", EDITOR_READ_WRITE)
                 REGISTER_PROPERTY(BulletComponent, position)
                 REGISTER_PROPERTY(BulletComponent, direction)
@@ -193,12 +188,15 @@ registry->remove<T>(entity); }>("remove"_hs) \
             REGISTER_PROPERTY(NPCCrowdMemberComponent, current_state)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, idle_clip)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, run_clip)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, stagger_clip)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, attack_clip)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, spawn_clip)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, sprint_clip)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, walk_speed)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, run_speed)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, sprint_speed)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, max_health)
+            REGISTER_PROPERTY(NPCCrowdMemberComponent, health)
             REGISTER_PROPERTY(NPCCrowdMemberComponent, current_speed);
 
         REFLECT_ENUM(NPCCrowdMemberComponent::State)
@@ -206,6 +204,7 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 ENUMERATOR(NPCCrowdMemberComponent::State, IDLE)
                 ENUMERATOR(NPCCrowdMemberComponent::State, CHASING)
                 ENUMERATOR(NPCCrowdMemberComponent::State, ATTACKING)
+                ENUMERATOR(NPCCrowdMemberComponent::State, STAGGERING)
                 ENUMERATOR(NPCCrowdMemberComponent::State, DYING);
         REGISTER_COMPONENT(ParentComponent, "ParentComponent", NO_EDITOR)
                 REGISTER_PROPERTY(ParentComponent, children);
