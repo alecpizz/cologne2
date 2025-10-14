@@ -42,7 +42,7 @@ namespace cologne
         cologne::DebugScope scope(__PRETTY_FUNCTION__);
         ImGui::CreateContext();
         ImGui::LoadIniSettingsFromDisk(RESOURCES_PATH "editor/imgui_config.ini");
-        imguiThemes::green();
+        imguiThemes::purple();
 
 
         ImGuiIO &io = ImGui::GetIO();
@@ -52,7 +52,7 @@ namespace cologne
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
         _prev_viewport_size = ImVec2(DEFAULT_WIDTH, DEFAULT_HEIGHT
         );
-        io.FontDefault = io.Fonts->AddFontFromFileTTF(RESOURCES_PATH "fonts/Montserrat-Regular.ttf", 16.0f);
+        io.FontDefault = io.Fonts->AddFontFromFileTTF(RESOURCES_PATH "fonts/Roboto-Regular.ttf", 16.0f);
         material_font = io.Fonts->AddFontFromFileTTF(RESOURCES_PATH "fonts/MaterialIcons-Regular.ttf", 48.0f);
         std::setlocale(LC_CTYPE, ".UTF8");
         ImGuiStyle &style = ImGui::GetStyle();
