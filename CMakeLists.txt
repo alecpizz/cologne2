@@ -37,12 +37,9 @@ include(FetchContent)
 set(SDL_OPENGL_AVAILABLE 1)
 set(SDL_GL ON)
 set(SDL_STATIC ON)
-set(SDLMIXER_VENDORED OFF)
-set(SDLMIXER_STATIC ON)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(vendor/SDL)
-add_subdirectory(vendor/SDL_mixer)
 add_subdirectory(vendor/glad)
 add_subdirectory(vendor/stb_image)
 add_subdirectory(vendor/stb_image_resize)
@@ -146,7 +143,7 @@ target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURC
 target_precompile_headers("${CMAKE_PROJECT_NAME}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/gpch.h")
 target_include_directories(${CMAKE_PROJECT_NAME}  PUBLIC ${JoltPhysics_SOURCE_DIR})
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm_static spdlog::spdlog_header_only
-        stb_image stb_image_resize stb_image_write stb_truetype nlohmann_json libsquish::Squish imgui ImGuizmo SDL3-static assimp Jolt freetype SDL3_mixer-static
+        stb_image stb_image_resize stb_image_write stb_truetype nlohmann_json libsquish::Squish imgui ImGuizmo SDL3-static assimp Jolt freetype
         RecastNavigation::Recast RecastNavigation::Detour RecastNavigation::DetourCrowd RecastNavigation::DebugUtils tinyexr)
 
 
