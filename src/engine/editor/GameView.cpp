@@ -65,7 +65,7 @@ namespace cologne
                 uint32_t id = Renderer::read_fbo_pixel("gbuffer", "entity_id", x, y);
                 if (id != entt::null)
                 {
-                    Audio::play_sound(_move_sound, 30);
+                    //Audio::play_sound(_move_sound, 30);
                     Entity temp = {static_cast<entt::entity>(id), Engine::get_scene().get()};
 
                     if (temp.has_component<ChildComponent>())

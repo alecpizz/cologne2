@@ -3,16 +3,13 @@
 //
 
 #pragma once
+#include "miniaudio.h"
 
 namespace cologne::Audio
 {
     void init();
-    void add_sound(const char* sound_path);
-    void add_music(const char* music_path);
-    void play_sound(const char* sound_path, int volume);
-    void stop_sound(const char* sound_path);
-    void play_music(const char* music_path);
-    void stop_music(const char* music_path);
-    void set_music_volume(int volume);
-    void destroy();
+    void cleanup();
+    ma_engine* get_engine();
+    ma_result load_sound(const std::string& path, ma_sound* sound);
+    void set_listener_position(const glm::vec3& pos, const glm::vec3& fwd, const glm::vec3& up);
 }

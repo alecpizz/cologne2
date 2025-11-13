@@ -41,12 +41,12 @@ namespace cologne
             }
             for (const auto &footstep_sound: controller.footstep_sounds)
             {
-                Audio::add_sound(footstep_sound.c_str());
+               // Audio::add_sound(footstep_sound.c_str());
             }
             auto anim = AssetManager::get_animation_by_name("deagle_Rig|Rig|MK_ReloadFull");
             controller.reload_time = anim->get_duration() / anim->get_ticks_per_second();
-            Audio::add_sound(controller.shoot_sound);
-            Audio::add_sound(controller.reload_sound);
+          //  Audio::add_sound(controller.shoot_sound);
+         //   Audio::add_sound(controller.reload_sound);
             controller.current_ammo = controller.max_ammo;
         }
 
@@ -241,7 +241,7 @@ namespace cologne
             controller.step_time = next_step_time;
             controller.step_timer = 0.0f;
             auto idx = rand() % 4;
-            Audio::play_sound(controller.footstep_sounds[idx].c_str(), glm::linearRand(25, 35));
+        //    Audio::play_sound(controller.footstep_sounds[idx].c_str(), glm::linearRand(25, 35));
         }
         else
         {
@@ -488,7 +488,7 @@ namespace cologne
                 auto &anim = vm.get_component<AnimatorComponent>();
                 anim.play(AssetHandle<AnimationClip>("deagle_Rig|Rig|MK_Shot"), 1, false);
                 LOG_INFO("play one shot");
-                Audio::play_sound(controller.shoot_sound, 30);
+            //    Audio::play_sound(controller.shoot_sound, 30);
                 auto cam = scene->get_entity_by_uuid(player.camera);
                 auto tr = cam.get_transform();
                 scene->create_bullet(tr.position, tr.get_forward(), 25);
@@ -507,7 +507,7 @@ namespace cologne
                 auto &anim = vm.get_component<AnimatorComponent>();
                 anim.play(AssetHandle<AnimationClip>("deagle_Rig|Rig|MK_ReloadFull"), 1, false);
                 LOG_INFO("play one reload shot");
-                Audio::play_sound(controller.reload_sound, 20);
+             //   Audio::play_sound(controller.reload_sound, 20);
                 controller.is_reloading = true;
                 controller.current_ammo = controller.max_ammo;
             }

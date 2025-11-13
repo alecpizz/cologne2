@@ -48,7 +48,7 @@ namespace cologne
                 if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
                 {
                     current_directory = current_directory.parent_path();
-                    Audio::play_sound(_move_sound, 30);
+                    // Audio::play_sound(_move_sound, 30);
                 }
             }
 
@@ -73,7 +73,7 @@ namespace cologne
                     if (dir_entry.is_directory())
                     {
                         current_directory /= path.filename();
-                        Audio::play_sound(_move_sound, 30);
+                        // Audio::play_sound(_move_sound, 30);
                     }
                 }
 

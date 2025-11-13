@@ -76,7 +76,7 @@ namespace cologne
         {
             if (ImGui::MenuItem("Create Empty Entity"))
             {
-                Audio::play_sound(_accept_sound, 30);
+                // Audio::play_sound(_accept_sound, 30);
                 _selected_entity = Engine::get_scene()->create_entity("Empty Entity");
             }
             if (ImGui::BeginMenu("Create Static Model Entity"))
@@ -85,7 +85,7 @@ namespace cologne
                 {
                     if (ImGui::MenuItem(model.get_name()))
                     {
-                        Audio::play_sound(_accept_sound, 30);
+                        // Audio::play_sound(_accept_sound, 30);
                         _selected_entity = Engine::get_scene()->
                                 create_static_model_entities(model.get_name(), {}, true);
                     }
@@ -143,7 +143,7 @@ namespace cologne
         bool opened = ImGui::TreeNodeEx((void *) (uint64_t) (uint32_t) entity, flags, tag.tag.c_str());
         if (ImGui::IsItemClicked())
         {
-            Audio::play_sound(_move_sound, 30);
+            // Audio::play_sound(_move_sound, 30);
             _selected_entity = entity;
         }
 

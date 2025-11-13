@@ -235,7 +235,7 @@ namespace cologne
             ImGui::Separator();
             if (ImGui::Checkbox("Active", &_selected_entity.get_component<ActiveComponent>().active))
             {
-                Audio::play_sound(_cancel_sound, 30);
+               // Audio::play_sound(_cancel_sound, 30);
             }
 
             build_transform_entry(_selected_entity.get_transform());
@@ -312,7 +312,7 @@ namespace cologne
 
             if (ImGui::Button("Add Component"))
             {
-                Audio::play_sound(_move_sound, 30);
+                //Audio::play_sound(_move_sound, 30);
                 ImGui::OpenPopup("AddComponent");
             }
 
@@ -347,7 +347,7 @@ namespace cologne
                                 emplace_func.invoke({}, &Engine::get_scene()->_registry,
                                                     static_cast<entt::entity>(_selected_entity), instance.as_ref());
                             }
-                            Audio::play_sound(_accept_sound, 30);
+                        //    Audio::play_sound(_accept_sound, 30);
                             ImGui::CloseCurrentPopup();
                         }
                     }

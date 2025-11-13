@@ -64,9 +64,9 @@ namespace cologne
             style.Colors[ImGuiCol_DockingEmptyBg].w = 0.f;
         }
 
-        Audio::add_sound(_accept_sound);
-        Audio::add_sound(_cancel_sound);
-        Audio::add_sound(_move_sound);
+        // Audio::add_sound(_accept_sound);
+        // Audio::add_sound(_cancel_sound);
+        // Audio::add_sound(_move_sound);
         initialize_reflection_editor();
         _records = std::vector<LogRecord>();
     }

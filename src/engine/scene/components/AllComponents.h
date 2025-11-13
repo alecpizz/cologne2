@@ -28,3 +28,4 @@
 #include "NPCCrowdMemberComponent.h"
 #include "ParentComponent.h"
 #include "BloodSplatterComponent.h"
+#include "AudioSourceComponent.h"

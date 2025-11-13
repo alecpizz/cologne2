@@ -32,6 +32,7 @@
 #include "components/TagComponent.h"
 #include "components/ViewmodelComponent.h"
 #include "systems/AnimationSystem.h"
+#include "systems/AudioSystem.h"
 #include "systems/BloodSystem.h"
 #include "systems/BulletSystem.h"
 #include "systems/EditorCameraControllerSystem.h"
@@ -168,6 +169,13 @@ namespace cologne
     {
         Physics::delete_all_bodies();
         Engine::get_renderer()->clear_lights();
+        for (const auto & system : systems)
+        {
+            if (system->get_update_flags() & RUNTIME)
+            {
+                system->on_scene_exit(this);
+            }
+        }
     }
 
     void Scene::setup_entity_map()
@@ -597,6 +605,7 @@ namespace cologne
         add_system(std::make_unique<AnimationSystem>());
         add_system(std::make_unique<RagdollSystem>());
         add_system(std::make_unique<BloodSystem>());
+        add_system(std::make_unique<AudioSystem>());
         add_system(std::make_unique<RendererSystem>());
     }
 }

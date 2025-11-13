@@ -376,6 +376,18 @@ namespace cologne
                     }
                 }
             }
+            else if constexpr (std::is_same_v<T, AudioClip>)
+            {
+                for (const auto& audio_clip : AssetManager::get_audio_clips())
+                {
+                    auto name = audio_clip.get_name();
+                    if (ImGui::Selectable(name.c_str()))
+                    {
+                        handle = AssetHandle<T>(name);
+                        changed = true;
+                    }
+                }
+            }
             else
             {
                 LOG_ERROR("UKNOWN TYPE!");
@@ -524,7 +536,9 @@ namespace cologne
         entt::meta_factory<AssetHandle<Mesh>>()
            .func<&write_asset_handle<Mesh>>("editor_write"_hs)
            .func<&read_asset_handle<Mesh>>("editor_read"_hs);
-
+        entt::meta_factory<AssetHandle<AudioClip>>()
+            .func<&write_asset_handle<AudioClip>>("editor_write"_hs)
+            .func<&read_asset_handle<AudioClip>>("editor_read"_hs);
         entt::meta_factory<Color>()
                 .func<&write_color>("editor_write"_hs)
                 .func<&read_color>("editor_read"_hs);

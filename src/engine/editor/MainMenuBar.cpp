@@ -168,7 +168,7 @@ namespace cologne
                 if (ImGui::MenuItem("Hot reload shaders"))
                 {
                     Engine::get_renderer()->reload_shaders();
-                    Audio::play_sound(_accept_sound, 30);
+                    // Audio::play_sound(_accept_sound, 30);
                 }
 
                 for (size_t i = 0; i < float_cmds.size(); ++i)
@@ -211,7 +211,7 @@ namespace cologne
                     if (ImGui::Checkbox(bool_cmds[i].name.c_str(), &value))
                     {
                         bool_cmds[i].ref = value;
-                        Audio::play_sound(_accept_sound, 30);
+                        // Audio::play_sound(_accept_sound, 30);
                     }
                     ImGui::PopID();
                 }
@@ -222,7 +222,7 @@ namespace cologne
                     if (ImGui::Button(button_cmds[i].name.c_str()))
                     {
                         button_cmds[i].action();
-                        Audio::play_sound(_accept_sound, 30);
+                        // Audio::play_sound(_accept_sound, 30);
                     }
                     ImGui::PopID();
                 }

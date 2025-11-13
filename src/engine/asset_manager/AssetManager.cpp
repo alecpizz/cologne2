@@ -13,11 +13,13 @@
 #include <engine/renderer/Renderer.h>
 #include <chrono>
 #include <engine/editor/Editor.h>
+#include <engine/audio/AudioClip.h>
 
 namespace cologne::AssetManager
 {
     std::vector<Model> models;
     std::vector<SkinnedModel> skinned_models;
+    std::vector<AudioClip> audio_clips;
     std::vector<AnimationClip> animations;
     std::vector<Mesh> meshes;
     std::vector<SkinnedMesh> skinned_meshes;
@@ -27,6 +29,7 @@ namespace cologne::AssetManager
     std::unordered_map<std::string, int32_t> skinned_model_index_map;
     std::unordered_map<std::string, int32_t> animation_index_map;
     std::unordered_map<std::string, int32_t> mesh_index_map;
+    std::unordered_map<std::string, int32_t> audio_clip_index_map;
     std::unordered_map<std::string, int32_t> skinned_mesh_index_map;
     std::unordered_map<std::string, int32_t> texture_index_map;
     bool is_loading = true;
@@ -64,6 +67,11 @@ namespace cologne::AssetManager
         for (int32_t i = 0; i < meshes.size(); i++)
         {
             mesh_index_map[meshes[i].get_name()] = i;
+        }
+
+        for (int32_t i = 0; i < audio_clips.size(); i++)
+        {
+            audio_clip_index_map[audio_clips[i].get_name()] = i;
         }
 
         for (int32_t i = 0; i < skinned_meshes.size(); i++)
@@ -146,6 +154,15 @@ namespace cologne::AssetManager
             {
                 auto &texture = special_textures.emplace_back(texture_path.path.c_str());
                 texture.set_name(texture_path.name);
+            }
+        }
+
+        std::vector<FileUtil::FileInfo> audio_paths = FileUtil::iterate_directory(ASSETS_PATH "sounds");
+        for (const auto& audio_path : audio_paths)
+        {
+            if (audio_path.ext == "wav" || audio_path.ext == "mp3")
+            {
+                audio_clips.emplace_back(audio_path.path, audio_path.name);
             }
         }
 
@@ -235,6 +252,11 @@ namespace cologne::AssetManager
             Engine::get_editor()->add_image_entry(special_texture.get_name().c_str(), special_texture.get_handle(),
                                                   glm::vec2(special_texture.get_height(), special_texture.get_width()));
         }
+
+        for (auto &audio_clip : audio_clips)
+        {
+            audio_clip.load();
+        }
     }
 
     void load_model(const std::string &path)
@@ -322,6 +344,12 @@ namespace cologne::AssetManager
         return materials;
     }
 
+    std::vector<AudioClip> &get_audio_clips()
+    {
+        return audio_clips;
+    }
+
+
     std::vector<Texture> &get_special_textures()
     {
         return special_textures;
@@ -380,6 +408,13 @@ namespace cologne::AssetManager
         return &special_textures[texture_index_map[name]];
     }
 
+    void print_audio_clips()
+    {
+        for (const auto& clip : audio_clips)
+        {
+            LOG_INFO("AUDIO CLIP %s", clip.get_name().c_str());
+        }
+    }
 
 
     void print_models()
@@ -410,6 +445,7 @@ namespace cologne::AssetManager
     {
         print_models();
         print_skinned_models();
+        print_audio_clips();
         print_animations();
         print_textures();
     }
@@ -436,11 +472,13 @@ namespace cologne::AssetManager
         skinned_models.clear();
         meshes.clear();
         skinned_meshes.clear();
+        audio_clips.clear();
         for (auto &material: materials)
         {
             material.cleanup_all();
         }
         materials.clear();
+        audio_clip_index_map.clear();
         model_index_map.clear();
         skinned_model_index_map.clear();
         animation_index_map.clear();
@@ -535,6 +573,32 @@ namespace cologne::AssetManager
     {
         return animation_index_map[name];
     }
+
+    AudioClip *get_audio_clip_by_name(const std::string &name)
+    {
+        if (!audio_clip_index_map.contains(name))
+        {
+            return nullptr;
+        }
+        return &audio_clips.at(audio_clip_index_map[name]);
+    }
+
+    AudioClip *get_audio_clip_by_index(int32_t idx)
+    {
+        return &audio_clips.at(idx);
+    }
+
+    int32_t get_audio_clip_index_by_name(const std::string &name)
+    {
+        if (!audio_clip_index_map.contains(name))
+        {
+            return -1;
+        }
+        return audio_clip_index_map[name];
+    }
+
+
+
 
     int32_t get_first_animation_index_with_name(const std::string &name)
     {

@@ -2,6 +2,7 @@
 #include <engine/renderer/types/Model.h>
 #include <engine/renderer/types/Mesh.h>
 #include <engine/renderer/types/SkinnedModel.h>
+#include <engine/audio/AudioClip.h>
 #include <filesystem>
 
 namespace cologne::AssetManager
@@ -19,6 +20,8 @@ namespace cologne::AssetManager
     void print_animations();
 
     void print_models();
+
+    void print_audio_clips();
 
     void print_skinned_models();
 
@@ -44,6 +47,8 @@ namespace cologne::AssetManager
 
     std::vector<Mesh> &get_meshes();
 
+    std::vector<AudioClip> &get_audio_clips();
+
     std::vector<SkinnedModel> &get_skinned_models();
 
     std::vector<Material> &get_materials();
@@ -52,6 +57,11 @@ namespace cologne::AssetManager
 
     std::vector<SkinnedMesh> &get_skinned_meshes();
 
+    AudioClip *get_audio_clip_by_name(const std::string& name);
+
+    AudioClip *get_audio_clip_by_index(int32_t idx);
+
+    int32_t get_audio_clip_index_by_name(const std::string& name);
 
     Material *get_material_by_index(int32_t idx);
 
@@ -115,6 +125,10 @@ namespace cologne::AssetManager
         if constexpr (std::is_same_v<Asset, AnimationClip>)
         {
             return get_animation_by_name(name);
+        }
+        if constexpr (std::is_same_v<Asset, AudioClip>)
+        {
+            return get_audio_clip_by_name(name);
         }
         return nullptr;
     }

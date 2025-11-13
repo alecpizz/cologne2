@@ -14,6 +14,7 @@ namespace cologne
         EDITOR = 1 << 0,
         RUNTIME = 1 << 1
     };
+
     class System
     {
     public:
@@ -23,12 +24,17 @@ namespace cologne
         {
         }
 
-        virtual void on_scene_start(Scene* scene)
-        {}
+        virtual void on_scene_start(Scene *scene)
+        {
+        }
 
-        virtual void on_update(Scene* scene, float dt) = 0;
+        virtual void on_update(Scene *scene, float dt) = 0;
 
         virtual void on_destroy()
+        {
+        }
+
+        virtual void on_scene_exit(Scene *scene)
         {
         }
 

@@ -64,8 +64,9 @@ namespace cologne
     Engine::~Engine()
     {
         scene_manager = nullptr;
-        cologne::Audio::destroy();
-        cologne::Physics::cleanup();
+        AssetManager::cleanup();
+        Audio::cleanup();
+        Physics::cleanup();
         renderer = nullptr;
         event_manager = nullptr;
         editor = nullptr;
