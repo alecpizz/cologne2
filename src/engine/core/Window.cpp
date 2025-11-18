@@ -21,7 +21,7 @@ namespace cologne
         {
             width = w;
             height = h;
-            if (!SDL_Init(SDL_INIT_VIDEO))
+            if (!SDL_Init(SDL_INIT_VIDEO ))
             {
                 LOG_ERROR("SDL_Init Error: %s", SDL_GetError());
                 return;

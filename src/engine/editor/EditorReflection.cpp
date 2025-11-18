@@ -3,6 +3,7 @@
 //
 #include <engine/asset_manager/AssetHandle.h>
 #include <engine/asset_manager/AssetManager.h>
+#include <engine/audio/AudioClip.h>
 #include <engine/scene/components/ConvexMeshColliderComponent.h>
 #include <engine/scene/components/LightComponent.h>
 #include <engine/scene/components/MeshComponent.h>

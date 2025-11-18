@@ -223,10 +223,14 @@ registry->remove<T>(entity); }>("remove"_hs) \
                 REGISTER_PROPERTY(DecalComponent, emission)
                 REGISTER_PROPERTY(DecalComponent, color_tint);
 
+        REFLECT_ENUM(AudioPlaybackState)
+                ENUMERATOR(AudioPlaybackState, Stop)
+                ENUMERATOR(AudioPlaybackState, Play);
+
         REGISTER_COMPONENT(AudioSourceComponent, "AudioSourceComponent", EDITOR_READ_WRITE)
             REGISTER_PROPERTY(AudioSourceComponent, clip)
             REGISTER_PROPERTY(AudioSourceComponent, loop)
-            REGISTER_PROPERTY(AudioSourceComponent, play_on_awake)
+            REGISTER_PROPERTY(AudioSourceComponent, state)
             REGISTER_PROPERTY(AudioSourceComponent, spatialized)
             REGISTER_PROPERTY(AudioSourceComponent, volume)
             REGISTER_PROPERTY(AudioSourceComponent, pitch)

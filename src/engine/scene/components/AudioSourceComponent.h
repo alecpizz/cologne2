@@ -7,19 +7,26 @@
 
 namespace cologne
 {
+    enum class AudioPlaybackState
+    {
+        Stop,
+        Play
+    };
+
     struct AudioSourceComponent
     {
         AssetHandle<AudioClip> clip;
         bool loop = false;
-        bool play_on_awake = true;
+        AudioPlaybackState state = AudioPlaybackState::Stop;
         bool spatialized = true;
         float volume = 1.0f;
         float pitch = 1.0f;
         float min_distance = 1.0f;
         float max_distance = 100.0f;
 
-        ma_sound* sound_instance = nullptr;
+        ma_sound *sound_instance = nullptr;
         bool is_playing = false;
+
         AudioSourceComponent() = default;
     };
 }

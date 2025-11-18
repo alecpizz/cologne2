@@ -63,7 +63,7 @@ namespace cologne
                 ma_sound_set_position(audio_src.sound_instance,
                                       transform.position.x, transform.position.y, transform.position.z);
             }
-            if (audio_src.play_on_awake)
+            if (audio_src.state == AudioPlaybackState::Play)
             {
                 ma_sound_start(audio_src.sound_instance);
                 audio_src.is_playing = true;
@@ -94,6 +94,7 @@ namespace cologne
 
     void AudioSystem::on_update(Scene *scene, float dt)
     {
+        Audio::update_one_shot_pool();
         Entity camera_entity = scene->get_primary_camera();
         if (camera_entity)
         {
@@ -109,15 +110,41 @@ namespace cologne
             auto &audio_src = view.get<AudioSourceComponent>(entity);
             auto &transform = view.get<TransformComponent>(entity);
 
-            if (audio_src.sound_instance && audio_src.spatialized)
+            if (!audio_src.sound_instance)
+            {
+                continue;
+            }
+
+            if (audio_src.spatialized)
             {
                 ma_sound_set_position(audio_src.sound_instance, transform.position.x, transform.position.y,
                                       transform.position.z);
             }
 
-            if (audio_src.sound_instance)
+            bool is_hw_playing = ma_sound_is_playing(audio_src.sound_instance);
+            if (audio_src.state == AudioPlaybackState::Play)
             {
+                if (!is_hw_playing)
+                {
+                    ma_sound_seek_to_pcm_frame(audio_src.sound_instance, 0);
+                    ma_sound_start(audio_src.sound_instance);
+                }
                 audio_src.is_playing = ma_sound_is_playing(audio_src.sound_instance);
+            }
+            else
+            {
+                if (is_hw_playing)
+                {
+                    ma_sound_stop(audio_src.sound_instance);
+                }
+            }
+
+            is_hw_playing = ma_sound_is_playing(audio_src.sound_instance);
+            audio_src.is_playing = is_hw_playing;
+
+            if (audio_src.is_playing && !is_hw_playing && !audio_src.loop)
+            {
+                audio_src.state = AudioPlaybackState::Stop;
             }
         }
     }

@@ -2,8 +2,12 @@
 #include <engine/renderer/types/Model.h>
 #include <engine/renderer/types/Mesh.h>
 #include <engine/renderer/types/SkinnedModel.h>
-#include <engine/audio/AudioClip.h>
 #include <filesystem>
+
+namespace cologne
+{
+    class AudioClip;
+}
 
 namespace cologne::AssetManager
 {

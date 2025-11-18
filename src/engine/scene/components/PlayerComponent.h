@@ -2,6 +2,7 @@
 // Created by alecpizz on 10/5/25.
 //
 #pragma once
+#include <engine/asset_manager/AssetHandle.h>
 #include <engine/physics/Physics.h>
 #include <engine/core/UUID.h>
 #include <entt/entt.hpp>
@@ -42,7 +43,7 @@ namespace cologne
 
     struct PlayerControllerComponent
     {
-        std::vector<std::string> footstep_sounds;
+        std::vector<AssetHandle<AudioClip>> footstep_sounds;
         glm::vec2 rotation = glm::vec2(0.0f);
         bool is_free_cam = false;
         bool show_mouse = false;
@@ -65,7 +66,7 @@ namespace cologne
         float gun_time = 0.0f;
         bool is_firing = false;
         bool is_reloading = false;
-        const char *shoot_sound = ASSETS_PATH "sounds/vsk_fire.ogg";
+        AssetHandle<AudioClip> shoot_sound = AssetHandle<AudioClip>("usp1");
         const char *reload_sound = ASSETS_PATH "sounds/vsk_reload_empty.ogg";
         //view model stuff
         float time = 0.0f;

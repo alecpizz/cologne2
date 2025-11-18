@@ -4,7 +4,6 @@
 
 #include "PlayerControllerSystem.h"
 
-#include <engine/asset_manager/AssetManager.h>
 #include <engine/audio/Audio.h>
 #include <engine/core/Engine.h>
 #include <engine/core/Input.h>
@@ -34,15 +33,12 @@ namespace cologne
             auto &controller = registry.get<PlayerControllerComponent>(entity);
             if (controller.footstep_sounds.empty())
             {
-                controller.footstep_sounds.emplace_back(ASSETS_PATH "sounds/player_step_1.wav");
-                controller.footstep_sounds.emplace_back(ASSETS_PATH "sounds/player_step_2.wav");
-                controller.footstep_sounds.emplace_back(ASSETS_PATH "sounds/player_step_3.wav");
-                controller.footstep_sounds.emplace_back(ASSETS_PATH "sounds/player_step_4.wav");
+                controller.footstep_sounds.emplace_back( "player_step_1");
+                controller.footstep_sounds.emplace_back( "player_step_2");
+                controller.footstep_sounds.emplace_back( "player_step_3");
+                controller.footstep_sounds.emplace_back( "player_step_4");
             }
-            for (const auto &footstep_sound: controller.footstep_sounds)
-            {
-               // Audio::add_sound(footstep_sound.c_str());
-            }
+
             auto anim = AssetManager::get_animation_by_name("deagle_Rig|Rig|MK_ReloadFull");
             controller.reload_time = anim->get_duration() / anim->get_ticks_per_second();
           //  Audio::add_sound(controller.shoot_sound);
@@ -222,6 +218,7 @@ namespace cologne
     {
         auto &controller = registry.get<PlayerControllerComponent>(entity);
         auto &player = registry.get<PlayerComponent>(entity);
+        auto &transform = registry.get<TransformComponent>(entity);
         if (!controller.grounded)
         {
             return;
@@ -241,7 +238,7 @@ namespace cologne
             controller.step_time = next_step_time;
             controller.step_timer = 0.0f;
             auto idx = rand() % 4;
-        //    Audio::play_sound(controller.footstep_sounds[idx].c_str(), glm::linearRand(25, 35));
+            Audio::play_one_shot(controller.footstep_sounds[idx], transform.position, 0.85f);
         }
         else
         {
@@ -488,10 +485,10 @@ namespace cologne
                 auto &anim = vm.get_component<AnimatorComponent>();
                 anim.play(AssetHandle<AnimationClip>("deagle_Rig|Rig|MK_Shot"), 1, false);
                 LOG_INFO("play one shot");
-            //    Audio::play_sound(controller.shoot_sound, 30);
                 auto cam = scene->get_entity_by_uuid(player.camera);
                 auto tr = cam.get_transform();
                 scene->create_bullet(tr.position, tr.get_forward(), 25);
+                Audio::play_one_shot2D(controller.shoot_sound);
                 controller.shot_timer = 0.0f;
                 controller.gun_time = controller.rpm;
                 controller.current_ammo--;
